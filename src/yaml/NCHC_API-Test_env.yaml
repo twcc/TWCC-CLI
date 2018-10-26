@@ -1,0 +1,67 @@
+info:
+    name:   "NCHC_API-Test_env"
+    ctime:  "2018-10-12 09:21:00"
+    auth:   "August Chao <1803001@narlabs.org.tw>"
+stage:
+    keys:
+        usr1:   "5e38ba3f-8471-4d47-a386-54a3c0775d0c"
+        sys:    "fb01047f-1098-4cf3-ae5a-7311f79b42df"
+    platforms:
+        - 
+          name:   "admin"
+          desc:   "就…admin"
+        - 
+          name:   "openstack-hsinchu-community"
+        - 
+          name:   "openstack-hsinchu-suse"
+        - 
+          name:   "k8s-hsinchu-default"
+        - 
+          name:   "slurm-hsinchu"
+        - 
+          name:   "ceph-hsinchu"
+        - 
+          name:   "goc"
+        
+    avalible_funcs:
+        -
+          name: "configuration"
+          url_type: "/api/v2/{FUNCTION}/"
+          http_verb:
+            - 'get'
+            - 'patch'
+        -
+          name: "solutions"
+          url_type: "/api/v2/{FUNCTION}/"
+          http_verb:
+            - 'get'
+        -
+          name: "projects"
+          url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+          http_verb:
+            - 'get'
+            - 'post'
+            - 'delete'
+        -
+          name: "keypairs"
+          url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+          http_verb:
+            - 'get'
+            - 'post'
+            - 'delete'
+          staus: [ "checked 2018-10-15, by Aug"
+                 , ]
+        -
+          name: "acls-g"
+          url_type: "/api_key/acls/groups"
+          http_verb:
+            - 'get'
+          staus: [ "checked 2018-10-15, by Aug"
+                 , ]
+        -
+          name: "acls"
+          url_type: "/api_key/{FUNCTION}/"
+          http_verb:
+            - 'get'
+          staus: [ "checked 2018-10-15, by Aug"
+                 , ]

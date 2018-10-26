@@ -1,0 +1,6328 @@
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+swagger: '2.0'
+info:
+  title: GOC PaaS API (from API Gateway)
+  version: '3.2.1'
+  description: >-
+    Please Check following information is right in NCHC Staging environment.
+    Those information will differ from environments. 1. Your 'host' ip from API
+    Gateway is '140.110.10.7:8000'. 2. Common-X-API-HOST value from 'Get all ACLs
+    by api key' API. 3. Common-X-API-KEY is admin key
+    'fb01047f-1098-4cf3-ae5a-7311f79b42df', nchc_user1 key
+    '795cb6b0-b984-470d-93dd-8fd1b58f56c7', nchc_user2 key
+    '23e99e04-c891-4dc4-a046-ea53af4115f2'. 4. Your browser to see this swagger
+    file is http.
+host: '140.110.10.7:8000'
+basePath: /
+schemes:
+  - http
+securityDefinitions:
+  basicAuth:
+    type: basic
+security:
+  - basicAuth: []
+tags:
+  - name: ACLs
+  - name: configuration
+  - name: infrastructure
+  - name: solution
+  - name: availability_zone
+    description: 'Supported platform type are openstack, kubernetes, slurm'
+  - name: flavor
+    description: 'Supported platform type are openstack, kubernetes, slurm'
+  - name: image
+    description: Supported platform type are openstack
+  - name: job
+    description: 'Supported platform type are kubnernetes, slurm'
+  - name: keypair
+    description: Supported platform type are openstack
+  - name: user
+  - name: load balancer
+    description: Supported platform type are openstack
+  - name: network
+    description: Supported platform type are openstack
+  - name: security group
+    description: Supported platform type are openstack
+  - name: project
+    description: 'Supported platform type are openstack, kubernetes, slurm, ceph'
+  - name: volume
+    description: Supported platform type are openstack
+  - name: snapshot
+    description: Supported platform type are openstack
+  - name: server
+    description: Supported platform type are openstack
+  - name: site
+    description: 'Supported platform type are openstack, kubernetes'
+  - name: bucket
+    description: Supported platform type are ceph
+parameters:
+  Admin-X-API-HOST:
+    name: X-API-HOST
+    type: string
+    in: header
+    default: admin
+    required: true
+  Common-X-API-HOST:
+    name: X-API-HOST
+    type: string
+    in: header
+    required: true
+    description: >-
+      Please get platfrom/api-host information from 'Get all ACLs by api key'
+      API
+  iService-X-API-HOST:
+    name: X-API-HOST
+    type: string
+    in: header
+    default: iService
+    required: true
+  Common-X-API-KEY:
+    name: x-api-key
+    type: string
+    in: header
+    default: fb01047f-1098-4cf3-ae5a-7311f79b42df
+    required: true
+    description: Please change your API key here.
+paths:
+  /api_key/acls:
+    get:
+      tags:
+        - ACLs
+      parameters:
+        - $ref: '#/parameters/Admin-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              total:
+                type: number
+                example: 1
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    create_at:
+                      type: integer
+                      example: 1533102746000
+                    group:
+                      type: string
+                      example: goc
+                    id:
+                      type: string
+                      example: 54965315-65b6-41ff-82db-a7629236a43c
+                    key_id:
+                      type: string
+                      example: a819ef06-6cdb-431a-bd98-f5a6d34f372f
+      description: 'Get all ACLs by api key, group name = x-api-host'
+      operationId: Acls_GET
+      summary: Get all ACLs by api key
+  /api_key/acls/groups:
+    get:
+      tags:
+        - ACLs
+      parameters:
+        - $ref: '#/parameters/Admin-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  goc:
+                    type: array
+                    items:
+                      type: object
+                    example: []
+                  openstack:
+                    type: array
+                    items:
+                      type: object
+                    example:
+                      - group: openstack-hsinchu-suse
+                        created_at: 1531822922000
+                        id: f5adac43-58fe-4937-b592-7671318237d6
+                        key_id: 6f66d322-a6e1-46bc-9188-c3f1f512bccc
+                      - group: openstack-hsinchu-community
+                        created_at: 1531822922000
+                        id: f5adac43-58fe-4937-b592-7671318237d6
+                        key_id: 6f66d322-a6e1-46bc-9188-c3f1f512bccc
+                  slurm:
+                    type: array
+                    items:
+                      type: object
+                    example:
+                      - group: slurm
+                        created_at: 1531822922000
+                        id: f5adac43-58fe-4937-b592-7671318237d6
+                        key_id: 6f66d322-a6e1-46bc-9188-c3f1f512bccc
+                  k8s:
+                    type: array
+                    items:
+                      type: object
+                    example:
+                      - group: k8s-hsinchu-default
+                        created_at: 1531822922000
+                        id: f5adac43-58fe-4937-b592-7671318237d6
+                        key_id: 6f66d322-a6e1-46bc-9188-c3f1f512bccc
+                  admin:
+                    type: array
+                    items:
+                      type: object
+                    example: []
+      description: 'Get all ACLs by api key, group name = x-api-host'
+      operationId: Acls_Group_GET
+      summary: Get all ACLs by api key
+  /api/v2/configuration/:
+    get:
+      tags:
+        - configuration
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Main catagory of configuration
+          in: query
+          name: main
+          required: false
+          type: string
+        - description: Sub-catagory of a configuration
+          in: query
+          name: sub
+          required: false
+          type: string
+        - description: A data field name in a subcategory.
+          in: query
+          name: keyword
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              main:
+                type: object
+                properties:
+                  sub:
+                    type: object
+                    properties:
+                      keyword:
+                        type: string
+                        example: The value. It may contain an object or just a string
+      description: >-
+        Get configurations of GOC Portal. The value of keyword may be an object
+        or just string. If no query parameter is specified, it returns all
+        configurations.
+      operationId: Configuration_GET
+      summary: Get configurations
+    patch:
+      consumes:
+        - application/json
+      tags:
+        - configuration
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: body
+          description: The keyword to be updated in a sepcified catagory
+          name: keyword
+          required: false
+          schema:
+            type: object
+            properties:
+              keyword:
+                type: string
+                example: The new value. This may contain an object or just a string
+        - description: 'Main catagory of configuration. For example, openstack.'
+          in: query
+          name: main
+          required: false
+          type: string
+        - description: 'Sub-catagory of a configuration. For example, config.'
+          in: query
+          name: sub
+          required: false
+          type: string
+        - description: 'A data field name in a subcategory. For example, platforms.'
+          in: query
+          name: keyword
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              keyword:
+                type: string
+                example: The updated value. This may contain an object or just a string
+      description: Update the configuration.
+      operationId: Configuration_PATCH
+      summary: Update configuration
+  /api/v2/infrastructure/hosts/:
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Hostname
+          in: query
+          name: hostname
+          required: false
+          type: string
+        - description: role
+          in: query
+          name: role
+          required: false
+          type: string
+        - description: platform
+          in: query
+          name: platform
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HostSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: List hosts.
+      operationId: Hosts_GET
+      summary: List hosts
+  '/api/v2/infrastructure/hosts/{host_id}/':
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/HostDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get details of a host.
+      operationId: Host_Detail_GET
+      summary: Get details of a host
+  '/api/v2/infrastructure/hosts/{host_id}/action/':
+    put:
+      tags:
+        - infrastructure
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+        - description: 'Action for host status, such as schedulable/unschedulable'
+          in: formData
+          name: status
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Change a kubernetes host to schedulable or unschedulable.
+      operationId: Host_Action_PUT
+      summary: Change a kubernetes host to schedulable or unschedulable
+  '/api/v2/infrastructure/hosts/{host_id}/cpu_usage/':
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+        - description: Default is two hours before end time.
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Get the usage before the end time. Default is now.
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/HostCpuUsageSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get CPU usage of a host.
+      operationId: Host_Cpu_Usage_GET
+      summary: Get CPU usage of a host
+  '/api/v2/infrastructure/hosts/{host_id}/disk_usage/':
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+        - description: Default is two hours before end time.
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Get the usage before the end time. Default is now.
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/HostDiskUsageSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get disk usage of a host.
+      operationId: Host_Disk_Usage_GET
+      summary: Get disk usage of a host
+  '/api/v2/infrastructure/hosts/{host_id}/mem_usage/':
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+        - description: Default is two hours before end time.
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Get the usage before the end time. Default is now.
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/HostMemUsageSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get memory usage of a host.
+      operationId: Host_Mem_Usage_GET
+      summary: Get memory usage of a host
+  '/api/v2/infrastructure/hosts/{host_id}/pods/':
+    get:
+      tags:
+        - infrastructure
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Host ID
+          format: int32
+          in: path
+          name: host_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PodsOnHostSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get pods on a node.
+      operationId: Pods_On_Host_GET
+      summary: Get pods on a node
+  /api/v2/solutions/:
+    get:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+      tags:
+        - solution
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SolutionSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: List solutions
+      operationId: Solutions_GET
+      summary: List solutions
+    post:
+      tags:
+        - solution
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution name
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: Description
+          in: formData
+          name: desc
+          required: false
+          type: string
+        - description: Category
+          in: formData
+          name: category
+          required: false
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/SolutionSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '409':
+          description: Conflict
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Create a solution
+      operationId: Solutions_POST
+      summary: Create a solution
+  '/api/v2/solutions/{solution_id}/':
+    delete:
+      tags:
+        - solution
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution ID
+          format: int32
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Delete a solution
+      operationId: Solution_Detail_DELETE
+      summary: Delete a solution
+    get:
+      tags:
+        - solution
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution ID
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SolutionDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Get a solution detail
+      operationId: Solution_Detail_GET
+      summary: Get a solution detail
+    patch:
+      tags:
+        - solution
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution ID
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+          format: int32
+        - description: Category
+          in: formData
+          name: category
+          required: false
+          type: string
+        - description: True if solution is public
+          in: formData
+          name: is_public
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SolutionDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Update a solution
+      operationId: Solution_Detail_PATCH
+      summary: Update a solution
+  '/api/v2/solutions/{solution_id}/file/':
+    get:
+      tags:
+        - solution
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution id
+          format: int32
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: file
+            description: Binary data
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Download a solution package
+      operationId: Solution_File_GET
+      summary: Download a solution package
+    put:
+      tags:
+        - solution
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Solution id
+          format: int32
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+        - description: Solution package
+          in: formData
+          name: data
+          required: true
+          type: file
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SolutionFileSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Upload a solution package
+      operationId: Solution_File_PUT
+      summary: Upload a solution package
+  /api/v2/users/:
+    get:
+      tags:
+        - user
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/UserSerializer'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List users
+      operationId: Users_GET
+      summary: List users
+    post:
+      tags:
+        - user
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: username
+          in: formData
+          name: username
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/UserSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+      description: Create a user
+      operationId: Users_POST
+      summary: Create a user
+  '/api/v2/users/{user_id}/':
+    delete:
+      tags:
+        - user
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: User ID
+          format: int32
+          in: path
+          name: user_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      description: Delete a user
+      operationId: User_Detail_DELETE
+      summary: Delete a user
+    get:
+      tags:
+        - user
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: User ID
+          format: int32
+          in: path
+          name: user_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/UserDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      description: Get details of a user
+      operationId: User_Detail_GET
+      summary: Get details of a user
+  /api/v2/version/:
+    get:
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/VersionSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: |-
+        <p>Show the version of GOC portal</p>
+        <p><strong>Example:</strong></p>
+        <ul>
+        <li>Request:
+          <code>bash
+          curl -X GET -H 'Content-Type: application/json; indent=4' \
+          -u &lt;account&gt;:&lt;password&gt; \
+          -k https://&lt;go-cloud-ip&gt;/api/&lt;version&gt;/version/</code></li>
+        <li>Response:
+          <code>json
+          {
+            "version": "2016.4.2"
+          }</code></li>
+        </ul>
+      operationId: Version_GET
+      summary: Show the version of GOC portal
+  '/api/v2/{platform_name}/availability_zones/':
+    get:
+      tags:
+        - availability_zone
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type, supported platform types are openstack, k8s and slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/AZSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List Availability Zones
+      operationId: Availability_Zones_GET
+      summary: List Availability Zones
+    post:
+      tags:
+        - availability_zone
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type, supported platform types are openstack, k8s and slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The name of the AZ
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: The description of AZ
+          in: formData
+          name: desc
+          required: false
+          type: string
+        - description: The type of the AZ
+          in: formData
+          name: type
+          required: true
+          type: string
+          enum:
+            - job
+            - service
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/AZSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Create Availability Zone
+      operationId: Availability_Zones_POST
+      summary: Create Availability Zone
+  '/api/v2/{platform_name}/availability_zones/{az_id}/':
+    delete:
+      tags:
+        - availability_zone
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type, supported platform types are openstack, k8s and slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Availability Zone ID
+          format: int32
+          in: path
+          name: az_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Delete Availability Zone
+      operationId: Availability_Zone_Detail_DELETE
+      summary: Delete Availability Zone
+    get:
+      tags:
+        - availability_zone
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type, supported platform types are openstack, k8s and slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Availability Zone ID
+          format: int32
+          in: path
+          name: az_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AZDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get Availability Zone Detail
+      operationId: Availability_Zone_Detail_GET
+      summary: Get Availability Zone Detail
+    patch:
+      tags:
+        - availability_zone
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+          description: 'Platform name, supported platform types are openstack, k8s and slurm'
+        - description: Availability Zone ID
+          format: int32
+          in: path
+          name: az_id
+          required: true
+          type: integer
+        - description: Host IDs to add into the availability zone
+          in: body
+          name: hosts
+          schema:
+            $ref: '#/definitions/AZHostArray'
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AZDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Update the Hosts in the Availability Zone
+      operationId: Availability_Zone_Detail_PATCH
+      summary: Update the Hosts in the Availability Zone
+  '/api/v2/{platform_name}/flavors/':
+    get:
+      tags:
+        - flavor
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type support Openstack, Kubernetes and Slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FlavorSerializer'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: ''
+      operationId: Flavors_GET
+      summary: List flavors
+    post:
+      tags:
+        - flavor
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type support Openstack, Kubernetes and Slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Post
+          in: body
+          name: postdata
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              cpu:
+                type: integer
+              memory:
+                type: integer
+              disk:
+                type: integer
+              gpu:
+                type: integer
+              metadata:
+                type: object
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/FlavorPostSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal server error
+      description: Create a flavor
+      operationId: Flavors_POST
+      summary: Create a flavor
+  '/api/v2/{platform_name}/flavors/{flavor_id}/':
+    delete:
+      tags:
+        - flavor
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type support Openstack, Kubernetes and Slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Flavor ID
+          format: int32
+          in: path
+          name: flavor_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/FlavorDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Delete a flavor
+      operationId: Flavor_Detail_DELETE
+      summary: Delete a flavor
+    get:
+      tags:
+        - flavor
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform type support Openstack, Kubernetes and Slurm'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Flavor ID
+          format: int32
+          in: path
+          name: flavor_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/FlavorDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get details of a flavor
+      operationId: Flavor_Detail_GET
+      summary: Get details of a flavor
+  '/api/v2/{platform_name}/images/':
+    get:
+      tags:
+        - image
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID (non-system-admin is required)
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+        - description: Get image list of a solution
+          format: int32
+          in: query
+          name: solution
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ImageSerializer'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: >-
+        Optional query parameters: project, solution project: project id for
+        listing images under a project. (optional) solution: solution id for
+        listing images used
+          by a solution. (optional)
+        Image is not public if it saved from an server.
+      operationId: Images_GET
+      summary: List images
+    post:
+      tags:
+        - image
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Image name
+          in: formData
+          name: name
+          required: true
+          type: string
+        - in: formData
+          name: is_public
+          required: false
+          type: boolean
+        - description: Linux or Windows
+          in: formData
+          name: os
+          required: true
+          type: string
+        - description: Operating System Version
+          in: formData
+          name: os_version
+          required: true
+          type: string
+        - description: Project ID (non-system-admin is required)
+          format: int32
+          in: formData
+          name: project
+          required: false
+          type: integer
+        - description: Description
+          in: formData
+          name: desc
+          required: false
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/ImagePostSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: >-
+        This API just create a metadata in database.
+
+        You need to use "Upload an Image" API to put an image to
+        repository.</li>
+      operationId: Images_POST
+      summary: Create an image
+  '/api/v2/{platform_name}/images/{image_id}/':
+    delete:
+      tags:
+        - image
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Image ID
+          format: int32
+          in: path
+          name: image_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/ImageDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      operationId: Image_Detail_DELETE
+      summary: Delete an image
+    get:
+      tags:
+        - image
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Image ID
+          format: int32
+          in: path
+          name: image_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/ImageDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: |-
+        Image is not public if it was saved from an server or
+        was uploaded by a tenant admin.
+      operationId: Image_Detail_GET
+      summary: Get details of a image
+  '/api/v2/{platform_name}/images/{image_id}/file/':
+    put:
+      tags:
+        - image
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Image ID
+          format: int32
+          in: path
+          name: image_id
+          required: true
+          type: integer
+        - description: An image file
+          in: formData
+          name: data
+          required: true
+          type: file
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: object
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      operationId: Image_File_PUT
+      summary: Upload an image
+  '/api/v2/{platform_name}/images/{server_id}/save/':
+    put:
+      tags:
+        - image
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: Post
+          in: body
+          name: postdata
+          required: true
+          schema:
+            type: object
+            properties:
+              project:
+                type: integer
+              name:
+                type: string
+                description: Image name
+              os_version:
+                type: string
+              os:
+                type: string
+              is_public:
+                type: boolean
+              desc:
+                type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/ImagePostSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '405':
+          description: BadMethod
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: |-
+        Save an image for server <server_id>.
+        os can be "Linux" or "Windows" depends on image of the server
+        Image is not public if it saved from an server.
+      operationId: Image_Save_PUT
+      summary: Save an instance as an image
+  '/api/v2/{platform_name}/jobs/':
+    get:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: project ID
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+        - description: user ID
+          format: int32
+          in: query
+          name: user
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/JobAbstrationSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List jobs
+      operationId: Jobs_GET
+      summary: List jobs
+    post:
+      tags:
+        - job
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Request body
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/WriteJobData'
+          required: true
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/JobAbstrationSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      description: |-
+        <p>Create Job</p>
+        <table class="parameters">
+          <thead>
+            <tr>
+              <th class="col col_header parameters-col_name">Name</th>
+              <th class="col col_header parameters-col_description">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-param-name="name" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">name<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Job name</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="project" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">project<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int64)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Project ID</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="schedule" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">schedule</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Run the job periodically with Cron format</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="type" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">type<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Job type</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : SLURM:SINGULARITY, KUBERNETES:DOCKER</p>
+                </div>
+              </td>
+            </tr>
+            <tr data-param-name="stepname" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">stepname<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Step name</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="availability_zone" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">availability_zone</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The availability zone for running this step</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="image" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">image<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The image used for this step</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="command" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">command</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The command need to be executed in the image</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="flavor" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">flavor<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int32)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Flavor ID</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="runs" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">runs</div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int32)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>How many concurrent runs should be lauched at once</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="depends_on" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">depends_on</div>
+                <div class="parameter__type">array[string]</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Specify the name of the steps on which this step depends. Only supported by Slurm platform.</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="dependency_policy" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">dependency_policy</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The policy of the dependency</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : AFTEROK, AFTERANY,AFTERNOTOK. Only supported by Slurm platform.</p>
+                </div>
+              </td>
+            </tr>
+            <tr data-param-name="type (for volume)" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">type (for volume)</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>job name</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : HOSTPATH, NFS</p>
+                </div>
+              </td>
+            </tr>
+            <tr data-param-name="server" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">server</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The hostname or IP address of an NFS server.(This value takes effect only on the type NFS)</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="path" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">path</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>mount source</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="mountPath" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">mountPath</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>mount destination</p></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      operationId: Jobs_POST
+      summary: Create job
+  '/api/v2/{platform_name}/jobs/{job_id}/':
+    delete:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: Delete a job
+      operationId: Job_Detail_DELETE
+      summary: Delete a job
+    get:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/JobAbstrationDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: Get details of a job
+      operationId: Job_Detail_GET
+      summary: Get details of a job
+    patch:
+      tags:
+        - job
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - in: path
+          format: int32
+          name: job_id
+          required: true
+          type: integer
+        - description: Request body
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/WriteJobDetailData'
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/JobAbstrationDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      description: |-
+        <p>Update a Job</p>
+        <table class="parameters">
+          <thead>
+            <tr>
+              <th class="col col_header parameters-col_name">Name</th>
+              <th class="col col_header parameters-col_description">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-param-name="name" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">name</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Job name</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="schedule" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">schedule</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Run the job periodically with Cron format</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="stepname" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">stepname</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Replace the <strong>stepname</strong> to the real stepname to which you want to update</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="availability_zone" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">availability_zone</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The availability zone for running this step</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="image" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">image</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The image used for this step</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="command" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">command</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The command need to be executed in the image</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="runs" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">runs</div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int32)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>How many concurrent runs should be lauched at once</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="depends_on" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">depends_on</div>
+                <div class="parameter__type">array[string]</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Specify the name of the steps on which this step depends</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="dependency_policy" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">dependency_policy</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The policy of the dependency</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : AFTEROK, AFTERANY,AFTERNOTOK</p>
+                </div>
+              </td>
+            </tr>
+            <tr data-param-name="type (for volume)" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">type (for volume)</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>job name</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : HOSTPATH, NFS</p>
+                </div>
+              </td>
+            </tr>
+            <tr data-param-name="server" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">server</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>The hostname or IP address of an NFS server.(This value takes effect only on the type NFS)</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="path" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">path</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>mount source</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="mountPath" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name">mountPath</div>
+                <div class="parameter__type">string</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>mount destination</p></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      operationId: Job_Detail_PATCH
+      summary: Update a job
+  '/api/v2/{platform_name}/jobs/{job_id}/runs/':
+    get:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RunSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List job runs
+      operationId: Job_Runs_GET
+      summary: List job runs
+  '/api/v2/{platform_name}/jobs/{job_id}/runs/{run_id}/':
+    get:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+        - description: Run ID
+          format: int32
+          in: path
+          name: run_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/RunDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Get a specific run
+      operationId: Job_Run_Detail_GET
+      summary: Get a specific run
+  '/api/v2/{platform_name}/jobs/{job_id}/runs/{run_id}/{type}/':
+    get:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+          description: 'Platform name, supported platform type are slurm and kubernetes'
+        - in: path
+          format: int32
+          name: job_id
+          required: true
+          type: integer
+        - in: path
+          format: int32
+          name: run_id
+          required: true
+          type: integer
+        - in: path
+          name: type
+          required: true
+          type: string
+          enum:
+            - logs
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              type: string
+      description: Get the specific type of information from a run
+      operationId: Job_Management_GET
+      summary: Get the specific type of information from a run
+    post:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+        - description: Run ID
+          format: int32
+          in: path
+          name: run_id
+          required: true
+          type: integer
+        - in: path
+          name: type
+          required: true
+          type: string
+          enum:
+            - stop
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Stop a run
+      operationId: Job_Management_POST
+      summary: Stop a run
+  '/api/v2/{platform_name}/jobs/{job_id}/{action}/':
+    post:
+      tags:
+        - job
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type are slurm and kubernetes'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Job ID
+          format: int32
+          in: path
+          name: job_id
+          required: true
+          type: integer
+        - in: path
+          name: action
+          required: true
+          type: string
+          enum:
+            - submit
+            - stop
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      description: start or stop a job
+      operationId: Job_Action_POST
+      summary: start or stop a job
+  '/api/v2/{platform_name}/keypairs/':
+    get:
+      tags:
+        - keypair
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: array
+            items:
+              type: object
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+      operationId: Keypairs_GET
+      summary: List Keypairs
+    post:
+      tags:
+        - keypair
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The name of the keypair
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: Public key of the keypair
+          in: formData
+          name: public_key
+          required: false
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: object
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+      operationId: Keypairs_POST
+      summary: Create a Keypair
+  '/api/v2/{platform_name}/keypairs/{key_name}/':
+    delete:
+      tags:
+        - keypair
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Keypair Name
+          in: path
+          name: key_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: object
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      operationId: Keypair_Detail_DELETE
+      summary: Delete a Keypair
+    get:
+      tags:
+        - keypair
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Keypair Name
+          in: path
+          name: key_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: object
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      operationId: Keypair_Detail_GET
+      summary: Get Keypair Detail
+  '/api/v2/{platform_name}/loadbalancers/':
+    get:
+      tags:
+        - load balancer
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID of the network on which to allocate the VIP.
+          format: int32
+          in: query
+          name: private_net
+          required: false
+          type: integer
+        - description: The ID of a project.
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LBSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Lists load balancers.
+      operationId: Load_Balancers_GET
+      summary: Lists load balancers
+    post:
+      tags:
+        - load balancer
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The load balancer name. Does not have to be unique.
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: 'TCP, HTTP, or HTTPS.'
+          in: formData
+          name: protocol
+          required: true
+          type: string
+        - description: A valid value is from 0 to 65535.
+          format: int32
+          in: formData
+          name: protocol_port
+          required: true
+          type: integer
+        - description: 'ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP.'
+          in: formData
+          name: lb_method
+          required: true
+          type: string
+        - description: The ID of the network on which to allocate the VIP.
+          format: int32
+          in: formData
+          name: private_net
+          required: true
+          type: integer
+        - description: Human-readable description for the load balancer.
+          in: formData
+          name: desc
+          required: false
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/LBSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      description: Creates a load balancer.
+      operationId: Load_Balancers_POST
+      summary: Creates a load balancer
+  '/api/v2/{platform_name}/loadbalancers/reports/':
+    get:
+      tags:
+        - load balancer
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          description: Platform name. Supported platform type is openstack
+          required: true
+          type: string
+        - description: Default is one month before end time.
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Get the report before the end time. Default is now.
+          in: query
+          name: end_time
+          required: false
+          type: string
+        - description: Project ID. Non-system admin must input.
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LBReportSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Get reports of load balancers.
+      operationId: Load_Balancer_Reports_GET
+      summary: Get reports of load balancers
+  '/api/v2/{platform_name}/loadbalancers/{loadbalancer_id}/':
+    delete:
+      tags:
+        - load balancer
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID for the load balancer.
+          format: int32
+          in: path
+          name: loadbalancer_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      description: Delete a load balancer.
+      operationId: Load_Balancer_Detail_DELETE
+      summary: Delete a load balancer
+    get:
+      tags:
+        - load balancer
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID for the load balancer.
+          format: int32
+          in: path
+          name: loadbalancer_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LBDetailSerializer'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Shows details for a load balancer.
+      operationId: Load_Balancer_Detail_GET
+      summary: Shows details for a load balancer
+    patch:
+      tags:
+        - load balancer
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID for the load balancer.
+          format: int32
+          in: path
+          name: loadbalancer_id
+          required: true
+          type: integer
+        - description: 'ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP.'
+          in: formData
+          name: lb_method
+          required: false
+          type: string
+        - description: 'A list of IP:Port to add into the load balancer'
+          in: formData
+          items:
+            type: string
+          name: members
+          required: false
+          type: array
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LBDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      description: Updates a load balancer.
+      operationId: Load_Balancer_Detail_PATCH
+      summary: Updates a load balancer
+  '/api/v2/{platform_name}/networks/':
+    get:
+      tags:
+        - network
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform type support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: >-
+            The ID of the project who owns the networks. (Tenant-admin must
+            specity this value)
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/NetworkSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      operationId: Networks_GET
+      summary: Lists networks
+    post:
+      tags:
+        - network
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The network name. It must be unique.
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: The CIDR.
+          in: formData
+          name: cidr
+          required: true
+          type: string
+        - description: The gateway IP address.
+          in: formData
+          name: gateway
+          required: true
+          type: string
+        - description: The ID of the project who owns the network.
+          format: int32
+          in: formData
+          name: project
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/NetworkSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Only system-admin can use this API
+      operationId: Networks_POST
+      summary: Creates a network
+  '/api/v2/{platform_name}/networks/{network_id}/':
+    delete:
+      tags:
+        - network
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID for the network.
+          format: int32
+          in: path
+          name: network_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/NetworkDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      operationId: Network_Detail_DELETE
+      summary: Deletes a network
+    get:
+      tags:
+        - network
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name support Openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: The ID for the network.
+          format: int32
+          in: path
+          name: network_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/NetworkDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      operationId: Network_Detail_GET
+      summary: Shows details for a network
+  '/api/v2/{platform_name}/projects/':
+    get:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          description: 'Support Openstack, Kubernetes, Slurm and Ceph'
+          name: platform_name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/GroupSerializer'
+      operationId: Groups_GET
+      summary: List groups
+    post:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          description: 'Support Openstack, Kubernetes, Slurm and Ceph'
+          name: platform_name
+          required: true
+          type: string
+        - description: The name of the group
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: description
+          in: formData
+          name: desc
+          required: false
+          type: string
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/GroupSerializer'
+      operationId: Groups_POST
+      summary: Create group
+  '/api/v2/{platform_name}/projects/{project_id}/':
+    delete:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          description: 'Support Openstack, Kubernetes, Slurm and Ceph'
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/GroupDetailSerializer'
+      operationId: Group_Detail_DELETE
+      summary: Delete group
+    get:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          description: Support Openstack and Kubernetes
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/GroupDetailSerializer'
+      operationId: Group_Detail_GET
+      summary: Get details of a group
+  '/api/v2/{platform_name}/projects/{project_id}/users/{user_id}/':
+    delete:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+        - description: User ID
+          format: int32
+          in: path
+          name: user_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+      description: disassociate user from a project
+      operationId: User_Tenant_Association_DELETE
+      summary: disassociate user from a project
+    post:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+        - description: User ID
+          format: int32
+          in: path
+          name: user_id
+          required: true
+          type: integer
+        - description: Role name
+          format: int32
+          in: formData
+          name: role
+          required: true
+          type: string
+          enum:
+            - tenant_admin
+      responses:
+        '201':
+          description: Created
+      description: associate user to project with specific role
+      operationId: User_Tenant_Association_POST
+      summary: associate user to a project with specific role
+  '/api/v2/{platform_name}/projects/{project_id}/solutions/':
+    get:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          description: Support Openstack and Kubernetes
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/GroupSolutionSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      operationId: Group_Solutions_GET
+      summary: Get solutions of a project
+    put:
+      consumes:
+        - application/json
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+        - description: Solution IDs to add into the project
+          in: body
+          name: solutions
+          required: true
+          schema:
+            type: object
+            properties:
+              solutions:
+                type: array
+                items:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GroupSolutionSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      operationId: Group_Solutions_PUT
+      summary: Updates solution list of a project
+  '/api/v2/{platform_name}/projects/{project_id}/solutions/{solution_id}/':
+    get:
+      tags:
+        - project
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: path
+          name: project_id
+          required: true
+          type: integer
+        - description: Solution ID
+          format: int32
+          in: path
+          name: solution_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GroupSolutionDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      operationId: Group_Solution_Detail_GET
+      summary: Get extra properties of a solution for a project
+  '/api/v2/{platform_name}/security_group_rules/{rule_id}/':
+    delete:
+      tags:
+        - security group
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack and k8s
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: id of security group rule
+          in: path
+          name: rule_id
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: formData
+          name: project
+          required: true
+          type: integer
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      description: Delete a rule in a security group.
+      operationId: Security_Group_Rules_DELETE
+      summary: Delete a rule in a security group
+  '/api/v2/{platform_name}/security_groups/':
+    get:
+      tags:
+        - security group
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack and k8s
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: query
+          name: project
+          required: true
+          type: integer
+        - description: Security group ID
+          in: query
+          name: sg
+          required: false
+          type: string
+        - description: Server ID
+          format: int32
+          in: query
+          name: server
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SecurityGroupSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: List security rules of a server.
+      operationId: Security_Groups_GET
+      summary: List security rules of a server
+  '/api/v2/{platform_name}/security_groups/{security_group_id}/':
+    patch:
+      tags:
+        - security group
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name. Supported platform type is openstack and k8s
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Security group ID
+          in: path
+          name: security_group_id
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: formData
+          name: project
+          required: false
+          type: integer
+        - description: 'ingress, egress'
+          in: formData
+          name: direction
+          required: false
+          type: string
+        - description: begin port
+          format: int32
+          in: formData
+          name: port_range_min
+          required: false
+          type: integer
+        - description: end port
+          in: formData
+          name: port_range_max
+          required: false
+          type: string
+        - description: >-
+            None, ipv6-route, udp, ipv6-nonxt, esp, pgm, ah, udplite, egp, vrrp,
+            tcp, ipv6-frag, ipv6-icmp, gre, ipv6-encap, ipv6-opts, rsvp, sctp,
+            icmp, ospf, dccp, igmp, icmpv6
+          in: formData
+          name: protocol
+          required: false
+          type: string
+        - description: 0.0.0.0/0
+          in: formData
+          name: remote_ip_prefix
+          required: false
+          type: string
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      description: Add a security rule to a security group.
+      operationId: Security_Group_Detail_PATCH
+      summary: Add a security rule to a security group
+  '/api/v2/{platform_name}/servers/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID. Non-system admin must input.
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+        - description: Image ID
+          format: int32
+          in: query
+          name: image
+          required: false
+          type: integer
+        - description: Site ID
+          format: int32
+          in: query
+          name: site
+          required: false
+          type: integer
+        - description: List resources of all users. The valid values are 1 or 0.
+          format: int32
+          in: query
+          name: all_users
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ServerSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List servers
+      operationId: Servers_GET
+      summary: List servers
+  '/api/v2/{platform_name}/servers/{server_id}/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get details of a server
+      operationId: Server_Detail_GET
+      summary: Get details of a server
+  '/api/v2/{platform_name}/servers/{server_id}/action/':
+    put:
+      tags:
+        - server
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: >-
+            Action for a server, such as
+            start/stop/reboot/associateIP/disassociateIP
+          in: formData
+          name: action
+          required: true
+          type: string
+        - description: >-
+            SOFT for a software-level reboot, or HARD for a virtual power cycle
+            hard reboot. Default is SOFT. This parameter only available for
+            reboot action.
+          in: formData
+          name: reboot_type
+          required: false
+          type: string
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Execute an action to a server
+      operationId: Server_Action_PUT
+      summary: Execute an action to a server
+  '/api/v2/{platform_name}/servers/{server_id}/cpu/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: Query start time
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Query finish time
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerCPUUtilSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get a Server CPU Utilization
+      operationId: Server_Cpu_Util_GET
+      summary: Get a Server CPU Utilization
+  '/api/v2/{platform_name}/servers/{server_id}/disk/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: Query meter name
+          in: query
+          name: meter_name
+          required: true
+          type: string
+        - description: Query start time
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Query finish time
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerDiskReadSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get a Server Disk Utilization
+      operationId: Server_Disk_Util_GET
+      summary: Get a Server Disk Utilization
+  '/api/v2/{platform_name}/servers/{server_id}/memory/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: Query start time
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Query finish time
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerMemoryUtilSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get a Server Memory Utilization
+      operationId: Server_Memory_Util_GET
+      summary: Get a Server Memory Utilization
+  '/api/v2/{platform_name}/servers/{server_id}/net/':
+    get:
+      tags:
+        - server
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Server ID
+          format: int32
+          in: path
+          name: server_id
+          required: true
+          type: integer
+        - description: Query meter name
+          in: query
+          name: meter_name
+          required: true
+          type: string
+        - description: Query start time
+          in: query
+          name: begin_time
+          required: false
+          type: string
+        - description: Query finish time
+          in: query
+          name: end_time
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServerNetworkIncomingSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get a Server Network Utilization
+      operationId: Server_Net_Util_GET
+      summary: Get a Server Network Utilization
+  '/api/v2/{platform_name}/sites/':
+    get:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID. Non-system admin must input.
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+        - description: Solution ID
+          format: int32
+          in: query
+          name: solution
+          required: false
+          type: integer
+        - description: List resources of all users. The valid values are 1 or 0.
+          format: int32
+          in: query
+          name: all_users
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SiteSerializer'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: List sites
+      operationId: Sites_GET
+      summary: List sites
+      tags:
+        - site
+    post:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: >-
+            Extra properties. To know which extra properties should be input,
+
+            please use
+            /api/v2/{platform_name}/projects/{project_id}/solutions/{solution_id}/
+
+            The format is x-extra-property-{extra-property-name}
+          in: header
+          name: x-extra-property-*
+          required: false
+          type: string
+        - description: The extra property of boot source (Just for example)
+          in: header
+          name: x-extra-property-boot-source
+          required: false
+          type: string
+        - description: The extra property of image (Just for example)
+          in: header
+          name: x-extra-property-image
+          required: false
+          type: string
+        - description: The extra property of flavor (Just for example)
+          in: header
+          name: x-extra-property-flavor
+          required: false
+          type: string
+        - description: The extra property of keypair (Just for example)
+          in: header
+          name: x-extra-property-keypair
+          required: false
+          type: string
+        - description: The extra property of private-network (Just for example)
+          in: header
+          name: x-extra-property-private-network
+          required: false
+          type: string
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Site name
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: Solution ID
+          format: int32
+          in: formData
+          name: solution
+          required: true
+          type: integer
+        - description: Description
+          in: formData
+          name: desc
+          required: false
+          type: string
+        - description: Project ID
+          format: int32
+          in: formData
+          name: project
+          required: true
+          type: integer
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/SiteSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Create a site
+      operationId: Sites_POST
+      summary: Create a site
+      tags:
+        - site
+  '/api/v2/{platform_name}/sites/{site_id}/':
+    delete:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Site ID
+          format: int32
+          in: path
+          name: site_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Delete a site
+      operationId: Site_Detail_DELETE
+      summary: Delete a site
+      tags:
+        - site
+    get:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: Platform name
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Site ID
+          format: int32
+          in: path
+          name: site_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SiteDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Get details of a site
+      operationId: Site_Detail_GET
+      summary: Get details of a site
+      tags:
+        - site
+    put:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: >-
+            Extra properties. To know which extra properties should be input,
+
+            please use
+            /api/v2/{platform_name}/projects/{project_id}/solutions/{solution_id}/
+
+            The format is x-extra-property-{extra-property-name}
+          in: header
+          name: x-extra-property-*
+          required: false
+          type: string
+        - description: The extra property of flavor (Just for example)
+          in: header
+          name: x-extra-property-flavor
+          required: false
+          type: string
+        - description: Platform name. Supported platform type is openstack
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Site ID
+          format: int32
+          in: path
+          name: site_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SiteDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Update site extra-property
+      operationId: Site_Detail_PUT
+      summary: Update site extra-property
+      tags:
+        - site
+  '/api/v2/{platform_name}/sites/{site_id}/action/':
+    put:
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+          description: Platform name. Supported platform type is openstack
+        - description: Site ID
+          format: int32
+          in: path
+          name: site_id
+          required: true
+          type: integer
+        - description: |-
+            Action for site status
+
+            Available values : start, stop, suspend, resume
+          in: body
+          name: status
+          required: true
+          schema:
+            $ref: '#/definitions/SiteActionSerializer'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Update status of a site
+      operationId: Site_Action_PUT
+      summary: Update status of a site
+      tags:
+        - site
+  '/api/v2/{platform_name}/sites/{site_id}/container/':
+    get:
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+          description: Platform name. Supported platform type is kubernetes
+        - description: Site ID
+          format: int32
+          in: path
+          name: site_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ContainerSerializer'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+      description: Get site detail of containers
+      operationId: Site_Container_GET
+      summary: Get site detail of containers
+      tags:
+        - site
+  '/api/v2/{platform_name}/snapshots/':
+    get:
+      tags:
+        - snapshot
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Source volume ID
+          format: int32
+          in: query
+          name: volume
+          required: false
+          type: integer
+        - description: Project ID
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SnapshotSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get snapshots
+      operationId: Snapshots_GET
+      summary: Get snapshots
+    post:
+      tags:
+        - snapshot
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Snapshot name
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: Description
+          in: formData
+          name: desc
+          required: false
+          type: string
+        - description: Source volume ID
+          format: int32
+          in: formData
+          name: volume
+          required: true
+          type: integer
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/SnapshotSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '413':
+          description: RequestEntityTooLarge
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Take a snapshot
+      operationId: Snapshots_POST
+      summary: Take a snapshot
+  '/api/v2/{platform_name}/snapshots/{snapshot_id}/':
+    delete:
+      tags:
+        - snapshot
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - in: path
+          name: platform_name
+          required: true
+          type: string
+          description: 'Platform name, supported platform type is openstack'
+        - in: path
+          name: snapshot_id
+          required: true
+          type: string
+          description: Snapshot ID
+      responses:
+        '204':
+          description: No Content
+      description: Delete a snapshot
+      operationId: Snapshot_Detail_DELETE
+      summary: Delete a snapshot
+    get:
+      tags:
+        - snapshot
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Snapshot ID
+          format: int32
+          in: path
+          name: snapshot_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: No response was specified
+          schema:
+            $ref: '#/definitions/SnapshotDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      description: Get details of a snapshot
+      operationId: Snapshot_Detail_GET
+      summary: Get details of a snapshot
+  '/api/v2/{platform_name}/volumes/':
+    get:
+      tags:
+        - volume
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID (non-system-admin is required)
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+        - description: Server ID
+          format: int32
+          in: query
+          name: attached_host
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/VolumeSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: List volumes
+      operationId: Volumes_GET
+      summary: List volumes
+    post:
+      tags:
+        - volume
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Volume name
+          in: formData
+          name: name
+          required: true
+          type: string
+        - description: Volume size (GB)
+          format: int32
+          in: formData
+          name: size
+          required: false
+          type: integer
+        - description: Project ID
+          format: int32
+          in: formData
+          name: project
+          required: false
+          type: integer
+        - description: Snapshot ID
+          format: int32
+          in: formData
+          name: src_snapshot
+          required: false
+          type: integer
+        - description: Description
+          in: formData
+          name: desc
+          required: false
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/VolumePostSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '405':
+          description: BadMethod
+        '413':
+          description: RequestEntityTooLarge
+        '415':
+          description: Bad Media Type
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Create a volume
+      operationId: Volumes_POST
+      summary: Create a volume
+  '/api/v2/{platform_name}/volumes/{volume_id}/':
+    delete:
+      tags:
+        - volume
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Volume ID
+          format: int32
+          in: path
+          name: volume_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal server error
+        '503':
+          description: Service Unavailable
+      description: Delete a volume
+      operationId: Volume_Detail_DELETE
+      summary: Delete a volume
+    get:
+      tags:
+        - volume
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Volume ID
+          format: int32
+          in: path
+          name: volume_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeDetailSerializer'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: Internal server error
+      description: Get details of a volume
+      operationId: Volume_Detail_GET
+      summary: Get details of a volume
+  '/api/v2/{platform_name}/volumes/{volume_id}/action/':
+    put:
+      tags:
+        - volume
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is openstack'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Volume ID
+          format: int32
+          in: path
+          name: volume_id
+          required: true
+          type: integer
+        - description: Server ID
+          format: int32
+          in: formData
+          name: server
+          required: false
+          type: integer
+        - description: 'Action for volume status (attach, detach, extend)'
+          in: formData
+          name: status
+          required: true
+          type: string
+        - description: The mountpoint path
+          in: formData
+          name: mountpoint
+          required: false
+          type: string
+        - description: Volume size (GB)
+          format: int32
+          in: formData
+          name: size
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeActionSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '405':
+          description: BadMethod
+        '500':
+          description: Internal Server Error
+      description: Update status or extend size of a volume
+      operationId: Volume_Action_PUT
+      summary: Update status of a volume
+  '/api/v2/{platform_name}/buckets/':
+    get:
+      tags:
+        - bucket
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: query
+          name: project
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BucketSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: List buckets
+      operationId: Buckets_GET
+      summary: List buckets
+    post:
+      tags:
+        - bucket
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Project ID
+          format: int32
+          in: formData
+          name: project
+          required: true
+          type: integer
+        - description: Bucket name
+          in: formData
+          name: name
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/BucketSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: Create a bucket
+      operationId: Buckets_POST
+      summary: Create a bucket
+  '/api/v2/{platform_name}/buckets/{bucket_id}/':
+    get:
+      tags:
+        - bucket
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Bucket ID
+          format: int32
+          in: path
+          name: bucket_id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BucketDetailSerializer'
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: Get details of a bucket
+      operationId: Bucket_Detail_GET
+      summary: Get details of a bucket
+    delete:
+      tags:
+        - bucket
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Bucket ID
+          format: int32
+          in: path
+          name: bucket_id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: Delete a bucket
+      operationId: Bucket_Detail_DELETE
+      summary: Delete a bucket
+  '/api/v2/{platform_name}/buckets/{bucket_id}/association/':
+    post:
+      tags:
+        - bucket
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Bucket ID
+          format: int32
+          in: path
+          name: bucket_id
+          required: true
+          type: integer
+        - description: Request body
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/BucketPermissionSerializer'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: |-
+        <p>Add permissions of an user to the bucket</p>
+        <table class="parameters">
+          <thead>
+            <tr>
+              <th class="col col_header parameters-col_name">Name</th>
+              <th class="col col_header parameters-col_description">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-param-name="user" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">user<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int64)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>User ID</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="permissions" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">permissions<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">array[string]</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Specify which operations the user can perform on the bucket.</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : READ, WRITE, READ_ACP, WRITE_ACP, FULL_CONTROL</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      operationId: Bucket_Association_POST
+      summary: Add permissions of an user to the bucket
+  '/api/v2/{platform_name}/buckets/{bucket_id}/disassociation/':
+    post:
+      tags:
+        - bucket
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Common-X-API-HOST'
+        - $ref: '#/parameters/Common-X-API-KEY'
+        - description: 'Platform name, supported platform type is ceph'
+          in: path
+          name: platform_name
+          required: true
+          type: string
+        - description: Bucket ID
+          format: int32
+          in: path
+          name: bucket_id
+          required: true
+          type: integer
+        - description: Request body
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/BucketPermissionSerializer'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: BadRequest
+        '401':
+          description: Unauthorized
+        '404':
+          description: NotFound
+        '500':
+          description: Internal Server Error
+      description: |-
+        <p>Remove permissions of an user from the bucket</p>
+        <table class="parameters">
+          <thead>
+            <tr>
+              <th class="col col_header parameters-col_name">Name</th>
+              <th class="col col_header parameters-col_description">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-param-name="user" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">user<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">
+                  integer
+                  <span class="prop-format">($int64)</span>
+                </div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>User ID</p></div>
+              </td>
+            </tr>
+            <tr data-param-name="permissions" data-param-in="body">
+              <td class="col parameters-col_name">
+                <div class="parameter__name required">permissions<span style="color: red;">&nbsp;*</span></div>
+                <div class="parameter__type">array[string]</div>
+                <div class="parameter__in">(body)</div>
+              </td>
+              <td class="col parameters-col_description">
+                <div class="markdown"><p>Specify which operations the user cannot perform on the bucket.</p></div>
+                <div class="parameter__enum markdown">
+                  <p><i>Available values</i> : READ, WRITE, READ_ACP, WRITE_ACP, FULL_CONTROL</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      operationId: Bucket_Disassociation_POST
+      summary: Remove permissions of an user from the bucket
+definitions:
+  AZDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      hosts:
+        type: array
+        items:
+          type: integer
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+    required:
+      - id
+      - name
+      - desc
+      - type
+      - create_time
+      - hosts
+  AZSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      type:
+        type: string
+    required:
+      - id
+      - name
+      - type
+      - platform
+  AttachedHostSerializer:
+    type: object
+    properties:
+      hostname:
+        type: string
+      id:
+        format: int64
+        type: integer
+    required:
+      - id
+      - hostname
+  DiskUsageSerializer:
+    type: object
+    properties:
+      timestamp:
+        format: date-time
+        type: string
+      unused_disk:
+        type: string
+      used_disk:
+        type: string
+    required:
+      - timestamp
+      - used_disk
+      - unused_disk
+  FlavorDetailSerializer:
+    type: object
+    properties:
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      metadata:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      resource:
+        type: string
+    required:
+      - id
+      - name
+      - resource
+      - desc
+      - platform
+      - metadata
+  FlavorPostSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+    required:
+      - id
+      - name
+      - platform
+  FlavorSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      metadata:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      resource:
+        type: string
+    required:
+      - id
+      - name
+      - resource
+      - metadata
+      - platform
+  GroupDetailSerializer:
+    type: object
+    properties:
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      status:
+        type: string
+      status_reason:
+        type: string
+      uuid:
+        type: string
+    required:
+      - id
+      - uuid
+      - name
+      - desc
+      - status
+      - status_reason
+  GroupSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+    required:
+      - id
+      - name
+      - platform
+  GroupSolutionSerializer:
+    type: object
+    properties:
+      solutions:
+        items:
+          type: integer
+        type: array
+    required:
+      - solutions
+  GroupSolutionDetailSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      site_extra_prop:
+        type: object
+        items: {}
+    required:
+      - id
+      - site_extra_prop
+  HostCpuUsageSerializer:
+    type: object
+    properties:
+      cpu_usage:
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - timestamp
+      - cpu_usage
+  HostDetailSerializer:
+    type: object
+    properties:
+      host_id:
+        format: int64
+        type: integer
+      interfaces:
+        items:
+          $ref: '#/definitions/InterfaceSerializer'
+        type: array
+      local_storage:
+        format: int64
+        type: integer
+      name:
+        type: string
+      node_type:
+        type: string
+      online:
+        type: string
+      os_image:
+        type: string
+      platform:
+        type: string
+      ram:
+        format: int64
+        type: integer
+      roles:
+        type: string
+      schedulable:
+        type: string
+      status:
+        type: string
+      vcpu:
+        format: int64
+        type: integer
+      version:
+        type: string
+    required:
+      - node_type
+      - host_id
+      - online
+      - status
+      - schedulable
+      - name
+      - roles
+      - interfaces
+      - version
+      - os_image
+      - vcpu
+      - ram
+      - local_storage
+      - platform
+  HostDiskUsageSerializer:
+    type: object
+    properties:
+      disk_usage:
+        items:
+          $ref: '#/definitions/DiskUsageSerializer'
+        type: array
+      mountpoint:
+        type: string
+    required:
+      - mountpoint
+      - disk_usage
+  HostMemUsageSerializer:
+    type: object
+    properties:
+      timestamp:
+        format: date-time
+        type: string
+      unused_mem:
+        type: string
+      used_mem:
+        type: string
+    required:
+      - timestamp
+      - used_mem
+      - unused_mem
+  HostSerializer:
+    type: object
+    properties:
+      host_id:
+        format: int64
+        type: integer
+      host_ip:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      roles:
+        type: string
+    required:
+      - host_id
+      - name
+      - host_ip
+      - roles
+      - platform
+  ImageDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      delete_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_deleted:
+        type: boolean
+      is_enabled:
+        type: boolean
+      is_public:
+        type: boolean
+      name:
+        type: string
+      os:
+        type: string
+      os_version:
+        type: string
+      platform:
+        type: string
+      ref_img_id:
+        type: string
+      status:
+        type: string
+      status_reason:
+        type: string
+    required:
+      - id
+      - name
+      - platform
+      - ref_img_id
+      - is_enabled
+      - is_deleted
+      - status
+      - status_reason
+      - is_public
+      - create_time
+      - delete_time
+      - desc
+      - os
+      - os_version
+  ImagePostSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      platform:
+        type: string
+    required:
+      - id
+      - name
+      - is_public
+      - create_time
+      - platform
+  ImageSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      platform:
+        type: string
+      status:
+        type: string
+    required:
+      - id
+      - name
+      - status
+      - is_public
+      - create_time
+      - platform
+  InterfaceSerializer:
+    type: object
+    properties:
+      interface:
+        type: string
+      ip:
+        type: string
+      mac:
+        type: string
+      max_speed:
+        format: int64
+        type: integer
+      name:
+        type: string
+    required:
+      - name
+      - interface
+      - ip
+      - mac
+      - max_speed
+  JobAbstrationDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      project:
+        format: int64
+        type: integer
+      steps:
+        items:
+          $ref: '#/definitions/JobStepSerializer'
+        type: array
+      schedule:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+        enum:
+          - 'SLURM:SINGULARITY'
+          - 'KUBERNETES:DOCKER'
+      user:
+        format: int64
+        type: integer
+    required:
+      - id
+      - create_time
+      - type
+      - project
+      - user
+      - status
+      - steps
+      - schedule
+      - name
+  JobAbstrationSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      project:
+        format: int64
+        type: integer
+      status:
+        type: string
+      type:
+        type: string
+        enum:
+          - 'SLURM:SINGULARITY'
+          - 'KUBERNETES:DOCKER'
+      user:
+        format: int64
+        type: integer
+    required:
+      - id
+      - type
+      - project
+      - user
+      - status
+      - create_time
+      - name
+  JobVolumeSerializer:
+    type: object
+    properties:
+      server:
+        type: string
+      path:
+        type: string
+      mountPath:
+        type: string
+      type:
+        type: string
+        enum:
+          - HOSTPATH
+          - NFS
+    required:
+      - path
+      - mountPath
+      - type
+  LBDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      lb_method:
+        type: string
+      members:
+        type: string
+      name:
+        type: string
+      private_net:
+        type: string
+      protocol:
+        type: string
+      protocol_port:
+        format: int64
+        type: integer
+      status:
+        type: string
+      status_reason:
+        type: string
+      vip:
+        type: string
+    required:
+      - id
+      - name
+      - desc
+      - protocol
+      - protocol_port
+      - lb_method
+      - members
+      - private_net
+      - vip
+      - status
+      - status_reason
+      - create_time
+  LBReportSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      delete_time:
+        format: date-time
+        type: string
+      id:
+        type: string
+      lb_method:
+        type: string
+      name:
+        type: string
+      private_net_name:
+        type: string
+      protocol:
+        type: string
+      status:
+        type: string
+      tenant:
+        type: string
+    required:
+      - id
+      - name
+      - tenant
+      - private_net_name
+      - protocol
+      - lb_method
+      - status
+      - create_time
+      - delete_time
+  LBSerializer:
+    type: object
+    properties:
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      lb_method:
+        type: string
+      name:
+        type: string
+      private_net:
+        type: string
+      protocol:
+        type: string
+      protocol_port:
+        format: int64
+        type: integer
+      status:
+        type: string
+    required:
+      - id
+      - name
+      - protocol
+      - protocol_port
+      - lb_method
+      - private_net
+      - status
+      - desc
+  NetworkDetailSerializer:
+    type: object
+    properties:
+      cidr:
+        type: string
+      create_time:
+        format: date-time
+        type: string
+      gateway:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        type: string
+      status:
+        type: string
+      status_reason:
+        type: string
+    required:
+      - id
+      - name
+      - cidr
+      - gateway
+      - project
+      - status
+      - status_reason
+      - create_time
+      - platform
+  NetworkSerializer:
+    type: object
+    properties:
+      cidr:
+        type: string
+      gateway:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        type: string
+      status:
+        type: string
+    required:
+      - id
+      - name
+      - project
+      - cidr
+      - gateway
+      - status
+      - platform
+  PodsOnHostSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      restart_count:
+        format: int64
+        type: integer
+      status:
+        type: string
+    required:
+      - name
+      - namespace
+      - status
+      - restart_count
+      - create_time
+  RunDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      end_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      stepname:
+        type: string
+      start_time:
+        format: date-time
+        type: string
+      status:
+        type: string
+    required:
+      - id
+      - stepname
+      - create_time
+      - start_time
+      - end_time
+      - status
+  RunSerializer:
+    type: object
+    properties:
+      count:
+        format: int64
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/RunDetailSerializer'
+        type: array
+    required:
+      - count
+      - results
+  SecurityGroupSerializer:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      security_group_rules:
+        items:
+          $ref: '#/definitions/SecurityRuleSerializer'
+        type: array
+    required:
+      - name
+      - id
+      - security_group_rules
+      - platform
+  SecurityRuleSerializer:
+    type: object
+    properties:
+      direction:
+        type: string
+      ethertype:
+        type: string
+      id:
+        type: string
+      port_range_max:
+        format: int64
+        type: integer
+      port_range_min:
+        format: int64
+        type: integer
+      protocol:
+        type: string
+      remote_ip_prefix:
+        type: string
+    required:
+      - id
+      - direction
+      - ethertype
+      - port_range_min
+      - port_range_max
+      - protocol
+      - remote_ip_prefix
+  ServerCPUUtilSerializer:
+    type: object
+    properties:
+      cpu_util:
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - cpu_util
+      - timestamp
+  ServerDetailSerializer:
+    type: object
+    properties:
+      availability_zone:
+        type: string
+      console_url:
+        type: string
+      flavor:
+        type: string
+      hostname:
+        type: string
+      id:
+        format: int64
+        type: integer
+      image:
+        type: string
+      os:
+        type: string
+      os_version:
+        type: string
+      platform:
+        type: string
+      private_ip:
+        type: string
+      private_net:
+        format: int64
+        type: integer
+      public_ip:
+        type: string
+      site:
+        type: string
+      status:
+        type: string
+    required:
+      - id
+      - hostname
+      - flavor
+      - image
+      - platform
+      - private_ip
+      - private_net
+      - public_ip
+      - console_url
+      - site
+      - status
+      - availability_zone
+      - os
+      - os_version
+  ServerDiskReadSerializer:
+    type: object
+    properties:
+      disk_read_bytes_rate:
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - disk_read_bytes_rate
+      - timestamp
+  ServerMemoryUtilSerializer:
+    type: object
+    properties:
+      memory_usage:
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - memory_usage
+      - timestamp
+  ServerNetworkIncomingSerializer:
+    type: object
+    properties:
+      network_incoming_bytes_rate:
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - network_incoming_bytes_rate
+      - timestamp
+  ServerSerializer:
+    type: object
+    properties:
+      availability_zone:
+        type: string
+      console_url:
+        type: string
+      flavor:
+        type: string
+      hostname:
+        type: string
+      id:
+        format: int64
+        type: integer
+      image:
+        type: string
+      os:
+        type: string
+      platform:
+        type: string
+      private_ip:
+        type: string
+      private_net:
+        format: int64
+        type: integer
+      public_ip:
+        type: string
+      site:
+        type: string
+      status:
+        type: string
+    required:
+      - id
+      - hostname
+      - flavor
+      - image
+      - platform
+      - private_ip
+      - private_net
+      - public_ip
+      - console_url
+      - site
+      - status
+      - availability_zone
+      - os
+  SiteActionSerializer:
+    type: object
+    properties:
+      status:
+        type: string
+        enum:
+          - start
+          - stop
+          - suspend
+          - resume
+    required:
+      - status
+  ContainerSerializer:
+    type: object
+    properties:
+      Pod:
+        type: array
+        items:
+          $ref: '#/definitions/PodObject'
+      Service:
+        type: array
+        items:
+          $ref: '#/definitions/ServiceObject'
+      ReplicationController:
+        type: array
+        items:
+          $ref: '#/definitions/RCObject'
+  PodObject:
+    type: object
+    properties:
+      name:
+        type: string
+      status:
+        type: string
+      pod_ip:
+        type: string
+      flavor:
+        type: string
+      host_ip:
+        type: string
+      hostname:
+        type: string
+      public_ip:
+        type: string
+      container:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            image:
+              type: string
+            ports:
+              type: array
+              items:
+                type: object
+                properties:
+                  protocol:
+                    type: string
+                  port:
+                    type: integer
+      annotations:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+  ServiceObject:
+    type: object
+    properties:
+      name:
+        type: string
+      net_type:
+        type: string
+      cluster_ip:
+        type: string
+      public_ip:
+        type: string
+      association:
+        type: array
+        items:
+          type: string
+      annotations:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+      ports:
+        type: array
+        items:
+          type: object
+          properties:
+            target_port:
+              type: integer
+            protocol:
+              type: string
+            port:
+              type: integer
+            node_port:
+              type: integer
+  RCObject:
+    type: object
+    properties:
+      name:
+        type: string
+      desired:
+        type: integer
+      current:
+        type: integer
+      replicas:
+        type: integer
+      annotations:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+  AutoScalingDetailsSerializer:
+    type: object
+    properties:
+      meter_name:
+        type: string
+      alarm_enabled:
+        type: string
+      alarm_period:
+        type: string
+      alarm_statistic:
+        type: string
+      evaluation_periods:
+        type: string
+      scale_max_size:
+        type: string
+      scaledown_threshold:
+        type: string
+      scaleup_threshold:
+        type: string
+  SiteDetailSerializer:
+    type: object
+    properties:
+      autoscaling_details:
+        $ref: '#/definitions/AutoScalingDetailsSerializer'
+      create_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        format: int64
+        type: integer
+      public_ip:
+        type: string
+      servers:
+        type: array
+        items:
+          format: int64
+          type: integer
+      solution:
+        format: int64
+        type: integer
+      status:
+        type: string
+      status_reason:
+        type: string
+      user:
+        format: int64
+        type: integer
+    required:
+      - id
+      - name
+      - solution
+      - desc
+      - project
+      - public_ip
+      - status
+      - status_reason
+      - platform
+      - create_time
+      - user
+      - servers
+      - autoscaling_details
+  SiteSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        format: int64
+        type: integer
+      public_ip:
+        type: string
+      solution:
+        format: int64
+        type: integer
+      status:
+        type: string
+      user:
+        format: int64
+        type: integer
+    required:
+      - id
+      - name
+      - solution
+      - project
+      - public_ip
+      - create_time
+      - user
+      - status
+      - platform
+  SnapshotDetailSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      restore_volume:
+        type: string
+      snapshot_uuid:
+        type: string
+      status:
+        type: string
+      status_reason:
+        type: string
+      user:
+        $ref: '#/definitions/SnapshotUserSerializer'
+      volume:
+        $ref: '#/definitions/SnapshotVolumeSerializer'
+    required:
+      - id
+      - volume
+      - user
+      - name
+      - status
+      - status_reason
+      - create_time
+      - snapshot_uuid
+      - desc
+      - restore_volume
+      - platform
+  SnapshotSerializer:
+    type: object
+    properties:
+      create_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      status:
+        type: string
+      volume:
+        type: string
+    required:
+      - id
+      - name
+      - desc
+      - volume
+      - create_time
+      - status
+      - platform
+  SnapshotUserSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      username:
+        type: string
+    required:
+      - id
+      - username
+  SnapshotVolumeSerializer:
+    type: object
+    properties:
+      attached_host:
+        $ref: '#/definitions/AttachedHostSerializer'
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_bootable:
+        type: boolean
+      name:
+        type: string
+      project:
+        $ref: '#/definitions/VolumeProjectSerializer'
+      size:
+        format: int64
+        maximum: 2147483647
+        minimum: -2147483648
+        type: integer
+      status:
+        type: string
+    required:
+      - id
+      - name
+      - size
+      - status
+      - create_time
+      - project
+      - attached_host
+      - is_bootable
+  SolutionDetailSerializer:
+    type: object
+    properties:
+      desc:
+        type: string
+      gsp_name:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      state:
+        type: string
+      version:
+        type: string
+      category:
+        type: string
+      is_public:
+        type: boolean
+    required:
+      - id
+      - name
+      - desc
+      - state
+      - gsp_name
+      - version
+      - category
+      - is_public
+  SolutionFileSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+    required:
+      - id
+  SolutionSerializer:
+    type: object
+    properties:
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      state:
+        type: string
+      category:
+        type: string
+      is_public:
+        type: boolean
+    required:
+      - id
+      - name
+      - state
+      - desc
+      - category
+      - is_public
+  UserProjectSerializer:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      role:
+        type: string
+        enum:
+          - tenant_admin
+    required:
+      - id
+      - name
+      - platform
+      - role
+  UserDetailSerializer:
+    properties:
+      associating_projects:
+        $ref: '#/definitions/UserProjectSerializer'
+      id:
+        format: int64
+        type: integer
+      username:
+        type: string
+      ceph_key:
+        $ref: '#/definitions/UserDetailKeyData'
+    required:
+      - id
+      - username
+      - associating_projects
+  UserDetailKeyData:
+    properties:
+      access_key:
+        type: string
+      secret_key:
+        type: string
+  UserSerializer:
+    properties:
+      id:
+        format: int64
+        type: integer
+      username:
+        type: string
+    required:
+      - id
+      - username
+  VersionSerializer:
+    type: object
+    properties:
+      version:
+        type: string
+    required:
+      - version
+  VolumeActionSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+    required:
+      - id
+  VolumeDetailSerializer:
+    type: object
+    properties:
+      attached_host:
+        $ref: '#/definitions/AttachedHostSerializer'
+      create_time:
+        format: date-time
+        type: string
+      delete_time:
+        format: date-time
+        type: string
+      desc:
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_attached:
+        type: boolean
+      is_bootable:
+        type: boolean
+      is_public:
+        type: boolean
+      mountpoint:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        $ref: '#/definitions/VolumeProjectSerializer'
+      size:
+        format: int64
+        maximum: 2147483647
+        minimum: -2147483648
+        type: integer
+      snapshot_list:
+        type: string
+      src_snapshot:
+        type: string
+      status:
+        type: string
+      status_reason:
+        type: string
+      user:
+        type: string
+      volume_uuid:
+        type: string
+    required:
+      - id
+      - name
+      - volume_uuid
+      - size
+      - status
+      - status_reason
+      - is_public
+      - create_time
+      - delete_time
+      - project
+      - user
+      - desc
+      - attached_host
+      - is_attached
+      - mountpoint
+      - src_snapshot
+      - is_bootable
+      - snapshot_list
+      - platform
+  VolumePostSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        format: int64
+        type: integer
+      size:
+        format: int64
+        type: integer
+    required:
+      - id
+      - name
+      - size
+      - project
+      - platform
+  VolumeProjectSerializer:
+    type: object
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+    required:
+      - id
+      - name
+  VolumeSerializer:
+    type: object
+    properties:
+      attached_host:
+        $ref: '#/definitions/AttachedHostSerializer'
+      create_time:
+        format: date-time
+        type: string
+      id:
+        format: int64
+        type: integer
+      is_bootable:
+        type: boolean
+      name:
+        type: string
+      platform:
+        type: string
+      project:
+        $ref: '#/definitions/VolumeProjectSerializer'
+      size:
+        format: int64
+        maximum: 2147483647
+        minimum: -2147483648
+        type: integer
+      status:
+        type: string
+    required:
+      - id
+      - name
+      - size
+      - status
+      - create_time
+      - project
+      - attached_host
+      - is_bootable
+      - platform
+  WriteJobVolumeSerializer:
+    properties:
+      server:
+        type: string
+      path:
+        type: string
+      mountPath:
+        type: string
+      type:
+        type: string
+        enum:
+          - HOSTPATH
+          - NFS
+    required:
+      - path
+      - mountPath
+      - type
+  AZHostArray:
+    properties:
+      hosts:
+        type: array
+        items:
+          type: integer
+  WriteJobData:
+    properties:
+      name:
+        type: string
+      project:
+        format: int64
+        type: integer
+      schedule:
+        type: string
+      type:
+        type: string
+        enum:
+          - 'SLURM:SINGULARITY'
+          - 'KUBERNETES:DOCKER'
+      steps:
+        items:
+          $ref: '#/definitions/WriteJobStepSerializer'
+        type: array
+    required:
+      - type
+      - project
+      - steps
+      - name
+  WriteJobStepSerializer:
+    properties:
+      stepname:
+        type: string
+      depends_on:
+        type: array
+        items:
+          type: string
+      dependency_policy:
+        type: string
+        enum:
+          - AFTEROK
+          - AFTERNOTOK
+          - AFTERANY
+      availability_zone:
+        type: string
+      command:
+        type: string
+      image:
+        type: string
+      flavor:
+        format: int32
+        type: integer
+      runs:
+        format: int32
+        type: integer
+      volumes:
+        items:
+          $ref: '#/definitions/WriteJobVolumeSerializer'
+        type: array
+    required:
+      - stepname
+      - image
+      - flavor
+  JobStepSerializer:
+    properties:
+      stepname:
+        type: string
+      depends_on:
+        type: array
+        items:
+          type: string
+      dependency_policy:
+        type: string
+        enum:
+          - AFTEROK
+          - AFTERNOTOK
+          - AFTERANY
+      availability_zone:
+        type: string
+      command:
+        type: string
+      image:
+        type: string
+      flavor:
+        format: int32
+        type: integer
+      runs:
+        format: int32
+        type: integer
+      volumes:
+        items:
+          $ref: '#/definitions/JobVolumeSerializer'
+        type: array
+    required:
+      - stepname
+      - depends_on
+      - dependency_policy
+      - availability_zone
+      - command
+      - image
+      - flavor
+      - runs
+      - volumes
+  WriteJobDetailData:
+    properties:
+      name:
+        type: string
+      schedule:
+        type: string
+      stepname:
+        type: object
+        properties:
+          depends_on:
+            type: array
+            items:
+              type: string
+          dependency_policy:
+            type: string
+            enum:
+              - AFTEROK
+              - AFTERNOTOK
+              - AFTERANY
+          availability_zone:
+            type: string
+          image:
+            type: string
+          command:
+            type: string
+          runs:
+            format: int32
+            type: integer
+          volumes:
+            items:
+              $ref: '#/definitions/JobVolumeSerializer'
+            type: array
+  BucketSerializer:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+    required:
+      - id
+      - name
+  BucketDetailSerializer:
+    properties:
+      id:
+        format: int64
+        type: integer
+      owner:
+        format: int64
+        type: integer
+      project:
+        format: int64
+        type: integer
+      name:
+        type: string
+      create_time:
+        format: date-time
+        type: string
+      authenticated_users:
+        type: object
+        properties:
+          user_id:
+            type: array
+            items:
+              type: string
+              example: permission
+      objects:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            last_modified:
+              format: date-time
+              type: string
+            size:
+              format: int64
+              type: integer
+      usage:
+        type: object
+        properties:
+          size:
+            format: int64
+            type: integer
+          size_actual:
+            format: int64
+            type: integer
+          size_utilized:
+            format: int64
+            type: integer
+          num_objects:
+            format: int64
+            type: integer
+    required:
+      - id
+      - name
+      - create_time
+      - owner
+      - authenticated_users
+      - project
+      - usage
+      - objects
+  BucketPermissionSerializer:
+    properties:
+      user:
+        type: integer
+        format: int64
+      permissions:
+        type: array
+        items:
+          type: string
+          enum:
+            - READ
+            - WRITE
+            - READ_ACP
+            - WRITE_ACP
+            - FULL_CONTROL
