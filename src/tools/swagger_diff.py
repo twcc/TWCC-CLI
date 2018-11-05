@@ -1,3 +1,27 @@
+# -*- coding: utf-8 -*-
+"""ASUS SWAGGER API Difference
+
+Show difference between Old and New SWAGGER documents
+
+Example:
+        $ python swagger_diff.py -o OLD_YAML -n NEW_YAML
+
+usage: swagger_diff.py [-h] [-p PATH_YAML] [-n NEW_YAML] [-o OLD_YAML]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PATH_YAML, --path_yaml PATH_YAML
+                        where yaml file store, (default: ../yaml)
+
+  -n NEW_YAML, --new_yaml NEW_YAML
+                        latest yaml file name, (default:
+                        api_v2_swagger_v5.0.0_staging.yaml)
+  -o OLD_YAML, --old_yaml OLD_YAML
+                        previous yaml file name, (default:
+                        api_v2_swagger_v5.1.1_staging.yaml)
+
+
+"""
 from __future__ import print_function
 from os import sys, path, strerror
 import argparse
@@ -9,6 +33,14 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 def doAnaly(fn_old = "../yaml/api_v2_swagger_v5.0.0_staging.yaml",
         fn_new = "../yaml/api_v2_swagger_v5.1.1_staging.yaml" ):
+    """doing difference between fn_old and fn_new in YAML format
+       analysis only do Paths entries and its http verbs.
+
+    Args:
+        fn_old (str): OLD_YAML file path
+        fn_new (str): NEW_YAML file path
+
+    """
 
     swg_old = yaml.load(open(fn_old, 'r').read())
     swg_new = yaml.load(open(fn_new, 'r').read())
