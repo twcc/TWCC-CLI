@@ -1,49 +1,68 @@
 # -*- coding: utf-8 -*-
-class TWCC:
-    def __init__(self, TWCC_YAML, host_url, debug=True):
-        self.twcc_yaml = TWCC_YAML
+import time
+import requests
+import json
+import yaml
+import datetime
+import logging
+import os
+from twcc.session import session_start
+from twcc.util import parsePtn
+
+
+class ServiceOperation:
+
+    def __init__(self, debug=True):
+        self._session_ = session_start()
         self.load_yaml()
-        self.host_url = host_url
+
+        self.try_alive()
+
+        self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
+        self.res_type_valid = set(['txt', 'json'])
+
         self._debug = debug
         if self._debug:
             self._setDebug()
 
+    def try_alive(self):
+        if not requests.get(self.host_url).status_code == 404:
+            raise ConnectionError
+        else:
+            return True
+
     def load_yaml(self):
-        import yaml
-        from .util import parsePtn
 
-        twcc_conf = yaml.load(open(self.twcc_yaml, 'r').read())
-        _ava_funcs_ = twcc_conf['stage']['avalible_funcs']
-        _platform_ = twcc_conf['stage']['platforms']
+        twcc_conf = yaml.load(open(self._session_.files['resources'], 'r').read())
+        self.stage = os.environ['_STAGE_']
+        self.host_url = twcc_conf[self.stage]['host']
+        self.api_keys = twcc_conf[self.stage]['keys']
 
-        self.sites = [_platform_[x]['name'] for x in xrange(len(_platform_))]
-        self.api_keys = twcc_conf['stage']['keys']
-        self.valid_funcs = [
-            _ava_funcs_[x]['name'] for x in xrange(len(_ava_funcs_))]
-        self.valid_http_verb = dict([
-            (_ava_funcs_[x]['name'],
-             _ava_funcs_[x]['http_verb']) for x in xrange(len(_ava_funcs_))])
+        _ava_funcs_ = twcc_conf['avalible_funcs']
+
+        self.valid_funcs = [_ava_funcs_[x]['name']
+                            for x in xrange(len(_ava_funcs_))]
+        self.valid_http_verb = dict([(_ava_funcs_[x]['name'], _ava_funcs_[x][
+                                    'http_verb']) for x in xrange(len(_ava_funcs_))])
         self.url_format = dict([(_ava_funcs_[x]['name'],
                                  _ava_funcs_[x]['url_type']) for x in xrange(len(_ava_funcs_))])
         self.url_ptn = dict([
             (x, parsePtn(self.url_format[x])) for x in self.url_format.keys()])
+
         self.twcc_conf = twcc_conf
-        self.http_verb = set(['get', 'post', 'delete', 'patch', 'put'])
 
     def isFunValid(self, func):
         return True if func in self.valid_funcs else False
 
     def _api_act(self, t_api, t_headers, t_data=None, mtype="get"):
-        import time
-        import requests
-        import json
 
         start_time = time.time()
 
         if mtype == 'get':
             r = requests.get(t_api, headers=t_headers)
         elif mtype == 'post':
-            r = requests.post(t_api, headers=t_headers, data=json.dumps(t_data))
+            r = requests.post(t_api, headers=t_headers,
+                              data=json.dumps(t_data))
         elif mtype == "delete":
             r = requests.delete(t_api, headers=t_headers)
         elif mtype == "patch":
@@ -56,7 +75,8 @@ class TWCC:
         if self._debug:
             self._i(t_api)
             self._i(t_headers)
-            self._i("--- URL: %s, Status: %s, (%.3f sec) ---" % (t_api, r.status_code, time.time() - start_time))
+            self._i("--- URL: %s, Status: %s, (%.3f sec) ---" %
+                    (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
 
     def doAPI(
@@ -68,34 +88,35 @@ class TWCC:
             url_dict=None, data_dict=None,
             http='get', res_type='json'):
 
-        avalible_res_type = set(['json', 'txt'])
-        if not res_type in avalible_res_type:
-            raise ValueError("Response type Error:'{0}' is not valid, avaliable options: {1}".format(res_type, ", ".join(avalible_res_type)))
-
+        if not res_type in self.res_type_valid:
+            raise ValueError(
+                "Response type Error:'{0}' is not valid, available options: {1}".format(
+                    res_type, ", ".join(self.res_type_valid)))
 
         if not self.isFunValid(func):
             raise ValueError("Function for:'{0}' is not valid".format(func))
         if not http in set(self.valid_http_verb[func]):
             raise ValueError("http verb:'{0}' is not valid".format(http))
 
-        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict = url_dict)
+        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
         t_header = self.mkHeader(site_sn, key_tag, api_host, api_key, ctype)
 
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
-        if res_type in avalible_res_type:
+        if res_type in self.res_type_valid:
             if res_type == 'json':
                 return res[0].json()
             elif res_type == 'txt':
                 return res[0].content
 
-    def mkHeader(
-            self,
-            site_sn=None, key_tag=None,
-            api_host="_DEF_", api_key="_DEF_",
-            ctype="application/json"):
+    def mkHeader(self, site_sn=None, key_tag=None,
+                 api_host="_DEF_", api_key="_DEF_",
+                 ctype="application/json"):
 
         if not type(site_sn) == type(None):
-            self.api_host = self.sites[site_sn]
+            if unicode(site_sn).isnumeric():
+                self.api_host = self.sites[site_sn]
+            else:
+                self.api_host = site_sn
         else:
             self.api_host = api_host
         if not type(key_tag) == type(None):
@@ -104,19 +125,17 @@ class TWCC:
             self.api_key = api_key
 
         self.ctype = ctype
-        return {'X-API-HOST':self.api_host,
-                'x-api-key':self.api_key,
-                'Content-Type':self.ctype}
+        return {'X-API-HOST': self.api_host,
+                'x-api-key': self.api_key,
+                'Content-Type': self.ctype}
 
     def _setDebug(self):
-        import datetime
-        import logging
-        import os
         log_dir = "log/"
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        log_filename = datetime.datetime.now().strftime(log_dir+"/nchc_%Y%m%d_%H%M%S.log")
+        log_filename = datetime.datetime.now().strftime(
+            log_dir + "/nchc_%Y%m%d_%H%M%S.log")
         logging.basicConfig(
             level=logging.DEBUG,
             format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s',
@@ -127,7 +146,8 @@ class TWCC:
         console.setLevel(logging.INFO)
 
         # 設定輸出格式
-        formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+        formatter = logging.Formatter(
+            '%(name)-12s: %(levelname)-8s %(message)s')
         # handler 設定輸出格式
         console.setFormatter(formatter)
         # 加入 hander 到 root logger
@@ -139,15 +159,14 @@ class TWCC:
         self._w = logging.warning
 
     def show(self):
-        self._i("-"*10 + "="*10 + " [info] BEGIN " + "="*10 + "-"*10 )
+        self._i("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
         self._i(self.sites)
         self._i(self.keys)
-        self._i("-"*10 + "="*10 + " [info] ENDS  " + "="*10 + "-"*10 )
+        self._i("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
-    def mkAPIUrl(
-            self,
-            site_sn=None, api_host="_DEF_",
-            func="_DEF_", url_dict=None):
+    def mkAPIUrl(self,
+                 site_sn=None, api_host="_DEF_",
+                 func="_DEF_", url_dict=None):
 
         # check if this function valid
         if not self.isFunValid(func):
@@ -159,7 +178,7 @@ class TWCC:
 
         # check if this site_sn is valid
         if not type(site_sn) == type(None):
-            self.api_pf = self.sites[site_sn]
+            self.api_pf = site_sn
         else:
             self.api_pf = api_host
 
@@ -172,7 +191,7 @@ class TWCC:
             # check if function name is in given url_dict
             if func in url_dict:
                 ptn = "/".join([
-                    "%s/%s"%(k, url_dict[k]) for k in url_dict.keys()])
+                    "%s/%s" % (k, url_dict[k]) for k in url_dict.keys()])
             else:
                 raise ValueError(
                     "Can not find '{0}' in provided dictionary.".format(func))
