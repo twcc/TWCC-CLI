@@ -3,65 +3,107 @@ info:
     ctime:  "2018-10-12 09:21:00"
     auth:   "August Chao <1803001@narlabs.org.tw>"
 stage:
+    host:   "https://140.110.10.7:8000"
     keys:
         usr1:   "5e38ba3f-8471-4d47-a386-54a3c0775d0c"
         sys:    "fb01047f-1098-4cf3-ae5a-7311f79b42df"
-    platforms:
-        - 
-          name:   "admin"
-          desc:   "就…admin"
-        - 
-          name:   "openstack-hsinchu-community"
-        - 
-          name:   "openstack-hsinchu-suse"
-        - 
-          name:   "k8s-hsinchu-default"
-        - 
-          name:   "slurm-hsinchu"
-        - 
-          name:   "ceph-hsinchu"
-        - 
-          name:   "goc"
-        
-    avalible_funcs:
-        -
-          name: "configuration"
-          url_type: "/api/v2/{FUNCTION}/"
-          http_verb:
-            - 'get'
-            - 'patch'
-        -
-          name: "solutions"
-          url_type: "/api/v2/{FUNCTION}/"
-          http_verb:
-            - 'get'
-        -
-          name: "projects"
-          url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
-          http_verb:
-            - 'get'
-            - 'post'
-            - 'delete'
-        -
-          name: "keypairs"
-          url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
-          http_verb:
-            - 'get'
-            - 'post'
-            - 'delete'
-          staus: [ "checked 2018-10-15, by Aug"
-                 , ]
-        -
-          name: "acls-g"
-          url_type: "/api_key/acls/groups"
-          http_verb:
-            - 'get'
-          staus: [ "checked 2018-10-15, by Aug"
-                 , ]
-        -
-          name: "acls"
-          url_type: "/api_key/{FUNCTION}/"
-          http_verb:
-            - 'get'
-          staus: [ "checked 2018-10-15, by Aug"
-                 , ]
+production:
+    host:   "http://apigateway.twcc.ai:8000"
+    keys:
+        usr1:   "7fe2bdd8-be01-430f-865f-feaec9dba27b"
+        sys:    "042e62a7-d1db-4b8a-881c-b224d2d7cf77"    
+        sysa:   "96dbfe6d-aabb-497b-a8fd-03628e5d7d7f"  # see https://git.narl.org.tw/gitlab/twcc/ACPT-TEAM/issues/16
+        tadm:   "8fb3ea15-db57-4326-a17d-33920843e9bc"
+        tusr:   "2ab93a87-f428-467c-86cc-1de7f519a8b9"
+    clusters:
+        - 'admin'
+        - 'ceph-taichung-default'
+        - 'goc'
+        #- 'harbor'
+        - 'k8s-taichung-default'
+        - 'openstack-taichung-community'
+        - 'openstack-taichung-suse'
+        - 'slurm-taichung-default'
+avalible_funcs:
+    -
+      name: "buckets"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "snapshots"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "volumes"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "images"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "jobs"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "users"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "configuration"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'patch'
+    -
+      name: "solutions"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+    -
+      name: "projects"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+      staus: [ "checked 2018-11-05, by Aug"
+             , ]
+    -
+      name: "flavors"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+    -
+      name: "keypairs"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+      staus: [ "checked 2018-10-15, by Aug"
+             , ]
+    -
+      name: "acls-g"
+      url_type: "/api_key/acls/groups"
+      http_verb:
+        - 'get'
+      staus: [ "checked 2018-10-15, by Aug"
+             , ]
+    -
+      name: "acls"
+      url_type: "/api_key/{FUNCTION}/"
+      http_verb:
+        - 'get'
+      staus: [ "checked 2018-10-15, by Aug"
+             , ]

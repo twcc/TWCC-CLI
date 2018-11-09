@@ -33,7 +33,8 @@ class ServiceOperation:
 
     def load_yaml(self):
 
-        twcc_conf = yaml.load(open(self._session_.files['resources'], 'r').read())
+        self._yaml_fn_ = self._session_.files['resources']
+        twcc_conf = yaml.load(open(self._yaml_fn_, 'r').read())
         self.stage = os.environ['_STAGE_']
         self.host_url = twcc_conf[self.stage]['host']
         self.api_keys = twcc_conf[self.stage]['keys']
@@ -130,7 +131,7 @@ class ServiceOperation:
                 'Content-Type': self.ctype}
 
     def _setDebug(self):
-        log_dir = "log/"
+        log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 

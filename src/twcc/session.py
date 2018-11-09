@@ -46,11 +46,16 @@ class Session(object):
                 elif key == "twcc_api_key":
                     (key_u, key_v) = val.split(":")
                     self.credentials[key_u] = key_v
+        self.clusters = {}
+        import yaml
+        config = yaml.load(open(self.yaml, 'r').read())
+        self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
+        del config
 
     def convertYaml(self):
         """
         Todo:
-           * need to change 
+           * need to change
         """
         if not os.path.exists(os.environ['TWCC_DATA_PATH']):
             mkdir_p(os.environ['TWCC_DATA_PATH'])
@@ -72,7 +77,6 @@ class Session(object):
                 for usr in t_config['keys']:
                     mbuf += "twcc_api_key={0}:{1}\n".format(usr,
                                                             t_config['keys'][usr])
-
             open(self.files['credential'], 'w').write(mbuf)
 
 
@@ -89,4 +93,4 @@ def mkdir_p(path):
 def session_start():
     return Session(
         twcc_yaml_path="/home/fychao/Working/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
-    
+

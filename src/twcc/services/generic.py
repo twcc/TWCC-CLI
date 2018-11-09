@@ -13,7 +13,6 @@ class GenericService():
         self._api_key_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
-        self._service_yaml_ = '../yaml/NCHC_API-Test_env.yaml'
         self._debug_ = debug
 
         self.twcc = ServiceOperation()
@@ -36,7 +35,7 @@ class GenericService():
         if self._debug_:
             pp(csite=self._csite_,
                 func=self._func_,
-                yaml=self._service_yaml_,
+                yaml=self.twcc._yaml_fn_,
                 res_type=self.res_type)
 
             if not isNone(self.url_dic):
@@ -81,3 +80,14 @@ class GenericService():
 
     def delete(self):
         pass
+
+
+class CpuService(GenericService):
+    def __init__(self, debug=False):
+        GenericService.__init__(self, debug=debug)
+        self._csite_ = "openstack-taichung-community"
+
+class GpuService(GenericService):
+    def __init__(self, debug=False):
+        GenericService.__init__(self, debug=debug)
+        self._csite_ = "k8s-taichung-default"

@@ -30,7 +30,10 @@ class acls(GenericService):
 
     def getSites(self):
         res = self.list()
-        return [ (x, y['group']) for x in res for y in res[x]]
+        #if 'data' in res:
+        return sorted([ x['group'] for x in res['data'] ])
+        #else:
+        #    return sorted([ (x, y['group']) for x in res for y in res[x]])
 
     def listGroup(self):
         """ this api is the same with acl
@@ -58,3 +61,9 @@ class keypairs(GenericService):
     def list(self):
         return self._do_api()
 
+class projects(GenericService):
+    def __init__(self, api_key_tag, debug=False):
+        GenericService.__init__(self, debug=debug)
+
+        self._csite_ = "openstack-taichung-suse"
+        self._api_key_ = api_key_tag
