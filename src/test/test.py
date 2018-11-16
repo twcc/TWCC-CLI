@@ -13,6 +13,6 @@ from twcc.util import pp
 #for func in [images]:
 #    a = func('sys', debug=False)
 #    pp(list=a.list())
-a = api_key('sys', debug=True)
+a = users('sys', debug=False)
 pp(list=a.list())
-pp(list=a.queryById("760df307-689e-45b9-bd59-9421d479f5f9"))
+pp(list=a.queryById("edbe47e8-093d-48a3-bcf8-3d63163a4b84"))

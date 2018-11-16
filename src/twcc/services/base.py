@@ -76,8 +76,4 @@ class api_key(GenericService):
         self._csite_ = "admin"
         self._api_key_ = api_key_tag
 
-    def queryById(self, id=None):
-        self.url_dic = {"api_key":id}
-        return self._do_api()
-
 
