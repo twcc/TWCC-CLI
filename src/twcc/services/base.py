@@ -62,8 +62,18 @@ class keypairs(GenericService):
         return self._do_api()
 
 class projects(GenericService):
+    """ This function is Site admin only
+    """
     def __init__(self, api_key_tag, debug=False):
         GenericService.__init__(self, debug=debug)
 
         self._csite_ = "openstack-taichung-suse"
         self._api_key_ = api_key_tag
+
+class api_key(GenericService):
+    def __init__(self, api_key_tag, debug=False):
+        GenericService.__init__(self, debug=debug)
+        self._csite_ = "admin"
+        self._api_key_ = api_key_tag
+
+

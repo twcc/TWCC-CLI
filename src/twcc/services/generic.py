@@ -78,6 +78,12 @@ class GenericService():
     def list(self):
         return self._do_api()
 
+    def queryById(self, mid):
+        self.url_dic = { self.__class__.__name__ : mid }
+        res = self._do_api()
+        self.url_dic = None
+        return res
+
     def delete(self):
         pass
 
