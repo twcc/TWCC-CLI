@@ -26,7 +26,6 @@ def cli():
 @click.option('-id','id_num',is_flag = None,help="The user id")
 def Acls(show_list,id_num):
     '''
-    Access control of IaaS
     '''
     acls_info = acls('sys',debug = False)
 
@@ -34,11 +33,10 @@ def Acls(show_list,id_num):
         pp(list=acls_info.getSites())
     elif show_list == 'list_g':
         pp(list=acls_info.listGroup())
-
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = acls_info.queryById(id_num))
     else:
-        print_command_help(Acls)
+        printCommandHelp(Acls)
 
 # Create a command for users 
 @click.command()
@@ -46,35 +44,31 @@ def Acls(show_list,id_num):
 @click.option('-id','id_num',is_flag = None,help="The user id")
 def Users(show_list,id_num):
     '''
-    Get user UUID for S3 bucket
     '''
     users_info = users('sys',debug = False)
 
     if show_list:
         pp(list = users_info.getInfo())
-
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = users_info.queryById(id_num))
     else:
-        print_command_help(Users)
+        printCommandHelp(Users)
 
 # Create a command for keypair
 @click.command()
 @click.option('-l','--list','show_list',is_flag=True,help="Show list of keypairs")
-@click.option('-id','id_num',is_flag = None,help="The user id")
-def KeyPairs(show_list,id_num):
+@click.option('-id','id_num',default = None,help="The keypair id")
+def KeyPairs(show_list,id_num,name):
     '''
-    Key to log in to VM
     '''
     key_info = keypairs('sys',debug = False)
 
     if show_list:
         pp(list = key_info.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = key_info.queryById(id_num))
     else:
-        print_command_help(KeyPairs)
+        printCommandHelp(KeyPairs)
 
 # Create a command for job
 @click.command()
@@ -82,17 +76,15 @@ def KeyPairs(show_list,id_num):
 @click.option('-id','id_num',is_flag = None,help="The user id")
 def Jobs(show_list,id_num):
     """
-    Batch job for K8s or Slurm
     """
     jobs_info = jobs('sys',debug = False)
 
     if show_list:
         pp(list = jobs_info.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = jobs_info.queryById(id_num))
     else:
-        print_command_help(Jobs)
+        printCommandHelp(Jobs)
 
 # Create a command for images
 @click.command()
@@ -100,17 +92,15 @@ def Jobs(show_list,id_num):
 @click.option('-id','id_num',is_flag = None,help="The user id")
 def Images(show_list,id_num):
     '''
-    Software configuration
     '''
     images_info = images('sys',debug = False)
 
     if show_list:
         pp(list = images.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = images_info.queryById(id_num))
     else:
-        print_command_help(Images)
+        printCommandHelp(Images)
 
 # Create a command for volumes
 @click.command()
@@ -118,17 +108,15 @@ def Images(show_list,id_num):
 @click.option('-id','id_num',is_flag = None,help="The user id")
 def Volumes(show_list,id_num):
     """
-    Attaching, detatching, extending disks for Openstack
     """
     volumes_info = volumes('sys',debug = False)
 
     if show_list:
         pp(list = volumes_info.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = volumes_info.queryById(id_num)) 
     else:
-        print_command_help(Volumes)
+        printCommandHelp(Volumes)
 
 # Create a command for snapshots
 @click.command()
@@ -136,36 +124,64 @@ def Volumes(show_list,id_num):
 @click.option('-id','id_num',default = None,help="The user id")
 def Snapshots(show_list,id_num):
     """
-    Attaching, detatching, extending disks for Openstack
     """
     snapshots_info = snapshots('sys',debug = False)
 
     if show_list:
         pp(list = snapshots_info.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = snapshots_info.queryById(id_num))
     else:
-        print_command_help(Snapshots)
+        printCommandHelp(Snapshots)
 
 # Create a command for buckets
 @click.command()
-@click.option('-l','--list','show_list',is_flag = True, help = "Show list of snapshots")
+@click.option('-l','--list','show_list',is_flag = True, help = "Show list of buckets")
 @click.option('-id','id_num', default = None, help = "The user id")
 def Buckets(show_list,id_num):
     '''
-    Storage space for Ceph
     '''
     buckets_info = buckets('sys',debug = False)
 
     if show_list:
         pp(list = buckets_info.list())
-    
-    if type(id_num) is not type(None):
+    elif type(id_num) is not type(None):
         pp(list = buckets_info.queryById(id_num))
     else:
-        print_command_help(Buckets)
+        printCommandHelp(Buckets)
+
+# Create a command for projects
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True,help = "Show list of projects ")
+@click.option('-id','id_num',default = None, help = "The user id")
+def Projects(show_list,id_num):
+    '''
+    '''
+    projects_info = projects('sys',debug = False)
     
+    if show_list:
+        pp(list = projects_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = projects_info.queryById(id_num))
+    else:
+        printCommandHelp(Projects)    
+
+# Create a command for api_key
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True,help = "Show list of API_keys")
+@click.option('-id','id_num',default = None, help = "The user id")
+def Api_Key(show_list,id_num):
+    '''
+    '''
+    api_info = api_key('sys',debug = False)
+
+    if show_list:
+        pp(list = api_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = api_info.queryById(id_num))
+    else:
+        printCommandHelp(Api_Key)
+
 
 # Add commands to cli command
 cli.add_command(Acls)
@@ -176,14 +192,19 @@ cli.add_command(Images)
 cli.add_command(Volumes)
 cli.add_command(Snapshots)
 cli.add_command(Buckets)
+cli.add_command(Projects)
+cli.add_command(Api_Key)
 
-def print_command_help(cmd):
+def printCommandHelp(cmd):
     """
     Print the help command for the input function.
     """
     with click.Context(cmd) as ctx:
         click.echo(cmd.get_help(ctx))
 
+def getCommandName(cmd):
+    with click.Context(cmd) as ctx:
+        click.echo(cmd.name) 
 
 def main():
     """

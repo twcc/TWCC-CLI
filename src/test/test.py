@@ -13,6 +13,6 @@ from twcc.util import pp
 #for func in [images]:
 #    a = func('sys', debug=False)
 #    pp(list=a.list())
-a = users('sys', debug=False)
+a = keypairs('usr1', debug=False)
 pp(list=a.list())
-pp(list=a.queryById("edbe47e8-093d-48a3-bcf8-3d63163a4b84"))
+#pp(list=a.queryById("edbe47e8-093d-48a3-bcf8-3d63163a4b84"))
