@@ -6,7 +6,12 @@ from __future__ import print_function
    :synopsis: A useful module indeed.
 .. moduleauthor:: August Chao <1803001@narlabs.org.tw>
 """
+<<<<<<< HEAD
 from twcc.services.base import acls,users,keypairs
+=======
+#from twcc.twcc import TWCC
+from twcc.services.base import acls,users,keypairs,projects,api_key
+>>>>>>> b16c5922e4399109b70d001d9130be6efe57f56a
 from twcc.services.jobs import jobs
 from twcc.services.storage import images,volumes,snapshots,buckets
 from twcc.util import pp
@@ -21,86 +26,174 @@ def cli():
 # Create a command for acls
 @click.command()
 @click.option('-l','--list','show_list',flag_value='list',help='Show the list of acls')
-@click.option('-lg','--list_g','show_list',flag_value='list_g',help='Show the list of acls_g')
-def Acls(show_list):
+@click.option('-g','--group','show_list',flag_value='list_g',help='Show the list of acls_g')
+@click.option('-id','id_num',default = None,help="The acls id")
+def Acls(show_list,id_num):
     '''
-    Access control of IaaS
     '''
+    acls_info = acls('sys',debug = False)
+
     if show_list == 'list':
+<<<<<<< HEAD
         acls_list = acls('sys')
         pp(list=acls_list.getSites())
     elif show_list == 'list_g':
         acls_list = acls('sys')
         pp(list=acls_list.listGroup())
+=======
+        pp(list=acls_info.getSites())
+    elif show_list == 'list_g':
+        pp(list=acls_info.listGroup())
+    elif type(id_num) is not type(None):
+        pp(list = acls_info.queryById(id_num))
+>>>>>>> b16c5922e4399109b70d001d9130be6efe57f56a
     else:
-        print("Please choose --list to show list of the current acls")
-        print("Or")
-        print("Please choose --list_g to show list of the current acls_group")
-   
+        printCommandHelp(Acls)
+
 # Create a command for users 
 @click.command()
 @click.option('-l','--list','show_list',is_flag=True,help="Show list of users")
-def Users(show_list):
+@click.option('-id','id_num',is_flag = None,help="The user id")
+def Users(show_list,id_num):
     '''
-    Show user's information
     '''
+    users_info = users('sys',debug = False)
+
     if show_list:
-        users_list = users('sys')
-        pp(list = users_list.getInfo())
+        pp(list = users_info.getInfo())
+    elif type(id_num) is not type(None):
+        pp(list = users_info.queryById(id_num))
     else:
-        print("Please enter -l or --list to show the list of the users")   
+        printCommandHelp(Users)
 
 # Create a command for keypair
 @click.command()
 @click.option('-l','--list','show_list',is_flag=True,help="Show list of keypairs")
-def KeyPairs(show_list):
+@click.option('-id','id_num',default = None,help="The keypair id")
+def KeyPairs(show_list,id_num,name):
     '''
-    Show list of keypairs
     '''
+    key_info = keypairs('sys',debug = False)
+
     if show_list:
-        key_list = keypairs('sys')
-        pp(list = key_list.list())
+        pp(list = key_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = key_info.queryById(id_num))
     else:
-        print("Please enter -l or --list to show the list of the keypairs")
+        printCommandHelp(KeyPairs)
 
 # Create a command for job
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help ="Show list of jobs")
-def Jobs(show_list):
+@click.option('-id','id_num',is_flag = None,help="The job id")
+def Jobs(show_list,id_num):
     """
-    Show list of jobs
     """
+    jobs_info = jobs('sys',debug = False)
+
     if show_list:
-        jobs_list = jobs('sys')
-        pp(list = jobs_list.list())
+        pp(list = jobs_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = jobs_info.queryById(id_num))
     else:
-        print("Please enter -l or --list to show the list of the jobs")
+        printCommandHelp(Jobs)
 
 # Create a command for images
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of images")
-def Images(show_list):
+@click.option('-id','id_num',is_flag = None,help="The image id")
+def Images(show_list,id_num):
     '''
-    Show list of images
     '''
+    images_info = images('sys',debug = False)
+
     if show_list:
-        images_list = images('sys')
         pp(list = images.list())
+    elif type(id_num) is not type(None):
+        pp(list = images_info.queryById(id_num))
     else:
-        print("Please enter -l or --list to show the list of images")
+        printCommandHelp(Images)
 
 # Create a command for volumes
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of volumes")
-def Volumes(show_list):
+@click.option('-id','id_num',is_flag = None,help="The volume id")
+def Volumes(show_list,id_num):
     """
-    Show list of volumes
     """
+    volumes_info = volumes('sys',debug = False)
+
     if show_list:
-        volumes_list = images('sys')
-        pp(list = images.list())
+        pp(list = volumes_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = volumes_info.queryById(id_num)) 
     else:
-        print("Please enter -l or --list to show the list of volumes")
+        printCommandHelp(Volumes)
+
+# Create a command for snapshots
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True,help = "Show list of snapshots")
+@click.option('-id','id_num',default = None,help="The snapshot id")
+def Snapshots(show_list,id_num):
+    """
+    """
+    snapshots_info = snapshots('sys',debug = False)
+
+    if show_list:
+        pp(list = snapshots_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = snapshots_info.queryById(id_num))
+    else:
+        printCommandHelp(Snapshots)
+
+# Create a command for buckets
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True, help = "Show list of buckets")
+@click.option('-id','id_num', default = None, help = "The bucket id")
+def Buckets(show_list,id_num):
+    '''
+    '''
+    buckets_info = buckets('sys',debug = False)
+
+    if show_list:
+        pp(list = buckets_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = buckets_info.queryById(id_num))
+    else:
+        printCommandHelp(Buckets)
+
+# Create a command for projects
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True,help = "Show list of projects ")
+@click.option('-id','id_num',default = None, help = "The project id")
+def Projects(show_list,id_num):
+    '''
+    '''
+    projects_info = projects('sys',debug = False)
+    
+    if show_list:
+        pp(list = projects_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = projects_info.queryById(id_num))
+    else:
+        printCommandHelp(Projects)    
+
+# Create a command for api_key
+@click.command()
+@click.option('-l','--list','show_list',is_flag = True,help = "Show list of API_keys")
+@click.option('-id','id_num',default = None, help = "The API key id")
+def Api_Key(show_list,id_num):
+    '''
+    '''
+    api_info = api_key('sys',debug = False)
+
+    if show_list:
+        pp(list = api_info.list())
+    elif type(id_num) is not type(None):
+        pp(list = api_info.queryById(id_num))
+    else:
+        printCommandHelp(Api_Key)
+
 
 # Add commands to cli command
 cli.add_command(Acls)
@@ -108,6 +201,19 @@ cli.add_command(Users)
 cli.add_command(KeyPairs)
 cli.add_command(Jobs)
 cli.add_command(Images)
+cli.add_command(Volumes)
+cli.add_command(Snapshots)
+cli.add_command(Buckets)
+cli.add_command(Projects)
+cli.add_command(Api_Key)
+
+def printCommandHelp(cmd):
+    """
+    Print the help command for the input function.
+    """
+    with click.Context(cmd) as ctx:
+        click.echo(cmd.get_help(ctx))
+
 def main():
     """
     this is a test main function

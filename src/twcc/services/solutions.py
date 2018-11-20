@@ -15,19 +15,6 @@ class solutions(GenericService):
         Args:
             api_key_tag (str): see YAML for detail
         """
-        GenericService.__init__(self)
-        # current working information
+        GenericService.__init__(self, debug=debug)
         self._csite_ = "goc"
         self._api_key_ = api_key_tag
-        self.res_type = "txt"
-        self._debug_ = debug
-        self.twcc._debug = debug
-
-    def list(self):
-        return self._do_api()
-
-
-if __name__ == '__main__':
-    test = solutions('sys')
-    r1 = test.list()
-    print(r1)

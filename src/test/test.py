@@ -14,6 +14,11 @@ a._csite_ = 'k8s-taichung-default'
 #    a = func('sysa', debug=True)
 #    a._csite_ = 'k8s-taichung-default'
 #    pp(list=a.list())
+<<<<<<< HEAD
 #a = users('sys', debug=False)
 #pp(list=a.list())
+=======
+a = keypairs('usr1', debug=False)
+pp(list=a.list())
+>>>>>>> b16c5922e4399109b70d001d9130be6efe57f56a
 #pp(list=a.queryById("edbe47e8-093d-48a3-bcf8-3d63163a4b84"))
