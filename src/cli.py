@@ -22,8 +22,8 @@ def cli():
 # Create a command for acls
 @click.command()
 @click.option('-l','--list','show_list',flag_value='list',help='Show the list of acls')
-@click.option('-lg','--list_g','show_list',flag_value='list_g',help='Show the list of acls_g')
-@click.option('-id','id_num',is_flag = None,help="The user id")
+@click.option('-g','--group','show_list',flag_value='list_g',help='Show the list of acls_g')
+@click.option('-id','id_num',default = None,help="The acls id")
 def Acls(show_list,id_num):
     '''
     '''
@@ -73,7 +73,7 @@ def KeyPairs(show_list,id_num,name):
 # Create a command for job
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help ="Show list of jobs")
-@click.option('-id','id_num',is_flag = None,help="The user id")
+@click.option('-id','id_num',is_flag = None,help="The job id")
 def Jobs(show_list,id_num):
     """
     """
@@ -89,7 +89,7 @@ def Jobs(show_list,id_num):
 # Create a command for images
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of images")
-@click.option('-id','id_num',is_flag = None,help="The user id")
+@click.option('-id','id_num',is_flag = None,help="The image id")
 def Images(show_list,id_num):
     '''
     '''
@@ -105,7 +105,7 @@ def Images(show_list,id_num):
 # Create a command for volumes
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of volumes")
-@click.option('-id','id_num',is_flag = None,help="The user id")
+@click.option('-id','id_num',is_flag = None,help="The volume id")
 def Volumes(show_list,id_num):
     """
     """
@@ -121,7 +121,7 @@ def Volumes(show_list,id_num):
 # Create a command for snapshots
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of snapshots")
-@click.option('-id','id_num',default = None,help="The user id")
+@click.option('-id','id_num',default = None,help="The snapshot id")
 def Snapshots(show_list,id_num):
     """
     """
@@ -137,7 +137,7 @@ def Snapshots(show_list,id_num):
 # Create a command for buckets
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True, help = "Show list of buckets")
-@click.option('-id','id_num', default = None, help = "The user id")
+@click.option('-id','id_num', default = None, help = "The bucket id")
 def Buckets(show_list,id_num):
     '''
     '''
@@ -153,7 +153,7 @@ def Buckets(show_list,id_num):
 # Create a command for projects
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of projects ")
-@click.option('-id','id_num',default = None, help = "The user id")
+@click.option('-id','id_num',default = None, help = "The project id")
 def Projects(show_list,id_num):
     '''
     '''
@@ -169,7 +169,7 @@ def Projects(show_list,id_num):
 # Create a command for api_key
 @click.command()
 @click.option('-l','--list','show_list',is_flag = True,help = "Show list of API_keys")
-@click.option('-id','id_num',default = None, help = "The user id")
+@click.option('-id','id_num',default = None, help = "The API key id")
 def Api_Key(show_list,id_num):
     '''
     '''
@@ -201,10 +201,6 @@ def printCommandHelp(cmd):
     """
     with click.Context(cmd) as ctx:
         click.echo(cmd.get_help(ctx))
-
-def getCommandName(cmd):
-    with click.Context(cmd) as ctx:
-        click.echo(cmd.name) 
 
 def main():
     """
