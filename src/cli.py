@@ -6,7 +6,6 @@ from __future__ import print_function
    :synopsis: A useful module indeed.
 .. moduleauthor:: August Chao <1803001@narlabs.org.tw>
 """
-#from twcc.twcc import TWCC
 from twcc.services.base import acls,users,keypairs
 from twcc.services.jobs import jobs
 from twcc.services.storage import images,volumes,snapshots,buckets
@@ -29,10 +28,10 @@ def Acls(show_list):
     '''
     if show_list == 'list':
         acls_list = acls('sys')
-        pp(list=a.getSites())
+        pp(list=acls_list.getSites())
     elif show_list == 'list_g':
         acls_list = acls('sys')
-        pp(list=a.listGroup())
+        pp(list=acls_list.listGroup())
     else:
         print("Please choose --list to show list of the current acls")
         print("Or")

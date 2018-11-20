@@ -12,7 +12,7 @@ def pp(**kwargs):
 
 def jpp(**args):
     import json
-    print json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=2)
+    print (json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=2))
 
 
 def isNone(x):

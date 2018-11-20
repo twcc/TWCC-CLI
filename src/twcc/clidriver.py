@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import re
 import requests
 import json
 import yaml
@@ -42,11 +43,11 @@ class ServiceOperation:
         _ava_funcs_ = twcc_conf['avalible_funcs']
 
         self.valid_funcs = [_ava_funcs_[x]['name']
-                            for x in xrange(len(_ava_funcs_))]
+                            for x in range(len(_ava_funcs_))]
         self.valid_http_verb = dict([(_ava_funcs_[x]['name'], _ava_funcs_[x][
-                                    'http_verb']) for x in xrange(len(_ava_funcs_))])
+                                    'http_verb']) for x in range(len(_ava_funcs_))])
         self.url_format = dict([(_ava_funcs_[x]['name'],
-                                 _ava_funcs_[x]['url_type']) for x in xrange(len(_ava_funcs_))])
+                                 _ava_funcs_[x]['url_type']) for x in range(len(_ava_funcs_))])
         self.url_ptn = dict([
             (x, parsePtn(self.url_format[x])) for x in self.url_format.keys()])
 
@@ -114,7 +115,7 @@ class ServiceOperation:
                  ctype="application/json"):
 
         if not type(site_sn) == type(None):
-            if unicode(site_sn).isnumeric():
+            if re.match("\d+", site_sn):
                 self.api_host = self.sites[site_sn]
             else:
                 self.api_host = site_sn
