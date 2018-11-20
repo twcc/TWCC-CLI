@@ -6,12 +6,8 @@ from __future__ import print_function
    :synopsis: A useful module indeed.
 .. moduleauthor:: August Chao <1803001@narlabs.org.tw>
 """
-<<<<<<< HEAD
-from twcc.services.base import acls,users,keypairs
-=======
 #from twcc.twcc import TWCC
 from twcc.services.base import acls,users,keypairs,projects,api_key
->>>>>>> b16c5922e4399109b70d001d9130be6efe57f56a
 from twcc.services.jobs import jobs
 from twcc.services.storage import images,volumes,snapshots,buckets
 from twcc.util import pp
@@ -34,19 +30,11 @@ def Acls(show_list,id_num):
     acls_info = acls('sys',debug = False)
 
     if show_list == 'list':
-<<<<<<< HEAD
-        acls_list = acls('sys')
-        pp(list=acls_list.getSites())
-    elif show_list == 'list_g':
-        acls_list = acls('sys')
-        pp(list=acls_list.listGroup())
-=======
         pp(list=acls_info.getSites())
     elif show_list == 'list_g':
         pp(list=acls_info.listGroup())
     elif type(id_num) is not type(None):
         pp(list = acls_info.queryById(id_num))
->>>>>>> b16c5922e4399109b70d001d9130be6efe57f56a
     else:
         printCommandHelp(Acls)
 
