@@ -31,8 +31,8 @@ import errno
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 
-def doAnaly(fn_old = "../yaml/api_v2_swagger_v5.0.0_staging.yaml",
-        fn_new = "../yaml/api_v2_swagger_v5.1.1_staging.yaml" ):
+def doAnaly(fn_new = "../yaml/GOC_PaaS_Admin_User_API_Swagger_v5.1.2.yaml",
+        fn_old = "../yaml/api_v2_swagger_v5.1.1_staging.yaml" ):
     """doing difference between fn_old and fn_new in YAML format
        analysis only do Paths entries and its http verbs.
 
