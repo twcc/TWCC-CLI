@@ -1,15 +1,16 @@
-from __future__ import print_function
+#from __future__ import print_function
 from twcc.services.base import acls, users, keypairs, projects, api_key
 from twcc.services.jobs import jobs
 from twcc.services.storage import images, volumes, snapshots, buckets
-from twcc.util import pp
+#from twcc.util import pp
+
 
 #for func in [acls, users, keypairs]:
 #for usr in ['usr1', 'sys']:
 
 
-a = func('sysa', debug=True)
-a._csite_ = 'k8s-taichung-default'
+#a = func('sysa', debug=True)
+#a._csite_ = 'k8s-taichung-default'
 #for func in [images]:
 #    a = func('sysa', debug=True)
 #    a._csite_ = 'k8s-taichung-default'

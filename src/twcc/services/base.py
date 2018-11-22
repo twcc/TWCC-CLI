@@ -60,7 +60,14 @@ class keypairs(GenericService):
 
     def list(self):
         return self._do_api()
-
+    
+    def createKeyPair(self,keyPairName):
+        self.http_verb = "post"
+        self.data_dic = {"name":keyPairName}
+        self.res_type = "txt"
+        res = self._do_api()
+        return res
+    
 class projects(GenericService):
     """ This function is Site admin only
     """

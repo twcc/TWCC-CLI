@@ -10,33 +10,14 @@ from __future__ import print_function
 from twcc.services.base import acls,users,keypairs,projects,api_key
 from twcc.services.jobs import jobs
 from twcc.services.storage import images,volumes,snapshots,buckets
-from twcc.util import pp
-
+from twcc.util import pp,isNone
+from fun.Base_Fun import AclsFun,KeyPairFun 
 import click
 
 # Create groups for command
 @click.group()
 def cli():
     pass
-
-# Create a command for acls
-@click.command()
-@click.option('-l','--list','show_list',flag_value='list',help='Show the list of acls')
-@click.option('-g','--group','show_list',flag_value='list_g',help='Show the list of acls_g')
-@click.option('-id','id_num',default = None,help="The acls id")
-def Acls(show_list,id_num):
-    '''
-    '''
-    acls_info = acls('sys',debug = False)
-
-    if show_list == 'list':
-        pp(list=acls_info.getSites())
-    elif show_list == 'list_g':
-        pp(list=acls_info.listGroup())
-    elif type(id_num) is not type(None):
-        pp(list = acls_info.queryById(id_num))
-    else:
-        printCommandHelp(Acls)
 
 # Create a command for users 
 @click.command()
@@ -53,22 +34,6 @@ def Users(show_list,id_num):
         pp(list = users_info.queryById(id_num))
     else:
         printCommandHelp(Users)
-
-# Create a command for keypair
-@click.command()
-@click.option('-l','--list','show_list',is_flag=True,help="Show list of keypairs")
-@click.option('-id','id_num',default = None,help="The keypair id")
-def KeyPairs(show_list,id_num,name):
-    '''
-    '''
-    key_info = keypairs('sys',debug = False)
-
-    if show_list:
-        pp(list = key_info.list())
-    elif type(id_num) is not type(None):
-        pp(list = key_info.queryById(id_num))
-    else:
-        printCommandHelp(KeyPairs)
 
 # Create a command for job
 @click.command()
@@ -182,11 +147,14 @@ def Api_Key(show_list,id_num):
     else:
         printCommandHelp(Api_Key)
 
+ac = AclsFun()
+kp = KeyPairFun()
 
 # Add commands to cli command
-cli.add_command(Acls)
+#cli.add_command(Acls)
+cli.add_command(ac.Acls)
 cli.add_command(Users)
-cli.add_command(KeyPairs)
+cli.add_command(kp.Keypairs)
 cli.add_command(Jobs)
 cli.add_command(Images)
 cli.add_command(Volumes)
