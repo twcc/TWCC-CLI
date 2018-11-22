@@ -19,12 +19,20 @@ production:
         - 'admin'
         - 'ceph-taichung-default'
         - 'goc'
-        #- 'harbor'
+        - 'harbor'
         - 'k8s-taichung-default'
         - 'openstack-taichung-community'
         - 'openstack-taichung-suse'
         - 'slurm-taichung-default'
 avalible_funcs:
+    -
+      name: "sites"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'put'
+        - 'delete'
     -
       name: "buckets"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
@@ -100,6 +108,11 @@ avalible_funcs:
         - 'get'
       staus: [ "checked 2018-10-15, by Aug"
              , ]
+    -
+      name: "api_key"
+      url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
     -
       name: "acls"
       url_type: "/api_key/{FUNCTION}/"

@@ -70,6 +70,11 @@ class projects(GenericService):
         self._csite_ = "openstack-taichung-suse"
         self._api_key_ = api_key_tag
 
+    def getProjectSolution(self, proj_id, sol_id):
+        self.url_dic = {'projects': proj_id, 'solutions':sol_id}
+        return self.list()
+
+
 class api_key(GenericService):
     def __init__(self, api_key_tag, debug=False):
         GenericService.__init__(self, debug=debug)

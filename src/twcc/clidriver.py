@@ -8,19 +8,23 @@ import datetime
 import logging
 import os
 from twcc.session import session_start
-from twcc.util import parsePtn
+from twcc.util import parsePtn, isNone
 
 
 class ServiceOperation:
 
     def __init__(self, debug=True):
         self._session_ = session_start()
+        self.load_credential()
         self.load_yaml()
 
         self.try_alive()
 
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
         self.res_type_valid = set(['txt', 'json'])
+
+        # for site usage
+        self.header_extra = {}
 
         self._debug = debug
         if self._debug:
@@ -32,13 +36,19 @@ class ServiceOperation:
         else:
             return True
 
+    def load_credential(self):
+        self.api_keys = self._session_.credentials
+        self.host_url = self._session_.host
+
     def load_yaml(self):
 
         self._yaml_fn_ = self._session_.files['resources']
         twcc_conf = yaml.load(open(self._yaml_fn_, 'r').read())
         self.stage = os.environ['_STAGE_']
-        self.host_url = twcc_conf[self.stage]['host']
-        self.api_keys = twcc_conf[self.stage]['keys']
+
+        # change to load ~/.twcc_data/credential
+        #self.host_url = twcc_conf[self.stage]['host']
+        #self.api_keys = twcc_conf[self.stage]['keys']
 
         _ava_funcs_ = twcc_conf['avalible_funcs']
 
@@ -70,7 +80,8 @@ class ServiceOperation:
         elif mtype == "patch":
             r = requests.delete(t_api, headers=t_headers)
         elif mtype == "put":
-            r = requests.put(t_api, headers=t_headers)
+            r = requests.put(t_api, headers=t_headers,
+                              data=json.dumps(t_data))
         else:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
@@ -87,7 +98,7 @@ class ServiceOperation:
             key_tag=None, api_key="_DEF_",
             ctype="application/json",
             func="_DEF_",
-            url_dict=None, data_dict=None,
+            url_dict=None, data_dict=None, url_ext_get=None,
             http='get', res_type='json'):
 
         if not res_type in self.res_type_valid:
@@ -102,6 +113,11 @@ class ServiceOperation:
 
         t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
         t_header = self.mkHeader(site_sn, key_tag, api_host, api_key, ctype)
+
+        if not isNone(url_ext_get):
+            t_url += "?"
+            for param_key in url_ext_get.keys():
+                t_url += "{0}={1}".format(param_key, url_ext_get[param_key])
 
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
@@ -127,9 +143,16 @@ class ServiceOperation:
             self.api_key = api_key
 
         self.ctype = ctype
-        return {'X-API-HOST': self.api_host,
+
+        return_header = {'X-API-HOST': self.api_host,
                 'x-api-key': self.api_key,
                 'Content-Type': self.ctype}
+
+        if len(self.header_extra.keys())>0:
+            for key in self.header_extra.keys():
+                return_header[key] = self.header_extra[key]
+
+        return return_header
 
     def _setDebug(self):
         log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
@@ -192,8 +215,10 @@ class ServiceOperation:
         if not type(url_dict) == type(None):
             # check if function name is in given url_dict
             if func in url_dict:
-                ptn = "/".join([
-                    "%s/%s" % (k, url_dict[k]) for k in url_dict.keys()])
+                ptn = "%s/%s" % (func, url_dict[func])
+                del url_dict[func]
+
+                ptn += "/"+"/".join( ["%s/%s"%(k, url_dict[k]) for k in url_dict.keys()] )
             else:
                 raise ValueError(
                     "Can not find '{0}' in provided dictionary.".format(func))
