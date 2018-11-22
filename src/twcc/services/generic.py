@@ -29,6 +29,7 @@ class GenericService():
 
         self.res_type = 'json'
         self.res_type_valid = self.twcc.res_type_valid
+
         self.http_verb = 'get'
         self.http_verb_valid = self.twcc.http_verb_valid
 
@@ -62,7 +63,7 @@ class GenericService():
 
         return res
 
-    def create(self):
+    def create(self,mid):
         pass
 
     def list(self):
@@ -76,9 +77,6 @@ class GenericService():
         self.url_dic = None
         return res
 
-    def delete(self):
-        pass
-
     @property
     def project_id(self):
         return self._project_id
@@ -86,6 +84,12 @@ class GenericService():
     @project_id.setter
     def project_id(self, proj_id):
         self._project_id = proj_id
+
+    def delete(self, mid):
+        self.http_verb = "delete"
+        self.url_dic = { self.__class__.__name__ : mid }
+        res = self._do_api()
+        return res
 
 class CpuService(GenericService):
     def __init__(self, debug=False):

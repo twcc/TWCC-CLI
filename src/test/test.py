@@ -1,10 +1,15 @@
-from __future__ import print_function
+#from __future__ import print_function
 from twcc.services.base import acls, users, keypairs, projects, api_key
 from twcc.services.jobs import jobs
 from twcc.services.storage import images, volumes, snapshots, buckets
+<<<<<<< HEAD
 from twcc.services.solutions import solutions
 from twcc.services.compute import sites
 from twcc.util import pp, isNone, table_layout
+=======
+#from twcc.util import pp
+
+>>>>>>> f8657551e49356e48b1513e63f28bd59521e65c2
 
 ##  7fe2bdd8-be01-430f-865f-feaec9dba27b
 csite = 'k8s-taichung-default'
@@ -14,6 +19,7 @@ mdebug = False
 def chk_api_key(key_tokens):
     import json
 
+<<<<<<< HEAD
     table_info = []
     table_cap = ['usr_tag', 'pro', 'acls', 'api_k']
     infos = []
@@ -161,3 +167,14 @@ if __name__ == "__main__":
     #    time.sleep(5)
     #    print ("\n\n\n")
     del_cntr('5122')
+
+
+#a = func('sysa', debug=True)
+#a._csite_ = 'k8s-taichung-default'
+#for func in [images]:
+#    a = func('sysa', debug=True)
+#    a._csite_ = 'k8s-taichung-default'
+#    pp(list=a.list())
+#a = keypairs('usr1', debug=False)
+#pp(list=a.list())
+#pp(list=a.queryById("edbe47e8-093d-48a3-bcf8-3d63163a4b84"))
