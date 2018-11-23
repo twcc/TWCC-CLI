@@ -46,7 +46,6 @@ def show_wanted_solution():
         table_cap, debug=mdebug)
 
 
-
 def get_solution_for_container(usr, proj_id):
     a = solutions(usr, debug=mdebug)
     a.ext_get = {'project': proj_id}
@@ -72,7 +71,7 @@ def list_site(site_id):
     return ans
 
 def get_sol_w_proj(sol_id, pro_id):
-    a = projects('usr1', debug=False) # littledd-2 fail
+    a = projects(user_tag, debug=False) # littledd-2 fail
     a._csite_ = 'k8s-taichung-default'
     a.url_dic = {'projects': pro_id, 'solutions':sol_id}
     ans=a.list()['site_extra_prop']
@@ -142,25 +141,33 @@ user_tag = 'littledd-2'
 csite = 'k8s-taichung-default'
 mdebug = False
 
-get_sol_w_proj(sol_id, project_id)
+get_sol_w_proj(sol_id, proj_id)
 get_solution_for_container(user_tag, proj_id)
 
 if __name__ == "__main__":
-    list_cntrs(isFull=True)
-    #site_id = create_cntr()
+    list_cntrs(isFull=False)
 
-    #import time
-    #isBind = False
-    #while True:
-    #    res = list_site(site_id)
-    #    if res['status'] == 'Ready' and not isBind:
-    #        bind_cntr(site_id, site_id)
-    #        isBind = True
-    #    if isBind:
-    #        list_cntrs()
-    #    time.sleep(5)
-    #    print ("\n\n\n")
-    del_cntr('5122')
+    for x in range (0):
+        site_id = create_cntr()
+
+        import time
+        isBind = False
+        isStop = False
+        while not isStop:
+            res = list_site(site_id)
+            if res['status'] == 'Ready' and not isBind:
+                bind_cntr(site_id, site_id)
+                isBind = True
+            if isBind:
+                #list_cntrs()
+                list_cntrs(isFull=True)
+                if len(res['public_ip'])>0 and res['public_ip'].split(".")[0]=="203":
+                    isStop = True
+
+            time.sleep(5)
+            print ("\n\n\n")
+        #del_cntr(site_id)
+        print ("site_id: {0} deleted!!".format(site_id))
 
 
 #a = func('sysa', debug=True)
