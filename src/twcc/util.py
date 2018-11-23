@@ -24,7 +24,8 @@ def table_layout(title, json_obj, caption_row=None, debug=False):
     from colorclass import Color
     from termcolor import cprint
     import time
-    
+    print(json_obj) 
+    print(type(json_obj))
     table_info = []
     if type(json_obj) is list:
         table_cap = [head for head in json_obj[0].keys()]
@@ -36,18 +37,22 @@ def table_layout(title, json_obj, caption_row=None, debug=False):
             table_info.append(temp)
     elif type(json_obj) is dict:
         table_cap = [head for head in json_obj.keys()]
-        print(table_cap)
-        table_info.append([ Color("{autoyellow}%s{/autoyellow}"%x) for x in table_cap])
+        final_cap = table_cap
         temp = []
         for data_d in table_cap:
-            #temp.append(json_obj[data_d][:20])
-            print(json_obj[data_d])
+            if type(json_obj[data_d]) is dict:
+                table_layout(data_d,json_obj[data_d])
+                final_cap.remove(data_d)
+            elif type(json_obj[data_d]) is not str:
+                print(json_obj[data_d])
+                print(data_d)
+                temp.append(str(json_obj[data_d])[:20])
+            pass
         table_info.append(temp)   
+        table_info.insert(0,[ Color("{autoyellow}%s{/autoyellow}"%x) for x in final_cap])
 
     table = AsciiTable(table_info,title)
-    table1 = SingleTable(table_info,title)    
     print(table.table)
-    print(table1.table)
 
 
 

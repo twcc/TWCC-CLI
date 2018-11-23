@@ -7,33 +7,16 @@ from __future__ import print_function
 .. moduleauthor:: August Chao <1803001@narlabs.org.tw>
 """
 #from twcc.twcc import TWCC
-from twcc.services.base import acls,users,keypairs,projects,api_key
 from twcc.services.jobs import jobs
 from twcc.services.storage import images,volumes,snapshots,buckets
 from twcc.util import pp,isNone
-from fun.Base_Fun import AclsFun,KeyPairFun 
+from fun.Base_Fun import AclsFun,KeyPairFun,ApiKeyFun,ProjectFun,UserFun 
 import click
 
 # Create groups for command
 @click.group()
 def cli():
     pass
-
-# Create a command for users 
-@click.command()
-@click.option('-l','--list','show_list',is_flag=True,help="Show list of users")
-@click.option('-id','id_num',is_flag = None,help="The user id")
-def Users(show_list,id_num):
-    '''
-    '''
-    users_info = users('sys',debug = False)
-
-    if show_list:
-        pp(list = users_info.getInfo())
-    elif type(id_num) is not type(None):
-        pp(list = users_info.queryById(id_num))
-    else:
-        printCommandHelp(Users)
 
 # Create a command for job
 @click.command()
@@ -115,53 +98,23 @@ def Buckets(show_list,id_num):
     else:
         printCommandHelp(Buckets)
 
-# Create a command for projects
-@click.command()
-@click.option('-l','--list','show_list',is_flag = True,help = "Show list of projects ")
-@click.option('-id','id_num',default = None, help = "The project id")
-def Projects(show_list,id_num):
-    '''
-    '''
-    projects_info = projects('sys',debug = False)
-    
-    if show_list:
-        pp(list = projects_info.list())
-    elif type(id_num) is not type(None):
-        pp(list = projects_info.queryById(id_num))
-    else:
-        printCommandHelp(Projects)    
-
-# Create a command for api_key
-@click.command()
-@click.option('-l','--list','show_list',is_flag = True,help = "Show list of API_keys")
-@click.option('-id','id_num',default = None, help = "The API key id")
-def Api_Key(show_list,id_num):
-    '''
-    '''
-    api_info = api_key('sys',debug = False)
-
-    if show_list:
-        pp(list = api_info.list())
-    elif type(id_num) is not type(None):
-        pp(list = api_info.queryById(id_num))
-    else:
-        printCommandHelp(Api_Key)
-
 ac = AclsFun()
+apk = ApiKeyFun() 
 kp = KeyPairFun()
+pj = ProjectFun()
+us = UserFun()
 
 # Add commands to cli command
-#cli.add_command(Acls)
 cli.add_command(ac.Acls)
-cli.add_command(Users)
+cli.add_command(apk.Api_Key)
+cli.add_command(us.Users)
 cli.add_command(kp.Keypairs)
 cli.add_command(Jobs)
 cli.add_command(Images)
 cli.add_command(Volumes)
 cli.add_command(Snapshots)
 cli.add_command(Buckets)
-cli.add_command(Projects)
-cli.add_command(Api_Key)
+cli.add_command(pj.Projects)
 
 def printCommandHelp(cmd):
     """

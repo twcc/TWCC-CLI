@@ -27,9 +27,35 @@ class AclsFun():
         if not isNone(describe):
             table_layout(' Acls Info ',acls_info.queryById(describe))
         else:
-            pp(show_list = acls_info.list())
-            #table_layout(' Acls Info ',acls_info.list()) 
+            #pp(show_list = acls_info.list())
+            table_layout(' Acls Info ',acls_info.list()) 
     Acls.add_command(list)
+
+class ApiKeyFun():
+    '''
+   Funciton for API_Key CLI
+    '''
+    def __init__(self):
+        pass
+    
+    @staticmethod
+    def apikey_auth(auth='sys'):
+        apikey_info = api_key(auth,debug = False)
+        return apikey_info
+    
+    @click.group()
+    def Api_Key():
+        pass
+    
+    @click.command()
+    @click.option('--describe',default = None, help = "Detail of specific keypair")
+    def list(describe):
+        apikey_info = ApiKeyFun.apikey_auth()
+        if not isNone(describe):
+            table_layout(' API_key Info ',apikey_info.queryById(describe))
+        else:
+            table_layout(' API_key Info ',apikey_info.list()) 
+    Api_Key.add_command(list)
 
 class KeyPairFun():
     '''
@@ -39,7 +65,7 @@ class KeyPairFun():
         pass
 
     @staticmethod
-    def keypair_data_info(auth='sys'):
+    def keypair_auth(auth='sys'):
         keypairs_info = keypairs(auth,debug = False)
         return keypairs_info
         
@@ -50,7 +76,7 @@ class KeyPairFun():
     @click.command()
     @click.option('--describe',default = None,help="Detail of specific keypair")
     def list(describe):
-        key_info = KeyPairFun.keypair_data_info()
+        key_info = KeyPairFun.keypair_auth()
         if not isNone(describe):
             table_layout( ' {} Info '.format(describe),key_info.queryById(describe))
         else:
@@ -62,7 +88,7 @@ class KeyPairFun():
     @click.pass_context
     def create_keypair(ctx,info):
         if not isNone(info):
-            key_info = KeyPairFun.keypair_data_info()
+            key_info = KeyPairFun.keypair_auth()
             pp(show_list = key_info.createKeyPair(info))
         else:
             print(ctx.get_help())
@@ -72,7 +98,7 @@ class KeyPairFun():
     @click.pass_context
     def delete_keypair(ctx,info):
         if not isNone(info):
-            key_info = KeyPairFun.keypair_data_info()
+            key_info = KeyPairFun.keypair_auth()
             pp(show_list = key_info.delete(info))
         else:
             print(ctx.get_help())
@@ -80,3 +106,57 @@ class KeyPairFun():
     Keypairs.add_command(list)
     Keypairs.add_command(create_keypair)
     Keypairs.add_command(delete_keypair)
+
+class ProjectFun():
+    '''
+   Funciton for Project CLI
+    '''
+    def __init__(self):
+        pass
+    
+    @staticmethod
+    def project_auth(auth='sys'):
+        projects_info = projects(auth,debug = False)
+        return projects_info
+    
+    @click.group()
+    def Projects():
+        pass
+    
+    @click.command()
+    @click.option('--describe',default = None, help = "Detail of specific keypair")
+    def list(describe):
+        projects_info = ProjectFun.project_auth()
+        if not isNone(describe):
+            table_layout(' Project Info ',projects_info.queryById(describe))
+        else:
+            table_layout(' Projects Info ',projects_info.list()) 
+    Projects.add_command(list)
+
+class UserFun():
+    '''
+   Funciton for User CLI
+    '''
+    def __init__(self):
+        pass
+    
+    @staticmethod
+    def user_auth(auth='sys'):
+        user_info = users(auth,debug = False)
+        return user_info
+    
+    @click.group()
+    def Users():
+        pass
+    
+    @click.command()
+    @click.option('--describe',default = None, help = "Detail of specific keypair")
+    def list(describe):
+        user_info = UserFun.user_auth()
+        if not isNone(describe):
+            table_layout(' User Info ',user_info.queryById(describe))
+        else:
+            table_layout(' User Info ',user_info.list()) 
+    Users.add_command(list)
+
+
