@@ -14,6 +14,7 @@ class GenericService():
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
         self._debug_ = debug
+        self.content_type = 'json'
 
         self.twcc = ServiceOperation()
         self.twcc._debug = debug
@@ -54,6 +55,7 @@ class GenericService():
             func = self._func_,
             url_dict = self.url_dic if not isNone(self.url_dic) else None,
             data_dict = self.data_dic if not isNone(self.data_dic) else None,
+            ctype = 'multipart/form-data' if self.content_type == 'file' else "application/json",
             http = self.http_verb,
             url_ext_get = self.ext_get,
             res_type = self.res_type)

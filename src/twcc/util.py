@@ -18,7 +18,7 @@ def jpp(**args):
 def isNone(x):
     return True if type(x) == type(None) else False
 
-def table_layout_william(title, json_obj, caption_row=None, debug=False, isWrap=True):
+def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
     from terminaltables import AsciiTable, SingleTable
     from colorclass import Color
     from termcolor import cprint
@@ -67,7 +67,7 @@ def table_layout_william(title, json_obj, caption_row=None, debug=False, isWrap=
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time), 'red', attrs=['bold'])
 
-def table_layout(title, json_obj, caption_row=None, debug=False):
+def table_layout_william(title, json_obj, caption_row=None, debug=False):
     from terminaltables import AsciiTable, SingleTable
     from colorclass import Color
     from termcolor import cprint

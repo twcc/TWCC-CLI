@@ -21,10 +21,13 @@ class ServiceOperation:
         self.try_alive()
 
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
-        self.res_type_valid = set(['txt', 'json'])
+        self.res_type_valid = set(['txt', 'json', 'octet-stream'])
 
         # for site usage
         self.header_extra = {}
+
+        # if res_type is 'octet-stream', then set True for download file
+        self._request_redirect = False
 
         self._debug = debug
         if self._debug:
@@ -71,7 +74,12 @@ class ServiceOperation:
         start_time = time.time()
 
         if mtype == 'get':
-            r = requests.get(t_api, headers=t_headers)
+            if self._request_redirect:
+                r = requests.get(t_api, headers=t_headers,
+                        allow_redirects=True,
+                        stream=True)
+            else:
+                r = requests.get(t_api, headers=t_headers)
         elif mtype == 'post':
             r = requests.post(t_api, headers=t_headers,
                               data=json.dumps(t_data))
@@ -80,7 +88,11 @@ class ServiceOperation:
         elif mtype == "patch":
             r = requests.delete(t_api, headers=t_headers)
         elif mtype == "put":
-            r = requests.put(t_api, headers=t_headers,
+            if self.ctype == 'multipart/form-data':
+                del t_headers['Content-Type']
+                r = requests.put(t_api, headers=t_headers, files=self.file_cnt)
+            else:
+                r = requests.put(t_api, headers=t_headers,
                               data=json.dumps(t_data))
         else:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
@@ -119,12 +131,20 @@ class ServiceOperation:
             for param_key in url_ext_get.keys():
                 t_url += "{0}={1}".format(param_key, url_ext_get[param_key])
 
+        if res_type == "octet-stream":
+            self._request_redirect = True
+
+
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 return res[0].json()
             elif res_type == 'txt':
                 return res[0].content
+            elif res_type == 'octet-stream':
+                (key, val) = (res[0].headers['Content-Disposition'].split("; ")[1].split("="))
+                return { key : val.replace('"', ''),
+                         "content": res[0].content }
 
     def mkHeader(self, site_sn=None, key_tag=None,
                  api_host="_DEF_", api_key="_DEF_",
@@ -151,6 +171,9 @@ class ServiceOperation:
         if len(self.header_extra.keys())>0:
             for key in self.header_extra.keys():
                 return_header[key] = self.header_extra[key]
+
+        if self._debug:
+            self._i(return_header)
 
         return return_header
 

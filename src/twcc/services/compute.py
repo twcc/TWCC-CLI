@@ -29,8 +29,8 @@ class sites(GenericService):
             'flavor' : "10core40GBMemory1GPU" ,
             #'image' : "registry.twcc.ai/ngc/vtr:latest",
             'image' : "registry.twcc.ai/ngc/nvidia/tensorflow:latest",
-            'gpfs01-mount-path' : "/mnt/home/work",
-            'gpfs02-mount-path' : "/mnt/home/home"}
+            'gpfs01-mount-path' : "/mnt/gpfs/work",
+            'gpfs02-mount-path' : "/mnt/gpfs/home"}
         return dict([ ("x-extra-property-%s"%(x), gpu_default[x]) for x in gpu_default.keys() ])
 
     @staticmethod
@@ -59,7 +59,8 @@ class sites(GenericService):
         self.http_verb = 'post'
         self.data_dic = {"name": name,
                 "project": self._project_id,
-                "solution": sol_id}
+                "solution": sol_id,
+                'desc': "test by aug"}
         #print(self.data_dic)
         #print(self.twcc.header_extra)
         return self._do_api()
