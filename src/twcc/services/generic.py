@@ -18,10 +18,14 @@ class GenericService():
         self.twcc = ServiceOperation()
         self.twcc._debug = debug
 
+        self._project_id = None
+
         # map to url
         self.url_dic = None
         # map to data entries
         self.data_dic = None
+        # map to get's parameter, aka ?project=898
+        self.ext_get = None
 
         self.res_type = 'json'
         self.res_type_valid = self.twcc.res_type_valid
@@ -44,29 +48,15 @@ class GenericService():
             if not isNone(self.data_dic):
                 pp(data_dic=self.data_dic)
 
-        if not isNone(self.url_dic):
-            res = self.twcc.doAPI(
-                site_sn=self._csite_,
-                key_tag=self._api_key_,
-                func=self._func_,
-                url_dict=self.url_dic,
-                http=self.http_verb,
-                res_type=self.res_type)
-        elif not isNone(self.data_dic):
-            res = self.twcc.doAPI(
-                site_sn=self._csite_,
-                key_tag=self._api_key_,
-                func=self._func_,
-                data_dict=self.data_dic,
-                http=self.http_verb,
-                res_type=self.res_type)
-        else:
-            res = self.twcc.doAPI(
-                site_sn=self._csite_,
-                key_tag=self._api_key_,
-                func=self._func_,
-                http=self.http_verb,
-                res_type=self.res_type)
+        res = self.twcc.doAPI(
+            site_sn = self._csite_,
+            key_tag = self._api_key_,
+            func = self._func_,
+            url_dict = self.url_dic if not isNone(self.url_dic) else None,
+            data_dict = self.data_dic if not isNone(self.data_dic) else None,
+            http = self.http_verb,
+            url_ext_get = self.ext_get,
+            res_type = self.res_type)
 
         if self._debug_:
             pp(res=res)
@@ -77,6 +67,8 @@ class GenericService():
         pass
 
     def list(self):
+        self.http_verb = 'get'
+        self.res_type = 'json'
         return self._do_api()
 
     def queryById(self, mid):
@@ -85,12 +77,19 @@ class GenericService():
         self.url_dic = None
         return res
 
-    def delete(self,mid):
+    @property
+    def project_id(self):
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, proj_id):
+        self._project_id = proj_id
+
+    def delete(self, mid):
         self.http_verb = "delete"
         self.url_dic = { self.__class__.__name__ : mid }
         res = self._do_api()
         return res
-    
 
 class CpuService(GenericService):
     def __init__(self, debug=False):

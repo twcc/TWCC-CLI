@@ -3,7 +3,9 @@ from __future__ import print_function
 from os import sys, path
 sys.path.append(path.dirname(path.abspath(__file__)))
 from generic import GenericService
-
+"""
+never use
+"""
 
 class projects(GenericService):
     """ This Class is for projects api call
@@ -27,7 +29,3 @@ class projects(GenericService):
         return self._do_api()
 
 
-if __name__ == '__main__':
-    test = projects('sys', True)
-    r1 = test.list()
-    print(r1)
