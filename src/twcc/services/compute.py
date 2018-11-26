@@ -50,6 +50,7 @@ class sites(GenericService):
             return default_assign_ip
 
     def list(self):
+        #print (self._project_id)
         self.ext_get = {'project': self._project_id}
         return self._do_api()
 

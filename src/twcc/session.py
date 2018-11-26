@@ -92,5 +92,5 @@ def mkdir_p(path):
 
 def session_start():
     return Session(
-        twcc_yaml_path="/home/nchc1803001/NCHC/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
+        twcc_yaml_path="/home/gunter/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
 

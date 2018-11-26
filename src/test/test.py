@@ -21,15 +21,15 @@ def chk_api_key(key_tokens):
     better = lambda x: getTxt(x, 20) if len(x) == 1 else len(x)
     for usr in key_tokens:
         a = projects(usr, debug=False)
+        a._csite_ = csite
         info = {}
         info['usr_tag'] = usr
-        info['pro'] = better(a.list())
-        info['acls'] = better(acls(usr).list())
-        info['api_k'] = better(api_key(usr).list())
+        info['pro'] = a.list()
+        info['acls'] = acls(usr).list()['total']
+        info['api_k'] = api_key(usr).list()['total']
         infos.append(info)
 
     table_layout(" List api_token ", infos, table_cap, debug=mdebug)
-
 
 
 def show_wanted_solution():
@@ -49,6 +49,7 @@ def show_wanted_solution():
 
 def get_solution_for_container(usr, proj_id):
     a = solutions(usr, debug=mdebug)
+    print(a.list())
     a.ext_get = {'project': proj_id}
     sol_id = [x['id'] for x in a.list() if x['category']=='container']
 
@@ -72,23 +73,31 @@ def list_site(site_id):
     return ans
 
 def get_sol_w_proj(sol_id, pro_id):
-    a = projects('usr1', debug=False) # littledd-2 fail
+    a = projects('sys', debug=False) # usr1 fail
     a._csite_ = 'k8s-taichung-default'
     a.url_dic = {'projects': pro_id, 'solutions':sol_id}
     ans=a.list()['site_extra_prop']
+    print(ans)
+    print(type(ans))
     if len(ans) > 0:
         table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
 
 def list_cntrs(isFull=True):
+    #mdebug = True
     b = sites(user_tag, mdebug)
-    b.project_id = proj_id
+    b._project_id = '85'
 
+    b._csite_ = 'k8s-taichung-default'
     ans=b.list()
+    print(ans)
+    if len(ans)==0:
+        return None
     for ele in ans:
-        if ele['status'] == 'Error':
-            print("del Error", ele['id'])
-            b.delete(ele['id'])
+        #if ele['status'] == 'Error':
+        #    print("del Error", ele['id'])
+        #    b.delete(ele['id'])
 
+        print(ans)
         table_layout(" site_extra_prop for '%s' "%ele['id'], [ele], list(ele.keys()))
 
         if not isFull:
@@ -130,15 +139,18 @@ def del_cntr(site_id):
     b.delete(site_id)
 
 def create_cntr():
+    mdebug = True
     b = sites(user_tag, mdebug)
-    b.project_id = proj_id
+    #b.project_id = proj_id
+    b._project_id = '85'
 
-    res = b.create("augfoobar", sol_id, b.getGpuDefaultHeader())
+    res = b.create("willtestcon", sol_id, b.getGpuDefaultHeader())
+    print(res)
     return res['id']
 
-proj_id = "697"
+proj_id = "85"
 sol_id = "160"
-user_tag = 'littledd-2'
+user_tag = 'sys'
 csite = 'k8s-taichung-default'
 mdebug = False
 
@@ -146,8 +158,10 @@ get_sol_w_proj(sol_id, project_id)
 get_solution_for_container(user_tag, proj_id)
 
 if __name__ == "__main__":
+    #list_cntrs(isFull=True)
+    create_cntr()
+    print(">>>>"*10)
     list_cntrs(isFull=True)
-    #site_id = create_cntr()
 
     #import time
     #isBind = False
@@ -160,7 +174,7 @@ if __name__ == "__main__":
     #        list_cntrs()
     #    time.sleep(5)
     #    print ("\n\n\n")
-    del_cntr('5122')
+    del_cntr('5314')
 
 
 #a = func('sysa', debug=True)

@@ -83,7 +83,8 @@ class GenericService():
 
     @project_id.setter
     def project_id(self, proj_id):
-        self._project_id = proj_id
+        self._project_id = proj_id  
+        print (">>>", self._project_id)
 
     def delete(self, mid):
         self.http_verb = "delete"
