@@ -73,21 +73,19 @@ def list_site(site_id):
     return ans
 
 def get_sol_w_proj(sol_id, pro_id):
-    a = projects('sys', debug=False) # usr1 fail
+    a = projects('sys', debug=True) # usr1 fail
     a._csite_ = 'k8s-taichung-default'
     a.url_dic = {'projects': pro_id, 'solutions':sol_id}
     ans=a.list()['site_extra_prop']
-    print(ans)
-    print(type(ans))
     if len(ans) > 0:
         table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
 
 def list_cntrs(isFull=True):
-    #mdebug = True
+    mdebug = True
     b = sites(user_tag, mdebug)
-    b._project_id = '85'
-
+    b._project_id = '2014'
     b._csite_ = 'k8s-taichung-default'
+
     ans=b.list()
     print(ans)
     if len(ans)==0:
@@ -97,7 +95,6 @@ def list_cntrs(isFull=True):
         #    print("del Error", ele['id'])
         #    b.delete(ele['id'])
 
-        print(ans)
         table_layout(" site_extra_prop for '%s' "%ele['id'], [ele], list(ele.keys()))
 
         if not isFull:
@@ -142,24 +139,24 @@ def create_cntr():
     mdebug = True
     b = sites(user_tag, mdebug)
     #b.project_id = proj_id
-    b._project_id = '85'
+    b._project_id = '2014'
 
     res = b.create("willtestcon", sol_id, b.getGpuDefaultHeader())
     print(res)
     return res['id']
 
-proj_id = "85"
-sol_id = "160"
+proj_id = "2014"
+sol_id = "865"
 user_tag = 'sys'
 csite = 'k8s-taichung-default'
 mdebug = False
 
-get_sol_w_proj(sol_id, project_id)
+get_sol_w_proj(sol_id, proj_id)
 get_solution_for_container(user_tag, proj_id)
 
 if __name__ == "__main__":
     #list_cntrs(isFull=True)
-    create_cntr()
+    #create_cntr()
     print(">>>>"*10)
     list_cntrs(isFull=True)
 

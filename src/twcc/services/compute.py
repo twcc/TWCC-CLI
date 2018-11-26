@@ -28,7 +28,7 @@ class sites(GenericService):
             'command' : "whoami; sleep 600;",
             'flavor' : "10core40GBMemory1GPU" ,
             #'image' : "registry.twcc.ai/ngc/vtr:latest",
-            'image' : "registry.twcc.ai/ngc/nvidia/tensorflow:latest",
+            'image' : "registry.twcc.ai/ngc/nvidia/tensorflow-18.10-py2-v",
             'gpfs01-mount-path' : "/mnt/home/work",
             'gpfs02-mount-path' : "/mnt/home/home"}
         return dict([ ("x-extra-property-%s"%(x), gpu_default[x]) for x in gpu_default.keys() ])

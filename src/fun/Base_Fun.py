@@ -127,6 +127,7 @@ class ProjectFun():
     @staticmethod
     def project_auth(auth='sys'):
         projects_info = projects(auth,debug = False)
+        projects_info._csite_ = 'k8s-taichung-default'
         return projects_info
 
     @click.group()
