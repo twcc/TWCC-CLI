@@ -8,6 +8,7 @@ from twcc.util import pp, isNone, table_layout
 from joblib import Parallel, delayed
 import dill as pickle
 import collections
+import time
 
 ##  7fe2bdd8-be01-430f-865f-feaec9dba27b
 csite = 'k8s-taichung-default'
@@ -34,7 +35,7 @@ def chk_api_key(key_tokens):
 
     table_layout(" List api_token ", infos, table_cap, debug=mdebug)
 
-chk_api_key(["littledd"])
+#chk_api_key(["littledd"])
 
 def show_wanted_solution():
     a = projects(user_tag, debug=mdebug)
@@ -153,8 +154,27 @@ def create_cntr(idx):
     #b.project_id = proj_id
     b._project_id = '2608'
 
-    res = b.create("aug_is_bad_%s"%(idx), sol_id, b.getGpuDefaultHeader())
-    return res['id']
+    res = b.create("bad_aug_%s"%(idx), sol_id, b.getGpuDefaultHeader())
+    site_id = res['id']
+    isBind = False
+    isStop = False
+    cntr = 1
+    while not isStop:
+        #res = list_site(site_id)
+        if res['status'] == 'Ready' and not isBind:
+            bind_cntr(site_id, site_id)
+            isBind = True
+        if isBind and res['public_ip'].split(".")[0]=="203" :
+            #list_cntrs(isFull=False)
+            isStop = True
+        if cntr > 40:
+            isStop = True
+            print ("site %s: fail to bind port in %s sec."%(site_id, cntr*5))
+        cntr += 1
+        print ("(%s) bind %s for site_id: %s, current public_ip %s."%(cntr, site_id, site_id, res['public_ip'] if 'public_ip' in res else "not bind"))
+        time.sleep(5)
+
+    return site_id
 
 proj_id = "2608"
 sol_id = "865"
@@ -162,7 +182,7 @@ user_tag = 'littledd'
 csite = 'k8s-taichung-default'
 mdebug = False
 
-#get_sol_w_proj(sol_id, proj_id)
+get_sol_w_proj(sol_id, proj_id)
 #get_solution_for_container(user_tag, proj_id)
 
 
@@ -172,8 +192,8 @@ if __name__ == "__main__":
     b._project_id = proj_id
     b._csite_ = 'k8s-taichung-default'
 
-    job_num = 20
-    max_cntr = 200
+    max_cntr = 20
+    job_num = max_cntr if max_cntr < 10 else 20
     ## massive create
     Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(create_cntr)(idx) for idx in range(max_cntr))
 
@@ -196,22 +216,6 @@ if __name__ == "__main__":
     ## massive delete
     Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(del_cntr)(res['id']) for res in b.list())
 
-    ##print [create_cntr(idx) for idx in range(1)]
-    #site_id = create_cntr("0")
-#
-#    import time
-#    isBind = False
-#    isStop = False
-#    while not isStop:
-#        res = list_site(site_id)
-#        if res['status'] == 'Ready' and not isBind:
-#            bind_cntr(site_id, site_id)
-#            isBind = True
-#        if isBind and res['public_ip'].split(".")[0]=="203" :
-#            list_cntrs(isFull=False)
-#            isStop = True
-#        time.sleep(5)
-#        print ("\n\n\n")
 
 
 #a = func('sysa', debug=True)
