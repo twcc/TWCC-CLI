@@ -2,6 +2,16 @@
 from __future__ import print_function
 from twcc.services.generic import GenericService
 
+class wallet(GenericService):
+    def __init__(self, api_key_tag, debug=False):
+        GenericService.__init__(self, debug=debug)
+
+        self._csite_ = "goc"
+        self._api_key_ = api_key_tag
+
+    def getInfo(self):
+        return self.list()
+
 class users(GenericService):
     def __init__(self, api_key_tag, debug=False):
         GenericService.__init__(self, debug=debug)

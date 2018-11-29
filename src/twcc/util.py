@@ -18,13 +18,19 @@ def jpp(**args):
 def isNone(x):
     return True if type(x) == type(None) else False
 
-def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
     from terminaltables import AsciiTable, SingleTable
     from colorclass import Color
     from termcolor import cprint
     from textwrap import wrap
     import time
 
+    if type(json_obj) == type({}):
+        json_obj = [json_obj]
+    if type(json_obj) == type([]):
+        if len(json_obj)>0:
+            row = json_obj[0]
+            caption_row = row.keys()
     heading_cap = set(['id', 'name'])
 
     intersect = set(caption_row).intersection(heading_cap)
@@ -44,7 +50,7 @@ def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
 
     for ele in json_obj:
         table_info.append([ ele[cap] for cap in caption_row])
-    table = SingleTable(table_info, title)
+    table = AsciiTable(table_info, title)
 
 
     for idx in range(len(table.table_data[1])):
