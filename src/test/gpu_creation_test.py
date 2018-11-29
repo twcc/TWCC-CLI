@@ -20,6 +20,7 @@ def chk_api_key(key_tokens):
 
     table_info = []
     table_cap = ['usr_tag', 'pro', 'acls', 'api_k']
+    table_cap = ['usr_tag', 'MST107106', 'total projects']
     infos = []
     getTxt = lambda x, y: x['message'][:y] if 'message' in x.keys() else x['detail'][:y]
     better = lambda x: getTxt(x, 20) if len(x) == 1 else len(x)
@@ -28,14 +29,16 @@ def chk_api_key(key_tokens):
         a._csite_ = csite
         info = {}
         info['usr_tag'] = usr
-        info['pro'] = a.list()
-        info['acls'] = acls(usr).list()['total']
-        info['api_k'] = api_key(usr).list()['total']
+        info['MST107106'] = ", ".join([ x['name'] for x in a.list() if x['name']=='MST107106'])
+        info['total projects'] = len(a.list())
+        #info['acls'] = acls(usr).list()
+        #info['api_k'] = api_key(usr).list()
         infos.append(info)
 
     table_layout(" List api_token ", infos, table_cap, debug=mdebug)
 
-#chk_api_key(["littledd"])
+chk_api_key(["littledd"])
+raw_input()
 
 def show_wanted_solution():
     a = projects(user_tag, debug=mdebug)
@@ -182,7 +185,7 @@ user_tag = 'littledd'
 csite = 'k8s-taichung-default'
 mdebug = False
 
-get_sol_w_proj(sol_id, proj_id)
+#get_sol_w_proj(sol_id, proj_id)
 #get_solution_for_container(user_tag, proj_id)
 
 
@@ -214,7 +217,7 @@ if __name__ == "__main__":
 
 
     ## massive delete
-    Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(del_cntr)(res['id']) for res in b.list())
+    #Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(del_cntr)(res['id']) for res in b.list())
 
 
 

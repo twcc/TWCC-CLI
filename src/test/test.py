@@ -28,8 +28,8 @@ def chk_api_key(key_tokens):
         info = {}
         info['usr_tag'] = usr
         info['pro'] = a.list()
-        info['acls'] = acls(usr).list()['total']
-        info['api_k'] = api_key(usr).list()['total']
+        info['acls'] = acls(usr).list()
+        info['api_k'] = api_key(usr).list()
         infos.append(info)
 
     table_layout(" List api_token ", infos, table_cap, debug=mdebug)
