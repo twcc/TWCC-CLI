@@ -13,6 +13,7 @@ import time
 ##  7fe2bdd8-be01-430f-865f-feaec9dba27b
 csite = 'k8s-taichung-default'
 project_id = "898"
+proj_id = "2269"
 mdebug = False
 
 def chk_api_key(key_tokens):
@@ -37,22 +38,26 @@ def chk_api_key(key_tokens):
 
     table_layout(" List api_token ", infos, table_cap, debug=mdebug)
 
-chk_api_key(["littledd"])
-raw_input()
+chk_api_key(["littledd-2"])
 
 def show_wanted_solution():
+    user_tag = 'littledd-2'
+    mdebug=True
     a = projects(user_tag, debug=mdebug)
     a._csite_ = csite
-    wanted = set([160, 373, 376, 400, 406, 457])
+    a._project_id = proj_id
+    wanted = set(['865'])
     a = sites(user_tag, debug=mdebug)
-    a.ext_get = {'project': project_id}
+    a.ext_get = {'project': proj_id}
+    a._project_id = proj_id
     site_list = a.list()
+    pp(site_list=site_list)
+    #table_cap = ['id', 'solution', 'status', 'status_reason']
+    #table_layout(" Results for 'Wanted Sites' ",
+    #    [ a.queryById(x['id']) for x in site_list if x['solution'] in wanted],
+    #    table_cap, debug=mdebug)
 
-    table_cap = ['id', 'solution', 'status', 'status_reason']
-    table_layout(" Results for 'Wanted Sites' ",
-        [ a.queryById(x['id']) for x in site_list if x['solution'] in wanted],
-        table_cap, debug=mdebug)
-
+show_wanted_solution()
 
 
 def get_solution_for_container(usr, roj_id):
@@ -145,6 +150,7 @@ def bind_cntr(site_id, port):
     b.exposedPort(site_id, bindIp)
 
 def del_cntr(site_id):
+    print "del: %s"%(site_id)
     b = sites(user_tag, mdebug)
     b.project_id = proj_id
 
@@ -195,28 +201,28 @@ if __name__ == "__main__":
     b._project_id = proj_id
     b._csite_ = 'k8s-taichung-default'
 
-    max_cntr = 20
+    max_cntr = 2
     job_num = max_cntr if max_cntr < 10 else 20
     ## massive create
-    Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(create_cntr)(idx) for idx in range(max_cntr))
+    #Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(create_cntr)(idx) for idx in range(max_cntr))
 
-    # count success
-    err = []
-    b._project_id = '2608'
-    all_created_site = Parallel(n_jobs=job_num, backend='multiprocessing')( delayed(b.queryById)(res['id']) for res in b.list() )
-    for res in all_created_site:
-        site_stat = b.queryById(res['id'])
-        if site_stat['status']=='Error':
-            err.append("%s_%s"%(site_stat['status'], site_stat['status_reason'].split(" ")[0]))
-        else:
-            err.append(site_stat['status'])
-    results = collections.Counter(err)
-    for (k,w) in results.most_common(100):
-        print "%s, %s"%(k, w)
+    ## count success
+    #err = []
+    #b._project_id = '2608'
+    #all_created_site = Parallel(n_jobs=job_num, backend='multiprocessing')( delayed(b.queryById)(res['id']) for res in b.list() )
+    #for res in all_created_site:
+    #    site_stat = b.queryById(res['id'])
+    #    if site_stat['status']=='Error':
+    #        err.append("%s_%s"%(site_stat['status'], site_stat['status_reason'].split(" ")[0]))
+    #    else:
+    #        err.append(site_stat['status'])
+    #results = collections.Counter(err)
+    #for (k,w) in results.most_common(100):
+    #    print "%s, %s"%(k, w)
 
 
 
-    ## massive delete
+    # massive delete
     #Parallel(n_jobs=job_num, backend='multiprocessing')(delayed(del_cntr)(res['id']) for res in b.list())
 
 

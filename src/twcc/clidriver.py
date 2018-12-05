@@ -10,9 +10,8 @@ import os
 from twcc.session import session_start
 from twcc.util import parsePtn, isNone
 
-
 class ServiceOperation:
-
+    global _TWCC_SESSION_
     def __init__(self, debug=True):
         self._session_ = session_start()
         self.load_credential()

@@ -2,16 +2,6 @@
 from __future__ import print_function
 from twcc.services.generic import GenericService
 
-class wallet(GenericService):
-    def __init__(self, api_key_tag, debug=False):
-        GenericService.__init__(self, debug=debug)
-
-        self._csite_ = "goc"
-        self._api_key_ = api_key_tag
-
-    def getInfo(self):
-        return self.list()
-
 class users(GenericService):
     def __init__(self, api_key_tag, debug=False):
         GenericService.__init__(self, debug=debug)
@@ -81,11 +71,11 @@ class keypairs(GenericService):
 class projects(GenericService):
     """ This function is Site admin only
     """
-    def __init__(self, api_key_tag, debug=False):
+    #def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
 
         self._csite_ = "goc"
-        self._api_key_ = api_key_tag
 
     def getProjectSolution(self, proj_id, sol_id):
         self.url_dic = {'projects': proj_id, 'solutions':sol_id}

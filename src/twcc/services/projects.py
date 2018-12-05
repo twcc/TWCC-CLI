@@ -3,6 +3,7 @@ from __future__ import print_function
 from os import sys, path
 sys.path.append(path.dirname(path.abspath(__file__)))
 from generic import GenericService
+from twcc.util import *
 """
 never use
 """
@@ -11,7 +12,9 @@ class projects(GenericService):
     """ This Class is for projects api call
     """
 
-    def __init__(self, api_key_tag, debug=False):
+    # use default key only
+    #def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         """ constractor for this projects class
 
         Args:
@@ -19,13 +22,14 @@ class projects(GenericService):
         """
         GenericService.__init__(self)
         # current working information
-        self._csite_ = "goc"
-        self._api_key_ = api_key_tag
+        # "goc" only for sys adm
+        self._csite_ = None
         self.res_type = "json"
         self._debug_ = debug
         self.twcc._debug = debug
 
     def list(self):
-        return self._do_api()
+        if self._chkSite_():
+            return self._do_api()
 
 

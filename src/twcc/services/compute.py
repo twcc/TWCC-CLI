@@ -7,11 +7,12 @@ from twcc.util import pp, isNone, table_layout
 chkPortPair = lambda x: True if type(x)==type({}) and len(set(['exposed', 'inner']).intersection(set(x.keys())) ) == 2 else False
 
 class sites(GenericService):
-    def __init__(self, api_key_tag, debug=False):
+    # use default key_tag
+    #def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
 
         self._csite_ = "k8s-taichung-default"
-        self._api_key_ = api_key_tag
         self._cache_sol_ = {}
 
     def __del__(self):
@@ -23,10 +24,13 @@ class sites(GenericService):
 
     @staticmethod
     def getGpuDefaultHeader():
-        gpu_default = { 'bucket' : None,
+        gpu_default = {
+            #'bucket' : None,
             'replica' : "1",
             'command' : "whoami; sleep 600;",
-            'flavor' : "10core40GBMemory1GPU" ,
+            'flavor' : "1 GPU + 8 Core CPU + 60 GB Memory" ,
+            #'flavor' : "2C8G80G1GPU" ,
+            #'flavor' : "4 GPU + 32 Core CPU + 240 GB Memory" ,
             #'image' : "registry.twcc.ai/ngc/vtr:latest",
             #'image' : "registry.twcc.ai/ngc/nvidia/tensorflow-18.10-py2-v",
             #'image' : "registry.twcc.ai/ngc/nvidia/tensorflow-18.10-py2-v1",
@@ -95,13 +99,16 @@ class sites(GenericService):
             return ans
 
     def _do_list_solution(self, sol_id):
-        self.proj = projects(self._api_key_, self.twcc._debug)
+        self.proj = projects(self.twcc._debug)
         self.proj._csite_ = self._csite_
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
         table_info = ans['site_extra_prop']
         self._cache_sol_[ sol_id ] = table_info
 
+    def isReady(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "Ready"
 
     def getDetail(self, site_id):
         self.url_dic = {"sites":site_id, 'container':""}

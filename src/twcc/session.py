@@ -1,11 +1,33 @@
 # -*- coding: utf-8 -*-
-
 import copy
 import errno
 import os
 import re
+import regex
 from twcc.util import *
+from PyInquirer import Validator, ValidationError, prompt
 
+class TwccApiValidator(Validator):
+    def validate(self, document):
+        ok = regex.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', document.text)
+        if not ok:
+            raise ValidationError(
+                message='Please enter a TWCC API key',
+                cursor_position=len(document.text))  # Move cursor to end
+
+quest_api = [
+    {
+        'type': 'input',
+        'name': 'TWCC_API_KEY',
+        'message': "Your API Key from www.TWCC.ai",
+        'validate': TwccApiValidator
+    },
+    {
+        'type': 'input',
+        'name': 'TWCC_KEY_NAME',
+        'message': "Enter Key Name for this key",
+    }
+]
 
 class Session(object):
 
@@ -21,14 +43,22 @@ class Session(object):
         self.files["resources"] = os.path.join(
             os.environ['TWCC_DATA_PATH'], "resources")
 
-        if isNone(twcc_session):
+        if self.is_files_exist():
+            self.load_session()
+        else:
             self.create_session()
 
-        else:
-            self._session = twcc_session
+    def is_files_exist(self):
+        for fn in self.files.keys():
+            if not os.path.isfile(self.files[fn]):
+                return False
+        return True
 
     def create_session(self):
-        self.convertYaml()
+        answers = prompt(quest_api)
+        API_KEY = answers['TWCC_API_KEY']
+        KEY_NAME = answers['TWCC_KEY_NAME']
+        self.convertYaml(API_KEY, KEY_NAME)
         self.load_session()
 
     def load_session(self):
@@ -46,13 +76,16 @@ class Session(object):
                 elif key == "twcc_api_key":
                     (key_u, key_v) = val.split(":")
                     self.credentials[key_u] = key_v
+        if len(self.credentials.keys())>=1:
+            self.default_key = self.credentials.keys()[0]
+
         self.clusters = {}
         import yaml
         config = yaml.load(open(self.yaml, 'r').read())
         self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
         del config
 
-    def convertYaml(self):
+    def convertYaml(self, api_key, key_name):
         """
         Todo:
            * need to change
@@ -73,10 +106,7 @@ class Session(object):
             if 'host' in t_config:
                 mbuf += "[default]\n"
                 mbuf += "twcc_host={0}\n".format(t_config['host'])
-            if 'keys' in t_config:
-                for usr in t_config['keys']:
-                    mbuf += "twcc_api_key={0}:{1}\n".format(usr,
-                                                            t_config['keys'][usr])
+            mbuf += "twcc_api_key={0}:{1}\n".format(key_name, api_key)
             open(self.files['credential'], 'w').write(mbuf)
 
 
@@ -89,8 +119,11 @@ def mkdir_p(path):
         else:
             raise
 
-
 def session_start():
-    return Session(
-        twcc_yaml_path="/home/gunter/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
+    if not '_TWCC_SESSION_' == globals():
+        return Session(
+            twcc_yaml_path="/home/gunter/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
+    else:
+        global _TWCC_SESSION_
+        return _TWCC_SESSION_
 
