@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-TWCC_PATH="/home/nchc1803001/NCHC/twcc-cli/src"
+TWCC_PATH="/home/fychao/Working/twcc-cli/src"
 sys.path[1]=TWCC_PATH
 
 from termcolor import colored
@@ -58,7 +58,7 @@ def create():
     #spin.stop()
     print("---\n\n")
     print("site_id: %s"%site_id)
-
+    print(b.getConnInfo(site_id))
 
     #pod_name = b.getPodName(site_id)
     #bindIp = b.getIpBindAttr([

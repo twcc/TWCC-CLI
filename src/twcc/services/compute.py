@@ -104,6 +104,15 @@ class sites(GenericService):
         table_info = ans['site_extra_prop']
         self._cache_sol_[ sol_id ] = table_info
 
+    def getConnInfo(self, site_id):
+        info_gen = self.queryById(site_id)
+        info_detail = self.getDetail(site_id)
+        usr_name = info_gen['user']['username']
+        info_port = [ x['port'] for x in info_detail['Service'][0]['ports'] if x['target_port'] == 22 ][0]
+        info_pub_ip = info_detail['Service'][0]['public_ip'][0]
+
+        return "{}@{}:{}".format(usr_name, info_pub_ip, info_port)
+
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
