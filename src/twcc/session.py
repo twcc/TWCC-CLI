@@ -75,6 +75,8 @@ class Session(object):
                 elif key == "twcc_api_key":
                     (key_u, key_v) = val.split(":")
                     self.credentials[key_u] = key_v
+                elif key == "twcc_ssh_key":
+                    self.ssh_key = val
         if len(self.credentials.keys())>=1:
             self.default_key = self.credentials.keys()[0]
 

@@ -111,7 +111,7 @@ class sites(GenericService):
         info_port = [ x['port'] for x in info_detail['Service'][0]['ports'] if x['target_port'] == 22 ][0]
         info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
-        return "{}@{}:{}".format(usr_name, info_pub_ip, info_port)
+        return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
