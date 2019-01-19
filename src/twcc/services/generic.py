@@ -5,18 +5,18 @@ import yaml
 from twcc.util import pp, isNone
 from twcc.clidriver import ServiceOperation
 
-class GenericService():
+# change to new-style-class https://goo.gl/AYgxqp
+class GenericService(object):
 
     def __init__(self, debug=False):
         # current working information
         self._csite_ = "__UNDEF__"
-        self._api_key_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
         self._debug_ = debug
-        self.content_type = 'json'
 
         self.twcc = ServiceOperation()
+        self._api_key_ = self.twcc._session_.default_key
         self.twcc._debug = debug
 
         self._project_id = None
@@ -33,6 +33,18 @@ class GenericService():
 
         self.http_verb = 'get'
         self.http_verb_valid = self.twcc.http_verb_valid
+
+    def _chkSite_(self):
+        if isNone(self._csite_):
+            raise ValueError("No site value.")
+        elif not self._csite_ in self.getSites():
+            raise ValueError("Site value is not valid. {0}".format(self._csite_))
+        else:
+            return True
+
+    def getSites(self):
+        exclu = ['admin', 'harbor', 'goc', 'test_sit', 'nchc-ad', 'haproxy_stats']
+        return [ x for x in self.twcc._session_.clusters if not x in exclu]
 
     def _isAlive(self):
         return self.twcc.try_alive()
@@ -55,7 +67,6 @@ class GenericService():
             func = self._func_,
             url_dict = self.url_dic if not isNone(self.url_dic) else None,
             data_dict = self.data_dic if not isNone(self.data_dic) else None,
-            ctype = 'multipart/form-data' if self.content_type == 'file' else "application/json",
             http = self.http_verb,
             url_ext_get = self.ext_get,
             res_type = self.res_type)
@@ -75,6 +86,7 @@ class GenericService():
 
     def queryById(self, mid):
         self.url_dic = { self.__class__.__name__ : mid }
+        self.http_verb = 'get'
         res = self._do_api()
         self.url_dic = None
         return res
@@ -86,6 +98,7 @@ class GenericService():
     @project_id.setter
     def project_id(self, proj_id):
         self._project_id = proj_id
+        print (">>>", self._project_id)
 
     def delete(self, mid):
         self.http_verb = "delete"

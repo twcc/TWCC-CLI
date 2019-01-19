@@ -7,11 +7,12 @@ from twcc.util import pp, isNone, table_layout
 chkPortPair = lambda x: True if type(x)==type({}) and len(set(['exposed', 'inner']).intersection(set(x.keys())) ) == 2 else False
 
 class sites(GenericService):
-    def __init__(self, api_key_tag, debug=False):
+    # use default key_tag
+    #def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
 
         self._csite_ = "k8s-taichung-default"
-        self._api_key_ = api_key_tag
         self._cache_sol_ = {}
 
     def __del__(self):
@@ -23,14 +24,18 @@ class sites(GenericService):
 
     @staticmethod
     def getGpuDefaultHeader():
-        gpu_default = { 'bucket' : None,
-            'replica' : "1",
+        gpu_default = {
+            #'bucket' : None,
+            #'replica' : "1",
             'command' : "whoami; sleep 600;",
-            'flavor' : "10core40GBMemory1GPU" ,
-            #'image' : "registry.twcc.ai/ngc/vtr:latest",
-            'image' : "registry.twcc.ai/ngc/nvidia/tensorflow:latest",
-            'gpfs01-mount-path' : "/mnt/gpfs/work",
-            'gpfs02-mount-path' : "/mnt/gpfs/home"}
+            'flavor' : "1 GPU + 04 cores + 080GB memory",
+            #'image' : "registry.twcc.ai/ngc/nvidia/tensorflow-18.10-py2-v1:latest",
+            'image' : "tensorflow-18.10-py2-v1:latest",
+            #'image' : "tensorflow-18.08-py2-v1:latest",
+            'replica' : '1',
+            'gpfs01-mount-path' : "/home/littedd18",
+            'gpfs02-mount-path' : "/mnt/work"
+            }
         return dict([ ("x-extra-property-%s"%(x), gpu_default[x]) for x in gpu_default.keys() ])
 
     @staticmethod
@@ -50,6 +55,7 @@ class sites(GenericService):
             return default_assign_ip
 
     def list(self):
+        #print (self._project_id)
         self.ext_get = {'project': self._project_id}
         return self._do_api()
 
@@ -59,8 +65,7 @@ class sites(GenericService):
         self.http_verb = 'post'
         self.data_dic = {"name": name,
                 "project": self._project_id,
-                "solution": sol_id,
-                'desc': "test by aug"}
+                "solution": sol_id}
         #print(self.data_dic)
         #print(self.twcc.header_extra)
         return self._do_api()
@@ -92,13 +97,16 @@ class sites(GenericService):
             return ans
 
     def _do_list_solution(self, sol_id):
-        self.proj = projects(self._api_key_, self.twcc._debug)
+        self.proj = projects(self.twcc._debug)
         self.proj._csite_ = self._csite_
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
         table_info = ans['site_extra_prop']
         self._cache_sol_[ sol_id ] = table_info
 
+    def isReady(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "Ready"
 
     def getDetail(self, site_id):
         self.url_dic = {"sites":site_id, 'container':""}

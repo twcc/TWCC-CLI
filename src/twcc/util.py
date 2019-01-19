@@ -1,3 +1,8 @@
+import threading
+import sys, os
+import time
+import unicodedata
+
 def parsePtn(url):
     import re
     g = re.findall(r'\{[A-Z]+\}', url)
@@ -18,13 +23,20 @@ def jpp(**args):
 def isNone(x):
     return True if type(x) == type(None) else False
 
-def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
     from terminaltables import AsciiTable, SingleTable
     from colorclass import Color
     from termcolor import cprint
     from textwrap import wrap
     import time
+    import json
 
+    if type(json_obj) == type({}):
+        json_obj = [json_obj]
+    if not len(caption_row)>0 and type(json_obj) == type([]):
+        if len(json_obj)>0:
+            row = json_obj[0]
+            caption_row = row.keys()
     heading_cap = set(['id', 'name'])
 
     intersect = set(caption_row).intersection(heading_cap)
@@ -44,7 +56,7 @@ def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
 
     for ele in json_obj:
         table_info.append([ ele[cap] for cap in caption_row])
-    table = SingleTable(table_info, title)
+    table = AsciiTable(table_info, title)
 
 
     for idx in range(len(table.table_data[1])):
@@ -55,7 +67,14 @@ def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
             if len(ele)>9:
                 ptn = "[{0:02d}] {1}\n"
             for idy in range(len(ele)):
-                tmp += ptn.format(idy+1, ele[idy])
+                out_buf = ele[idy]
+                try:
+                    out_buf = json.loads(out_buf)
+                    out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
+                except:
+                    pass
+                tmp += ptn.format(idy+1, out_buf)
+
             table.table_data[1][idx] = tmp
         elif type(ele) == type({}): # for dictionary
             tmp = "%s"%"\n".join([ "[%s] %s"%(x, ele[x]) for x in ele.keys()])
@@ -67,33 +86,93 @@ def table_layout(title, json_obj, caption_row=None, debug=False, isWrap=True):
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time), 'red', attrs=['bold'])
 
-def table_layout_william(title, json_obj, caption_row=None, debug=False):
-    from terminaltables import AsciiTable, SingleTable
+def dic_seperator(d):
+    non_dic_cap_table = []
+    dic_cap_table = []
+
+    if type(d) is list:
+        for key in d[0].keys():
+            if type(d[0][key]) is dict:
+                dic_cap_table.append(key)
+            else:
+                non_dic_cap_table.append(key)
+    elif type(d) is dict:
+        for key in d.keys():
+            if type(d[key]) is dict:
+                dic_cap_table.append(key)
+            else:
+                non_dic_cap_table.append(key)
+
+    return non_dic_cap_table,dic_cap_table
+
+
+def create_table_list(obj,tt):
     from colorclass import Color
     from termcolor import cprint
+    from terminaltables import AsciiTable as AC
+
     import time
+    temp_list = []
 
-    table_info = []
-    if type(json_obj) is list:
-        table_cap = [head for head in json_obj[0].keys()]
-        table_info.append([ Color("{autoyellow}%s{/autoyellow}"%x) for x in table_cap])
-        for data_d in json_obj:
-            temp = []
-            for data in data_d:
-                temp.append(data_d[data])
-            table_info.append(temp)
-    elif type(json_obj) is dict:
-        table_cap = [head for head in json_obj.keys()]
-        print(table_cap)
-        table_info.append([ Color("{autoyellow}%s{/autoyellow}"%x) for x in table_cap])
-        temp = []
-        for data_d in table_cap:
-            #temp.append(json_obj[data_d][:20])
-            print(json_obj[data_d])
-        table_info.append(temp)
+    temp_list.append([cap for cap in tt])
 
-    table = AsciiTable(table_info,title)
-    table1 = SingleTable(table_info,title)
-    print(table.table)
-    print(table1.table)
+    for i in range(len(obj)):
+        tf = []
+        for na in tt:
+            if na in ["created_at","expired_time"]:
+                ti = time.localtime(int(str(obj[i][na])[:11]))
+                tf.append("{}/{}/{}\n{}:{}:{}".format(ti.tm_year,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,ti.tm_sec))
+            else:
+                tf.append(obj[i][na])
+        temp_list.append(tf)
 
+    temp_table = AC(temp_list)
+
+    return temp_table
+
+
+class SpinCursor(threading.Thread):
+    """ A console spin cursor class """
+
+    def __init__(self, msg='',maxspin=0,minspin=10,speed=5):
+        # Count of a spin
+        self.count = 0
+        self.out = sys.stdout
+        self.flag = False
+        self.max = maxspin
+        self.min = minspin
+        # Any message to print first ?
+        self.msg = msg
+        # Complete printed string
+        self.string = ''
+        # Speed is given as number of spins a second
+        # Use it to calculate spin wait time
+        self.waittime = 1.0/float(speed*4)
+        if os.name == 'posix':
+            self.spinchars = (unicodedata.lookup('FIGURE DASH'),u'\\ ',u'| ',u'/ ')
+        else:
+            # The unicode dash character does not show
+            # up properly in Windows console.
+            self.spinchars = (u'-',u'\\ ',u'| ',u'/ ')
+        threading.Thread.__init__(self, None, None, "Spin Thread")
+
+    def spin(self):
+        """ Perform a single spin """
+
+        for x in self.spinchars:
+            self.string = self.msg + "...\t" + x + "\r"
+            self.out.write(self.string.encode('utf-8'))
+            self.out.flush()
+            time.sleep(self.waittime)
+
+    def run(self):
+
+        while (not self.flag) and ((self.count<self.min) or (self.count<self.max)):
+            self.spin()
+            self.count += 1
+
+        # Clean up display...
+        self.out.write(" "*(len(self.string) + 1))
+
+    def stop(self):
+        self.flag = True

@@ -30,4 +30,4 @@ __all__ = ["clidriver", "util", "services"]
 
 os.environ['_STAGE_'] = "production"
 
-_session_ = session_start()
+_TWCC_SESSION_ = session_start()
