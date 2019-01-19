@@ -3,7 +3,7 @@ info:
     ctime:  "2018-10-12 09:21:00"
     auth:   "August Chao <1803001@narlabs.org.tw>"
 stage:
-    host:   "https://140.110.10.7:8000"
+    host:   "https://140.110.10.7:8443"
     keys:
         usr1:   "5e38ba3f-8471-4d47-a386-54a3c0775d0c"
         sys:    "fb01047f-1098-4cf3-ae5a-7311f79b42df"

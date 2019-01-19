@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-TWCC_PATH="/home/fychao/Working/twcc-cli/src/"
+TWCC_PATH="/home/u9764578/twcc-cli/src"
 sys.path[1]=TWCC_PATH
 
 from termcolor import colored

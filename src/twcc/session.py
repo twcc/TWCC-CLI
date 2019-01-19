@@ -25,6 +25,11 @@ quest_api = [
         'type': 'input',
         'name': 'TWCC_KEY_NAME',
         'message': "Enter Key Name for this key",
+    },
+    {
+        'type': 'password',
+        'name': 'TWCC_SSH_KEY',
+        'message': "Enter SSH Key for this Container"
     }
 ]
 
@@ -57,7 +62,8 @@ class Session(object):
         answers = prompt(quest_api)
         API_KEY = answers['TWCC_API_KEY']
         KEY_NAME = answers['TWCC_KEY_NAME']
-        self.convertYaml(API_KEY, KEY_NAME)
+        SSH_KEY = answers['TWCC_SSH_KEY']
+        self.convertYaml(API_KEY, KEY_NAME,SSH_KEY)
         self.load_session()
 
     def load_session(self):
@@ -78,7 +84,9 @@ class Session(object):
                 elif key == "twcc_ssh_key":
                     self.ssh_key = val
         if len(self.credentials.keys())>=1:
+            #print(type(self.credentials.keys()))
             self.default_key = self.credentials.keys()[0]
+            #self.default_key = self.credentials.keys()
 
         self.clusters = {}
         import yaml
@@ -86,7 +94,7 @@ class Session(object):
         self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
         del config
 
-    def convertYaml(self, api_key, key_name):
+    def convertYaml(self, api_key, key_name,ssh_key_name):
         """
         Todo:
            * need to change
@@ -108,6 +116,7 @@ class Session(object):
                 mbuf += "[default]\n"
                 mbuf += "twcc_host={0}\n".format(t_config['host'])
             mbuf += "twcc_api_key={0}:{1}\n".format(key_name, api_key)
+            mbuf += "twcc_ssh_key={}\n".format(ssh_key_name)
             open(self.files['credential'], 'w').write(mbuf)
 
 
@@ -123,7 +132,7 @@ def mkdir_p(path):
 def session_start():
     if not '_TWCC_SESSION_' == globals():
         return Session(
-            twcc_yaml_path="/home/gunter/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
+            twcc_yaml_path="/home/u9764578/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
     else:
         global _TWCC_SESSION_
         return _TWCC_SESSION_
