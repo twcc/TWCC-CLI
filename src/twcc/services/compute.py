@@ -33,7 +33,7 @@ class sites(GenericService):
             'image' : "tensorflow-18.10-py2-v1:latest",
             #'image' : "tensorflow-18.08-py2-v1:latest",
             'replica' : '1',
-            'gpfs01-mount-path' : "/home/littedd18",
+            'gpfs01-mount-path' : "/home/littledd18",
             'gpfs02-mount-path' : "/mnt/work"
             }
         return dict([ ("x-extra-property-%s"%(x), gpu_default[x]) for x in gpu_default.keys() ])

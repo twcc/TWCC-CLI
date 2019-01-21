@@ -3,12 +3,12 @@ info:
     ctime:  "2018-10-12 09:21:00"
     auth:   "August Chao <1803001@narlabs.org.tw>"
 stage:
-    host:   "https://140.110.10.7:8443"
+    host:   "https://140.110.10.7:8000"
     keys:
         usr1:   "5e38ba3f-8471-4d47-a386-54a3c0775d0c"
         sys:    "fb01047f-1098-4cf3-ae5a-7311f79b42df"
 production:
-    host:   "http://apigateway.twcc.ai:8000"
+    host:   "https://apigateway.twcc.ai:8443"
     keys:
         usr1:   "7fe2bdd8-be01-430f-865f-feaec9dba27b"
         sys:    "042e62a7-d1db-4b8a-881c-b224d2d7cf77"    

@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-TWCC_PATH="/home/u9764578/twcc-cli/src"
+TWCC_PATH="/home/gunter/twcc-cli/src"
 sys.path[1]=TWCC_PATH
 
 from termcolor import colored
@@ -121,6 +121,19 @@ def rm(con_ids):
     else:
         print("Need to enter Container ID")
 
+@click.command()
+@click.argument('s_id',nargs=1)
+def gen(s_id):
+    print("This is to generate the shell script to connect.")
+    b = sites()
+    site_id = s_id
+    conn_info = b.getConnInfo(site_id)
+    ssh_key = b.twcc.ssh_key
+
+    with open('login.sh','w') as f:
+        f.write("sshpass -p {} ssh {} -o StrictHostKeyChecking=no 'cd ai-benchmark/;sudo pip install -r requirement.txt;python v3_web.py &'".format(ssh_key,conn_info))
+    print("Please run login.sh to start the service.")
+
 @click.group()
 def cli():
     pass
@@ -128,6 +141,7 @@ def cli():
 cli.add_command(create)
 cli.add_command(list)
 cli.add_command(list_sol)
+cli.add_command(gen)
 cli.add_command(rm)
 
 if __name__ == "__main__":

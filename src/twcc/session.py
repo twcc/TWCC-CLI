@@ -132,7 +132,7 @@ def mkdir_p(path):
 def session_start():
     if not '_TWCC_SESSION_' == globals():
         return Session(
-            twcc_yaml_path="/home/u9764578/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
+            twcc_yaml_path="/home/gunter/twcc-cli/src/yaml/NCHC_API-Test_env.yaml")
     else:
         global _TWCC_SESSION_
         return _TWCC_SESSION_
