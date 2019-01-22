@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-TWCC_PATH="/home/gunter/twcc-cli/src"
+TWCC_PATH="/home/nchc1803001/NCHC/hi/twcc-cli/src/"
 sys.path[1]=TWCC_PATH
 
 from termcolor import colored
@@ -56,10 +56,10 @@ def create():
             wait_ready = True
         time.sleep(5)
     #spin.stop()
-    print("---\n\n")
+    #print("---\n\n")
     print("site_id: %s"%site_id)
-    print("ssh key: %s"%b.twcc.ssh_key)
-    print(b.getConnInfo(site_id))
+    #print("ssh key: %s"%b.twcc.ssh_key)
+    #print(b.getConnInfo(site_id))
 
 
     #pod_name = b.getPodName(site_id)
@@ -131,7 +131,7 @@ def gen(s_id):
     ssh_key = b.twcc.ssh_key
 
     with open('login.sh','w') as f:
-        f.write("sshpass -p {} ssh {} -o StrictHostKeyChecking=no 'cd ai-benchmark/;sudo pip install -r requirement.txt;python v3_web.py &'".format(ssh_key,conn_info))
+        f.write("sshpass -p {} ssh {} -f -o StrictHostKeyChecking=no 'cd ai-benchmark/;sudo pip install -r requirement.txt;python v3_web.py'".format(ssh_key,conn_info))
     print("Please run login.sh to start the service.")
 
 @click.group()
