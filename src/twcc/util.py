@@ -59,28 +59,29 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
     table = AsciiTable(table_info, title)
 
 
-    for idx in range(len(table.table_data[1])):
-        ele = table.table_data[1][idx]
-        if type(ele) == type([]) and len(ele)>0: # for list
-            tmp = ""
-            ptn = "[{0:01d}] {1}\n"
-            if len(ele)>9:
-                ptn = "[{0:02d}] {1}\n"
-            for idy in range(len(ele)):
-                out_buf = ele[idy]
-                try:
-                    out_buf = json.loads(out_buf)
-                    out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
-                except:
-                    pass
-                tmp += ptn.format(idy+1, out_buf)
+    for idy in range(len(table.table_data)):
+        for idx in range(len(table.table_data[idy])):
+            ele = table.table_data[idy][idx]
+            if type(ele) == type([]) and len(ele)>0: # for list
+                tmp = ""
+                ptn = "[{0:01d}] {1}\n"
+                if len(ele)>9:
+                    ptn = "[{0:02d}] {1}\n"
+                for idy in range(len(ele)):
+                    out_buf = ele[idy]
+                    try:
+                        out_buf = json.loads(out_buf)
+                        out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
+                    except:
+                        pass
+                    tmp += ptn.format(idy+1, out_buf)
 
-            table.table_data[1][idx] = tmp
-        elif type(ele) == type({}): # for dictionary
-            tmp = "%s"%"\n".join([ "[%s] %s"%(x, ele[x]) for x in ele.keys()])
-            table.table_data[1][idx] = tmp
-        elif type(ele) == type(""): # for string
-            table.table_data[1][idx] = '\n'.join(wrap(ele, 20))
+                table.table_data[idy][idx] = tmp
+            elif type(ele) == type({}): # for dictionary
+                tmp = "%s"%"\n".join([ "[%s] %s"%(x, ele[x]) for x in ele.keys()])
+                table.table_data[idy][idx] = tmp
+            elif type(ele) == type(""): # for string
+                table.table_data[idy][idx] = '\n'.join(wrap(ele, 20))
 
     print(table.table)
     if debug:
