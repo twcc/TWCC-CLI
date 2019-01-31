@@ -17,9 +17,16 @@ class GenericService(object):
 
         self.twcc = ServiceOperation()
         self._api_key_ = self.twcc._session_.default_key
+        # @todo
+        try:
+            self._project_id = self.twcc._session_.def_proj
+        except:
+            self._project_id = ""
+            self._project_id = None
+            print("WARNING: no default_project")
+
         self.twcc._debug = debug
 
-        self._project_id = None
 
         # map to url
         self.url_dic = None

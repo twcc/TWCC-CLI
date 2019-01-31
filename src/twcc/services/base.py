@@ -20,7 +20,7 @@ class acls(GenericService):
     """ This Class is for ACL api call
     """
 
-    def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         """ constractor for this ACL class
 
         Args:
@@ -29,7 +29,6 @@ class acls(GenericService):
         GenericService.__init__(self, debug=debug)
 
         self._csite_ = "admin"
-        self._api_key_ = api_key_tag
         self.res_type = "json"
 
     def getSites(self):
@@ -75,7 +74,6 @@ class keypairs(GenericService):
 class projects(GenericService):
     """ This function is Site admin only
     """
-    #def __init__(self, api_key_tag, debug=False):
     def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
 

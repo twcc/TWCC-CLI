@@ -42,7 +42,11 @@ class ServiceOperation:
     def load_credential(self):
         self.api_keys = self._session_.credentials
         self.host_url = self._session_.host
-        self.ssh_key = self._session_.ssh_key
+        #@todo
+        try:
+            self.def_proj = self._session_.def_proj
+        except:
+            self.def_proj = ""
 
     def load_yaml(self):
 

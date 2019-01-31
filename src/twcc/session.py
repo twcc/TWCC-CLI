@@ -5,6 +5,7 @@ import os
 import re
 from twcc.util import *
 from PyInquirer import Validator, ValidationError, prompt
+from PyInquirer import style_from_dict, Token
 
 class TwccApiValidator(Validator):
     def validate(self, document):
@@ -13,6 +14,16 @@ class TwccApiValidator(Validator):
             raise ValidationError(
                 message='Please enter a TWCC API key',
                 cursor_position=len(document.text))  # Move cursor to end
+custom_style_2 = style_from_dict({
+    Token.Separator: '#6C6C6C',
+    Token.QuestionMark: '#FF9D00 bold',
+    #Token.Selected: '',  # default
+    Token.Selected: '#5F819D',
+    Token.Pointer: '#FF9D00 bold',
+    Token.Instruction: '',  # default
+    Token.Answer: '#5F819D bold',
+    Token.Question: '',
+})
 
 quest_api = [
     {
@@ -26,11 +37,6 @@ quest_api = [
         'name': 'TWCC_KEY_NAME',
         'message': "Enter Key Name for this key",
     },
-    {
-        'type': 'password',
-        'name': 'TWCC_SSH_KEY',
-        'message': "Enter SSH Key for this Container"
-    }
 ]
 
 class Session(object):
@@ -52,6 +58,7 @@ class Session(object):
         else:
             self.create_session()
 
+
     def is_files_exist(self):
         for fn in self.files.keys():
             if not os.path.isfile(self.files[fn]):
@@ -62,9 +69,31 @@ class Session(object):
         answers = prompt(quest_api)
         API_KEY = answers['TWCC_API_KEY']
         KEY_NAME = answers['TWCC_KEY_NAME']
-        SSH_KEY = answers['TWCC_SSH_KEY']
-        self.convertYaml(API_KEY, KEY_NAME,SSH_KEY)
+        self.convertYaml(API_KEY, KEY_NAME)
+        self._getProjects()
         self.load_session()
+
+    def _getProjects(self):
+        from twcc.services.base import acls, projects
+        import json
+        a = projects()
+        a._csite_ = 'k8s-taichung-default' # TWCC allow k8s only
+        cluster = a.getSites()[0]
+        avl_proj = a.list()
+        table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
+        quest_api = [
+            { 'type': 'rawlist',
+              'name': 'default_project',
+              'message': "Default *PROJECT_ID* when using TWCC-Cli:",
+              'choices': [ "{} - {}".format(x['id'], x['name']) for x in avl_proj ],
+            }]
+        answers = prompt(quest_api, style=custom_style_2)
+        proj_id = answers['default_project'].split(" - ")[0]
+        # @todo here!
+        fn_cred = self.files['credential']
+        open(fn_cred, 'a+').write("twcc_proj_id={}\n".format(proj_id))
+
+
 
     def load_session(self):
         self.yaml = self.files['resources']
@@ -83,6 +112,9 @@ class Session(object):
                     self.credentials[key_u] = key_v
                 elif key == "twcc_ssh_key":
                     self.ssh_key = val
+                elif key == "twcc_proj_id":
+                    self.def_proj = val
+
         if len(self.credentials.keys())>=1:
             #print(type(self.credentials.keys()))
             self.default_key = self.credentials.keys()[0]
@@ -94,7 +126,7 @@ class Session(object):
         self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
         del config
 
-    def convertYaml(self, api_key, key_name,ssh_key_name):
+    def convertYaml(self, api_key, key_name):
         """
         Todo:
            * need to change
@@ -116,7 +148,7 @@ class Session(object):
                 mbuf += "[default]\n"
                 mbuf += "twcc_host={0}\n".format(t_config['host'])
             mbuf += "twcc_api_key={0}:{1}\n".format(key_name, api_key)
-            mbuf += "twcc_ssh_key={}\n".format(ssh_key_name)
+            #mbuf += "twcc_ssh_key={}\n".format(ssh_key_name)
             open(self.files['credential'], 'w').write(mbuf)
 
 
