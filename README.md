@@ -7,13 +7,16 @@ requires:
 1. python 2.7
 1. python 2.7-dev
 
-in ubuntu
+scripts for Ubuntu 16.04 @ TWCC
 ```
-sudo apt install build-essential python2.7 python2.7-dev
+sudo sed -i 's/nova\.clouds\./tw./g' /etc/apt/sources.list
+sudo apt update
+sudo apt -y install build-essential python2.7 python2.7-dev
 ```
 
-try
+in project directory and try
 ```
+pipenv install
 pipenv run python src/test/gpu_cntr.py
 ```
 
