@@ -4,13 +4,10 @@
 
 try
 ```
-pipenv run python ./src/test/gpu_cntr.py list
+pipenv run python src/test/gpu_cntr.py
 ```
 
 del credential file
 ```
 rm -rf ~/.twcc_data/credential
 ```
-
-todo:
-1. virtual env.
