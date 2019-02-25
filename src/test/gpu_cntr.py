@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys, os
+from joblib import Parallel, delayed
 TWCC_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path[1]=TWCC_PATH
 
@@ -14,14 +15,12 @@ TWCC_LOGO() ## here is logo
 import re
 from twcc.util import pp, table_layout, SpinCursor
 from twcc.services.solutions import solutions
-from twcc.services.base import acls, users, wallet
+from twcc.services.base import acls, users
 from twcc.services.projects import projects
 from twcc.session import session_start
 from twcc.services.compute import sites
 import click,os
 import time
-
-use_sol_id = "4"
 
 def list_projects():
     proj = projects()
@@ -30,49 +29,96 @@ def list_projects():
         print ("="*5, cluster, "="*5)
         table_layout ("Proj for {0}".format(cluster), proj.list(), ['id', 'name'])
 
-@click.command()
-def create():
-    b = sites()
-    sol_id = use_sol_id
-    res = b.create("twcc_cli", sol_id, b.getGpuDefaultHeader())
-    if 'id' in res:
-        site_id = res['id']
-    else:
-        pp(res=res)
-        return False
 
+def list_img(sol_name):
+    b = sites(debug=False)
+    print(b.getAvblImg(sol_name))
+
+
+def list_all_img():
+    sol_list = sites.getSolList(name_only=True)
+    for sol in sol_list:
+        list_img(sol)
+
+def list_s3():
+    b = sites()
+    print(b.getAvblS3())
+
+
+def doSiteReady(site_id):
+    b = sites(debug=False)
     wait_ready = False
     while not wait_ready:
+        print("Waiting for container to be Ready.")
         if b.isReady(site_id):
             wait_ready = True
         time.sleep(5)
-    print("site_id: %s"%site_id)
+    return site_id
+
+def create_cntr(cntr_name="twcc-cli", gpu=1, sol_name='Tensorflow', sol_img=None, s3=[], isWait=True):
+    def_header = sites.getGpuDefaultHeader(gpu)
+    sol_id = sites.checkSolName(sol_name)
+
+    b = sites(debug=False)
+    imgs = b.getAvblImg(sol_name, latest_first=True)
+    if type(sol_img) == type(None) or len(sol_name)==0:
+        def_header['x-extra-property-image'] = imgs[0]
+    else:
+        if sol_img in imgs:
+            def_header['x-extra-property-image'] = sol_img
+        else:
+            raise ValueError("Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
+    ## checking S3
+    max_mount_s3 = 4
+    if len(s3) > max_mount_s3:
+        raise ValueError("Mounting S3 buckets are > {0}.".format(max_mount_s3))
+    else:
+        my_s3_dict = b.getAvblS3(mtype='dict')
+        my_s3 = set([ x for x in my_s3_dict])
+        mount_s3 = set(s3)
+
+        diff_s3 = mount_s3.difference(my_s3)
+        if len(diff_s3) > 0:
+            raise ValueError("S3 bucket can NOT mount: {0}.".format( ", ".join(diff_s3) ))
+        else:
+            def_header['x-extra-property-bucket'] = sites.mkS3MountFormat(s3)
+
+
+    res = b.create(cntr_name, sol_id, def_header)
+    print("Site id: {0} is created.".format(res['id']))
+
+    if isWait:
+        doSiteReady(res['id'])
+    return int(res['id'])
+
 
 def list_all_solutions():
     a = solutions()
-    table_layout("all avalible solutions", a.list())
+    cntrs = a.list()
+    col_name = ['id','name', 'create_time', 'status', 'status_reason']
+    table_layout("all avalible solutions", cntrs, caption_row=col_name)
 
 
-@click.command()
 def list_sol():
-    a = sites()
-    a.list_solution('4')
-
-@click.command()
-def list():
-    a = sites()
-    my_sites = a.list()
-    if len(my_sites)>0:
-        table_layout('sites', my_sites)
+    print(sites.getSolList(mtype='list', name_only=True))
 
 def del_all():
     a = sites()
     [ a.delete(site_info['id']) for site_info in a.list()]
 
-@click.command()
-@click.argument('con_ids', nargs=-1)
-def rm(con_ids):
+def get_all_info():
     a = sites()
+    return [ site_info  for site_info in a.list(isAll=True)]
+
+def get_site_detail(site_id):
+    a = sites()
+    return a.getDetail(site_id)
+
+def del_cntr(con_ids):
+    a = sites()
+    if type(con_ids) == type(1):
+        con_ids = [con_ids]
     if len(con_ids) > 0:
         for con_id in con_ids:
             a.delete(con_id)
@@ -80,24 +126,52 @@ def rm(con_ids):
     else:
         print("Need to enter Container ID")
 
-@click.command()
-@click.argument('s_id',nargs=1)
-def gen(s_id):
+def gen_cntr(s_id):
     print("This is container information for connection. ")
     b = sites()
     site_id = s_id
     conn_info = b.getConnInfo(site_id)
     print (conn_info)
 
-@click.group()
 def cli():
     pass
 
-cli.add_command(create)
-cli.add_command(list)
-cli.add_command(list_sol)
-cli.add_command(gen)
-cli.add_command(rm)
+
+def list_cntr(site_id=0, isTable=True):
+    if not type(site_id)==type(1):
+        raise ValueError("Site number: '{0}' error.".format(site_id))
+
+    if not isTable:
+        gen_cntr(site_id)
+    else:
+        a = sites()
+        if site_id==0:
+            my_sites = a.list()
+            if len(my_sites)>0:
+                col_name = ['id','name', 'create_time', 'status']
+                table_layout('sites', my_sites, caption_row=col_name)
+        else:
+            res = a.queryById(site_id)
+            col_name = ['id','name', 'create_time', 'status', 'status_reason']
+            table_layout('sites: %s'%site_id, res, caption_row=col_name)
 
 if __name__ == "__main__":
-    cli()
+
+    list_s3()
+    list_sol()
+    list_all_img()
+
+    # min call
+    #create_cntr('twcc-cli-gpu1', 1)
+    #create_cntr(1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe1'] )
+    #create_cntr('test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe'] )
+
+    #create_cntr('twcc-cli-test', 1, "Tensorflow", s3=['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'] )
+    # max call, only can mount 4 s3 buckects
+    site_id = create_cntr('twcc-cli-test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'], True )
+
+    list_cntr()
+    list_cntr(site_id)
+    list_cntr(site_id, isTable=False)
+    del_cntr(site_id)
+    list_cntr()

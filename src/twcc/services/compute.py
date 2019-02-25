@@ -23,20 +23,73 @@ class sites(GenericService):
             print("__del__")
 
     @staticmethod
-    def getGpuDefaultHeader():
+    def getGpuList(mtype='list'):
+      #@todo, python 3 is not good with dict key object
+      gpu_list = [ (1, '1 GPU + 04 cores + 090GB memory'),
+           (2, '2 GPU + 08 cores + 180GB memory'),
+           (4, '4 GPU + 16 cores + 360GB memory'),
+           (8, '8 GPU + 32 cores + 720GB memory')]
+      if mtype=='list':
+          return gpu_list
+      elif mtype=='dict':
+          return dict(gpu_list)
+
+    @staticmethod
+    def getSolList(mtype='list', name_only=False, reverse=False):
+        sol_list = [ (4, "Tensorflow"),
+          (9, "Caffe2"),
+          (10, "Caffe"),
+          (13, "CNTK"),
+          (16, "CUDA"),
+          (19, "MXNet"),
+          (24, "pyTorch"),
+          #(29, "TensorRT"), # not avalible for now
+          #(35, "TensorRT_Server"), # not avalible for now
+          (42, "Theano"),
+          (49, "Torch"),
+          (52, "Digits") ]
+
+        if reverse:
+            sol_list = [ (y, x) for (x, y) in sol_list]
+
+        if name_only and mtype=='list':
+            sol_list = [ y for (x, y) in sol_list]
+
+        if mtype=='list':
+            return sol_list
+        elif mtype=='dict' and not name_only:
+            return dict(sol_list)
+
+    @staticmethod
+    def checkSolName(sol_name):
+        sol_list = sites.getSolList(mtype='dict', reverse=True)
+
+        if sol_name in sol_list:
+            return sol_list[sol_name]
+        else:
+            return False
+
+    @staticmethod
+    def getGpuDefaultHeader(gpus=2):
+        gpu_list = sites.getGpuList(mtype='dict')
+        if not gpus in gpu_list.keys():
+            raise ValueError("GPU number '{0}' is not valid.".format(gpus))
+
         gpu_default = {
             #'bucket' : None,
-            #'replica' : "1",
             'command' : "whoami; sleep 600;",
-            'flavor' : "1 GPU + 04 cores + 080GB memory",
-            #'image' : "registry.twcc.ai/ngc/nvidia/tensorflow-18.10-py2-v1:latest",
-            'image' : "tensorflow-18.10-py2-v1:latest",
-            #'image' : "tensorflow-18.08-py2-v1:latest",
+            'flavor' : gpu_list[gpus],
             'replica' : '1',
-            'gpfs01-mount-path' : "/home/littledd18",
-            'gpfs02-mount-path' : "/mnt/work"
             }
         return dict([ ("x-extra-property-%s"%(x), gpu_default[x]) for x in gpu_default.keys() ])
+
+    @staticmethod
+    def mkS3MountFormat(alist):
+        import json
+        if len(alist)>0:
+            return json.dumps([ {"name": x, "mountpath": "/mnt/s3/%s"%(x)} for x in alist])
+        else:
+            return "[]"
 
     @staticmethod
     def getIpBindAttr(port_mapping, pod_name = "_UNDEF_"):
@@ -53,21 +106,46 @@ class sites(GenericService):
                 else:
                     raise ValueError("Port Mapping Error {0}".format(port_mapping))
             return default_assign_ip
+    def getAvblS3(self, mtype='list'):
+        res = self.list_solution(4, isShow=False)
+        buckets = [ x['name'] for x in res['bucket']]
+        if mtype=='list':
+            return buckets
+        elif mtype=='dict':
+            return dict([ (x, "/mnt/s3/%s"%(x)) for x in buckets])
 
-    def list(self):
-        #print (self._project_id)
-        self.ext_get = {'project': self._project_id}
+    def getAvblImg(self, sol_name, latest_first=True):
+        sol_id = sites.checkSolName(sol_name)
+        if sol_id:
+            res = self.list_solution(sol_id, isShow=False)
+            if latest_first:
+                return sorted(res['image'], reverse=True)
+            else:
+                return res['image']
+        else:
+            raise ValueError("Solution name:'{0}' is not available.".format(sol_name))
+
+    def list(self, isAll=False):
+        if isAll:
+            self.ext_get = {'project': self._project_id,
+                "all_users": 1 }
+        else:
+            self.ext_get = {'project': self._project_id}
         return self._do_api()
 
 
     def create(self, name, sol_id, extra_prop):
+
+        # @todo change this
+        extra_prop['x-extra-property-gpfs01-mount-path'] = '/mnt/work'
+        extra_prop['x-extra-property-gpfs02-mount-path'] = '/home/{}'.format(self._username)
+
         self.twcc.header_extra = extra_prop
         self.http_verb = 'post'
         self.data_dic = {"name": name,
+                "desc": 'TWCC-Cli created GPU container',
                 "project": self._project_id,
                 "solution": sol_id}
-        #print(self.data_dic)
-        #print(self.twcc.header_extra)
         return self._do_api()
 
     def update(self, data_dic):
@@ -92,7 +170,8 @@ class sites(GenericService):
 
         ans = self._cache_sol_[sol_id]
         if isShow:
-            table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
+            #table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
+            print(ans)
         elif not isShow:
             return ans
 

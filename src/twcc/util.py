@@ -36,7 +36,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
     if not len(caption_row)>0 and type(json_obj) == type([]):
         if len(json_obj)>0:
             row = json_obj[0]
-            caption_row = row.keys()
+            caption_row = list(row.keys())
     heading_cap = set(['id', 'name'])
 
     intersect = set(caption_row).intersection(heading_cap)

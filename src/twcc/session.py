@@ -32,11 +32,11 @@ quest_api = [
         'message': "Your API Key from www.TWCC.ai",
         'validate': TwccApiValidator
     },
-    {
-        'type': 'input',
-        'name': 'TWCC_KEY_NAME',
-        'message': "Enter Key Name for this key",
-    },
+    #{
+    #    'type': 'input',
+    #    'name': 'TWCC_KEY_NAME',
+    #    'message': "Enter Key Name for this key",
+    #},
 ]
 
 class Session(object):
@@ -68,30 +68,47 @@ class Session(object):
     def create_session(self):
         answers = prompt(quest_api)
         API_KEY = answers['TWCC_API_KEY']
-        KEY_NAME = answers['TWCC_KEY_NAME']
+        #KEY_NAME = answers['TWCC_KEY_NAME']
+        KEY_NAME = 'twcc'
         self.convertYaml(API_KEY, KEY_NAME)
         self._getProjects()
         self.load_session()
 
     def _getProjects(self):
-        from twcc.services.base import acls, projects
+        from twcc.services.base import acls, projects, users, api_key
         import json
+
+        u = users()
+        info_usr = u.list()
+        if len(info_usr)==0:
+            raise
+
+        info_usr = info_usr[0]
+        sess_yaml = "twcc_username={}\n".format(info_usr['username'])
+        print("hi, {} TWCC API-Key accepted!".format(info_usr['display_name']))
+
         a = projects()
+        prjs = a.getProjects()
+
+        #k = api_key()
+        #print(k.list())
+
         a._csite_ = 'k8s-taichung-default' # TWCC allow k8s only
         cluster = a.getSites()[0]
         avl_proj = a.list()
-        table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
+        #table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
+        # @todo here!
         quest_api = [
             { 'type': 'rawlist',
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
-              'choices': [ "{} - {}".format(x['id'], x['name']) for x in avl_proj ],
+              'choices': [ "{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
         answers = prompt(quest_api, style=custom_style_2)
         proj_id = answers['default_project'].split(" - ")[0]
-        # @todo here!
         fn_cred = self.files['credential']
-        open(fn_cred, 'a+').write("twcc_proj_id={}\n".format(proj_id))
+        sess_yaml += "twcc_proj_id={}\n".format(proj_id)
+        open(fn_cred, 'a+').write(sess_yaml)
 
 
 
@@ -114,10 +131,11 @@ class Session(object):
                     self.ssh_key = val
                 elif key == "twcc_proj_id":
                     self.def_proj = val
+                elif key == "twcc_username":
+                    self.def_username = val
 
         if len(self.credentials.keys())>=1:
-            #print(type(self.credentials.keys()))
-            self.default_key = self.credentials.keys()[0]
+            self.default_key = list(self.credentials.keys())[0]
             #self.default_key = self.credentials.keys()
 
         self.clusters = {}

@@ -20,8 +20,9 @@ class GenericService(object):
         # @todo
         try:
             self._project_id = self.twcc._session_.def_proj
+            self._username = self.twcc._session_.def_username
         except:
-            self._project_id = ""
+            self._username = ""
             self._project_id = None
             print("WARNING: no default_project")
 

@@ -2,11 +2,6 @@
 from __future__ import print_function
 from twcc.services.generic import GenericService
 
-class wallet(GenericService):
-    def __init__(self, debug=False):
-        GenericService.__init__(self, debug=debug)
-        self._csite_ = None
-
 class users(GenericService):
     def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
@@ -33,10 +28,7 @@ class acls(GenericService):
 
     def getSites(self):
         res = self.list()
-        #if 'data' in res:
         return sorted([ x['group'] for x in res['data'] ])
-        #else:
-        #    return sorted([ (x, y['group']) for x in res for y in res[x]])
 
     def listGroup(self):
         """ this api is the same with acl
@@ -83,11 +75,39 @@ class projects(GenericService):
         self.url_dic = {'projects': proj_id, 'solutions':sol_id}
         return self.list()
 
+    def getProjects(self):
+        s = iservice()
+        res = s.getAllProjects()
+
+        my_prj = {}
+        for prj in res['wallet']:
+
+            prj_code = prj['計畫系統代碼']
+            prj_avbl_cr = float(prj['錢包餘額'])
+            prj_name = prj['計畫名稱']
+            prj_ele = { 'prj_code': prj_code,
+                    'prj_avbl_cr': prj_avbl_cr,
+                    'prj_name': prj_name }
+            my_prj[prj_code] = prj_ele
+        return my_prj
 
 class api_key(GenericService):
-    def __init__(self, api_key_tag, debug=False):
+    def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
         self._csite_ = "admin"
-        self._api_key_ = api_key_tag
 
+    def getInfo(self):
+        self.url_dic = {'api_key': 'api_key'}
+        self._csite_ = 'admin'
+        return self.list()
+
+
+class iservice(GenericService):
+    def __init__(self, debug=False):
+        GenericService.__init__(self, debug=debug)
+
+
+    def getAllProjects(self):
+        self.url_dic = {"iservice":"user/all_wallet"}
+        return self.list()
 

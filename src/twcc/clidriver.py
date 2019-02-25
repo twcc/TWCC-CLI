@@ -124,8 +124,10 @@ class ServiceOperation:
 
         if not isNone(url_ext_get):
             t_url += "?"
+            t_url_tmp = []
             for param_key in url_ext_get.keys():
-                t_url += "{0}={1}".format(param_key, url_ext_get[param_key])
+                t_url_tmp.append( "{0}={1}".format(param_key, url_ext_get[param_key]) )
+            t_url += "&".join(t_url_tmp)
 
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
@@ -227,6 +229,9 @@ class ServiceOperation:
                 del url_dict[func]
 
                 ptn += "/"+"/".join( ["%s/%s"%(k, url_dict[k]) for k in url_dict.keys()] )
+
+                #todos
+                ptn = ptn.strip("/")
             else:
                 raise ValueError(
                     "Can not find '{0}' in provided dictionary.".format(func))
