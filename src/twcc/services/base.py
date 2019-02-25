@@ -82,9 +82,9 @@ class projects(GenericService):
         my_prj = {}
         for prj in res['wallet']:
 
-            prj_code = prj['計畫系統代碼']
-            prj_avbl_cr = float(prj['錢包餘額'])
-            prj_name = prj['計畫名稱']
+            prj_code = prj[u"計畫系統代碼"]
+            prj_avbl_cr = float(prj[u"錢包餘額"])
+            prj_name = prj[u"計畫名稱"]
             prj_ele = { 'prj_code': prj_code,
                     'prj_avbl_cr': prj_avbl_cr,
                     'prj_name': prj_name }

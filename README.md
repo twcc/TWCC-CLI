@@ -3,8 +3,14 @@
 > we cook twcc-cli
 
 requires:
+1. build-essential
 1. python 2.7
-2. python 2.7-dev
+1. python 2.7-dev
+
+in ubuntu
+```
+sudo apt install build-essential python2.7 python2.7-dev
+```
 
 try
 ```
