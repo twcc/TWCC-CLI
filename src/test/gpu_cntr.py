@@ -145,7 +145,7 @@ def gen_cntr(s_id):
 
 @click.command()
 @click.option('-site', 'site_id', default = 0, type = int, help="Enter the site id")
-@click.option('-table', 'isTable', default = True, type = bool, help="Enter the site id")
+@click.option('-table', 'isTable', default = True, type = bool, help="Show cntr info in table style.")
 def list_cntr(site_id, isTable):
     if not type(site_id)==type(1):
         raise ValueError("Site number: '{0}' error.".format(site_id))
