@@ -7,7 +7,8 @@ requires:
 1. python 2.7
 1. python 2.7-dev
 
-- Step 1. scripts for Ubuntu 16.04 @ TWCC
+## Step 1. scripts for Ubuntu 16.04 @ TWCC
+
 ```
 sudo sed -i 's/nova\.clouds\./tw./g' /etc/apt/sources.list
 sudo apt update
@@ -24,18 +25,18 @@ or just run
 bash tools/twcc_env.sh
 ``
 
-- Step 2. in project directory and try
+## Step 2. in project directory and try
 ```
 pipenv install
 pipenv run python src/test/gpu_cntr.py
 ```
 
-- Step 3. delete credential information, just
+## Step 3. delete credential information, just
 ```
 rm -rf ~/.twcc_data
 ```
 
-- Step 4. Create a default container 
+## Step 4. Create a default container 
 
 usage:
 ```
@@ -49,34 +50,37 @@ pipenv run python src/test/gpu_cntr.py create-cntr
 ```
 
 
-- Step 5. List ALL available solutions
+## Step 5. List ALL available solutions
 ```
 pipenv run python src/test/gpu_cntr.py list-sol
 ```
 
-- Step 6. List ALL available images
+## Step 6. List ALL available images
 ```
 pipenv run python src/test/gpu_cntr.py list-all-img
 ```
 
-- Step 7. List container information 
+## Step 7. List container information 
 
 usage:
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table]
 ```
 
-  - example 1: get all containers
+- example 1: get all containers
+
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr 
 ```
 
-  - example 2: get a container information with site_id = `93072`
+example 2: get a container information with site_id = `93072`
+
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
 ```
 
-  - example 3: get connection information for site_id = `93072`
+example 3: get connection information for site_id = `93072`
+
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
 ```
@@ -84,14 +88,15 @@ pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
 This will show your TWCC username, which you given in [iService](https://iservice.nchc.org.tw/), and SSH access port.
 
 
-- Step 8. Remove available container
+## Step 8. Remove available container
 
 usage:
 ```
 pipenv run python src/test/gpu_cntr.py del-cntr -site Site Id
 ```
 
-  - example 1: delete container with site_id = `93091`
+- example 1: delete container with site_id = `93091` 
 ```
 pipenv run python src/test/gpu_cntr.py del-cntr -site 93091
 ```
+
