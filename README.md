@@ -28,3 +28,4 @@ del credential file
 ```
 rm -rf ~/.twcc_data/credential
 ```
+cli
