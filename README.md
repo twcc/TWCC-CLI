@@ -95,7 +95,8 @@ usage:
 pipenv run python src/test/gpu_cntr.py del-cntr -site Site Id
 ```
 
-- example 1: delete container with site_id = `93091` 
+- example 1: delete container with site_id = `93072` 
+
 ```
 pipenv run python src/test/gpu_cntr.py del-cntr -site 93091
 ```
