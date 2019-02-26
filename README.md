@@ -28,4 +28,29 @@ del credential file
 ```
 rm -rf ~/.twcc_data/credential
 ```
-cli
+
+Create a default container
+```
+pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu Number of GPU] [-sol Solution Name] [-img Image Name]
+                                                   [-s3 S3 bucket name] [-wait Wait for CNTR to ready]
+```
+
+List available solutions
+```
+pipenv run python src/test/gpu_cntr.py list-sol
+```
+
+List available images
+```
+pipenv run python src/test/gpu_cntr.py list-all-img
+```
+
+List available cntr
+```
+pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table]
+```
+
+Remove available cntr
+```
+pipenv run python src/test/gpu_cntr.py del-cntr -site Site Id
+```
