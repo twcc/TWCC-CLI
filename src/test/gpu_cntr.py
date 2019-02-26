@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys, os
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 TWCC_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path[1]=TWCC_PATH
 
@@ -34,12 +34,13 @@ def list_img(sol_name):
     b = sites(debug=False)
     print(b.getAvblImg(sol_name))
 
-
+@click.command()
 def list_all_img():
     sol_list = sites.getSolList(name_only=True)
     for sol in sol_list:
         list_img(sol)
 
+@click.command()
 def list_s3():
     b = sites()
     print(b.getAvblS3())
@@ -55,7 +56,15 @@ def doSiteReady(site_id):
         time.sleep(5)
     return site_id
 
-def create_cntr(cntr_name="twcc-cli", gpu=1, sol_name='Tensorflow', sol_img=None, s3=[], isWait=True):
+@click.command()
+@click.option('-cntr', 'cntr_name', default = "twcc-cli", type = str, help = "Enter containr name")
+@click.option('-gpu', default = 1, type = int, help = "Enter number of gpu")
+@click.option('-sol', 'sol_name', default = "Tensorflow", type = str, help = "Enter solution name")
+@click.option('-img', 'sol_img', default = None, type = str, help = "Enter image name")
+@click.option('-s3','s3', default = [], multiple = True, help = "Enter S3 bucket")
+@click.option('-wait', 'isWait', default = True, type = bool,  help = "Need to wait for cntr")
+def create_cntr(cntr_name, gpu, sol_name, sol_img, s3,isWait):
+    s3 = list(s3)
     def_header = sites.getGpuDefaultHeader(gpu)
     sol_id = sites.checkSolName(sol_name)
 
@@ -99,7 +108,7 @@ def list_all_solutions():
     col_name = ['id','name', 'create_time', 'status', 'status_reason']
     table_layout("all avalible solutions", cntrs, caption_row=col_name)
 
-
+@click.command()
 def list_sol():
     print(sites.getSolList(mtype='list', name_only=True))
 
@@ -115,11 +124,13 @@ def get_site_detail(site_id):
     a = sites()
     return a.getDetail(site_id)
 
+@click.command()
+@click.argument('con_ids', nargs=-1)
 def del_cntr(con_ids):
     a = sites()
     if type(con_ids) == type(1):
         con_ids = [con_ids]
-    if len(con_ids) > 0:
+    if len(list(con_ids)) > 0:
         for con_id in con_ids:
             a.delete(con_id)
             print("Successfully remove {}".format(con_id))
@@ -133,11 +144,10 @@ def gen_cntr(s_id):
     conn_info = b.getConnInfo(site_id)
     print (conn_info)
 
-def cli():
-    pass
-
-
-def list_cntr(site_id=0, isTable=True):
+@click.command()
+@click.option('-site', 'site_id', default = 0, type = int, help="Enter the site id")
+@click.option('-table', 'isTable', default = True, type = bool, help="Enter the site id")
+def list_cntr(site_id, isTable):
     if not type(site_id)==type(1):
         raise ValueError("Site number: '{0}' error.".format(site_id))
 
@@ -155,23 +165,37 @@ def list_cntr(site_id=0, isTable=True):
             col_name = ['id','name', 'create_time', 'status', 'status_reason']
             table_layout('sites: %s'%site_id, res, caption_row=col_name)
 
+# cli start from here
+
+@click.group()
+def cli():
+    pass
+
+cli.add_command(list_s3)
+cli.add_command(list_sol)
+cli.add_command(list_all_img)
+cli.add_command(create_cntr)
+cli.add_command(list_cntr)
+cli.add_command(del_cntr)
+
 if __name__ == "__main__":
 
-    list_s3()
-    list_sol()
-    list_all_img()
+    #list_s3()
+    #list_sol()
+    #list_all_img()
 
     # min call
-    #create_cntr('twcc-cli-gpu1', 1)
+    #site_id = create_cntr('twcc-cli-gpu1', 1)
+    cli()
     #create_cntr(1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe1'] )
     #create_cntr('test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe'] )
 
     #create_cntr('twcc-cli-test', 1, "Tensorflow", s3=['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'] )
     # max call, only can mount 4 s3 buckects
-    site_id = create_cntr('twcc-cli-test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'], True )
+    #site_id = create_cntr('twcc-cli-test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'], True )
 
-    list_cntr()
-    list_cntr(site_id)
-    list_cntr(site_id, isTable=False)
-    del_cntr(site_id)
-    list_cntr()
+    #list_cntr()
+    #list_cntr(site_id)
+    #list_cntr(site_id, isTable=False)
+    #del_cntr(site_id)
+    #list_cntr()
