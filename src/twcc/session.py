@@ -85,7 +85,7 @@ class Session(object):
 
         info_usr = info_usr[0]
         sess_yaml = "twcc_username={}\n".format(info_usr['username'])
-        print("hi, {} TWCC API-Key accepted!".format(info_usr['display_name']))
+        print(u"hi, {} TWCC API-Key accepted!".format(info_usr['display_name']))
 
         a = projects()
         prjs = a.getProjects()
@@ -102,7 +102,7 @@ class Session(object):
             { 'type': 'rawlist',
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
-              'choices': [ "{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
+              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
         answers = prompt(quest_api, style=custom_style_2)
         proj_id = answers['default_project'].split(" - ")[0]
