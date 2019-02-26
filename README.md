@@ -23,20 +23,17 @@ or just run
 
 ```
 bash tools/twcc_env.sh
-``
+```
 
 ## Step 2. in project directory and try
+
 ```
 pipenv install
 pipenv run python src/test/gpu_cntr.py
 ```
 
-## Step 3. delete credential information, just
-```
-rm -rf ~/.twcc_data
-```
 
-## Step 4. Create a default container 
+## Step 3. Create a default container 
 
 usage:
 ```
@@ -45,22 +42,25 @@ pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu 
 ```
 
 to create a 1 GPU **Tensorflow** latest environment with name *twcc-cli*
+
 ```
 pipenv run python src/test/gpu_cntr.py create-cntr 
 ```
 
 
-## Step 5. List ALL available solutions
+## Step 4. List ALL available solutions
+
 ```
 pipenv run python src/test/gpu_cntr.py list-sol
 ```
 
-## Step 6. List ALL available images
+## Step 5. List ALL available images
+
 ```
 pipenv run python src/test/gpu_cntr.py list-all-img
 ```
 
-## Step 7. List container information 
+## Step 6. List container information 
 
 usage:
 ```
@@ -73,13 +73,13 @@ pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show in
 pipenv run python src/test/gpu_cntr.py list-cntr 
 ```
 
-example 2: get a container information with site_id = `93072`
+- example 2: get a container information with site_id = `93072`
 
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
 ```
 
-example 3: get connection information for site_id = `93072`
+- example 3: get connection information for site_id = `93072`
 
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
@@ -88,7 +88,7 @@ pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
 This will show your TWCC username, which you given in [iService](https://iservice.nchc.org.tw/), and SSH access port.
 
 
-## Step 8. Remove available container
+## Step 7. Remove available container
 
 usage:
 ```
@@ -100,3 +100,10 @@ pipenv run python src/test/gpu_cntr.py del-cntr -site Site Id
 pipenv run python src/test/gpu_cntr.py del-cntr -site 93091
 ```
 
+
+
+## Step 8. delete credential information, just
+
+```
+rm -rf ~/.twcc_data
+```
