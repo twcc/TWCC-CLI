@@ -85,7 +85,7 @@ pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
 ```
 
-This will show your TWCC username, which you given in [iService](https://iservice.nchc.org.tw/), and SSH access port.
+This will show your TWCC username, which you gave in [iService](https://iservice.nchc.org.tw/), and SSH access port.
 
 
 ## Step 7. Remove available container
