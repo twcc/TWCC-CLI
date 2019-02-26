@@ -20,6 +20,8 @@ sudo pip install pipenv
 
 in project directory and try
 ```
+git clone https://github.com/TW-NCHC/TWCC-CLI.git
+cd TWCC-CLI/
 pipenv install
 pipenv run python src/test/gpu_cntr.py
 ```
