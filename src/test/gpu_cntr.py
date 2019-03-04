@@ -94,7 +94,10 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, s3,isWait):
 
 
     res = b.create(cntr_name, sol_id, def_header)
-    print("Site id: {0} is created.".format(res['id']))
+    if 'id' not in res.keys():
+        raise ValueError("Can't find id, please check error message : {}".format(res['message']))
+    else:
+        print("Site id: {0} is created.".format(res['id']))
 
     if isWait:
         doSiteReady(res['id'])
