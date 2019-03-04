@@ -55,7 +55,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
     table_info.append([ Color("{autoyellow}%s{/autoyellow}"%x) for x in caption_row])
 
     for ele in json_obj:
-        table_info.append([ ele[cap] for cap in caption_row])
+        table_info.append([ ele[cap] for cap in caption_row if cap in ele])
     table = AsciiTable(table_info, title)
 
 
