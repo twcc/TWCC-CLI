@@ -1,0 +1,40 @@
+{
+    "snippets" : [
+        {
+            "name" : "NCHC-API-SWAGGER-PARSER",
+            "code" : [
+                "import requests",
+                "import yaml",
+                "import json",
+                "import re, time",
+                "import pandas as pd",
+                "from pygments import highlight",
+                "from pygments.lexers import JsonLexer",
+                "from pygments.formatters import TerminalFormatter",
+                "fn_yaml = \"./apis_v2_swagger_v4.0_asus.yaml\"",
+                "config = yaml.load(open(fn_yaml, 'r').read())",
+                "_host_ = \"http://\"+config['host']",
+                "def pjson(obj):",
+                "    jstr = json.dumps(obj, indent=4, sort_keys=True)",
+                "    print(highlight(jstr, JsonLexer(), TerminalFormatter()))",
+                "pjson(config['parameters'])",
+                " ",
+                "fn_NCHC_Stage = './NCHC_API-Test_env.yaml'",
+                "nchc_conf = yaml.load(open(fn_NCHC_Stage, 'r').read())",
+                " ",
+                "_sites_ = [ nchc_conf['stage']['platforms'][x]['name'] for x in xrange(len(nchc_conf['stage']['platforms']))]",
+                "_keys_  = nchc_conf['stage']['keys']",
+                "print _sites_, _keys_"
+
+            ]
+        },
+        {
+            "name" : "some imports",
+            "code" : [
+                "import numpy as np",
+                "import matplotlib as mpl",
+                "print('spam')"
+            ]
+        }
+    ]
+}
