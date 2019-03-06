@@ -7,8 +7,8 @@
 
 - **Requirements**
     1. build-essential
-    1. python 2.7
-    1. python 2.7-dev
+    2. python 2.7
+    3. python 2.7-dev
 
 
 	```
@@ -30,17 +30,17 @@
 ## Step 2. Go into the project directory, and try executing cli program
 
 
-	```
+
     pipenv install
     pipenv run python src/test/gpu_cntr.py
-	```
+
 
 ## Step 3. Create a Container 
 
 - **Usage**
 	```
 	pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu Number of GPU] [-sol Solution Name] [-img Image Name]
-	                                                   [-s3 S3 bucket name] [-wait Wait for CNTR to ready]
+	                                                   [-s3 S3 bucket name] [-wait <Wait for CNTR to ready>]
 	```
 
 - **Create a container with default configuration** 
@@ -75,7 +75,7 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 
 - **Usage**
     ```
-    pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table] [-all <Show all containers>]
+    pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table <Show info on table>] [-all <Show all containers>]
     ```
 
 - **Examples**
