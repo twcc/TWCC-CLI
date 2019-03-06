@@ -158,6 +158,12 @@ def list_cntr(site_id, isTable,isAll):
         gen_cntr(site_id)
     else:
         a = sites()
+        #print(a.list(isAll=True))
+        #print(isAll)
+        #print(type(a.list(isAll=True)))
+        if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
+           isAll = False
+        #  raise ValueError("{}, please change to Admin key".format(a.list(isAll=isAll)['detail'])) 
         if site_id==0:
             my_sites = a.list(isAll=isAll)
             if len(my_sites)>0:
