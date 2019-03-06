@@ -149,7 +149,8 @@ def gen_cntr(s_id):
 @click.command()
 @click.option('-site', 'site_id', default = 0, type = int, help="Enter the site id")
 @click.option('-table', 'isTable', default = True, type = bool, help="Show cntr info in table style.")
-def list_cntr(site_id, isTable):
+@click.option('-all', 'isAll', is_flag = True, type = bool, help="Show all container.")
+def list_cntr(site_id, isTable,isAll):
     if not type(site_id)==type(1):
         raise ValueError("Site number: '{0}' error.".format(site_id))
 
@@ -158,7 +159,7 @@ def list_cntr(site_id, isTable):
     else:
         a = sites()
         if site_id==0:
-            my_sites = a.list()
+            my_sites = a.list(isAll=isAll)
             if len(my_sites)>0:
                 col_name = ['id','name', 'create_time', 'status']
                 table_layout('sites', my_sites, caption_row=col_name)
