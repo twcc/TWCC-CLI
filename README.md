@@ -64,7 +64,7 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 
 usage:
 ```
-pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table]
+pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table] [-all Show all container]
 ```
 
 - example 1: get all containers
@@ -83,6 +83,12 @@ pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
 
 ```
 pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
+```
+
+- example 4: show all container(admin/tenant_admin only)
+
+```
+pipenv run python src/test/gpu_cntr.py list-cntr -all
 ```
 
 This will show your TWCC username, which you gave in [iService](https://iservice.nchc.org.tw/), and SSH access port.
