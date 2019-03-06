@@ -6,6 +6,7 @@
 ## Step 1. Scripts for Ubuntu 16.04 @ TWCC
 
 - **Requirements**
+
     1. build-essential
     2. python 2.7
     3. python 2.7-dev
@@ -42,18 +43,20 @@
 	pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu Number of GPU] [-sol Solution Name] [-img Image Name]
 	                                                   [-s3 S3 bucket name] [-wait <Wait for CNTR to ready>]
 	```
+- **Example**
 
-- **Create a container with default configuration** 
+    **1. Create a container with default configuration** 
+       
     ```
 	pipenv run python src/test/gpu_cntr.py create-cntr 
 	```
-    
+ 
+        
+           
     - Default configuration：
-        - Solution & Image: Tensorflow (latest environment)
-        - Container name: twcc-cli
-        - Hardware: 1 GPU + 4 cores + 90 GB memory
-        
-        
+      - Solution & Image: Tensorflow (latest environment)
+      - Container name: twcc-cli
+      - Hardware: 1 GPU + 4 cores + 90 GB memory
     
 
     
@@ -80,19 +83,19 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 
 - **Examples**
 
-    1. Get a list of all containers
+    **1. Get a list of all containers**
 
     ```
     pipenv run python src/test/gpu_cntr.py list-cntr 
     ```
 
-    2. Get a container information with site_id = `93072`
+    **2. Get a container information with site_id = `93072`**
 
     ```
     pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
     ```
 
-	3. Get connection information for site_id = `93072`
+	**3. Get connection information for site_id = `93072`**
 	
 	```
 	pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table False
@@ -101,7 +104,7 @@ pipenv run python src/test/gpu_cntr.py list-all-img
    This will show your TWCC username, which you created in [iService](https://iservice.nchc.org.tw/), and SSH access port.
 
 
-   4. Get all containers for a project (admin/tenant_admin only)
+   **4. Get all containers for a project (admin/tenant_admin only)**
     
     ```
     pipenv run python src/test/gpu_cntr.py list-cntr -all
@@ -118,7 +121,7 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 
 - **Example** 
 
-    1. Remove a container with site_id = `93072` 
+    **1. Remove a container with site_id = `93072`** 
 
     ```
     pipenv run python src/test/gpu_cntr.py del-cntr 93072
