@@ -149,7 +149,8 @@ def gen_cntr(s_id):
 @click.command()
 @click.option('-site', 'site_id', default = 0, type = int, help="Enter the site id")
 @click.option('-table', 'isTable', default = True, type = bool, help="Show cntr info in table style.")
-def list_cntr(site_id, isTable):
+@click.option('-all', 'isAll', is_flag = True, type = bool, help="Show all container.")
+def list_cntr(site_id, isTable,isAll):
     if not type(site_id)==type(1):
         raise ValueError("Site number: '{0}' error.".format(site_id))
 
@@ -157,6 +158,9 @@ def list_cntr(site_id, isTable):
         gen_cntr(site_id)
     else:
         a = sites()
+        if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
+            isAll = False
+        # raise ValueError("{}, please change to Admin key".format(a.list(isAll=isAll)['detail']))
         if site_id==0:
             my_sites = a.list()
             if len(my_sites)>0:
