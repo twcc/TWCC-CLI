@@ -28,12 +28,22 @@
 	bash tools/twcc_env.sh
 	```
 
-## Step 2. Go into the project directory, and try executing cli program
+## Step 2. in project directory and try
 
+```
+pipenv install
+pipenv run python src/test/gpu_cntr.py
+```
 
+and you will need to input TWCC API key. 
 
-    pipenv install
-    pipenv run python src/test/gpu_cntr.py
+to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
+
+![TWCC API KEY](https://snag.gy/ZA0xw9.jpg)
+
+and 
+
+![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
 
 
 ## Step 3. Create a Container 
