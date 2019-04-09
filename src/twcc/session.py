@@ -96,13 +96,18 @@ class Session(object):
         a._csite_ = 'k8s-taichung-default' # TWCC allow k8s only
         cluster = a.getSites()[0]
         avl_proj = a.list()
+        # Check if projects are matched.
+        not_in_proj = [x.get('id') for x in avl_proj if x.get('name') not in prjs.keys()]
+        # Remove any project not able to show.
+        avl_proj[:] = [x for x in avl_proj if x.get('id') != not_in_proj]
+
         #table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
         # @todo here!
         quest_api = [
             { 'type': 'rawlist',
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
-              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
+              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj],
             }]
         answers = prompt(quest_api, style=custom_style_2)
         proj_id = answers['default_project'].split(" - ")[0]
