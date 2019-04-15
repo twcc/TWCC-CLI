@@ -1,9 +1,9 @@
 info:
     name:   "NCHC_API-Test_env"
-    ctime:  "2018-10-12 09:21:00"
+    ctime:  "2019-4-15 11:16:00"
     auth:   "August Chao <1803001@narlabs.org.tw>"
 production:
-    host:   "https://apigateway.twcc.ai:8443"
+    host:   "https://apigateway.twcc.ai"
     keys:
     clusters:
         - 'admin'
