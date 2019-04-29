@@ -67,6 +67,7 @@ class S3():
             :param file_name         : The name of the upload file or path(r need to set as True)
             :param bucket_name       : The bucket name
             :param key               : The file name shows inside the bucket
+            :param r                 : Setting for recursive
             :return                  : True if success upload file to S3 bucket
         """
         if r == True:
@@ -75,7 +76,6 @@ class S3():
                     for f in tqdm(files):
                         fullpath = os.path.join(root,f)
                         self.s3_cli.upload_file(fullpath,bucket_name,f)
-                        
             else:
                 print("No such path")
         else:
@@ -87,16 +87,22 @@ class S3():
                 return False
             return True
 
-    def download_bucket(self,file_name,src,dist,r=False):
+    def download_bucket(self,bucket_name,key,file_name,r=False):
         """ Download from S3
 
+            :param bucket_name       : The bucket name
+            :param key               : The file name shows inside the bucket
+            :param file_name         : The name of the download file name or path(r need to set as True)
+            :param r                 : Setting for recursive
             :return            : True if success upload file to S3 bucket
         """
         if r == True:
-            pass
+            a = self.list_object(bucket_name)[1:]
+            for i in tqdm(a):
+                self.s3_cli.download_file(bucket_name,i[0],'test/'+i[0])
         else:
             try:
-                response = self.s3_cli.download_file(file_name,src,dist)
+                response = self.s3_cli.download_file(bucket_name,key,file_name)
                 print("Successfully download file : ",file_name)
             except:
                 print("ERROR during download")
