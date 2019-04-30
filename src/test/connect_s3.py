@@ -19,19 +19,30 @@ import click,time
 
 
 if __name__ == '__main__':
-    s3 = S3('s3','*','*','twgc-s3.nchc.org.tw')
-    #buckets = s3.list_bucket()
-    #s3.test_table(buckets)
-    #s3.create_bucket('thisistest5')
+    s3 = S3('s3','*','*','*')
+
+    # Create a new bucket
+    s3.create_bucket('thisistestbucket')
+
+    # List out all the new bucket
     buckets = s3.list_bucket()
     s3.test_table(buckets)
-    #s3.upload_bucket('this_is_test_file.txt','thisistest4','this_is_test_file.txt')
-    #s3.upload_bucket('this_is_test_file2.txt','thisistest4','this_is_test_file2.txt')
-    files = s3.list_object('thisistest5')
+
+    # Upload single file to bucket
+    s3.upload_bucket(file_name = '/Users/WillyChen/Work/UploadMe.txt',bucket_name = 'thisistestbucket',key = 'DownloadMe.txt')
+    # Download single file from bucket 
+    s3.download_bucket(bucket_name = 'thisistestbucket',key = 'DownloadMe.txt',file_name = '/Users/WillyChen/Work/DownloadMe.txt')
+
+    # List files inside of bucket
+    files = s3.list_object('thisistestbucket')
     s3.test_table(files)
-    #s3.upload_bucket(path = '/Users/WillyChen/Learning/try_loc',bucket_name = 'thisistest5',r = True)
-    #s3.download_bucket(bucket_name = 'thisistest5',path='/Users/WillyChen/Learning/try_loc2',r = True)
-    #files = s3.list_object('thisistest5')
-    #s3.test_table(files)
-    s3.del_bucket('thisistest5')
+
+    # Upload files to bucket
+    s3.upload_bucket(path = '/Users/WillyChen/Work/UploadFromHere',bucket_name = 'thisistestbucket',r = True)
+    # Download files to bucket
+    s3.download_bucket(bucket_name = 'thisistestbucket',path='/Users/WillyChen/Work/DownloadToHere',r = True)
+    files = s3.list_object('thisistestbucket')
+    s3.test_table(files)
+    # Delete bucket
+    s3.del_bucket('thisistestbucket')
 
