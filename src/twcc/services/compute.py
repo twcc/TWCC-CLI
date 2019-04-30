@@ -60,6 +60,11 @@ class sites(GenericService):
         elif mtype=='dict' and not name_only:
             return dict(sol_list)
 
+    def getCommitList(self, mtype='list'):
+        self.func = 'image_commit';
+
+        return self._do_api()
+
     @staticmethod
     def checkSolName(sol_name):
         sol_list = sites.getSolList(mtype='dict', reverse=True)

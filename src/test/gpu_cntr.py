@@ -14,10 +14,11 @@ TWCC_LOGO() ## here is logo
 import re
 from twcc.util import pp, table_layout, SpinCursor
 from twcc.services.solutions import solutions
-from twcc.services.base import acls, users
+from twcc.services.base import acls, users, image_commit
 from twcc.services.projects import projects
 from twcc.session import session_start
 from twcc.services.compute import sites
+from prompt_toolkit.shortcuts import get_input
 import click,os
 import time
 
@@ -171,6 +172,30 @@ def list_cntr(site_id, isTable,isAll):
             col_name = ['id','name', 'create_time', 'status', 'status_reason']
             table_layout('sites: %s'%site_id, res, caption_row=col_name)
 
+@click.command()
+def list_commit():
+    c = image_commit()
+    print(c.getCommitList())
+
+@click.command()
+def create_commit():
+    a = sites()
+    isAll = True;
+
+    if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
+        isAll = False
+
+        my_sites = a.list(isAll=isAll)
+        if len(my_sites)>0:
+            col_name = ['id','name', 'create_time', 'status']
+            table_layout('sites', my_sites, caption_row=col_name)
+
+    site_id = get_input(u'Please Input the site ID which you would like to commit: ')
+    tag = get_input(u'Please Input the image tag  ')
+    image = get_input(u'Please Input the image name: ')
+    c = image_commit()
+    print(c.createCommit(site_id, tag, image))
+
 # cli start from here
 
 @click.group()
@@ -183,6 +208,8 @@ cli.add_command(list_all_img)
 cli.add_command(create_cntr)
 cli.add_command(list_cntr)
 cli.add_command(del_cntr)
+cli.add_command(list_commit)
+cli.add_command(create_commit)
 
 if __name__ == "__main__":
 
