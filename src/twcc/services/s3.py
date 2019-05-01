@@ -12,11 +12,7 @@ from tqdm import tqdm
 class S3():
     def __init__(self):
         """ Initilaize information for s3 bucket
-            :param service_name: Service name of the connection
-            :param access_key  : S3 bucket's access key
-            :param secret_key  : S3 bucket's secret key
-            :param endpoint_url: S3 bucket's endpoint
-            :return            : None """
+        """
         # The setting for connect to s3 bucket
         self.service_name = 's3'
         self.endpoint_url = "s3.twcc.ai"
@@ -65,47 +61,68 @@ class S3():
             tmp.insert(0,head_data)       
             return tmp
         else:
-            print("Nothing inside this bucket")
+            tmp = [['Nothing inside the bucket']]
+            return tmp
         
-    def upload_bucket(self,file_name,bucket_name,key,r=False):
+    def upload_bucket(self,file_name=None,bucket_name=None,key=None,path=None,r=False):
         """ Upload to S3
 
-            :param file_name         : The name of the upload file or path(r need to set as True)
+            :param file_name         : The name of the upload file 
+            :param path              : The path for the files, r must set ot True
             :param bucket_name       : The bucket name
             :param key               : The file name shows inside the bucket
             :param r                 : Setting for recursive
             :return                  : True if success upload file to S3 bucket
         """
         if r == True:
-            if os.path.isdir(file_name):
-                for root,dirs,files in os.walk(file_name):
-                    for f in tqdm(files):
-                        fullpath = os.path.join(root,f)
-                        self.s3_cli.upload_file(fullpath,bucket_name,f)
+            if os.path.isdir(path):
+                for root,dirs,files in tqdm(os.walk(path)):
+                    if len(dirs) == 0:
+                        for f in files:
+                            full_path = os.path.join(root,f)
+                            ff_name = full_path[k+1:]
+                            self.s3_cli.upload_file(full_path,bucket_name,ff_name)
+                    else:
+                        k = len(root)
+                        for f in files:
+                            full_path = os.path.join(root,f)
+                            self.s3_cli.upload_file(full_path,bucket_name,f)
             else:
                 print("No such path")
         else:
             try:
-                response = self.s3_cli.upload_file(file_name,src,dist)
+                response = self.s3_cli.upload_file(file_name,bucket_name,key)
                 print("Successfully upload file : ",file_name)
             except:
                 print("ERROR during upload")
                 return False
             return True
 
-    def download_bucket(self,bucket_name,key,file_name,r=False):
+    def download_bucket(self,bucket_name=None,key=None,file_name=None,path=None,r=False):
         """ Download from S3
 
             :param bucket_name       : The bucket name
             :param key               : The file name shows inside the bucket
-            :param file_name         : The name of the download file name or path(r need to set as True)
+            :param path              : The path for the files, r must set ot True
+            :param file_name         : The name of the download file
             :param r                 : Setting for recursive
             :return            : True if success upload file to S3 bucket
         """
         if r == True:
-            a = self.list_object(bucket_name)[1:]
-            for i in tqdm(a):
-                self.s3_cli.download_file(bucket_name,i[0],'test/'+i[0])
+            # 下載路徑確認
+            if os.path.isdir(path):
+                # 存取所有在某空間的檔案名稱
+                a = self.list_object(bucket_name)[1:]
+                # 將所有的檔案名稱印出
+                for i in tqdm(a):
+                    ff_name = os.path.join(path+'/', i[0])
+                    check_path = "/".join(ff_name.split('/')[:-1])
+                    if not os.path.isdir(check_path):
+                        os.mkdir(check_path)
+                    # 下載對應的檔案名稱至電腦中
+                    self.s3_cli.download_file(bucket_name,i[0],ff_name)
+            else:
+                print("No such path")
         else:
             try:
                 response = self.s3_cli.download_file(bucket_name,key,file_name)
