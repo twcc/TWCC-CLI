@@ -19,6 +19,11 @@ def jpp(**args):
     import json
     print (json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=2))
 
+def strShorten(mstr, max_len=6):
+    if len(mstr)>max_len:
+        return u"{}...".format(mstr[:max_len])
+    else:
+        return mstr
 
 def isNone(x):
     return True if type(x) == type(None) else False

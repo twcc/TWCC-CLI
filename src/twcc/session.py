@@ -78,7 +78,7 @@ class Session(object):
         from twcc.services.base import acls, projects, users, api_key
         import json
 
-        u = users(debug=True)
+        u = users(debug=False)
         info_usr = u.list()
         if len(info_usr)==0:
             raise
@@ -87,7 +87,7 @@ class Session(object):
         sess_yaml = "twcc_username={}\n".format(info_usr['username'])
         print(u"hi, {} TWCC API-Key accepted!".format(info_usr['display_name']))
 
-        a = projects(debug=True)
+        a = projects(debug=False)
         prjs = a.getProjects()
 
         #k = api_key()
@@ -102,7 +102,10 @@ class Session(object):
             { 'type': 'rawlist',
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
-              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'][:6], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
+              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(
+                  x['id'], x['name'], 
+                  strShorten(prjs[ x['name'] ]['prj_name']), 
+                  prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
         answers = prompt(quest_api, style=custom_style_2)
         proj_id = answers['default_project'].split(" - ")[0]
