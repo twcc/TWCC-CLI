@@ -64,7 +64,7 @@ class keypairs(GenericService):
         return res
 
 class projects(GenericService):
-    """ This function is Site admin only
+    """ 
     """
     def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
@@ -90,6 +90,19 @@ class projects(GenericService):
                     'prj_name': prj_name }
             my_prj[prj_code] = prj_ele
         return my_prj
+
+
+    def getS3ProjId(self, proj_code):
+        projs = self.list()
+        for proj in projs:
+            if proj['name'] == proj_code:
+                return proj['id']
+
+    def getS3Keys(self, proj_code):
+        proj_id = self.getS3ProjId(proj_code)
+        self.url_dic = {'projects': proj_id, 'key':''}
+        return self.list()
+
 
 class api_key(GenericService):
     def __init__(self, debug=False):

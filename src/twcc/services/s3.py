@@ -1,13 +1,16 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import os 
+import boto3
+import click
+from twcc.clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
 from tqdm import tqdm
 
-import boto3
-import click
-import os 
 
 class S3():
-    def __init__(self,service_name='s3',access_key=None,secret_key=None,endpoint_url=None):
+    def __init__(self):
         """ Initilaize information for s3 bucket
             :param service_name: Service name of the connection
             :param access_key  : S3 bucket's access key
@@ -15,12 +18,14 @@ class S3():
             :param endpoint_url: S3 bucket's endpoint
             :return            : None """
         # The setting for connect to s3 bucket
-        self.service_name = service_name
-        self.access_key = access_key
-        self.secret_key = secret_key
-        self.endpoint_url = endpoint_url
+        self.service_name = 's3'
+        self.endpoint_url = "s3.twcc.ai"
         self.new_files = []
         self.new_bucket = []
+        self.twcc = ServiceOperation()
+        self.access_key = self.twcc.def_s3_access_key
+        self.secret_key = self.twcc.def_s3_secret_key
+
         
         # Make sure there are value input here
         if not self.access_key or not self.secret_key:
@@ -30,7 +35,8 @@ class S3():
         self.s3_cli = session.client(service_name = self.service_name,
                                      aws_access_key_id = self.access_key,
                                      aws_secret_access_key = self.secret_key,
-                                     endpoint_url = 'http://' + self.endpoint_url)
+                                     endpoint_url = 'https://' + self.endpoint_url, 
+                                     verify=False)
 
     def list_bucket(self):
         """ Listing all the bucket for S3 directory

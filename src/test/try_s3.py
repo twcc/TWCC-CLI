@@ -13,24 +13,23 @@ def TWCC_LOGO():
 TWCC_LOGO() ## here is logo
 import re
 from twcc.services.s3 import S3
-
-import click,time
+import click, time
 
 
 
 if __name__ == '__main__':
-    s3 = S3('s3','MPBVAQPULDHZIFUQITMO','11t63yDVZTlStKoBBxHl35HgUcgMOSNrVYXojO7b','twgc-s3.nchc.org.tw')
+    s3 = S3()
     buckets = s3.list_bucket()
-    #s3.test_table(buckets)
-    #s3.create_bucket('thisistest4')
-    #buckets = s3.list_bucket()
-    #s3.test_table(buckets)
+    s3.test_table(buckets)
+    s3.create_bucket('thisistest4')
+    buckets = s3.list_bucket()
+    s3.test_table(buckets)
     #s3.upload_bucket('this_is_test_file.txt','thisistest4','this_is_test_file.txt')
     #s3.upload_bucket('this_is_test_file2.txt','thisistest4','this_is_test_file2.txt')
-    files = s3.list_object('thisistest4')
-    s3.test_table(files)
+    #files = s3.list_object('share1')
+    #s3.test_table(files)
     #s3.upload_bucket('/Users/WillyChen/Work/VTR/CLI_BOTO/twcc-cli/src/test','thisistest4','test',True)
-    s3.download_bucket('thisistest4','test','/Users/WillyChen/Work/VTR/CLI_BOTO/twcc-cli/src/test',True)
+    #s3.download_bucket('thisistest4','test','/Users/WillyChen/Work/VTR/CLI_BOTO/twcc-cli/src/test',True)
     #files = s3.list_object('thisistest4')
     #s3.test_table(files)
     #s3.del_bucket('thisistest4')

@@ -78,7 +78,7 @@ class Session(object):
         from twcc.services.base import acls, projects, users, api_key
         import json
 
-        u = users()
+        u = users(debug=True)
         info_usr = u.list()
         if len(info_usr)==0:
             raise
@@ -87,7 +87,7 @@ class Session(object):
         sess_yaml = "twcc_username={}\n".format(info_usr['username'])
         print(u"hi, {} TWCC API-Key accepted!".format(info_usr['display_name']))
 
-        a = projects()
+        a = projects(debug=True)
         prjs = a.getProjects()
 
         #k = api_key()
@@ -95,21 +95,29 @@ class Session(object):
 
         a._csite_ = 'k8s-taichung-default' # TWCC allow k8s only
         cluster = a.getSites()[0]
-        avl_proj = a.list()
+        avl_proj = a.list()[:9]
         #table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
         # @todo here!
         quest_api = [
             { 'type': 'rawlist',
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
-              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
+              'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(x['id'], x['name'], prjs[ x['name'] ]['prj_name'][:6], prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
         answers = prompt(quest_api, style=custom_style_2)
         proj_id = answers['default_project'].split(" - ")[0]
         fn_cred = self.files['credential']
         sess_yaml += "twcc_proj_id={}\n".format(proj_id)
-        open(fn_cred, 'a+').write(sess_yaml)
 
+        s3_proj = projects()
+        s3_proj._csite_ = 'ceph-taichung-default'
+        proj_code = answers['default_project'].split(" ")[3]
+        s3_key = s3_proj.getS3Keys(proj_code)
+
+        sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['access_key'])
+        sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['secret_key'])
+
+        open(fn_cred, 'a+').write(sess_yaml)
 
 
     def load_session(self):
@@ -131,6 +139,10 @@ class Session(object):
                     self.ssh_key = val
                 elif key == "twcc_proj_id":
                     self.def_proj = val
+                elif key == "twcc_s3_access_key":
+                    self.def_s3_access_key = val
+                elif key == "twcc_s3_secret_key":
+                    self.def_s3_secret_key = val
                 elif key == "twcc_username":
                     self.def_username = val
 
@@ -166,7 +178,6 @@ class Session(object):
                 mbuf += "[default]\n"
                 mbuf += "twcc_host={0}\n".format(t_config['host'])
             mbuf += "twcc_api_key={0}:{1}\n".format(key_name, api_key)
-            #mbuf += "twcc_ssh_key={}\n".format(ssh_key_name)
             open(self.files['credential'], 'w').write(mbuf)
 
 
