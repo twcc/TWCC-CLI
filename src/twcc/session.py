@@ -99,7 +99,8 @@ class Session(object):
         # Check if projects are matched.
         not_in_proj = [x.get('id') for x in avl_proj if x.get('name') not in prjs.keys()]
         # Remove any project not able to show.
-        avl_proj[:] = [x for x in avl_proj if x.get('id') != not_in_proj]
+        #avl_proj[:] = [x for x in avl_proj if x.get('id') != not_in_proj]
+        avl_proj[:] = [x for x in avl_proj if x.get('id') not in not_in_proj]
 
         #table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
         # @todo here!
