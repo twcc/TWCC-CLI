@@ -109,17 +109,18 @@ class S3():
             :return            : True if success upload file to S3 bucket
         """
         if r == True:
-            # 下載路徑確認
+            # checking for download path exists
             if os.path.isdir(path):
-                # 存取所有在某空間的檔案名稱
+                # get the list of objects inside the bucket
                 a = self.list_object(bucket_name)[1:]
-                # 將所有的檔案名稱印出
+                # loop through all the objects
                 for i in tqdm(a):
                     ff_name = os.path.join(path+'/', i[0])
                     check_path = "/".join(ff_name.split('/')[:-1])
+                    # check if the download folder exists
                     if not os.path.isdir(check_path):
                         os.mkdir(check_path)
-                    # 下載對應的檔案名稱至電腦中
+                    # download to the correct path
                     self.s3_cli.download_file(bucket_name,i[0],ff_name)
             else:
                 print("No such path")
