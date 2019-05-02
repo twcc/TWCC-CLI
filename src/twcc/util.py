@@ -63,7 +63,6 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
         table_info.append([ ele[cap] for cap in caption_row if cap in ele])
     table = AsciiTable(table_info, title)
 
-
     for idy in range(len(table.table_data)):
         for idx in range(len(table.table_data[idy])):
             ele = table.table_data[idy][idx]
@@ -72,15 +71,14 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
                 ptn = "[{0:01d}] {1}\n"
                 if len(ele)>9:
                     ptn = "[{0:02d}] {1}\n"
-                for idy in range(len(ele)):
-                    out_buf = ele[idy]
+                for idz in range(len(ele)):
+                    out_buf = ele[idz]
                     try:
                         out_buf = json.loads(out_buf)
                         out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
                     except:
                         pass
                     tmp += ptn.format(idy+1, out_buf)
-
                 table.table_data[idy][idx] = tmp
             elif type(ele) == type({}): # for dictionary
                 tmp = "%s"%"\n".join([ "[%s] %s"%(x, ele[x]) for x in ele.keys()])
