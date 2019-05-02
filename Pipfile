@@ -21,6 +21,8 @@ prompt_toolkit = "==1.0.14"
 Pygments = "==2.3.1"
 PyInquirer = "==1.0.3"
 PyYAML = "==3.13"
+boto3 = "*"
+tqdm = "*"
 
 [requires]
 python_version = "2.7"
