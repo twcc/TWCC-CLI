@@ -3,6 +3,8 @@ from __future__ import print_function
 import os 
 import boto3
 import click
+
+from botocore.exceptions import ClientError 
 from twcc.clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
@@ -80,7 +82,7 @@ class S3():
                     if len(dirs) == 0:
                         for f in files:
                             full_path = os.path.join(root,f)
-                            ff_name = full_path[k+1:]
+                            ff_name = full_path[k:]
                             self.s3_cli.upload_file(full_path,bucket_name,ff_name)
                     else:
                         k = len(root)
@@ -92,9 +94,9 @@ class S3():
         else:
             try:
                 response = self.s3_cli.upload_file(file_name,bucket_name,key)
-                print("Successfully upload file : ",file_name)
-            except:
-                print("ERROR during upload")
+                print("Successfully upload file : ",key)
+            except ClientError as e:
+                print(e)
                 return False
             return True
 
@@ -115,27 +117,33 @@ class S3():
                 a = self.list_object(bucket_name)[1:]
                 # loop through all the objects
                 for i in tqdm(a):
-                    ff_name = os.path.join(path+'/', i[0])
+                    ff_name = os.path.join(path+'/', i[2])
                     check_path = "/".join(ff_name.split('/')[:-1])
                     # check if the download folder exists
                     if not os.path.isdir(check_path):
                         os.mkdir(check_path)
                     # download to the correct path
-                    self.s3_cli.download_file(bucket_name,i[0],ff_name)
+                    self.s3_cli.download_file(bucket_name,i[2],ff_name)
             else:
                 print("No such path")
         else:
             try:
+                if not file_name.endswith('/'):
+                    check_path = "/".join(file_name.split('/')[:-1])
+
+                if not os.path.isdir(check_path):
+                    os.mkdir(check_path)
+
                 response = self.s3_cli.download_file(bucket_name,key,file_name)
                 print("Successfully download file : ",file_name)
-            except:
-                print("ERROR during download")
+            except ClientError as e:
+                print("ERROR during download : ",e)
                 return False
             return True
 
 
     def create_bucket(self,bucket):
-        """ Create an Amazon S3 bucket
+        """ Create an S3 bucket
 
             :param bucket_name: Unique string name
             :return           : True if bucket is created, else False
@@ -144,12 +152,12 @@ class S3():
             self.s3_cli.create_bucket(Bucket=bucket)
             self.new_bucket.append(bucket)
             print("Successfully create bucket :",self.c_t(bucket))
-        except:
-            print("ERROR during create")
+        except ClientError as e:
+            print("ERROR during create : ",e)
             return False
         return True
 
-    def del_bucket(self,bucket_name):
+    def del_bucket(self,bucket_name,y):
         """ Delete a bucket from S3
 
             :param bucket_name: Unique string name
@@ -157,13 +165,17 @@ class S3():
         """
         try:
             a = self.list_object(bucket_name)[1:]
-            for i in a:
-                self.del_object(bucket_name = bucket_name, file_name = i[0])
+            if y == True:
+                for i in a:
+                    self.del_object(bucket_name = bucket_name, file_name = i[2])
             res = self.s3_cli.delete_bucket(Bucket = bucket_name)
             print("Successfully delete bucket :",bucket_name)
-        except: 
-            print("ERROR during delete bucket")
-            return False
+        except ClientError as e: 
+            if e.response['Error']['Code'] == 'BucketNotEmpty':
+                error_msg = "{} still has files inside it.".format(e.response['Error']['BucketName'])
+                print(error_msg)
+            else:
+                raise e.response
         return True 
     
     def del_object(self,bucket_name,file_name):
@@ -177,9 +189,8 @@ class S3():
             res = self.s3_cli.delete_object(Bucket = bucket_name,
                                             Key = file_name)
             print("Successfully delete object :",file_name)
-        except:
-            print("ERROR during delete object")
-            return False
+        except ClientError as e:
+            print(e.response)
         return True
             
 
@@ -191,4 +202,12 @@ class S3():
 
     def c_t(self,txt,color="red"):
         return colored(txt,color)
+
+    def check_4_bucket(self,bucket_name):
+        try:
+            res = self.s3_cli.head_bucket(Bucket=bucket_name)
+        except ClientError as e:
+            return False
+        return True
+
 
