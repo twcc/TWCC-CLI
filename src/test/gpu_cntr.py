@@ -30,15 +30,24 @@ def list_projects():
         table_layout ("Proj for {0}".format(cluster), proj.list(), ['id', 'name'])
 
 
-def list_img(sol_name):
-    b = sites(debug=False)
-    print(b.getAvblImg(sol_name))
+def list_img(sol_id):
+    print(b.getAvblImg(sol_id))
 
 @click.command()
 def list_all_img():
+    print("NOTE: This operation will take 1~2 mins.")
+    block_set = set([182, 29, 35, 120])
+    a = solutions()
+    cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set]
     sol_list = sites.getSolList(name_only=True)
-    for sol in sol_list:
-        list_img(sol)
+    base_site = sites(debug=False)
+    output = []
+    for (sol_name, sol_id) in cntrs:
+        output.append( {"sol_name":sol_name, 
+            "sol_id":sol_id, 
+            "images":base_site.getAvblImg(sol_id, sol_name)} )
+
+    table_layout("img", output, ['sol_name', 'sol_id', 'images'])
 
 @click.command()
 def list_s3():
@@ -108,11 +117,12 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, s3,isWait):
 def list_all_solutions():
     a = solutions()
     cntrs = a.list()
-    col_name = ['id','name', 'create_time', 'status', 'status_reason']
+    col_name = ['id','name', 'create_time']
     table_layout("all avalible solutions", cntrs, caption_row=col_name)
 
 @click.command()
 def list_sol():
+    list_all_solutions()
     print(sites.getSolList(mtype='list', name_only=True))
 
 def del_all():
