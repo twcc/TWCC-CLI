@@ -60,14 +60,10 @@ class sites(GenericService):
         elif mtype=='dict' and not name_only:
             return dict(sol_list)
 
-    @staticmethod
-    def checkSolName(sol_name):
-        sol_list = sites.getSolList(mtype='dict', reverse=True)
+    def getCommitList(self, mtype='list'):
+        self.func = 'image_commit';
 
-        if sol_name in sol_list:
-            return sol_list[sol_name]
-        else:
-            return False
+        return self._do_api()
 
     @staticmethod
     def getGpuDefaultHeader(gpus=2):

@@ -11,6 +11,21 @@ class users(GenericService):
     def getInfo(self):
         return self.list()
 
+class image_commit(GenericService):
+    def __init__(self, debug=False):
+        GenericService.__init__(self, debug=debug)
+
+        self._csite_ = "goc"
+
+    def getCommitList(self):
+        return self._do_api()
+
+    def createCommit(self, siteid, tag, image):
+        self.http_verb = "post"
+        self.data_dic = {"site":siteid, "tag":tag, "image":image}
+        self.res_type = "txt"
+        return self._do_api()
+
 class acls(GenericService):
     """ This Class is for ACL api call
     """

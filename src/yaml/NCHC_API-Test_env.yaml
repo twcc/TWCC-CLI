@@ -49,6 +49,12 @@ avalible_funcs:
       http_verb:
         - 'get'
     -
+      name: "image_commit"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+    -
       name: "jobs"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
