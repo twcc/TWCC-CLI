@@ -77,6 +77,8 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set and cntr['name']==sol_name])
     if len(cntrs)>0:
         sol_id = cntrs[sol_name]
+    else:
+        raise ValueError("Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
     b = sites(debug=False)
     imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
