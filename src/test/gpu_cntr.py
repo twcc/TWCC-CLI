@@ -22,6 +22,8 @@ from prompt_toolkit.shortcuts import get_input
 import click,os
 import time
 
+block_set = set([182, 29, 35, 120])
+
 def list_projects():
     proj = projects()
     for cluster in proj.getSites():
@@ -30,21 +32,17 @@ def list_projects():
         table_layout ("Proj for {0}".format(cluster), proj.list(), ['id', 'name'])
 
 
-def list_img(sol_id):
-    print(b.getAvblImg(sol_id))
-
 @click.command()
 def list_all_img():
     print("NOTE: This operation will take 1~2 mins.")
-    block_set = set([182, 29, 35, 120])
     a = solutions()
     cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set]
     sol_list = sites.getSolList(name_only=True)
     base_site = sites(debug=False)
     output = []
     for (sol_name, sol_id) in cntrs:
-        output.append( {"sol_name":sol_name, 
-            "sol_id":sol_id, 
+        output.append( {"sol_name":sol_name,
+            "sol_id":sol_id,
             "images":base_site.getAvblImg(sol_id, sol_name)} )
 
     table_layout("img", output, ['sol_name', 'sol_id', 'images'])
@@ -70,15 +68,18 @@ def doSiteReady(site_id):
 @click.option('-gpu', default = 1, type = int, help = "Enter number of gpu")
 @click.option('-sol', 'sol_name', default = "Tensorflow", type = str, help = "Enter solution name")
 @click.option('-img', 'sol_img', default = None, type = str, help = "Enter image name")
-@click.option('-s3','s3', default = [], multiple = True, help = "Enter S3 bucket")
+#@click.option('-s3','s3', default = [], multiple = True, help = "Enter S3 bucket") # dont use
 @click.option('-wait', 'isWait', default = True, type = bool,  help = "Need to wait for cntr")
-def create_cntr(cntr_name, gpu, sol_name, sol_img, s3,isWait):
-    s3 = list(s3)
+def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
     def_header = sites.getGpuDefaultHeader(gpu)
-    sol_id = sites.checkSolName(sol_name)
+
+    a = solutions()
+    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set and cntr['name']==sol_name])
+    if len(cntrs)>0:
+        sol_id = cntrs[sol_name]
 
     b = sites(debug=False)
-    imgs = b.getAvblImg(sol_name, latest_first=True)
+    imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
     if type(sol_img) == type(None) or len(sol_name)==0:
         def_header['x-extra-property-image'] = imgs[0]
     else:
@@ -87,25 +88,12 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, s3,isWait):
         else:
             raise ValueError("Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
-    ## checking S3
-    max_mount_s3 = 4
-    if len(s3) > max_mount_s3:
-        raise ValueError("Mounting S3 buckets are > {0}.".format(max_mount_s3))
-    else:
-        my_s3_dict = b.getAvblS3(mtype='dict')
-        my_s3 = set([ x for x in my_s3_dict])
-        mount_s3 = set(s3)
-
-        diff_s3 = mount_s3.difference(my_s3)
-        if len(diff_s3) > 0:
-            raise ValueError("S3 bucket can NOT mount: {0}.".format( ", ".join(diff_s3) ))
-        else:
-            def_header['x-extra-property-bucket'] = sites.mkS3MountFormat(s3)
-
-
     res = b.create(cntr_name, sol_id, def_header)
     if 'id' not in res.keys():
-        raise ValueError("Can't find id, please check error message : {}".format(res['message']))
+        if 'message' in res:
+            raise ValueError("Can't find id, please check error message : {}".format(res['message']))
+        if 'detail' in res:
+            raise ValueError("Can't find id, please check error message : {}".format(res['detail']))
     else:
         print("Site id: {0} is created.".format(res['id']))
 
@@ -223,22 +211,4 @@ cli.add_command(create_commit)
 
 if __name__ == "__main__":
 
-    #list_s3()
-    #list_sol()
-    #list_all_img()
-
-    # min call
-    #site_id = create_cntr('twcc-cli-gpu1', 1)
     cli()
-    #create_cntr(1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe1'] )
-    #create_cntr('test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete', 'dwwe'] )
-
-    #create_cntr('twcc-cli-test', 1, "Tensorflow", s3=['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'] )
-    # max call, only can mount 4 s3 buckects
-    #site_id = create_cntr('twcc-cli-test', 1, "CNTK", "cntk-18.08-py3-v1:latest", ['05-focusgroup', 'demo112', 'dnntest', 'do-not-delete'], True )
-
-    #list_cntr()
-    #list_cntr(site_id)
-    #list_cntr(site_id, isTable=False)
-    #del_cntr(site_id)
-    #list_cntr()

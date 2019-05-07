@@ -66,15 +66,6 @@ class sites(GenericService):
         return self._do_api()
 
     @staticmethod
-    def checkSolName(sol_name):
-        sol_list = sites.getSolList(mtype='dict', reverse=True)
-
-        if sol_name in sol_list:
-            return sol_list[sol_name]
-        else:
-            return False
-
-    @staticmethod
     def getGpuDefaultHeader(gpus=2):
         gpu_list = sites.getGpuList(mtype='dict')
         if not gpus in gpu_list.keys():
