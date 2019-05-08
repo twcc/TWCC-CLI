@@ -11,7 +11,7 @@
 [Delete bucket](#deletebucket)<br>
 
 
-<h2 name='createnew'>Create new bucket</h2>
+<h2 id=createnew>Create new bucket</h2>
 
 - **Usage**
     ```
@@ -24,7 +24,7 @@
     pipenv run python src/test/s3.py create-bucket -n testbucket 
     ```
     
-<h2 name='listallbucket'>List all buckets</h2>
+<h2 id=listallbucket>List all buckets</h2>
 
 - **Usage**
     ```
@@ -77,7 +77,7 @@
     pipenv run python s3.py upload -s ~/UploadFolder/ -d wtestbucket -r
     ```
 
-<h2 name='download'>Download a file from bucket</h2>
+<h2 id = download>Download a file from bucket</h2>
 
 
 <h2 name='t'>Delete bucket</h2>
