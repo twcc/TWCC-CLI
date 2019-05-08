@@ -164,33 +164,3 @@ rm -rf ~/.twcc_data
     ```
     pipenv run python src/test/gpu_cntr.py list-commit
     ```
-    
-## S3 Step ? Create new bucket
-- **Usage**
-    ```
-    pipenv run python src/test/s3.py create-bucket [-n/--name Bucket name] 
-    ```
-- **Example** 
-
-    **1. Create a new bucket name testbucket** 
-    ```
-    pipenv run python src/test/s3.py create-bucket -n testbucket 
-    ```
-    
-## S3 Step ? List out ALL available buckets
-- **Usage**
-    ```
-    pipenv run python src/test/s3.py list-buckets 
-    ```
-    
-## S3 Step ? Delete bucket
-- **Usage**
-    ```
-    pipenv run python src/test/s3.py create-bucket [-n/--name Bucket name] 
-    ```
-- **Example** 
-
-    **1. Create a new bucket name testbucket** 
-    ```
-    pipenv run python src/test/s3.py create-bucket -n testbucket 
-    ```
