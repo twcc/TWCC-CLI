@@ -4,6 +4,7 @@
 
 INDEX: 
 1. [S3](doc/S3_tutorial.md)
+1. [Customized Image](doc/Customed_Img_Tutorial.md)
 
 ## Step 1. Scripts for Ubuntu 16.04 @ TWCC
 
@@ -146,21 +147,3 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 ```
 rm -rf ~/.twcc_data
 ```
-
-## Step ?. Request for customized image
-- **Usage**
-    ```
-    pipenv run python src/test/gpu_cntr.py create-commit
-    ```
-
-- **Example** 
-
-    **1. Request for customized image using 246709 image** 
-    
-    ![image alt](https://snag.gy/MKEhTj.jpg)
-
-## Step ? List out ALL customized image requests
-- **Usage**
-    ```
-    pipenv run python src/test/gpu_cntr.py list-commit
-    ```
