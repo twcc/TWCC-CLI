@@ -31,7 +31,7 @@
     pipenv run python src/test/s3.py list-buckets 
     ```
     
-<h2 name='listfilesinbucket'>List all files inside a bucket</h2>
+<h2 id =listfilesinbucket>List all files inside a bucket</h2>
 
 - **Usage**
     ```
@@ -44,7 +44,7 @@
     pipenv run python src/test/s3.py list-files -n wtestbucket
     ```
     
-<h2 name='delfileinbucket'>Delete a file inside a bucket</h2>
+<h2 id = delfileinbucket>Delete a file inside a bucket</h2>
 
 - **Usage**
     ```
@@ -79,6 +79,23 @@
 
 <h2 id = download>Download a file from bucket</h2>
 
+- **Usage**
+    ```
+    pipenv run python src/test/s3.py download [-s/--source <Bucket name>] [-d/--directory <Local path>] [-k/--key <file name>] [-r]
+    ```
+- **Example** 
+
+    **1. Download a file from bucket** 
+    ```
+    # if didn't give file name in -d, the file name will be the key's name.
+    pipenv run python s3.py download -s wtestbucket -d ~/ -k downloadme.txt
+    ```
+    
+    **2. Download bucket to path** 
+    ```
+    # Remember to add -r for recursively copy entire directories.
+    pipenv run python s3.py download -s wtestbucket -d ~/DowntoHere/ -r
+    ```
 
 <h2 id = deletebucket>Delete bucket</h2>
 
