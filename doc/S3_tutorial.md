@@ -2,16 +2,16 @@
 **Here we will show how to use TWCC-CLI to perform some of the S3 functions.**
 
 ##### Table of Contents
-[Create new bucket](#createnew)<br>
-[List all bucket](#listallbucket)<br>
-[List all files in a bucket](#listfilesinbucket)<br>
-[Delete file in a bucket](#delfileinbucket)<br>
-[Upload](#upload)<br>
-[Download](#download)<br>
-[Delete bucket](#deletebucket)<br>
+* [Create new bucket](#CREATENEW)
+* [List all bucket](#LISTALLBUCKET)
+* [List all files in a bucket](#listfilesinbucket)
+* [Delete file in a bucket](#delfileinbucket)
+* [Upload](#upload)
+* [Download](#download)
+* [Delete bucket](#deletebucket)
 
 
-<h2 id=createnew>Create new bucket</h2>
+<h2 id=CREATENEW>Create new bucket</h2>
 
 - **Usage**
     ```
@@ -24,7 +24,7 @@
     pipenv run python src/test/s3.py create-bucket -n testbucket 
     ```
     
-<h2 id=listallbucket>List all buckets</h2>
+<h2 id=LISTALLBUCKET>List all buckets</h2>
 
 - **Usage**
     ```
@@ -57,7 +57,7 @@
     pipenv run python src/test/s3.py del-file -n wtestbucket -f a.txt
     ```   
     
-<h2 name='upload'>Upload a file or a folder to bucket</h2>
+<h2 id = upload>Upload a file or a folder to bucket</h2>
 
 - **Usage**
     ```
@@ -80,7 +80,7 @@
 <h2 id = download>Download a file from bucket</h2>
 
 
-<h2 name='t'>Delete bucket</h2>
+<h2 id = deletebucket>Delete bucket</h2>
 
 - **Usage**
     ```
