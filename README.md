@@ -281,6 +281,12 @@ pipenv run python src/test/gpu_cntr.py list-all-img
     pipenv run python src/test/gpu_cntr.py del-cntr 93072
     ```
 
+## Step 8. Remove credentials
+
+    ```
+    rm -rf ~/.twcc_data
+    ```
+
 ## Step ?. Request for customize image
 - **Usage**
     ```
@@ -296,8 +302,17 @@ pipenv run python src/test/gpu_cntr.py list-all-img
     ```
     pipenv run python src/test/gpu_cntr.py list-commit
     ```
-## Step 8. Remove credentials
 
-```
-rm -rf ~/.twcc_data
-```
+## Create S3 Bucket
+- **Usage**
+    ```
+    pipenv run python src/test/s3.py create-bucket [-n/--name Bucket Name]
+    ```
+- **Example**
+
+    **1. Create a new bucket** 
+    ```
+    pipenv run python src/test/s3.py create-bucket -n/--name testbucekt
+    ```
+
+
