@@ -77,7 +77,7 @@
     pipenv run python s3.py upload -s ~/UploadFolder/ -d wtestbucket -r
     ```
 
-<h2 id = download>Download a file from bucket</h2>
+<h2 id = download>Download a file or bucket from bucket</h2>
 
 - **Usage**
     ```
