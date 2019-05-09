@@ -2,6 +2,9 @@
 
 > we cook twcc-cli
 
+INDEX: 
+1. [S3](doc/S3_tutorial.md)
+1. [Customized Image](doc/Customed_Img_Tutorial.md)
 
 ## Step 1. Scripts for Ubuntu 16.04 @ TWCC
 
@@ -36,6 +39,15 @@ pipenv run python src/test/gpu_cntr.py
 ```
 
 and you will need to input TWCC API key. 
+
+to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
+
+![TWCC API KEY](https://snag.gy/ZA0xw9.jpg)
+
+and 
+
+![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
+
 
 to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
 

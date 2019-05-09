@@ -13,7 +13,7 @@ if 'TWCC_DATA_PATH' in os.environ:
     for path in os.environ['TWCC_DATA_PATH'].split(os.pathsep):
         path = os.path.expandvars(path)
         path = os.path.expanduser(path)
-        _TWCC_data_path.append(path)
+        _TWCC_data_path_.append(path)
 _TWCC_data_path_.append(
     os.path.join(os.environ['HOME'], '.twcc_data')
 )

@@ -1,6 +1,6 @@
 info:
     name:   "NCHC_API-Test_env"
-    ctime:  "2019-4-15 11:16:00"
+    ctime:  "2018-10-12 09:21:00"
     auth:   "August Chao <1803001@narlabs.org.tw>"
 production:
     host:   "https://apigateway.twcc.ai"
@@ -48,6 +48,12 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+    -
+      name: "image_commit"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
     -
       name: "jobs"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
