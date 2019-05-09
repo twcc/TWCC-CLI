@@ -60,14 +60,10 @@ class sites(GenericService):
         elif mtype=='dict' and not name_only:
             return dict(sol_list)
 
-    @staticmethod
-    def checkSolName(sol_name):
-        sol_list = sites.getSolList(mtype='dict', reverse=True)
+    def getCommitList(self, mtype='list'):
+        self.func = 'image_commit';
 
-        if sol_name in sol_list:
-            return sol_list[sol_name]
-        else:
-            return False
+        return self._do_api()
 
     @staticmethod
     def getGpuDefaultHeader(gpus=2):
@@ -114,8 +110,7 @@ class sites(GenericService):
         elif mtype=='dict':
             return dict([ (x, "/mnt/s3/%s"%(x)) for x in buckets])
 
-    def getAvblImg(self, sol_name, latest_first=True):
-        sol_id = sites.checkSolName(sol_name)
+    def getAvblImg(self, sol_id, sol_name, latest_first=True):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)
             if latest_first:

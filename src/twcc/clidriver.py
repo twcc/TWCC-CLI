@@ -45,6 +45,8 @@ class ServiceOperation:
         #@todo
         try:
             self.def_proj = self._session_.def_proj
+            self.def_s3_access_key = self._session_.def_s3_access_key
+            self.def_s3_secret_key = self._session_.def_s3_secret_key
         except:
             self.def_proj = ""
 
