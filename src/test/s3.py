@@ -133,30 +133,4 @@ cli.add_command(download)
 
 if __name__ == '__main__':
     cli()
-    #s3 = S3()
-    #s3.list_files_v2(bucket_name='wtestbucket',delimiter='',prefix='hi_im_here')
-    # Create a new bucket
-    #s3.create_bucket('thisistestbucket')
-
-    # List out all the new bucket
-    #buckets = s3.list_bucket()
-    #s3.test_table(buckets)
-#
-#    # Upload single file to bucket
-#    s3.upload_bucket(file_name = '/Users/WillyChen/Work/UploadMe.txt',bucket_name = 'thisistestbucket',key = 'DownloadMe.txt')
-#    # Download single file from bucket 
-#    s3.download_bucket(bucket_name = 'thisistestbucket',key = 'DownloadMe.txt',file_name = '/Users/WillyChen/Work/DownloadMe.txt')
-#
-#    # List files inside of bucket
-#    files = s3.list_object('thisistestbucket')
-#    s3.test_table(files)
-#
-#    # Upload files to bucket
-#    s3.upload_bucket(path = '/Users/WillyChen/Work/UploadFromHere',bucket_name = 'thisistestbucket',r = True)
-#    # Download files to bucket
-#    s3.download_bucket(bucket_name = 'thisistestbucket',path='/Users/WillyChen/Work/DownloadToHere',r = True)
-#    files = s3.list_object('thisistestbucket')
-#    s3.test_table(files)
-#    # Delete bucket
-#    s3.del_bucket('thisistestbucket')
 
