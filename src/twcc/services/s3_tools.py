@@ -131,6 +131,7 @@ class S3():
                 if not file_name.endswith('/'):
                     check_path = "/".join(file_name.split('/')[:-1])
 
+                print(check_path)
                 if not os.path.isdir(check_path):
                     os.mkdir(check_path)
 
@@ -175,7 +176,7 @@ class S3():
                 error_msg = "{} still has files inside it.".format(e.response['Error']['BucketName'])
                 print(error_msg)
             else:
-                raise e.response
+                print(e.response)
         return True 
     
     def del_object(self,bucket_name,file_name):
@@ -209,5 +210,16 @@ class S3():
         except ClientError as e:
             return False
         return True
+
+    def list_files_v2(self,bucket_name,delimiter='',prefix=''):
+        try:
+            res = self.s3_cli.list_objects_v2(Bucket=bucket_name,Delimiter=delimiter,Prefix=prefix)
+            return [now_dict['Key'] for now_dict in res['Contents']]
+            #for now_dict in res['Contents']:
+            #    print(now_dict['Key'])
+        except ClientError as e:
+            return False
+        return True
+
 
 
