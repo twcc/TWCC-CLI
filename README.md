@@ -49,6 +49,15 @@ and
 ![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
 
 
+to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
+
+![TWCC API KEY](https://snag.gy/ZA0xw9.jpg)
+
+and 
+
+![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
+
+
 ## Step 3. Create a Container 
 
 - **Usage**
