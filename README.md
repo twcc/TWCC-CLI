@@ -2,28 +2,34 @@
 
 > we cook twcc-cli
 
-requires:
-1. build-essential
-1. python 2.7
-1. python 2.7-dev
+INDEX: 
+1. [S3](doc/S3_tutorial.md)
+1. [Customized Image](doc/Customed_Img_Tutorial.md)
 
-## Step 1. scripts for Ubuntu 16.04 @ TWCC
+## Step 1. Scripts for Ubuntu 16.04 @ TWCC
 
-```
-sudo sed -i 's/nova\.clouds\./tw./g' /etc/apt/sources.list
-sudo apt update
-sudo apt -y install build-essential python2.7 python2.7-dev
+- **Requirements**
 
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py 
-sudo python2.7 get-pip.py
-sudo pip install pipenv
-```
+    1. build-essential
+    2. python 2.7
+    3. python 2.7-dev
 
-or just run
 
-```
-bash tools/twcc_env.sh
-```
+	```
+	sudo sed -i 's/nova\.clouds\./tw./g' /etc/apt/sources.list
+	sudo apt update
+	sudo apt -y install build-essential python2.7 python2.7-dev
+	
+	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py 
+	sudo python2.7 get-pip.py
+	sudo pip install pipenv
+	```
+
+	or just run
+	
+	```
+	bash tools/twcc_env.sh
+	```
 
 ## Step 2. in project directory and try
 
@@ -32,20 +38,50 @@ pipenv install
 pipenv run python src/test/gpu_cntr.py
 ```
 
+and you will need to input TWCC API key. 
 
-## Step 3. Create a default container 
+to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
 
-usage:
-```
-pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu Number of GPU] [-sol Solution Name] [-img Image Name]
-                                                   [-s3 S3 bucket name] [-wait Wait for CNTR to ready]
-```
+![TWCC API KEY](https://snag.gy/ZA0xw9.jpg)
 
-to create a 1 GPU **Tensorflow** latest environment with name *twcc-cli*
+and 
 
-```
-pipenv run python src/test/gpu_cntr.py create-cntr 
-```
+![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
+
+
+to get your TWCC API key, you need to [login TWCC Web Portal](https://www.youtube.com/watch?v=jReWylnyBS4)
+
+![TWCC API KEY](https://snag.gy/ZA0xw9.jpg)
+
+and 
+
+![TWCC-CLI key](https://snag.gy/h9itW7.jpg)
+
+
+## Step 3. Create a Container 
+
+- **Usage**
+	```
+	pipenv run python src/test/gpu_cntr.py create-cntr [-cntr Container name] [-gpu Number of GPU] [-sol Solution Name] [-img Image Name]
+	                                                   [-s3 S3 bucket name] [-wait <Wait for CNTR to ready>]
+	```
+- **Example**
+
+    **1. Create a container with default configuration** 
+       
+    ```
+	pipenv run python src/test/gpu_cntr.py create-cntr 
+	```
+ 
+        
+           
+    - Default configuration：
+      - Solution & Image: Tensorflow (latest environment)
+      - Container name: twcc-cli
+      - Hardware: 1 GPU + 4 cores + 90 GB memory
+    
+
+    
 
 
 ## Step 4. List ALL available solutions
@@ -62,48 +98,60 @@ pipenv run python src/test/gpu_cntr.py list-all-img
 
 ## Step 6. List container information 
 
-usage:
-```
-pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table Show info on table]
-```
+- **Usage**
+    ```
+    pipenv run python src/test/gpu_cntr.py list-cntr [-site Site Id] [-table <Show info on table>] [-all <Show all containers>]
+    ```
 
-- example 1: get all containers
+- **Examples**
 
-```
-pipenv run python src/test/gpu_cntr.py list-cntr 
-```
+    **1. Get a list of all containers**
 
-- example 2: get a container information with site_id = `93072`
+    ```
+    pipenv run python src/test/gpu_cntr.py list-cntr 
+    ```
 
-```
-pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
-```
+    **2. Get a container information with site_id = `93072`**
 
-- example 3: get connection information for site_id = `93072`
+    ```
+    pipenv run python src/test/gpu_cntr.py list-cntr -site 93072
+    ```
 
-```
-pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table false
-```
-
-This will show your TWCC username, which you gave in [iService](https://iservice.nchc.org.tw/), and SSH access port.
-
-
-## Step 7. Remove available container
-
-usage:
-```
-pipenv run python src/test/gpu_cntr.py del-cntr -site Site Id
-```
-
-- example 1: delete container with site_id = `93072` 
-
-```
-pipenv run python src/test/gpu_cntr.py del-cntr -site 93072
-```
+	**3. Get connection information for site_id = `93072`**
+	
+	```
+	pipenv run python src/test/gpu_cntr.py list-cntr -site 93072 -table False
+	```
+    
+   This will show your TWCC username, which you created in [iService](https://iservice.nchc.org.tw/), and SSH access port.
 
 
+   **4. Get all containers for a project (admin/tenant_admin only)**
+    
+    ```
+    pipenv run python src/test/gpu_cntr.py list-cntr -all
+    ```
+	
 
-## Step 8. delete credential information, just
+
+## Step 7. Remove a container
+
+- **Usage**
+    ```
+    pipenv run python src/test/gpu_cntr.py del-cntr Site Id
+    ```
+
+- **Example** 
+
+    **1. Remove a container with site_id = `93072`** 
+
+    ```
+    pipenv run python src/test/gpu_cntr.py del-cntr 93072
+    ```
+
+
+
+## Step 8. Remove credentials
 
 ```
 rm -rf ~/.twcc_data
