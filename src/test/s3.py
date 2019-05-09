@@ -68,8 +68,8 @@ def del_file(bucket_name,file_name):
     s3.del_object(bucket_name,file_name)
 
 @click.command()
-@click.option('-s','--source','source', help = 'Name of the File.')
-@click.option('-d','--directory','directory', help = 'Name of the Bucket.')
+@click.option('-s','--source','source',required=True, help = 'Name of the File.')
+@click.option('-d','--directory','directory',required=True, help = 'Name of the Bucket.')
 @click.option('-k','--key','key',help ='The name of the key to upload to.') 
 @click.option('-r','r',is_flag = True,help = 'Recursively copy entire directories.' )
 def upload(source,directory,key,r):
@@ -88,8 +88,8 @@ def upload(source,directory,key,r):
 
 #download_bucket(self,bucket_name=None,key=None,file_name=None,path=None,r=False)
 @click.command()
-@click.option('-s','--source','source', help = 'Name of the Bucket.')
-@click.option('-d','--directory','directory', help = 'Name of the path.')
+@click.option('-s','--source','source',required=True, help = 'Name of the Bucket.')
+@click.option('-d','--directory','directory',required=True, help = 'Name of the path.')
 @click.option('-k','--key','key',help ='The name of the key to download.') 
 @click.option('-r','r',is_flag = True,help = 'Recursively copy entire directories.' )
 def download(source,directory,key,r):
@@ -101,14 +101,27 @@ def download(source,directory,key,r):
         raise Exception("No such bucket name {} exists".format(source))
 
     # Check if the directory exists
+    # Download everything inside the bucket
     if os.path.isdir(directory) and key == None:
         if r != True:
             raise Exception("{} is path, need to set recursive to True".format(directory))
         s3.download_bucket(bucket_name = source,path=directory,r=r)
     else:
-        if directory.endswith('/'):
-            directory = directory + key
-        s3.download_bucket(file_name = directory,bucket_name = source,key = key)
+        # Download everthing from a folder
+        if key.endswith('*'):
+            files = s3.list_object(source)
+            prefix_folder = '/'.join(key.split('/')[:-1])
+            desire_files = s3.list_files_v2(bucket_name=source,delimiter='',prefix=prefix_folder)
+            for desire_file in desire_files:
+                if not desire_file.endswith('/'):
+                    print(desire_file)    
+                    new_directory = directory + desire_file
+                    s3.download_bucket(file_name = new_directory,bucket_name = source,key = desire_file)
+        else:
+        # Download a single file from a folder or bucket
+            if directory.endswith('/'):
+                directory = directory + key
+            s3.download_bucket(file_name = directory,bucket_name = source,key = key)
 
 cli.add_command(create_bucket)
 cli.add_command(list_buckets)
@@ -121,6 +134,7 @@ cli.add_command(download)
 if __name__ == '__main__':
     cli()
     #s3 = S3()
+    #s3.list_files_v2(bucket_name='wtestbucket',delimiter='',prefix='hi_im_here')
     # Create a new bucket
     #s3.create_bucket('thisistestbucket')
 
