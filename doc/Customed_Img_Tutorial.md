@@ -1,4 +1,4 @@
-# TWCC-CLI Customed Img Tutorial tutorial
+# TWCC-CLI Customized Image Tutorial
 **Here we will show how to use TWCC-CLI to request for customed image and create a new container base on the image.**
 
 
