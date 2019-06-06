@@ -36,18 +36,18 @@ class sites(GenericService):
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
-        sol_list = [ (4, "Tensorflow"),
+        sol_list = [ (4, "TensorFlow"),
           (9, "Caffe2"),
           (10, "Caffe"),
           (13, "CNTK"),
           (16, "CUDA"),
           (19, "MXNet"),
-          (24, "pyTorch"),
+          (24, "PyTorch"),
           #(29, "TensorRT"), # not avalible for now
           #(35, "TensorRT_Server"), # not avalible for now
           (42, "Theano"),
           (49, "Torch"),
-          (52, "Digits") ]
+          (52, "DIGITS") ]
 
         if reverse:
             sol_list = [ (y, x) for (x, y) in sol_list]
