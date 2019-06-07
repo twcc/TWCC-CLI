@@ -163,7 +163,7 @@ def list_cntr(site_id, isTable,isAll):
             isAll = False
         # raise ValueError("{}, please change to Admin key".format(a.list(isAll=isAll)['detail']))
         if site_id==0:
-            my_sites = a.list()
+            my_sites = a.list(isAll=isAll)
             if len(my_sites)>0:
                 col_name = ['id','name', 'create_time', 'status']
                 table_layout('sites', my_sites, caption_row=col_name)
