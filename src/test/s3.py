@@ -30,14 +30,14 @@ def create_bucket(bucket_name):
     s3.create_bucket(bucket_name)
 
 @click.command()
-@click.option('-lb','list4buckets',is_flag = False,type=bool, help = 'Show all buckets in this project')
-def list_buckets(list4buckets):
+#@click.option('-lb','list4buckets',is_flag = False,type=bool, help = 'Show all buckets in this project')
+def list_buckets():
     ''' List all the exist s3 buckets in the project.
     '''
     s3 = S3()
-    if not list4buckets:
-        buckets = s3.list_bucket()
-        s3.test_table(buckets)
+    #if not list4buckets:
+    buckets = s3.list_bucket()
+    s3.test_table(buckets)
 
 @click.command()
 @click.option('-n','--name','bucket_name',required=True, help = 'Name of the Bucket.')
@@ -133,4 +133,3 @@ cli.add_command(download)
 
 if __name__ == '__main__':
     cli()
-
