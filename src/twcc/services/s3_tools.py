@@ -43,7 +43,8 @@ class S3():
         """
         response = self.s3_cli.list_buckets()
         head_data = [bucket_name for bucket_name in response['Buckets'][0].keys()]
-        total_data = [[self.c_t(bucket['Name']),self.c_t(str(bucket['CreationDate']).split('.')[0])] if bucket['Name'] in self.new_bucket else [bucket['Name'],str(bucket['CreationDate']).split('.')[0]] for bucket in response['Buckets']]
+        #total_data = [self.c_t(bucket['CreationDate']),self.c_t(str(bucket['Name']).split('.')[0])] if bucket['Name'] in self.new_bucket else [bucket['Name'],str(bucket['CreationDate']).split('.')[0]] for bucket in response['Buckets']]
+        total_data = [[str(bucket['CreationDate']).split('.')[0],bucket['Name']] for bucket in response['Buckets']]
         total_data.insert(0,head_data)
         return total_data
 
@@ -78,17 +79,16 @@ class S3():
         """
         if r == True:
             if os.path.isdir(path):
-                for root,dirs,files in tqdm(os.walk(path)):
-                    if len(dirs) == 0:
-                        for f in files:
-                            full_path = os.path.join(root,f)
-                            ff_name = full_path[k:]
-                            self.s3_cli.upload_file(full_path,bucket_name,ff_name)
-                    else:
-                        k = len(root)
-                        for f in files:
-                            full_path = os.path.join(root,f)
-                            self.s3_cli.upload_file(full_path,bucket_name,f)
+                on_local_path_len = len("/".join(path.split('/')[:-1])) # Get the len of the local path.
+                for root,dirs,files in tqdm(os.walk(path)): # Loop through all the files in the local.
+                    for f_name in files:
+                        local_file_path = os.path.join(root,f_name) # Get the local file path. 
+                        remote_file_path = local_file_path[on_local_path_len + 1:] # Create the key name on S3.
+                        try:
+                            self.s3_cli.upload_file(local_file_path,bucket_name,remote_file_path)
+                        except ClientError as e:
+                            print(e)
+                            return False
             else:
                 print("No such path")
         else:
@@ -116,7 +116,7 @@ class S3():
                 # get the list of objects inside the bucket
                 a = self.list_object(bucket_name)[1:]
                 # loop through all the objects
-                for i in tqdm(a):
+                for i in a:
                     ff_name = os.path.join(path+'/', i[2])
                     check_path = "/".join(ff_name.split('/')[:-1])
                     # check if the download folder exists
@@ -220,6 +220,3 @@ class S3():
         except ClientError as e:
             return False
         return True
-
-
-
