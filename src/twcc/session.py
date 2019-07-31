@@ -128,13 +128,14 @@ class Session(object):
 
 
     def load_session(self):
+        import re
         self.yaml = self.files['resources']
 
         self.credentials = {}
         cnt = open(self.files['credential'], 'r').readlines()
         for li in cnt:
             li = li.strip()
-            if not re.search("^\[default]", li):
+            if not re.search("^\[default]", li) and re.search("=", li):
                 key, val = li.split("=")
 
                 if key == "twcc_host":
