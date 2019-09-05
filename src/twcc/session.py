@@ -66,9 +66,10 @@ class Session(object):
         return True
 
     def create_session(self):
-        answers = prompt(quest_api)
-        API_KEY = answers['TWCC_API_KEY']
-        #KEY_NAME = answers['TWCC_KEY_NAME']
+        API_KEY = os.environ.get('TWCC_API_KEY', '')
+        if not API_KEY:
+            answers = prompt(quest_api)
+            API_KEY = answers['TWCC_API_KEY']
         KEY_NAME = 'twcc'
         self.convertYaml(API_KEY, KEY_NAME)
         self._getProjects()
@@ -111,15 +112,20 @@ class Session(object):
                   strShorten(prjs[ x['name'] ]['prj_name']), 
                   prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
-        answers = prompt(quest_api, style=custom_style_2)
-        proj_id = answers['default_project'].split(" - ")[0]
+        PROJECT_ID = os.environ.get('TWCC_PROJECT_ID', '')
+        PROJECT_CODE = os.environ.get('TWCC_PROJECT_CODE', '')
+        valid_proj_ids = [p['id'] for p in avl_proj]
+        if not PROJECT_ID or not PROJECT_CODE or int(PROJECT_ID) not in valid_proj_ids:
+            answers = prompt(quest_api, style=custom_style_2)
+            PROJECT_ID = answers['default_project'].split(" - ")[0]
+            PROJECT_CODE = answers['default_project'].split(" ")[3]
+
         fn_cred = self.files['credential']
-        sess_yaml += "twcc_proj_id={}\n".format(proj_id)
+        sess_yaml += "twcc_proj_id={}\n".format(PROJECT_ID)
 
         s3_proj = projects()
         s3_proj._csite_ = 'ceph-taichung-default'
-        proj_code = answers['default_project'].split(" ")[3]
-        s3_key = s3_proj.getS3Keys(proj_code)
+        s3_key = s3_proj.getS3Keys(PROJECT_CODE)
 
         sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['access_key'])
         sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['secret_key'])
