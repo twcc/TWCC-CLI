@@ -7,6 +7,8 @@ from twcc.util import *
 from PyInquirer import Validator, ValidationError, prompt
 from PyInquirer import style_from_dict, Token
 
+_TWCC_CLI_VERSION_="v190917"
+
 class TwccApiValidator(Validator):
     def validate(self, document):
         ok = re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', document.text)
@@ -127,8 +129,8 @@ class Session(object):
         s3_proj._csite_ = 'ceph-taichung-default'
         s3_key = s3_proj.getS3Keys(PROJECT_CODE)
 
-        sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['access_key'])
-        sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['secret_key'])
+        sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['public']['access_key'])
+        sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['public']['secret_key'])
 
         open(fn_cred, 'a+').write(sess_yaml)
 
@@ -143,6 +145,9 @@ class Session(object):
             li = li.strip()
             if not re.search("^\[default]", li) and re.search("=", li):
                 key, val = li.split("=")
+
+                if key == "twcc_cli":
+                    assert val==_TWCC_CLI_VERSION_, "TWCC_CLI version error! plz, `rm ~/.twcc_data` and input api-key again."
 
                 if key == "twcc_host":
                     self.host = val
