@@ -107,8 +107,8 @@ class Session(object):
               'name': 'default_project',
               'message': "Default *PROJECT_ID* when using TWCC-Cli:",
               'choices': [ u"{} - [ {} {} ], AVBL. CR.:{}".format(
-                  x['id'], x['name'], 
-                  strShorten(prjs[ x['name'] ]['prj_name']), 
+                  x['id'], x['name'],
+                  strShorten(prjs[ x['name'] ]['prj_name']),
                   prjs[ x['name'] ]['prj_avbl_cr'] ) for x in avl_proj ],
             }]
         answers = prompt(quest_api, style=custom_style_2)
@@ -120,11 +120,10 @@ class Session(object):
         s3_proj._csite_ = 'ceph-taichung-default'
         proj_code = answers['default_project'].split(" ")[3]
         s3_key = s3_proj.getS3Keys(proj_code)
-
-        sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['access_key'])
-        sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['secret_key'])
-
-        open(fn_cred, 'a+').write(sess_yaml)
+        if 'public' in s3_key:
+            sess_yaml += "twcc_s3_access_key={}\n".format(s3_key['public']['access_key'])
+            sess_yaml += "twcc_s3_secret_key={}\n".format(s3_key['public']['secret_key'])
+            open(fn_cred, 'a+').write(sess_yaml)
 
 
     def load_session(self):
@@ -159,7 +158,7 @@ class Session(object):
 
         self.clusters = {}
         import yaml
-        config = yaml.load(open(self.yaml, 'r').read())
+        config = yaml.load(open(self.yaml, 'r').read(), Loader=yaml.SafeLoader)
         self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
         del config
 
