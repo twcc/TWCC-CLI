@@ -132,7 +132,7 @@ class sites(GenericService):
     def create(self, name, sol_id, extra_prop):
 
         # @todo change this
-        extra_prop['x-extra-property-gpfs01-mount-path'] = '/mnt/work'
+        extra_prop['x-extra-property-gpfs01-mount-path'] = '/work/{}'.format(self._username)
         extra_prop['x-extra-property-gpfs02-mount-path'] = '/home/{}'.format(self._username)
 
         self.twcc.header_extra = extra_prop
