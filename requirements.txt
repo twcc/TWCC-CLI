@@ -1,17 +1,25 @@
--i https://pypi.org/simple
+-i https://pypi.org/simple/
+boto3==1.9.63
+botocore==1.12.253
 certifi==2018.11.29
 chardet==3.0.4
 click==7.0
 colorclass==2.2.0
+docutils==0.15.2
+futures==3.3.0 ; python_version == '2.6' or python_version == '2.7'
 idna==2.8
+jmespath==0.9.4
 prompt-toolkit==1.0.14
 pygments==2.3.1
 pyinquirer==1.0.3
-pyyaml==3.13
-regex==2019.2.21
+python-dateutil==2.8.1 ; python_version >= '2.7'
+pyyaml==5.1
+regex==2019.11.1
 requests==2.21.0
+s3transfer==0.1.13
 six==1.12.0
 termcolor==1.1.0
 terminaltables==3.1.0
+tqdm==4.26.0
 urllib3==1.24.1
 wcwidth==0.1.7
