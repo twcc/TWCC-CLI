@@ -19,4 +19,4 @@ INDEX:
 
 
 UPDATED:
-- Please follow instuctions in [TWCC MANUAL](https://www.twcc.ai/doc?page=deploy_env_cli), thanks!
+- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/doc?page=deploy_env_cli), thanks!
