@@ -53,7 +53,7 @@ class ServiceOperation:
     def load_yaml(self):
 
         self._yaml_fn_ = self._session_.files['resources']
-        twcc_conf = yaml.load(open(self._yaml_fn_, 'r').read())
+        twcc_conf = yaml.load(open(self._yaml_fn_, 'r').read(), Loader=yaml.FullLoader)
         self.stage = os.environ['_STAGE_']
 
         # change to load ~/.twcc_data/credential

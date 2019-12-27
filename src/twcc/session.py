@@ -171,7 +171,7 @@ class Session(object):
 
         self.clusters = {}
         import yaml
-        config = yaml.load(open(self.yaml, 'r').read())
+        config = yaml.load(open(self.yaml, 'r').read(), Loader=yaml.FullLoader)
         self.clusters = config[ os.environ['_STAGE_'] ]['clusters']
         del config
 
@@ -189,7 +189,7 @@ class Session(object):
 
         if not os.path.exists(self.files['credential']):
             import yaml
-            config = yaml.load(open(self.twcc_yaml_path, 'r').read())
+            config = yaml.load(open(self.twcc_yaml_path, 'r').read(), Loader=yaml.FullLoader)
             t_config = config[os.environ['_STAGE_']]
 
             mbuf = ""
