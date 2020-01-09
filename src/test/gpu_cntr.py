@@ -1,7 +1,10 @@
 from __future__ import print_function
 import sys, os
+
 TWCC_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 sys.path[1]=TWCC_PATH
+print(TWCC_PATH)
 
 from termcolor import colored
 def TWCC_LOGO():
@@ -32,7 +35,7 @@ def list_projects():
         table_layout ("Proj for {0}".format(cluster), proj.list(), ['id', 'name'])
 
 
-@click.command()
+#@click.command()
 def list_all_img():
     print("NOTE: This operation will take 1~2 mins.")
     a = solutions()
@@ -204,7 +207,7 @@ def cli():
 
 cli.add_command(list_s3)
 cli.add_command(list_sol)
-cli.add_command(list_all_img)
+#cli.add_command(list_all_img)
 cli.add_command(create_cntr)
 cli.add_command(list_cntr)
 cli.add_command(del_cntr)
