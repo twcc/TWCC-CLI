@@ -14,7 +14,6 @@ def pp(**kwargs):
     mpp = pprint.PrettyPrinter(indent=2)
     mpp.pprint(kwargs)
 
-
 def jpp(**args):
     import json
     print (json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=2))
@@ -29,7 +28,7 @@ def isNone(x):
     return True if type(x) == type(None) else False
 
 def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
-    from terminaltables import AsciiTable, SingleTable
+    from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
     from textwrap import wrap
@@ -111,8 +110,6 @@ def dic_seperator(d):
 
 
 def create_table_list(obj,tt):
-    from colorclass import Color
-    from termcolor import cprint
     from terminaltables import AsciiTable as AC
 
     import time

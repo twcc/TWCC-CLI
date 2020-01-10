@@ -75,13 +75,12 @@ class Session(object):
         self.load_session()
 
     def _getProjects(self):
-        from twcc.services.base import acls, projects, users, api_key
-        import json
+        from twcc.services.base import  projects, users
 
         u = users(debug=False)
         info_usr = u.list()
         if len(info_usr)==0:
-            raise
+            raise ValueError
 
         info_usr = info_usr[0]
         sess_yaml = "twcc_username={}\n".format(info_usr['username'])
@@ -94,7 +93,7 @@ class Session(object):
         #print(k.list())
 
         a._csite_ = 'k8s-taichung-default' # TWCC allow k8s only
-        cluster = a.getSites()[0]
+        # cluster = a.getSites()[0]
         avl_proj = a.list()[:9]
         #table_layout ("Proj for {0}".format(cluster), avl_proj, ['id', 'name'])
         # @todo here!
@@ -197,6 +196,7 @@ def mkdir_p(path):
             raise
 
 def session_start():
+    _TWCC_SESSION_ = None
     if not '_TWCC_SESSION_' == globals():
         TWCC_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         return Session( twcc_yaml_path="{}/yaml/NCHC_API-Test_env.yaml".format(TWCC_PATH) )

@@ -4,7 +4,6 @@ from twcc.session import session_start
 
 __version__ = '0.0.1'
 
-
 #
 # Get our data path to be added to botocore's search path
 #

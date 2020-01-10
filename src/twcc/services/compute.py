@@ -61,7 +61,7 @@ class sites(GenericService):
             return dict(sol_list)
 
     def getCommitList(self, mtype='list'):
-        self.func = 'image_commit';
+        self.func = 'image_commit'
 
         return self._do_api()
 
@@ -157,7 +157,6 @@ class sites(GenericService):
         return self._do_api()
 
     def list_solution(self, sol_id, isShow=True):
-        t_sol = None
         if sol_id in self._cache_sol_:
             t_sol = self._cache_sol_
         else:

@@ -11,6 +11,3 @@ class flavors(GenericService):
         self._csite_ = "openstack-taichung-community"
         self._api_key_ = api_key
 
-if __name__ == '__main__':
-    a = flavors("sys")
-    a.list()

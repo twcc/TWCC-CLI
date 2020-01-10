@@ -13,7 +13,6 @@ import urllib3
 urllib3.disable_warnings()
 
 class ServiceOperation:
-    global _TWCC_SESSION_
     def __init__(self, debug=True):
         self._session_ = session_start()
         self.load_credential()
@@ -143,9 +142,7 @@ class ServiceOperation:
                  ctype="application/json"):
 
         if not type(site_sn) == type(None):
-            if re.match("\d+", site_sn):
-                self.api_host = self.sites[site_sn]
-            else:
+            if re.match(r"\d+", site_sn):
                 self.api_host = site_sn
         else:
             self.api_host = api_host
@@ -197,8 +194,6 @@ class ServiceOperation:
 
     def show(self):
         self._i("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
-        self._i(self.sites)
-        self._i(self.keys)
         self._i("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
     def mkAPIUrl(self,
