@@ -5,6 +5,7 @@
 
 - 🈺User API 文件 https://man.twcc.ai/s/rkMucHkwS
 - 🈺 TWCC API 開發手冊 👈�https://man.twcc.ai/s/Hkg2TMAHH
+- 🈺 New API 開發手冊 👈�https://hackmd.io/MnuR8uSkTOWEIVAiZOKjrQ?view
 
 
 INDEX: 
