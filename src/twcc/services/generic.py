@@ -79,7 +79,6 @@ class GenericService(object):
             url_ext_get = self.ext_get,
             res_type = self.res_type)
 
-        print('xxxxxxxxxxxxxxxx  _api_key_ :'+self._api_key_)
 
         if self._debug_:
             pp(res=res)

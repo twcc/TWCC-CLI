@@ -267,6 +267,7 @@ def rm(res_type,con_ids, name, r):
 @click.option('-v', 'res_type', flag_value='Vcs')
 @click.option('-n', 'res_type', flag_value='Network')
 @click.option('-k', 'res_type', flag_value='Keypair')
+@click.option('-p', 'res_type', flag_value='Port')
 
 @click.option('-img', 'res_property', flag_value='image')
 @click.option('-vol', 'res_property', flag_value='volumne')
@@ -292,6 +293,9 @@ def ls(res_type, res_property, site_id, is_table, is_all
       list_files(name)
 
     return True
+
+  if res_type == 'Port':
+     list_port(id_num)
 
   if res_type == 'Container':
     if res_property == 'solution':
@@ -380,9 +384,18 @@ def mk(res_type, name, gpu, sol, img_name, wait):
   return False
 
 @click.command()
-@click.argument('con_ids', nargs=-1)
-def bind(con_ids):
-  list_port(con_ids)
+@click.option('-u', '--op', flag_value='unbind')
+@click.option('-p','port', type = int , help ='number of port') 
+@click.option('-site','siteId',type = int ,help ='site id') 
+def bind(op, port, siteId):
+  b = sites()
+  if not op: 
+    print('bind')
+    b.exposedPort(siteId, port)
+  else:
+    b.unbindPort(siteId, port)
+    print(siteId, port) 
+    #b.getConnInfo(siteId)
 
 @click.group()
 def cli():

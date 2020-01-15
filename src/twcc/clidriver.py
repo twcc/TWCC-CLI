@@ -77,7 +77,7 @@ class ServiceOperation:
         return True if func in self.valid_funcs else False
 
     def _api_act(self, t_api, t_headers, t_data=None, mtype="get"):
-
+        
         start_time = time.time()
 
         if mtype == 'get':
@@ -110,7 +110,7 @@ class ServiceOperation:
             func="_DEF_",
             url_dict=None, data_dict=None, url_ext_get=None,
             http='get', res_type='json'):
-
+ 
         if not res_type in self.res_type_valid:
             raise ValueError(
                 "Response type Error:'{0}' is not valid, available options: {1}".format(
