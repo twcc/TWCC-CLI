@@ -240,18 +240,18 @@ def download(source,directory,key,r):
 @click.option('-v', 'res_type', flag_value='Vcs')
 @click.option('-n', 'res_type', flag_value='Network')
 @click.option('-k', 'res_type', flag_value='Keypair')
-@click.argument('con_ids', nargs=-1)
+@click.argument('id', nargs=-1)
 @click.option('-name','--name','name', help = 'Name of the Bucket.')
 @click.option('-r','r', is_flag = True,help = 'Help delete all the files inside the bucket before delete bucket.')
 
 
-def rm(res_type,con_ids, name, r):
+def rm(res_type, id, name, r):
 
   if res_type == 'Container':
-    if not con_ids:
-      print('res_types {} ,con id empty'.format(con_ids))
+    if not id:
+      print('res_types {} ,con id empty'.format(id))
     else:
-      del_cntr(con_ids)
+      del_cntr(id)
   elif res_type == 'Cos':
     print('enter cos')
     if not name:
@@ -284,7 +284,6 @@ def rm(res_type,con_ids, name, r):
 
 def ls(res_type, res_property, site_id, is_table, is_all
        , id_num, name):
-  print('enter ls')
 
   if res_type == 'Cos':
     if not name:
@@ -295,7 +294,7 @@ def ls(res_type, res_property, site_id, is_table, is_all
     return True
 
   if res_type == 'Port':
-     list_port(id_num)
+     list_port(site_id)
 
   if res_type == 'Container':
     if res_property == 'solution':
