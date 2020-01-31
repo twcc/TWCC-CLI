@@ -2,3 +2,5 @@
 scripts/
 .pyc
 .swp
+*.egg-info*
+*venv*
