@@ -1,10 +1,11 @@
 from setuptools import setup
 
 setup(
-    name='sss',
+    name='twccli',
     version='0.1',
-    py_modules=['sss'],
+    py_modules=['twccli'],
     install_requires=[
+        'click',
         'boto3==1.10.',
 	'botocore==1.13.28',
 	'certifi==2019.11.28',
@@ -31,6 +32,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        sss=sss:cli
+        twccli=twccli:cli
     ''',
 )
