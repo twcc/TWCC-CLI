@@ -181,6 +181,10 @@ class sites(GenericService):
         info_gen = self.queryById(site_id)
         info_detail = self.getDetail(site_id)
         usr_name = info_gen['user']['username']
+
+        info_port = [ x for x in info_detail['Service'][0]['ports']  ]
+        print (info_port)
+        table_layout("", info_port)
         info_port = [ x['port'] for x in info_detail['Service'][0]['ports'] if x['target_port'] == 22 ][0]
         info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
@@ -201,13 +205,24 @@ class sites(GenericService):
         if 'Pod' in detail and len(detail['Pod'])==1 and detail['Pod'][0]['status'] == 'running':
             return detail['Pod'][0]['name']
 
-    def exposedPort(self, site_id, portAttr):
-        self.url_dic = {"sites":site_id, 'container/action':""}
-        self.update(portAttr)
+    #def exposedPort(self, site_id, portAttr):
+    #    self.url_dic = {"sites":site_id, 'container/action':""}
+    #    self.update(portAttr)
 
-    def unbindPort(self, site_id):
+    def exposedPort(self, site_id, port_id):
         pod_name = self.getPodName(site_id)
-        unbindAttr = {"action": "disassociateIP",
-                      "pod_name": pod_name}
+        bindAttr = {  "action": "associateIP",
+                      "pod_name": pod_name,
+                      "ports":[{'targetPort': int(port_id)}] }
         self.url_dic = {"sites":site_id, 'container/action':""}
+        self.update(bindAttr)
+
+
+    def unbindPort(self, site_id, port_id):                             
+        pod_name = self.getPodName(site_id)                             
+        unbindAttr = {"action": "disassociateIP",                       
+                      "pod_name": pod_name,
+                      "ports":[{'targetPort': int(port_id)}] }          
+        self.url_dic = {"sites":site_id, 'container/action':""}         
         self.update(unbindAttr)
+

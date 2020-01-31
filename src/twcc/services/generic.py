@@ -79,6 +79,7 @@ class GenericService(object):
             url_ext_get = self.ext_get,
             res_type = self.res_type)
 
+
         if self._debug_:
             pp(res=res)
 
