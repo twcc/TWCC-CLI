@@ -13,9 +13,15 @@ if 'TWCC_DATA_PATH' in os.environ:
         path = os.path.expandvars(path)
         path = os.path.expanduser(path)
         _TWCC_data_path_.append(path)
-_TWCC_data_path_.append(
-    os.path.join(os.environ['HOME'], '.twcc_data')
-)
+
+
+if "HOME" in os.environ:
+    _TWCC_data_path_.append(
+        os.path.join(os.environ['HOME'], '.twcc_data')
+    )
+else:
+    _TWCC_data_path_.append("/tmp")
+    
 os.environ['TWCC_DATA_PATH'] = os.pathsep.join(_TWCC_data_path_)
 
 
@@ -29,4 +35,4 @@ __all__ = ["clidriver", "util", "services"]
 
 os.environ['_STAGE_'] = "production"
 
-_TWCC_SESSION_ = session_start()
+# _TWCC_SESSION_ = session_start()
