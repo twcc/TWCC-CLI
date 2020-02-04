@@ -9,4 +9,4 @@ scripts/
 *venv*
 *.tox*
 dist/*
-.coverage*
+.coverage
