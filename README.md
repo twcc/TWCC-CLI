@@ -1,5 +1,6 @@
 # TWCC-CLI Project
-[![pipeline status](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/badges/aug_dev_Feb/pipeline.svg)](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/commits/aug_dev_Feb) | 
+[![pipeline status](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/badges/aug_dev_Feb/pipeline.svg)](https://git.narl.org.tw/gitlab/ai-in[![coverage report](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/badges/aug_dev_Feb/coverage.svg)](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/commits/aug_dev_Feb)
+aug_dev_Feb) | 
 
 > **NOTE**:
 >
