@@ -1,15 +1,6 @@
 from __future__ import print_function
 
 import sys, os
-
-
-TWCC_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-
-
-sys.path[1] = TWCC_PATH
-
-block_set = set([182, 29, 35, 120])
-
 import click
 import re
 from twcc.services.s3_tools import S3

@@ -8,3 +8,4 @@ scripts/
 *.egg-info*
 *venv*
 *.tox*
+dist/*
