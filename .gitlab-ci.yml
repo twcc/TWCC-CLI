@@ -6,6 +6,7 @@ stages:
 before_script:
 - curl -O https://bootstrap.pypa.io/get-pip.py
 - python get-pip.py
+- pip install tox
 
 python27:
   image: python:2.7
