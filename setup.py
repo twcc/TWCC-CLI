@@ -18,6 +18,7 @@ def find_version(*file_paths):
 
 
 install_requirements = [
+    'tox',
     'click',
     'boto3',
     'botocore',
