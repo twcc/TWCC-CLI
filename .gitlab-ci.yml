@@ -12,8 +12,12 @@ python27:
   image: python:2.7
   stage: test
   script: tox -e py27
+  only: 
+  - aug_dev_Feb
 python37:
   image: python:3.7
   stage: test
   script: tox -e py37
+  only: 
+  - aug_dev_Feb
 
