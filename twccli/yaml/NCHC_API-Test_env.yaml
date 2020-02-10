@@ -5,15 +5,13 @@ info:
 production:
     host:   "https://apigateway.twcc.ai"
     keys:
-    clusters:
-        - 'admin'
-        - 'ceph-taichung-default'
+    resources:
+        HPCJ: 'slurm-taichung-default'
+        COS: 'ceph-taichung-default'
+        CNTR: 'k8s-taichung-default'
+        VCS: 'openstack-taichung-community'
+    management:
         - 'goc'
-        - 'harbor'
-        - 'k8s-taichung-default'
-        - 'openstack-taichung-community'
-        - 'openstack-taichung-suse'
-        - 'slurm-taichung-default'
 avalible_funcs:
     -
       name: "iservice"

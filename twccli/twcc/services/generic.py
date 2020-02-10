@@ -2,21 +2,30 @@
 from __future__ import print_function
 import os
 import yaml
-from twcc.util import pp, isNone
+from twcc.session import Session2
+from twcc.util import pp, isNone, isDebug
 from twcc.clidriver import ServiceOperation
 
 # change to new-style-class https://goo.gl/AYgxqp
+
+
 class GenericService(object):
 
-    def __init__(self, debug=False):
+    def __init__(self, api_key=None, debug=False):
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
-        self._debug_ = debug
+        self._debug_ = isDebug()
 
-        self.twcc = ServiceOperation()
-        self._api_key_ = self.twcc._session_.default_key
+        self.twcc = ServiceOperation(needSession=False)
+        # in some case, before session started,
+        # need to get info. from TWCC.
+        if type(api_key) == type(None):
+            self._api_key_ = Session2._getApiKey()
+        else:
+            print("using passed api_key", api_key)
+            self._api_key_ = api_key
         # @todo
         try:
             self._project_id = self.twcc._session_.def_proj
@@ -24,10 +33,9 @@ class GenericService(object):
         except:
             self._username = ""
             self._project_id = None
-            print("WARNING: no default_project")
+            self.__log("no default_project")
 
         self.twcc._debug = debug
-
 
         # map to url
         self.url_dic = None
@@ -46,13 +54,15 @@ class GenericService(object):
         if isNone(self._csite_):
             raise ValueError("No site value.")
         elif not self._csite_ in self.getSites():
-            raise ValueError("Site value is not valid. {0}".format(self._csite_))
+            raise ValueError(
+                "Site value is not valid. {0}".format(self._csite_))
         else:
             return True
 
     def getSites(self):
-        exclu = ['admin', 'harbor', 'goc', 'test_sit', 'nchc-ad', 'haproxy_stats']
-        return [ x for x in self.twcc._session_.clusters if not x in exclu]
+        exclu = ['admin', 'harbor', 'goc',
+                 'test_sit', 'nchc-ad', 'haproxy_stats']
+        return [x for x in self.twcc._session_.clusters if not x in exclu]
 
     def _isAlive(self):
         return self.twcc.try_alive()
@@ -61,7 +71,6 @@ class GenericService(object):
         if self._debug_:
             pp(csite=self._csite_,
                 func=self._func_,
-                yaml=self.twcc._yaml_fn_,
                 res_type=self.res_type)
 
             if not isNone(self.url_dic):
@@ -70,22 +79,21 @@ class GenericService(object):
                 pp(data_dic=self.data_dic)
 
         res = self.twcc.doAPI(
-            site_sn = self._csite_,
-            key_tag = self._api_key_,
-            func = self._func_,
-            url_dict = self.url_dic if not isNone(self.url_dic) else None,
-            data_dict = self.data_dic if not isNone(self.data_dic) else None,
-            http = self.http_verb,
-            url_ext_get = self.ext_get,
-            res_type = self.res_type)
-
+            site_sn=self._csite_,
+            api_key=self._api_key_,
+            func=self._func_.lower(),
+            url_dict=self.url_dic if not isNone(self.url_dic) else None,
+            data_dict=self.data_dic if not isNone(self.data_dic) else None,
+            http=self.http_verb,
+            url_ext_get=self.ext_get,
+            res_type=self.res_type)
 
         if self._debug_:
             pp(res=res)
 
         return res
 
-    def create(self,mid):
+    def create(self, mid):
         pass
 
     def list(self):
@@ -94,7 +102,7 @@ class GenericService(object):
         return self._do_api()
 
     def queryById(self, mid):
-        self.url_dic = { self.__class__.__name__ : mid }
+        self.url_dic = {self.__class__.__name__.lower(): mid}
         self.http_verb = 'get'
         res = self._do_api()
         self.url_dic = None
@@ -107,18 +115,23 @@ class GenericService(object):
     @project_id.setter
     def project_id(self, proj_id):
         self._project_id = proj_id
-        print (">>>", self._project_id)
 
     def delete(self, mid):
         self.http_verb = "delete"
-        self.url_dic = { self.__class__.__name__ : mid }
+        self.url_dic = {self.__class__.__name__: mid}
         res = self._do_api()
         return res
+
+    def __log(self, mstr):
+        if self._debug_:
+            print("DEBUG in [{}]: {}".format(self.__class__.__name__, mstr))
+
 
 class CpuService(GenericService):
     def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)
         self._csite_ = "openstack-taichung-community"
+
 
 class GpuService(GenericService):
     def __init__(self, debug=False):

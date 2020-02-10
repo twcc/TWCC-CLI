@@ -7,18 +7,20 @@ import yaml
 import datetime
 import logging
 import os
-from twcc.session import session_start
-from twcc.util import parsePtn, isNone
+from twcc.session import session_start, Session2
+from twcc.util import parsePtn, isNone, isDebug, pp
 import urllib3
 urllib3.disable_warnings()
 
-class ServiceOperation:
-    def __init__(self, debug=True):
-        self._session_ = session_start()
-        self.load_credential()
-        self.load_yaml()
 
-        self.try_alive()
+class ServiceOperation:
+    def __init__(self, needSession=False):
+        if needSession:
+            self._session_ = session_start2()
+        #self._session_ = session_start()
+        self._load()
+        # self.load_credential()
+        # self.load_yaml()
 
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
         self.res_type_valid = set(['txt', 'json'])
@@ -26,22 +28,33 @@ class ServiceOperation:
         # for site usage
         self.header_extra = {}
 
-        self._debug = debug
+        self._debug = isDebug()
         if self._debug:
             self._setDebug()
 
-    def try_alive(self):
-        return True
-        #print (requests.get(self.host_url, verify=False).status_code)
-        #if not requests.get(self.host_url, verify=False).status_code == 404:
-        #    raise ConnectionError
-        #else:
-        #    return True
+    def _load(self):
+        self.api_key = Session2._getApiKey()
+        self.twcc_config = Session2._getTwccliConfig()
+        self.host_url = Session2._getTwccApiHost()
+
+        _ava_funcs_ = self.twcc_config['avalible_funcs']
+        self.valid_funcs = [_ava_funcs_[x]['name']
+                            for x in range(len(_ava_funcs_))]
+
+        self.valid_http_verb = dict([(_ava_funcs_[x]['name'], _ava_funcs_[x][
+                                    'http_verb']) for x in range(len(_ava_funcs_))])
+        self.url_format = dict([(_ava_funcs_[x]['name'],
+                                 _ava_funcs_[x]['url_type']) for x in range(len(_ava_funcs_))])
+        self.url_ptn = dict([
+            (x, parsePtn(self.url_format[x])) for x in self.url_format.keys()])
+
+    def isFunValid(self, func):
+        print(self.twcc_config)
 
     def load_credential(self):
         self.api_keys = self._session_.credentials
         self.host_url = self._session_.host
-        #@todo
+        # @todo aug 0206
         try:
             self.def_proj = self._session_.def_proj
             self.def_s3_access_key = self._session_.def_s3_access_key
@@ -50,9 +63,8 @@ class ServiceOperation:
             self.def_proj = ""
 
     def load_yaml(self):
-
-        self._yaml_fn_ = self._session_.files['resources']
-        twcc_conf = yaml.load(open(self._yaml_fn_, 'r').read(), Loader=yaml.SafeLoader)
+        self._yaml_fn_ = Session2.PackageYaml
+        twcc_conf = Session2._getTwccliConfig()
         self.stage = os.environ['_STAGE_']
 
         # change to load ~/.twcc_data/credential
@@ -76,7 +88,7 @@ class ServiceOperation:
         return True if func in self.valid_funcs else False
 
     def _api_act(self, t_api, t_headers, t_data=None, mtype="get"):
-        
+
         start_time = time.time()
 
         if mtype == 'get':
@@ -90,7 +102,7 @@ class ServiceOperation:
             r = requests.delete(t_api, headers=t_headers, verify=False)
         elif mtype == "put":
             r = requests.put(t_api, headers=t_headers,
-                              data=json.dumps(t_data), verify=False)
+                             data=json.dumps(t_data), verify=False)
         else:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
@@ -103,13 +115,14 @@ class ServiceOperation:
 
     def doAPI(
         self,
-            site_sn=None, api_host="_DEF_",
-            key_tag=None, api_key="_DEF_",
+            site_sn=None,
+            api_host=None,
+            key_tag=None, api_key=None,
             ctype="application/json",
-            func="_DEF_",
+            func=None,
             url_dict=None, data_dict=None, url_ext_get=None,
             http='get', res_type='json'):
- 
+
         if not res_type in self.res_type_valid:
             raise ValueError(
                 "Response type Error:'{0}' is not valid, available options: {1}".format(
@@ -121,43 +134,40 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(http))
 
         t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
-        t_header = self.mkHeader(site_sn, key_tag, api_host, api_key, ctype)
+        t_header = self.mkHeader(
+            site_sn=site_sn, key_tag=key_tag, api_host=api_host, api_key=api_key, ctype=ctype)
 
         if not isNone(url_ext_get):
             t_url += "?"
             t_url_tmp = []
             for param_key in url_ext_get.keys():
-                t_url_tmp.append( "{0}={1}".format(param_key, url_ext_get[param_key]) )
+                t_url_tmp.append("{0}={1}".format(
+                    param_key, url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
 
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
-                return res[0].json()
+                try:
+                    return res[0].json()
+                except:
+                    return res[0].content
             elif res_type == 'txt':
                 return res[0].content
 
     def mkHeader(self, site_sn=None, key_tag=None,
-                 api_host="_DEF_", api_key="_DEF_",
+                 api_host=None, api_key=None,
                  ctype="application/json"):
 
-        if not type(site_sn) == type(None):
-            if re.match(r"\d+", site_sn):
-                self.api_host = site_sn
-        else:
-            self.api_host = api_host
-        if not type(key_tag) == type(None):
-            self.api_key = self.api_keys[key_tag]
-        else:
-            self.api_key = api_key
+        self.api_host = api_host
 
         self.ctype = ctype
 
-        return_header = {'X-API-HOST': self.api_host,
-                'x-api-key': self.api_key,
-                'Content-Type': self.ctype}
+        return_header = {'X-API-HOST': site_sn,
+                         'x-api-key': self.api_key,
+                         'Content-Type': self.ctype}
 
-        if len(self.header_extra.keys())>0:
+        if len(self.header_extra.keys()) > 0:
             for key in self.header_extra.keys():
                 return_header[key] = self.header_extra[key]
 
@@ -197,8 +207,8 @@ class ServiceOperation:
         self._i("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
     def mkAPIUrl(self,
-                 site_sn=None, api_host="_DEF_",
-                 func="_DEF_", url_dict=None):
+                 site_sn=None, api_host=None,
+                 func=None, url_dict=None):
 
         # check if this function valid
         if not self.isFunValid(func):
@@ -225,9 +235,10 @@ class ServiceOperation:
                 ptn = "%s/%s" % (func, url_dict[func])
                 del url_dict[func]
 
-                ptn += "/"+"/".join( ["%s/%s"%(k, url_dict[k]) for k in url_dict.keys()] )
+                ptn += "/"+"/".join(["%s/%s" % (k, url_dict[k])
+                                     for k in url_dict.keys()])
 
-                #todos
+                # todos
                 ptn = ptn.strip("/")
             else:
                 raise ValueError(

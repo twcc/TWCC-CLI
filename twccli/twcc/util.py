@@ -18,6 +18,9 @@ def jpp(**args):
     import json
     print (json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=2))
 
+def isDebug():
+    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" else False
+
 def strShorten(mstr, max_len=6):
     if len(mstr)>max_len:
         return u"{}...".format(mstr[:max_len])
@@ -27,7 +30,20 @@ def strShorten(mstr, max_len=6):
 def isNone(x):
     return True if type(x) == type(None) else False
 
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
+def mkdir_p(path):
+    import errno
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def isFile(fn):
+    return True if os.path.isfile(fn) else False
+
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, isPrint=False):
     from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
@@ -85,9 +101,12 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True):
             elif type(ele) == type(""): # for string
                 table.table_data[idy][idx] = '\n'.join(wrap(ele, 20))
 
-    print(table.table)
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time), 'red', attrs=['bold'])
+    if isPrint:
+        print(table.table)
+    else:
+        return table.table
 
 def dic_seperator(d):
     non_dic_cap_table = []

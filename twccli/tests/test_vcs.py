@@ -1,12 +1,12 @@
 from click.testing import CliRunner
+import os
+import sys
+from os.path import abspath, dirname
 import click
 import unittest
 
-
-def test_foobar():
-    from twcc.services.compute import sites
-
-    assert 1 == 1
+# set project src dir
+sys.path.insert(0, os.path.join(abspath(dirname('__file__')), 'twccli'))
 
 
 def test_hello_world():
@@ -19,3 +19,7 @@ def test_hello_world():
     result = runner.invoke(hello, ['Peter'])
     assert result.exit_code == 0
     assert result.output == 'Hello Peter!\n'
+
+
+if __name__ == '__main__':
+    test_envVaribles()

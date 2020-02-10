@@ -21,9 +21,8 @@ if "HOME" in os.environ:
     )
 else:
     _TWCC_data_path_.append("/tmp")
-    
-os.environ['TWCC_DATA_PATH'] = os.pathsep.join(_TWCC_data_path_)
 
+os.environ['TWCC_DATA_PATH'] = os.pathsep.join(_TWCC_data_path_)
 
 SCALAR_TYPES = set([
     'string', 'float', 'integer', 'long', 'boolean', 'double',
