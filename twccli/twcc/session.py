@@ -94,7 +94,6 @@ class Session2(object):
             self.sessConf = yaml.load(
                 open(self.twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
             if isNone(self.sessConf):
-                # and not "_default" in self.sessConf:
                 raise ValueError("{} is not a valid credentials file".format(
                     self.twcc_file_session))
 
@@ -185,7 +184,7 @@ class Session2(object):
 
         config = Session2._getTwccliConfig()
 
-        twcc_proj = projects(api_key=api_key, debug=False)
+        twcc_proj = projects(api_key=api_key)
 
         iserv_proj = Session2._getIsrvProjs()
 

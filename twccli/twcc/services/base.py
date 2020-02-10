@@ -6,8 +6,8 @@ from twcc.services.generic import GenericService
 
 
 class Users(GenericService):
-    def __init__(self, api_key=None, debug=False):
-        GenericService.__init__(self, debug=debug)
+    def __init__(self, api_key=None):
+        GenericService.__init__(self)
 
         self._csite_ = "goc"
         if not isNone(api_key):
@@ -118,8 +118,8 @@ class projects(GenericService):
     """
     """
 
-    def __init__(self, api_key=None, debug=False):
-        GenericService.__init__(self, api_key=None, debug=debug)
+    def __init__(self, api_key=None):
+        GenericService.__init__(self, api_key=None)
 
         if not isNone(api_key):
             self.api_key = api_key
@@ -174,8 +174,8 @@ class api_key(GenericService):
 
 
 class iservice(GenericService):
-    def __init__(self, api_key=api_key, debug=False):
-        GenericService.__init__(self, api_key=api_key, debug=debug)
+    def __init__(self, api_key=api_key):
+        GenericService.__init__(self, api_key=api_key)
 
     def getAllProjects(self):
         self.url_dic = {"iservice": "user/all_wallet"}

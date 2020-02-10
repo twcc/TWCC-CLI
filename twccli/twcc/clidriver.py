@@ -14,13 +14,11 @@ urllib3.disable_warnings()
 
 
 class ServiceOperation:
-    def __init__(self, needSession=False):
+    def __init__(self, needSession=True):
         if needSession:
-            self._session_ = session_start2()
+            self._session_ = session_start()
         #self._session_ = session_start()
         self._load()
-        # self.load_credential()
-        # self.load_yaml()
 
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
         self.res_type_valid = set(['txt', 'json'])

@@ -11,7 +11,7 @@ from twcc.clidriver import ServiceOperation
 
 class GenericService(object):
 
-    def __init__(self, api_key=None, debug=False):
+    def __init__(self, api_key=None):
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
@@ -26,6 +26,7 @@ class GenericService(object):
         else:
             print("using passed api_key", api_key)
             self._api_key_ = api_key
+
         # @todo
         try:
             self._project_id = self.twcc._session_.def_proj
@@ -35,7 +36,7 @@ class GenericService(object):
             self._project_id = None
             self.__log("no default_project")
 
-        self.twcc._debug = debug
+        self.twcc._debug = isDebug()
 
         # map to url
         self.url_dic = None
@@ -129,11 +130,12 @@ class GenericService(object):
 
 class CpuService(GenericService):
     def __init__(self, debug=False):
-        GenericService.__init__(self, debug=debug)
+        GenericService.__init__(self)
         self._csite_ = "openstack-taichung-community"
 
 
 class GpuService(GenericService):
-    def __init__(self, debug=False):
-        GenericService.__init__(self, debug=debug)
+    def __init__(self):
+        GenericService.__init__(self)
+        self.cluster_tag = "CNTR"
         self._csite_ = "k8s-taichung-default"

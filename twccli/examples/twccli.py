@@ -7,10 +7,9 @@ import re
 from twcc.services.s3_tools import S3
 from twcc.services.solutions import solutions
 from twcc.util import pp, table_layout, SpinCursor
-from twcc.services.compute import sites
+from twcc.services.compute import GpuSite as Sites
 from twcc.services.base import acls, users, image_commit
 from twcc.session import session_start
-from prompt_toolkit.shortcuts import get_input
 from twcc.services.projects import projects
 from twcc.services.base import acls, users, keypairs, projects, api_key
 from fun.Base_Fun import AclsFun, KeyPairFun
@@ -87,7 +86,7 @@ def list_cntr(site_id, isTable, isAll):
     if not isTable:
         gen_cntr(site_id)
     else:
-        a = sites()
+        a = Sites()
         if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
             isAll = False
         if site_id == 0:

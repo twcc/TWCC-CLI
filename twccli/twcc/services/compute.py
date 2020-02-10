@@ -1,28 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twcc.services.generic import GenericService, CpuService
+from twcc.services.generic import GpuService, CpuService
 from twcc.services.base import projects
-from twcc.util import pp, isNone, table_layout
+from twcc.util import pp, isNone, table_layout, isDebug
 
 
 def chkPortPair(x): return True if type(x) == type({}) and len(
     set(['exposed', 'inner']).intersection(set(x.keys()))) == 2 else False
 
 
-class sites(GenericService):
+class GpuSite(GpuService):
 
     def __init__(self, debug=False):
-        GenericService.__init__(self, debug=debug)
+        GpuService.__init__(self)
 
+        self._func_ = "sites"
         self._csite_ = "k8s-taichung-default"
+        # self.project_id = self.twcc._session_.getProjectSolution
+        print(self._api_key_ )
         self._cache_sol_ = {}
-
-    def __del__(self):
-        """
-        @Todo design a cache to keep solutions
-        """
-        if self._debug_:
-            print("__del__")
 
     @staticmethod
     def getGpuList(mtype='list'):
@@ -126,6 +122,8 @@ class sites(GenericService):
                 "Solution name:'{0}' is not available.".format(sol_name))
 
     def list(self, isAll=False):
+        print(self.twcc.getProjectId(self.cluster_tag), ">>>>")
+        raw_input()
         if isAll:
             self.ext_get = {'project': self._project_id,
                             "all_users": 1}
@@ -175,7 +173,7 @@ class sites(GenericService):
             return ans
 
     def _do_list_solution(self, sol_id):
-        self.proj = projects(self.twcc._debug)
+        self.proj = projects(self.twcc._debug_)
         self.proj._csite_ = self._csite_
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
@@ -230,8 +228,8 @@ class sites(GenericService):
 
 class VcsSite(CpuService):
     def __init__(self):
-    
-        """ Description	
+
+        """ Description
         Site creates VCS Computing Resources in TWCC
         """
         pass
