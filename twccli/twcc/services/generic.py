@@ -11,7 +11,7 @@ from twcc.clidriver import ServiceOperation
 
 class GenericService(object):
 
-    def __init__(self, api_key=None, initSession=False):
+    def __init__(self, api_key=None, skip_session=False):
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
@@ -27,15 +27,17 @@ class GenericService(object):
             print("using passed api_key", api_key)
             self._api_key_ = api_key
 
-        self.twcc_session = twcc._TWCC_SESSION_
-        self._project_code = self.twcc_session.getDefaultProject()
-        self.project_ids = self.twcc_session.twcc_proj_id
         self.twcc._debug = isDebug()
-
         self.cluster_tag = "CNTR"
         
+        if not skip_session:
+            self.twcc_session = twcc._TWCC_SESSION_
+            self._project_code = self.twcc_session.getDefaultProject()
+            self.project_ids = self.twcc_session.twcc_proj_id
+            self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
+
+        
         # set defult project id
-        self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
         self._csite_ = Session2._getClusterName( self.cluster_tag )
         
         # map to url

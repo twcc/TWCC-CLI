@@ -37,5 +37,4 @@ os.environ['_STAGE_'] = "production"
 
 GupSiteBlockSet = set([182, 29, 35, 120])
 
-if not "_TWCC_SESSION_" in globals():
-    _TWCC_SESSION_ = Session2()
+_TWCC_SESSION_ = Session2()

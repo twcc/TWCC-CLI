@@ -152,7 +152,7 @@ class Session2(object):
         self.twcc_proj_id = self.sessConf['projects'][projCode]
 
     @staticmethod
-    def getTwccResourses():
+    def _getTwccResourses():
         config = Session2._getTwccliConfig()
         return config['production']['resources']
 
@@ -284,20 +284,21 @@ class Session2(object):
     def getApiKey(self):
         return Session2._getApiKey()
 
-    def getSessionData(self):
+    @staticmethod
+    def _getSessionData():
         sessionData = defaultdict(dict)
 
-        whoami = self.whoami()
+        whoami = Session2._whoami()
         sessionData["_default"]['twcc_username'] = whoami['username']
-        sessionData["_default"]['twcc_api_key'] = self.twcc_api_key
-        sessionData["_default"]['twcc_proj_code'] = self.getDefaultProject()
+        sessionData["_default"]['twcc_api_key'] = Session2._getApiKey()
+        sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject()
 
-        s3keys = self.getTwccS3Keys()
+        s3keys = Session2._getTwccS3Keys(Session2._getDefaultProject(), Session2._getApiKey())
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
 
-        resources = Session2.getTwccResourses()
-        projects = self.getAvblProjs()
+        resources = Session2._getTwccResourses()
+        projects = Session2._getAvblProjs()
         for proj in projects:
             proj_codes = dict()
             for res in resources:
@@ -306,6 +307,9 @@ class Session2(object):
             sessionData['projects'][proj] = proj_codes
 
         return dict(sessionData)
+    
+    def getSessionData(self):
+        return Session2._getSessionData()
 
     def __str__(self):
         print("---"*10, self.twcc_proj_code)

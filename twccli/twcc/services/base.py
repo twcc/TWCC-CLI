@@ -7,7 +7,7 @@ from twcc.services.generic import GenericService
 
 class Users(GenericService):
     def __init__(self, api_key=None):
-        GenericService.__init__(self)
+        GenericService.__init__(self, skip_session=True)
 
         self._csite_ = "goc"
         if not isNone(api_key):
@@ -119,7 +119,7 @@ class projects(GenericService):
     """
 
     def __init__(self, api_key=None):
-        GenericService.__init__(self, api_key=None)
+        GenericService.__init__(self, api_key=None, skip_session=True)
 
         if not isNone(api_key):
             self.api_key = api_key
@@ -134,7 +134,6 @@ class projects(GenericService):
         return self.list()
 
     def getProjects(self):
-        print(self._api_key_)
         s = iservice(api_key=self._api_key_)
         res = s.getAllProjects()
 
@@ -174,7 +173,7 @@ class api_key(GenericService):
 
 class iservice(GenericService):
     def __init__(self, api_key=api_key):
-        GenericService.__init__(self, api_key=api_key)
+        GenericService.__init__(self, api_key=api_key, skip_session=True)
 
     def getAllProjects(self):
         self.url_dic = {"iservice": "user/all_wallet"}
