@@ -10,5 +10,5 @@ sys.path.insert(0, os.path.join(abspath(dirname('__file__')), 'twccli'))
 
 
 def test_create_twcc_session():
-    from twcc.session import Session2
-    twcc = Session2()
+    import twcc
+    twcc._TWCC_SESSION_
