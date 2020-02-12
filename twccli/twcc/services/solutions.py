@@ -9,13 +9,13 @@ class solutions(GenericService):
     """ This Class is for solutions api call
     """
 
-    def __init__(self, debug=False):
+    def __init__(self):
         """ constractor for this solutions class
 
         Args:
             api_key_tag (str): see YAML for detail
         """
-        GenericService.__init__(self, debug=debug)
+        GenericService.__init__(self)
         # current working information
         self._csite_ = "goc"
 

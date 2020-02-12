@@ -7,17 +7,14 @@ import yaml
 import datetime
 import logging
 import os
-from twcc.session import session_start, Session2
+from twcc.session import Session2
 from twcc.util import parsePtn, isNone, isDebug, pp
 import urllib3
 urllib3.disable_warnings()
 
 
 class ServiceOperation:
-    def __init__(self, needSession=True):
-        if needSession:
-            self._session_ = session_start()
-        #self._session_ = session_start()
+    def __init__(self):
         self._load()
 
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
@@ -47,9 +44,11 @@ class ServiceOperation:
             (x, parsePtn(self.url_format[x])) for x in self.url_format.keys()])
 
     def isFunValid(self, func):
+        #@todo
         print(self.twcc_config)
 
     def load_credential(self):
+        # @todo
         self.api_keys = self._session_.credentials
         self.host_url = self._session_.host
         # @todo aug 0206
@@ -97,6 +96,7 @@ class ServiceOperation:
         elif mtype == "delete":
             r = requests.delete(t_api, headers=t_headers, verify=False)
         elif mtype == "patch":
+            # @todo
             r = requests.delete(t_api, headers=t_headers, verify=False)
         elif mtype == "put":
             r = requests.put(t_api, headers=t_headers,

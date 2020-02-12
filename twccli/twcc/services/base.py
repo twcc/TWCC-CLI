@@ -161,7 +161,6 @@ class projects(GenericService):
         self.url_dic = {'projects': proj_id, 'key': ''}
         return self.list()
 
-
 class api_key(GenericService):
     def __init__(self, debug=False):
         GenericService.__init__(self, debug=debug)

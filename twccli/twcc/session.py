@@ -45,38 +45,28 @@ class Session2(object):
         os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))))
 
+    isInitialized = False
     def __init__(self, twcc_data_path=None,
                  twcc_api_key=None,
                  twcc_file_session=None,
                  twcc_project_code=None):
-        self.twcc_data_path = twcc_data_path
+        
         self.twcc_api_key = Session2._getApiKey()
-
-        if isNone(self.twcc_data_path):
-            if 'TWCC_DATA_PATH' in os.environ:
-                self.twcc_data_path = os.environ['TWCC_DATA_PATH']
-            else:
-                self.twcc_data_path = os.path.dirname(
-                    os.path.realpath(__file__))
-
-        if isNone(twcc_project_code):
-            self.twcc_project_code = twcc_project_code
-        else:
-            self.twcc_project_code = Session2._getDefaultProject()
-
-        self.twcc_file_session = twcc_file_session
-        if isNone(self.twcc_file_session):
-            self.twcc_file_session = os.path.join(
-                self.twcc_data_path, "credential")
-            self.twcc_file_resources = os.path.join(
-                self.twcc_data_path, "resources")
+        self.twcc_data_path = Session2._getTwccDataPath(twcc_data_path)
+        self.twcc_file_session = Session2._getSessionFile(twcc_file_session)
+        self.twcc_file_resources = Session2._getResourceFile()
+        self.twcc_proj_code = Session2._getDefaultProject(twcc_project_code)
         self.package_yaml = Session2.PackageYaml
-
-        try:
+        
+        if self.isValidSession():
+            self.isInitialized = True
             self.loadSession()
-        except ValueError as err:
-            print(err)
+            print("load session")
+        else:
+            #print(self.getSessionData())
+            self.isInitialized = False
             self.initSession()
+            print("init session")
 
     def initSession(self):
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
@@ -84,31 +74,76 @@ class Session2(object):
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
                 self.getSessionData(), fn, encoding='utf-8', allow_unicode=True)
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
     def isApiKey(self):
         self.twcc_api_key = self.sessConf["_default"]["twcc_api_key"]
 
+    @staticmethod
+    def _getTwccDataPath(twcc_data_path=None):
+        if isNone(twcc_data_path):
+            if 'TWCC_DATA_PATH' in os.environ:
+                return os.environ['TWCC_DATA_PATH']
+            else:
+                return os.path.dirname(os.path.realpath(__file__))
+        return twcc_data_path
+    
+    @staticmethod
+    def _getSessionFile(twcc_file_session=None):
+        if isNone(twcc_file_session):
+            return os.path.join(Session2._getTwccDataPath(), "credential")
+        return twcc_file_session
+    
+    @staticmethod
+    def _getResourceFile(twcc_file_resources=None):
+        if isNone(twcc_file_resources):
+            return os.path.join(Session2._getTwccDataPath(), "resources")
+        else:
+            return twcc_file_resources
+
+    @staticmethod
+    def _isValidSession():
+        twcc_file_session = Session2._getSessionFile()
+        print( "twcc_file_session:", twcc_file_session )
+        print( "rule 1:", not isNone(twcc_file_session) )
+        print( "rule 2:", not isFile(twcc_file_session) )
+        if not isNone(twcc_file_session) and isFile(twcc_file_session):
+            sessConf = yaml.load(
+                open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
+            # print(sessConf)
+            if not type(sessConf) == type(None):
+                return True
+        return False
+    
+    def isValidSession(self):
+        return Session2._isValidSession()
+
+
     def loadSession(self):
-        if not isNone(self.twcc_file_session) and isFile(self.twcc_file_session):
+        if self.isValidSession():
             self.sessConf = yaml.load(
                 open(self.twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
             if isNone(self.sessConf):
                 raise ValueError("{} is not a valid credentials file".format(
                     self.twcc_file_session))
 
+            self.twcc_username = self.sessConf["_default"]["twcc_username"]
             self.twcc_api_key = self.sessConf["_default"]["twcc_api_key"]
 
             self.twcc_s3_access_key = self.sessConf["_default"]["twcc_s3_access_key"]
             self.twcc_s3_secret_key = self.sessConf["_default"]["twcc_s3_secret_key"]
 
             # map to proj_code
-            self.twcc_proj_code = self.sessConf["_default"]["twcc_proj_id"]
+            self.twcc_proj_code = self.sessConf["_default"]["twcc_proj_code"]
             self.switchProj()
             return True
-        else:
-            raise ValueError("Can not file session information in {}".format(
-                self.twcc_file_session))
 
     def switchProj(self, projCode=None):
         if isNone(projCode):
@@ -140,26 +175,34 @@ class Session2(object):
         return Session2._getIsrvProjs(api_key=self.twcc_api_key)
 
     @staticmethod
-    def _getDefaultProject():
-        if "TWCC_PROJ_ID" in os.environ:
-            return os.environ["TWCC_PROJ_ID"]
+    def _getDefaultProject(twcc_proj_code=None):
+        if isNone(twcc_proj_code) :
+            if "TWCC_PROJ_CODE" in os.environ:
+                return os.environ["TWCC_PROJ_CODE"]
+            else:
+                print("input project code")
+        return twcc_proj_code
 
     def getDefaultProject(self):
         return Session2._getDefaultProject()
 
     @staticmethod
-    def getClusterName(abbr=None):
+    def _getClusterName(abbr=None):
         config = Session2._getTwccliConfig()
         avbl_clusters = config["production"]['resources']
         if abbr in avbl_clusters:
             return avbl_clusters[abbr]
         return None
 
+    def getClusterName(self, abbr=None):
+        return Session2._getClusterName(abbr)
+
     @staticmethod
     def _getTwccS3Keys(proj_code, api_key):
         from twcc.services.base import projects
+        print(">>>", proj_code)
         twcc_proj = projects(api_key=api_key)
-        twcc_proj.setCluster(Session2.getClusterName("COS"))
+        twcc_proj.setCluster(Session2._getClusterName("COS"))
         return twcc_proj.getS3Keys(proj_code)
 
     def getTwccS3Keys(self):
@@ -247,7 +290,7 @@ class Session2(object):
         whoami = self.whoami()
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = self.twcc_api_key
-        sessionData["_default"]['twcc_proj_id'] = self.getDefaultProject()
+        sessionData["_default"]['twcc_proj_code'] = self.getDefaultProject()
 
         s3keys = self.getTwccS3Keys()
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
@@ -265,6 +308,7 @@ class Session2(object):
         return dict(sessionData)
 
     def __str__(self):
+        print("---"*10, self.twcc_proj_code)
         key_values = [
             {"key": "twcc_data_path", "value": self.twcc_data_path},
             {"key": "twcc_api_key", "value": self.twcc_api_key},
@@ -278,16 +322,16 @@ class Session2(object):
 
 
 # if __name__ == '__main__':
-    #sess = Session2()
-    # print(sess)
-    # print(sess.whoami())
+#     sess = Session2()
+    #print(sess.whoami())
+    #print(sess.twcc_proj_code)
     # print(sess.getTwccApiHost())
     # print(sess.getIsrvProjs())
     # print(sess.getTwccProjs("k8s-taichung-default"))
     # print(sess.getTwccS3Keys())
     # print(Session2._getDefaultProject())
 
-    # print(sess.getSessionData())
+    #print(sess.getSessionData())
     # print(sess.switchProj("ACD108162"))
 
 def session_start():

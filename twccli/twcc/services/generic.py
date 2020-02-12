@@ -2,42 +2,42 @@
 from __future__ import print_function
 import os
 import yaml
+import twcc
 from twcc.session import Session2
 from twcc.util import pp, isNone, isDebug
 from twcc.clidriver import ServiceOperation
 
 # change to new-style-class https://goo.gl/AYgxqp
 
-
 class GenericService(object):
 
-    def __init__(self, api_key=None):
+    def __init__(self, api_key=None, initSession=False):
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
         self._debug_ = isDebug()
 
-        self.twcc = ServiceOperation(needSession=False)
-        # in some case, before session started,
-        # need to get info. from TWCC.
+        self.twcc = ServiceOperation()
         if type(api_key) == type(None):
+            # here, while Session2 using this class,
+            # we don't really need session to assist
             self._api_key_ = Session2._getApiKey()
         else:
             print("using passed api_key", api_key)
             self._api_key_ = api_key
 
-        # @todo
-        try:
-            self._project_id = self.twcc._session_.def_proj
-            self._username = self.twcc._session_.def_username
-        except:
-            self._username = ""
-            self._project_id = None
-            self.__log("no default_project")
-
+        self.twcc_session = twcc._TWCC_SESSION_
+        self._project_code = self.twcc_session.getDefaultProject()
+        self.project_ids = self.twcc_session.twcc_proj_id
         self.twcc._debug = isDebug()
 
+        self.cluster_tag = "CNTR"
+        
+        # set defult project id
+        self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
+        self._csite_ = Session2._getClusterName( self.cluster_tag )
+        
         # map to url
         self.url_dic = None
         # map to data entries
@@ -103,7 +103,7 @@ class GenericService(object):
         return self._do_api()
 
     def queryById(self, mid):
-        self.url_dic = {self.__class__.__name__.lower(): mid}
+        self.url_dic = {self._func_: mid}
         self.http_verb = 'get'
         res = self._do_api()
         self.url_dic = None
@@ -129,7 +129,7 @@ class GenericService(object):
 
 
 class CpuService(GenericService):
-    def __init__(self, debug=False):
+    def __init__(self):
         GenericService.__init__(self)
         self._csite_ = "openstack-taichung-community"
 
@@ -139,3 +139,8 @@ class GpuService(GenericService):
         GenericService.__init__(self)
         self.cluster_tag = "CNTR"
         self._csite_ = "k8s-taichung-default"
+
+
+if __name__ == "__main__":
+    ga = GenericService()
+    print(ga)

@@ -64,8 +64,8 @@ class GpuSite(GpuService):
         return self._do_api()
 
     @staticmethod
-    def getGpuDefaultHeader(gpus=2):
-        gpu_list = sites.getGpuList(mtype='dict')
+    def getGpuDefaultHeader(gpus=1):
+        gpu_list = GpuSite.getGpuList(mtype='dict')
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
 
@@ -122,8 +122,8 @@ class GpuSite(GpuService):
                 "Solution name:'{0}' is not available.".format(sol_name))
 
     def list(self, isAll=False):
-        print(self.twcc.getProjectId(self.cluster_tag), ">>>>")
-        raw_input()
+        # print(self.twcc._session_.getProjectId(self.cluster_tag), ">>>>")
+        # raw_input()
         if isAll:
             self.ext_get = {'project': self._project_id,
                             "all_users": 1}
@@ -136,7 +136,7 @@ class GpuSite(GpuService):
         # @todo change this
         extra_prop['x-extra-property-gpfs01-mount-path'] = '/mnt/work'
         extra_prop['x-extra-property-gpfs02-mount-path'] = '/home/{}'.format(
-            self._username)
+            self.twcc_session.twcc_username)
 
         self.twcc.header_extra = extra_prop
         self.http_verb = 'post'
@@ -173,7 +173,7 @@ class GpuSite(GpuService):
             return ans
 
     def _do_list_solution(self, sol_id):
-        self.proj = projects(self.twcc._debug_)
+        self.proj = projects()
         self.proj._csite_ = self._csite_
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)

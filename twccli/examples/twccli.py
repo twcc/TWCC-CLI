@@ -4,6 +4,7 @@ import sys
 import os
 import click
 import re
+from twcc import GupSiteBlockSet
 from twcc.services.s3_tools import S3
 from twcc.services.solutions import solutions
 from twcc.util import pp, table_layout, SpinCursor
@@ -19,7 +20,7 @@ import time
 
 
 def doSiteReady(site_id):
-    b = sites(debug=False)
+    b = Sites(debug=False)
     wait_ready = False
     while not wait_ready:
         print("Waiting for container to be Ready.")
@@ -42,7 +43,7 @@ def list_all_img():
     print("Note : this operation take 1-2 mins")
     a = solutions()
     cntrs = [(cntr['name'], cntr['id'])
-             for cntr in a.list() if not cntr['id'] in block_set]
+             for cntr in a.list() if not cntr['id'] in GupSiteBlockSet]
     sol_list = sites.getSolList(name_only=True)
     base_site = sites(debug=False)
     output = []
@@ -93,11 +94,11 @@ def list_cntr(site_id, isTable, isAll):
             my_sites = a.list(isAll=isAll)
             if len(my_sites) > 0:
                 col_name = ['id', 'name', 'create_time', 'status']
-                table_layout('sites', my_sites, caption_row=col_name)
+                table_layout('sites', my_sites, caption_row=col_name, isPrint=True)
         else:
             res = a.queryById(site_id)
             col_name = ['id', 'name', 'create_time', 'status', 'status_reason']
-            table_layout('sites: %s' % site_id, res, caption_row=col_name)
+            table_layout('sites: %s' % site_id, res, caption_row=col_name, isPrint=True)
 
 
 def list_commit():
@@ -128,17 +129,17 @@ def del_bucket(bucket_name, df):
 
 
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
-    def_header = sites.getGpuDefaultHeader(gpu)
+    def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
-                  if not cntr['id'] in block_set and cntr['name'] == sol_name])
+                  if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
     if len(cntrs) > 0:
         sol_id = cntrs[sol_name]
     else:
         raise ValueError(
             "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
-    b = sites(debug=False)
+    b = Sites(debug=False)
     imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
     if type(sol_img) == type(None) or len(sol_name) == 0:
         def_header['x-extra-property-image'] = imgs[0]
@@ -168,7 +169,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 
 
 def del_cntr(con_ids):
-    a = sites()
+    a = Sites()
     if type(con_ids) == type(1):
         con_ids = [con_ids]
     if len(list(con_ids)) > 0:
@@ -315,7 +316,6 @@ def ls(res_type, res_property, site_id, is_table, is_all, id_num, name):
             list_sol()
 
         if res_property == 'image':
-            print('list all image')
             list_all_img()
         if res_property == 'commit':
             list_commit()

@@ -1,6 +1,6 @@
 # Copyright 2018 NCHC
 import os
-from twcc.session import session_start
+from twcc.session import Session2
 
 __version__ = '0.0.1'
 
@@ -32,6 +32,10 @@ COMPLEX_TYPES = set(['structure', 'map', 'list'])
 
 __all__ = ["clidriver", "util", "services"]
 
+#@todo
 os.environ['_STAGE_'] = "production"
 
-# _TWCC_SESSION_ = session_start()
+GupSiteBlockSet = set([182, 29, 35, 120])
+
+if not "_TWCC_SESSION_" in globals():
+    _TWCC_SESSION_ = Session2()

@@ -25,8 +25,6 @@ from prompt_toolkit.shortcuts import get_input
 import click,os
 import time
 
-block_set = set([182, 29, 35, 120])
-
 def list_projects():
     proj = projects()
     for cluster in proj.getSites():
@@ -39,7 +37,7 @@ def list_projects():
 def list_all_img():
     print("NOTE: This operation will take 1~2 mins.")
     a = solutions()
-    cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set]
+    cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in GupSiteBlockSet]
     sol_list = sites.getSolList(name_only=True)
     base_site = sites(debug=False)
     output = []
@@ -77,7 +75,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
     def_header = sites.getGpuDefaultHeader(gpu)
 
     a = solutions()
-    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set and cntr['name']==sol_name])
+    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in GupSiteBlockSet and cntr['name']==sol_name])
     if len(cntrs)>0:
         sol_id = cntrs[sol_name]
     else:
