@@ -1,6 +1,8 @@
 # Copyright 2018 NCHC
 import os
 from twcc.session import Session2
+from requests.packages import urllib3
+from requests.packages.urllib3 import exceptions as urllib3_exceptions
 
 __version__ = '0.0.1'
 
@@ -32,9 +34,12 @@ COMPLEX_TYPES = set(['structure', 'map', 'list'])
 
 __all__ = ["clidriver", "util", "services"]
 
-#@todo
-os.environ['_STAGE_'] = "production"
-
 GupSiteBlockSet = set([182, 29, 35, 120])
 
 _TWCC_SESSION_ = Session2()
+
+# By default, requests logs following message if verify=False
+#   InsecureRequestWarning: Unverified HTTPS request is
+#   being made. Adding certificate verification is strongly advised.
+# Just disable the warning if user intentionally did this.
+urllib3.disable_warnings(urllib3_exceptions.InsecureRequestWarning)
