@@ -18,6 +18,7 @@ def test_list_cntr():
     mySession = Session2()
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])
+    print (result)
     assert result.exit_code == 0
 
 
@@ -25,5 +26,6 @@ def test_list_cos():
     mySession = Session2()
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-o'])
+    print (result)
     assert result.exit_code == 0
 
