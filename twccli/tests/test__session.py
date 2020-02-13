@@ -1,4 +1,5 @@
-from twcc import Session2
+import twccli.twcc as twcc
+from twccli.twcc import Session2
 import pytest
 from click.testing import CliRunner
 
@@ -12,9 +13,9 @@ def test_init_twcc_session():
     mySession = Session2()
     assert mySession.getApiKey() == Session2._getApiKey()
 
-from examples.twccli import cli
-
 def test_list_cntr():
+    from twccli.examples.twccli import cli
+    print(twcc._TWCC_SESSION_)
     mySession = Session2()
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])
@@ -23,7 +24,8 @@ def test_list_cntr():
 
 
 def test_list_cos():
-    mySession = Session2()
+    from twccli.examples.twccli import cli
+
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-o'])
     print (">"*10, result)

@@ -1,10 +1,7 @@
 # Copyright 2018 NCHC
 import os
-from twcc.session import Session2
+from .session import Session2
 from requests.packages import urllib3
-from requests.packages.urllib3 import exceptions as urllib3_exceptions
-
-__version__ = '0.0.1'
 
 #
 # Get our data path to be added to botocore's search path
@@ -42,4 +39,4 @@ _TWCC_SESSION_ = Session2()
 #   InsecureRequestWarning: Unverified HTTPS request is
 #   being made. Adding certificate verification is strongly advised.
 # Just disable the warning if user intentionally did this.
-urllib3.disable_warnings(urllib3_exceptions.InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

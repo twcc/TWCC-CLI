@@ -5,7 +5,7 @@ import re
 import yaml
 import shutil
 from collections import defaultdict
-from twcc.util import *
+from twccli.twcc.util import *
 
 
 # class TwccApiValidator(Validator):
