@@ -80,6 +80,8 @@ class Session2(object):
             self.isInitialized = True
             self.loadSession()
             print("load session")
+            print(">>>", self.twcc_proj_id)
+            print(">>>", self.twcc_s3_access_key)
         else:
             # print(self.getSessionData())
             self.isInitialized = False
