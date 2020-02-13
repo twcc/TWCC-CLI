@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twcc.services.generic import GpuService, CpuService
-from twcc.services.base import projects
-from twcc.util import pp, isNone, table_layout, isDebug
+from twccli.twcc.services.generic import GpuService, CpuService
+from twccli.twcc.services.base import projects
+from twccli.twcc.util import pp, isNone, table_layout, isDebug
 
 
 def chkPortPair(x): return True if type(x) == type({}) and len(
@@ -17,7 +17,7 @@ class GpuSite(GpuService):
         self._func_ = "sites"
         self._csite_ = "k8s-taichung-default"
         # self.project_id = self.twcc._session_.getProjectSolution
-        print(self._api_key_ )
+        print(">"*10, "GpuSite", "<"*10, self._api_key_ )
         self._cache_sol_ = {}
 
     @staticmethod

@@ -3,8 +3,7 @@ import os
 import sys
 from os.path import abspath, dirname
 import click
-import unittest
-# from examples.twccli import cli
+#from .examples.twccli import cli
 
 # def test_list_cntr():
 #     runner = CliRunner()

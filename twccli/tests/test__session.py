@@ -14,7 +14,7 @@ def test_init_twcc_session():
     assert mySession.getApiKey() == Session2._getApiKey()
 
 def test_list_cntr():
-    from twccli.examples.twccli import cli
+    from examples.twccli import cli
     print(twcc._TWCC_SESSION_)
     mySession = Session2()
     runner = CliRunner()
@@ -24,7 +24,7 @@ def test_list_cntr():
 
 
 def test_list_cos():
-    from twccli.examples.twccli import cli
+    from examples.twccli import cli
 
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-o'])

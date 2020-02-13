@@ -44,8 +44,8 @@ def list_all_img():
     a = solutions()
     cntrs = [(cntr['name'], cntr['id'])
              for cntr in a.list() if not cntr['id'] in GupSiteBlockSet]
-    sol_list = sites.getSolList(name_only=True)
-    base_site = sites(debug=False)
+    sol_list = Sites.getSolList(name_only=True)
+    base_site = Sites(debug=False)
     output = []
     for (sol_name, sol_id) in cntrs:
         output.append({"sol_name": sol_name,
@@ -76,7 +76,7 @@ def list_all_solution():
 
 def list_sol():
     list_all_solution()
-    print(sites.getSolList(mtype='list', name_only=True))
+    print(Sites.getSolList(mtype='list', name_only=True))
 
 
 def list_cntr(site_id, isTable, isAll):
@@ -183,14 +183,14 @@ def del_cntr(con_ids):
 
 def gen_cntr(s_id):
     print("This is container information for connection. ")
-    b = sites()
+    b = Sites()
     site_id = s_id
     conn_info = b.getConnInfo(site_id)
     print(conn_info)
 
 
 def list_port(site_id):
-    b = sites()
+    b = Sites()
     conn_info = b.getConnInfo(site_id)
 
 # == upload/download ========
@@ -400,7 +400,7 @@ def mk(res_type, name, gpu, sol, img_name, wait):
 @click.option('-p', 'port', type=int, help='number of port')
 @click.option('-site', 'siteId', type=int, help='site id')
 def bind(op, port, siteId):
-    b = sites()
+    b = Sites()
     if not op:
         print('bind')
         b.exposedPort(siteId, port)
