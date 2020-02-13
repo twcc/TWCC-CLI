@@ -5,6 +5,7 @@ import boto3
 import click
 
 from botocore.exceptions import ClientError 
+from twcc import _TWCC_SESSION_
 from twcc.clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
@@ -21,8 +22,8 @@ class S3():
         self.new_files = []
         self.new_bucket = []
         self.twcc = ServiceOperation()
-        self.access_key = self.twcc.def_s3_access_key
-        self.secret_key = self.twcc.def_s3_secret_key
+        self.access_key = _TWCC_SESSION_.twcc_s3_access_key
+        self.secret_key = _TWCC_SESSION_.twcc_s3_secret_key
 
         
         # Make sure there are value input here

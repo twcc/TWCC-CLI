@@ -43,20 +43,16 @@ class ServiceOperation:
         self.url_ptn = dict([
             (x, parsePtn(self.url_format[x])) for x in self.url_format.keys()])
 
-    def isFunValid(self, func):
-        #@todo
-        print(self.twcc_config)
-
     def load_credential(self):
         # @todo
         self.api_keys = self._session_.credentials
         self.host_url = self._session_.host
         # @todo aug 0206
         try:
-            self.def_proj = self._session_.def_proj
-            self.def_s3_access_key = self._session_.def_s3_access_key
-            self.def_s3_secret_key = self._session_.def_s3_secret_key
-        except:
+            self.def_s3_access_key = self._session_.twcc_s3_access_key
+            self.def_s3_secret_key = self._session_.twcc_s3_secret_key
+        except Exception as e:
+            print(e)
             self.def_proj = ""
 
     def load_yaml(self):

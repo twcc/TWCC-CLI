@@ -8,14 +8,16 @@ import unittest
 # set project src dir
 sys.path.insert(0, os.path.join(abspath(dirname('__file__')), 'twccli'))
 
+from examples.twccli import cli
 
-def test_hello_world():
-    @click.command()
-    @click.argument('name')
-    def hello(name):
-        click.echo('Hello %s!' % name)
-
+def test_list_cntr():
     runner = CliRunner()
-    result = runner.invoke(hello, ['Peter'])
+    result = runner.invoke(cli, ['ls', '-c'])
     assert result.exit_code == 0
-    assert result.output == 'Hello Peter!\n'
+
+
+def test_list_cos():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['ls', '-o'])
+    assert result.exit_code == 0
+
