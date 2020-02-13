@@ -6,7 +6,6 @@ import click
 import unittest
 from examples.twccli import cli
 
-
 def test_list_cntr():
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])

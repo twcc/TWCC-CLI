@@ -11,3 +11,16 @@ def test_init_twcc_session():
     mySession = Session2()
     assert mySession.getApiKey() == Session2._getApiKey()
 
+from examples.twccli import cli
+
+def test_list_cntr():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['ls', '-c'])
+    assert result.exit_code == 0
+
+
+def test_list_cos():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['ls', '-o'])
+    assert result.exit_code == 0
+
