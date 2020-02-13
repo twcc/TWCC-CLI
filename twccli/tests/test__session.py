@@ -1,5 +1,6 @@
 from twcc import Session2
 import pytest
+from click.testing import CliRunner
 
 @pytest.mark.first
 def test_init_twcc_session():
