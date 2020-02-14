@@ -299,6 +299,7 @@ def rm(res_type, id, name, r):
 @click.option('-name',  'name',  type=str, help="Enter name")
 @click.option('-id', 'id_num', default=None, help="The API key id")
 def ls(res_type, res_property, site_id, is_table, is_all, id_num, name):
+    print(">>>>", res_type, res_property, site_id, is_table, is_all, id_num, name)
 
     if res_type == 'Cos':
         if not name:
@@ -412,7 +413,6 @@ def bind(op, port, siteId):
 
 @click.group()
 def cli():
-    print(sys.argv)
     pass
 
 
