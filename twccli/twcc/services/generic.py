@@ -32,6 +32,7 @@ class GenericService(object):
         
         if not skip_session:
             self.twcc_session = twcc._TWCC_SESSION_
+            print(">"*15, self.twcc_session)
             self._project_code = self.twcc_session.getDefaultProject()
             self.project_ids = self.twcc_session.twcc_proj_id
             self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]

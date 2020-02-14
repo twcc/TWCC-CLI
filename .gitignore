@@ -10,3 +10,4 @@ scripts/
 *.tox*
 dist/*
 .coverage
+build/*

@@ -200,6 +200,7 @@ class Session2(object):
     def _getDefaultProject(twcc_proj_code=None):
         if isNone(twcc_proj_code):
             if "TWCC_PROJ_CODE" in os.environ:
+                print(os.environ["TWCC_PROJ_CODE"])
                 return os.environ["TWCC_PROJ_CODE"]
             else:
                 print("input project code")
