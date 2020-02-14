@@ -412,7 +412,7 @@ def bind(op, port, siteId):
 
 @click.group()
 def cli():
-    print('enter cli')
+    print(sys.argv)
     pass
 
 
