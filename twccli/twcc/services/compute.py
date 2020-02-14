@@ -16,7 +16,6 @@ class GpuSite(GpuService):
 
         self._func_ = "sites"
         self._csite_ = "k8s-taichung-default"
-        # self.project_id = self.twcc._session_.getProjectSolution
         print(">"*10, "GpuSite", "<"*10, self._api_key_ )
         self._cache_sol_ = {}
 

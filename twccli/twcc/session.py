@@ -228,7 +228,7 @@ class Session2(object):
         return twcc_proj.getS3Keys(proj_code)
 
     def getTwccS3Keys(self):
-        return Session2._getTwccS3Keys(self.getDefaultProject(), self.twcc_api_key)
+        return Session2._getTwccS3Keys(Session2.getDefaultProject(), self.twcc_api_key)
 
     @staticmethod
     def _getTwccProjs(cluster_name, api_key=None):
