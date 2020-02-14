@@ -17,7 +17,7 @@ def test_list_cntr():
     mySession = Session2()
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])
-    print (">"*10, result)
+    print (">"*10, result.output)
     assert result.exit_code == 0
 
 
