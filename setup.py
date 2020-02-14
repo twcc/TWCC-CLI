@@ -25,8 +25,41 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-install_reqs = parse_requirements('requirements.txt', session=PipSession())
-reqs = [str(ir.req) for ir in install_reqs]
+try:
+    # for pip >= 10
+    from pip._internal.req import parse_requirements
+except ImportError:
+    # for pip <= 9.0.3
+    from pip.req import parse_requirements
+
+def load_requirements(fname):
+    reqs = parse_requirements(fname, session="test")
+    return [str(ir.req) for ir in reqs]
+
+reqs = [
+        'boto3==1.11.17',
+        'botocore==1.14.17',
+        'certifi==2019.11.28',
+        'chardet==3.0.4',
+        'Click==7.0',
+        'colorclass==2.2.0',
+        'docutils==0.15.2',
+        'idna==2.8',
+        'jmespath==0.9.4',
+        'prompt-toolkit',
+        'Pygments==2.5.2',
+        'python-dateutil==2.8.1',
+        'PyYAML==5.3',
+        'regex==2020.1.8',
+        'requests==2.22.0',
+        's3transfer==0.3.3',
+        'six==1.14.0',
+        'termcolor==1.1.0',
+        'terminaltables==3.1.0',
+        'tqdm==4.42.1',
+        'urllib3==1.25.8',
+        'wcwidth==0.1.8']
+
 
 setup(
     name='twccli',
@@ -34,13 +67,15 @@ setup(
     py_modules=['twccli'],
     packages=find_packages(),
     install_requires= reqs,
+    include_package_data=True,
     license="Apache License 2.0",
     entry_points='''
         [console_scripts]
         twccli=twccli.examples.twccli:cli
     ''',
     package_data={
-        "twccli": ["yaml/*yaml", "requirements.txt"],
+        "twccli": ["yaml/*yaml"],
+        "":["requirements.txt"],
     },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
