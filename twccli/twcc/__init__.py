@@ -39,13 +39,12 @@ GupSiteBlockSet = set([182, 29, 35, 120])
 #    print(hasattr(twcc, "_TWCC_SESSION_"))
 _TWCC_SESSION_ = None
 while True:
-    if isNone(_TWCC_SESSION_):
-        _TWCC_SESSION_ = Session2()
-        # print("_TWCC_SESSION_.isInitialized", _TWCC_SESSION_.isInitialized)
-        if _TWCC_SESSION_.isInitialized:
-            break
-        else:
-            print("XXXX create again")
+    _TWCC_SESSION_ = Session2()
+    # print("_TWCC_SESSION_.isInitialized", _TWCC_SESSION_.isInitialized)
+    if _TWCC_SESSION_.isInitialized:
+        break
+    else:
+        print("XXXX create again")
 
 
 # By default, requests logs following message if verify=False
