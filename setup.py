@@ -40,7 +40,7 @@ setup(
         twccli=twccli.examples.twccli:cli
     ''',
     package_data={
-        "twccli": ["yaml/*yaml"],
+        "twccli": ["yaml/*yaml", "requirements.txt"],
     },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
