@@ -5,8 +5,9 @@ import re
 import yaml
 import shutil
 from collections import defaultdict
-from twccli.twcc.util import *
-
+# from twcc import _TWCC_SESSION_
+from twcc.util import *
+# print(_TWCC_SESSION_)
 
 # class TwccApiValidator(Validator):
 #    def validate(self, document):
@@ -146,6 +147,8 @@ class Session2(object):
         return Session2._isValidSession()
 
     def loadSession(self):
+        # if isNone(_TWCC_SESSION_) and type(_TWCC_SESSION_) == type(Session2) and _TWCC_SESSION_.isInitialized:
+        #     return _TWCC_SESSION_
         if self.isValidSession():
             self.sessConf = yaml.load(
                 open(self.twcc_file_session, "r").read(), Loader=yaml.SafeLoader)

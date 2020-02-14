@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twccli.twcc.services.generic import GpuService, CpuService
-from twccli.twcc.services.base import projects
-from twccli.twcc.util import pp, isNone, table_layout, isDebug
+from twcc.services.generic import GpuService, CpuService
+from twcc.services.base import projects
+from twcc.util import pp, isNone, table_layout, isDebug
 
 
 def chkPortPair(x): return True if type(x) == type({}) and len(

@@ -1,9 +1,7 @@
-import twccli.twcc as twcc
-from twccli.twcc import _TWCC_SESSION_, Session2
+from twcc import _TWCC_SESSION_, Session2
 import pytest
 from click.testing import CliRunner
 
-@pytest.mark.first
 def test_init_twcc_session():
     import shutil
     import os
@@ -15,7 +13,7 @@ def test_init_twcc_session():
 
 def test_list_cntr():
     from examples.twccli import cli
-    print(twcc._TWCC_SESSION_)
+    print(_TWCC_SESSION_)
     mySession = Session2()
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])
@@ -23,11 +21,11 @@ def test_list_cntr():
     assert result.exit_code == 0
 
 
-def test_list_cos():
-    from examples.twccli import cli
-
-    runner = CliRunner()
-    result = runner.invoke(cli, ['ls', '-o'])
-    print (">"*10, result)
-    assert result.exit_code == 0
+#def test_list_cos():
+#    from examples.twccli import cli
+#
+#    runner = CliRunner()
+#    result = runner.invoke(cli, ['ls', '-o'])
+#    print (">"*10, result)
+#    assert result.exit_code == 0
 

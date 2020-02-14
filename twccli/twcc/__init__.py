@@ -1,6 +1,6 @@
 # Copyright 2018 NCHC
-import os
-from .session import Session2
+import os, sys
+from twcc.session import Session2
 from requests.packages import urllib3
 
 #
@@ -33,7 +33,14 @@ __all__ = ["clidriver", "util", "services"]
 
 GupSiteBlockSet = set([182, 29, 35, 120])
 
-_TWCC_SESSION_ = Session2()
+#modulename = 'twcc.session'
+#if modulename in sys.modules:
+#    print(hasattr(twcc, "_TWCC_SESSION_"))
+_TWCC_SESSION_ = None
+if "_TWCC_SESSION_" in locals():
+    sess = Session2()
+    if sess.isInitialized:
+        _TWCC_SESSION_ = sess
 
 # By default, requests logs following message if verify=False
 #   InsecureRequestWarning: Unverified HTTPS request is
