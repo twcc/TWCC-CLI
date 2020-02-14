@@ -2,7 +2,6 @@
 *log/
 .vscode/*
 .ipynb_checkpoints/
-scripts/
 .pyc
 .swp
 *.egg-info*

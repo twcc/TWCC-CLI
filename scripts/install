@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import os
+import sys
+import shutil
+from subprocess import check_call
+
+_dirname = os.path.dirname
+
+_ROOT = _dirname(_dirname(os.path.abspath(__file__)))
+print(_ROOT)
+os.chdir(_ROOT)
+
+
+def run(command):
+    return check_call(command, shell=True)
+
+try:
+    python_version = os.environ['PYTHON_VERSION']
+except KeyError:
+    python_version = '.'.join([str(i) for i in sys.version_info[:2]])
+
+run('pip install pytest pytest-cov')
+if os.path.isdir('dist') and os.listdir('dist'):
+    shutil.rmtree('dist')
+run('python setup.py bdist_wheel')
+wheel_dist = os.listdir('dist')[0]
+run('pip install %s' % (os.path.join('dist', wheel_dist)))
