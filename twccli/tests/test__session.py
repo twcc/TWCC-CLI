@@ -18,6 +18,8 @@ def test_list_cntr():
     runner = CliRunner()
     result = runner.invoke(cli, ['ls', '-c'])
     print (">"*10, result.output)
+    print (">"*10, result.stderr)
+    print (">"*10, result.stdout)
     assert result.exit_code == 0
 
 
