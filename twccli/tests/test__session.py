@@ -1,5 +1,5 @@
 import twccli.twcc as twcc
-from twccli.twcc import Session2
+from twccli.twcc import _TWCC_SESSION_, Session2
 import pytest
 from click.testing import CliRunner
 
