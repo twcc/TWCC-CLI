@@ -130,12 +130,8 @@ def del_bucket(bucket_name, df):
 
 
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
-    print(gpu)
     def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
-    for ele in a.list():
-        print(ele['name'], sol_name, ele['name']==sol_name, type(ele['name']), type(sol_name))
-        print(ele['id'], True if not ele['id'] in GupSiteBlockSet else False)
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
                   if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
     if len(cntrs) > 0:

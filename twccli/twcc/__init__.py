@@ -4,6 +4,10 @@ from .util import isNone
 from .session import Session2
 from requests.packages import urllib3
 
+# sys.setdefaultencoding() does not exist, here!
+reload(sys)  # Reload does the trick!
+sys.setdefaultencoding('UTF8')
+
 #
 # Get our data path to be added to botocore's search path
 #
@@ -34,9 +38,6 @@ __all__ = ["clidriver", "util", "services"]
 
 GupSiteBlockSet = set([182, 29, 35, 120])
 
-#modulename = 'twcc.session'
-#if modulename in sys.modules:
-#    print(hasattr(twcc, "_TWCC_SESSION_"))
 _TWCC_SESSION_ = None
 while True:
     _TWCC_SESSION_ = Session2()
