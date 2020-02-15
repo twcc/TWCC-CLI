@@ -4,9 +4,11 @@ from .util import isNone
 from .session import Session2
 from requests.packages import urllib3
 
-# sys.setdefaultencoding() does not exist, here!
-reload(sys)  # Reload does the trick!
-sys.setdefaultencoding('UTF8')
+if sys.version_info[0] == 2:
+    # fix utf8 for py27
+    # sys.setdefaultencoding() does not exist, here!
+    reload(sys)  # Reload does the trick!
+    sys.setdefaultencoding('UTF8')
 
 #
 # Get our data path to be added to botocore's search path

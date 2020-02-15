@@ -50,13 +50,16 @@ class TestCntrLifecyc:
         import json
         if isatt:
             flg = False
-            for exp_port in json.loads(out[-3].replace("'", '"')):
+            print(">>>"*14, type(out[-3]))
+            for exp_port in json.loads(out[-3].replace("\'", "\"").replace("u\"", "\"")):
+            #for exp_port in json.loads(out[-3].replace("'", '"')):
                 if exp_port['target_port'] == 3000:
                     flg = True
             assert flg
         else:
             flg = True
-            for exp_port in json.loads(out[-3].replace("'", '"')):
+            for exp_port in json.loads(out[-3].replace("\'", "\"").replace("u\"", "\"")):
+            #for exp_port in json.loads(out[-3].replace("'", '"')):
                 if exp_port['target_port'] == 3000:
                     flg = False
             assert flg
