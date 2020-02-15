@@ -6,7 +6,7 @@ import yaml
 import shutil
 from collections import defaultdict
 # from twcc import _TWCC_SESSION_
-from twcc.util import *
+from .util import *
 # print(_TWCC_SESSION_)
 
 # class TwccApiValidator(Validator):

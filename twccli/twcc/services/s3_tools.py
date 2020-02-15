@@ -5,8 +5,8 @@ import boto3
 import click
 
 from botocore.exceptions import ClientError 
-from twcc import _TWCC_SESSION_
-from twcc.clidriver import ServiceOperation
+from .. import _TWCC_SESSION_
+from ..clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
 from tqdm import tqdm

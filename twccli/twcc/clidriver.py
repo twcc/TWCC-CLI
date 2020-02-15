@@ -7,8 +7,8 @@ import yaml
 import datetime
 import logging
 import os
-from twcc.session import Session2
-from twcc.util import parsePtn, isNone, isDebug, pp
+from .session import Session2
+from .util import parsePtn, isNone, isDebug, pp
 import urllib3
 urllib3.disable_warnings()
 
