@@ -32,7 +32,7 @@ class TestCntrLifecyc:
 
     def _create(self):
         cmd_list = u"mk -c -name {} -gpu {} -sol {} -img_name {} -wait True".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
-        self.create_out = self.__run(cmd_list.split(" "))
+        self.create_out = self.__run(cmd_list.split(u" "))
 
     def _list(self):
         import re
