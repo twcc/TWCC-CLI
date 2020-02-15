@@ -31,7 +31,7 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = "mk -c -name {} -gpu {} -sol {} -img_name {} -wait True".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
+        cmd_list = u"mk -c -name {} -gpu {} -sol {} -img_name {} -wait True".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
         self.create_out = self.__run(cmd_list.split(" "))
 
     def _list(self):
