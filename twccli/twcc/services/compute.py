@@ -22,7 +22,8 @@ class GpuSite(GpuService):
     @staticmethod
     def getGpuList(mtype='list'):
         # @todo, python 3 is not good with dict key object
-        gpu_list = [(1, '1 GPU + 04 cores + 090GB memory'),
+        gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'), # twcc test only
+                    (1, '1 GPU + 04 cores + 090GB memory'),
                     (2, '2 GPU + 08 cores + 180GB memory'),
                     (4, '4 GPU + 16 cores + 360GB memory'),
                     (8, '8 GPU + 32 cores + 720GB memory')]

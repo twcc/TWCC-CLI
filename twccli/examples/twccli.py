@@ -52,7 +52,7 @@ def list_all_img():
                        "sol_id": sol_id,
                        "images": base_site.getAvblImg(sol_id, sol_name)})
 
-    table_layout("img", output, ['sol_name', 'sol_id', 'images'])
+    table_layout("img", output, ['sol_name', 'sol_id', 'images'], isPrint=True)
 
 
 def list_buckets():
@@ -129,8 +129,12 @@ def del_bucket(bucket_name, df):
 
 
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
+    print(gpu)
     def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
+    for ele in a.list():
+        print(ele['name'], sol_name, ele['name']==sol_name, type(ele['name']), type(sol_name))
+        print(ele['id'], True if not ele['id'] in GupSiteBlockSet else False)
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
                   if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
     if len(cntrs) > 0:
@@ -141,6 +145,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 
     b = Sites(debug=False)
     imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
+    print(imgs)
     if type(sol_img) == type(None) or len(sol_name) == 0:
         def_header['x-extra-property-image'] = imgs[0]
     else:
@@ -159,7 +164,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
             raise ValueError(
                 "Can't find id, please check error message : {}".format(res['detail']))
     else:
-        print("Site id: {0} is created.".format(res['id']))
+        print("SiteId: {0}.".format(res['id']))
 
     if isWait:
         doSiteReady(res['id'])
@@ -386,7 +391,6 @@ def mk(res_type, name, gpu, sol, img_name, wait):
 
     if res_type == 'Container':
         create_cntr(name, gpu, sol, img_name, wait)
-        print('create_cntr')
         return True
 
     if res_type == 'Cos':
@@ -397,18 +401,18 @@ def mk(res_type, name, gpu, sol, img_name, wait):
 
 
 @click.command()
-@click.option('-u', '--op', flag_value='unbind')
-@click.option('-p', 'port', type=int, help='number of port')
-@click.option('-site', 'siteId', type=int, help='site id')
-def bind(op, port, siteId):
-    b = Sites()
-    if not op:
-        print('bind')
-        b.exposedPort(siteId, port)
-    else:
-        b.unbindPort(siteId, port)
-        print(siteId, port)
-        # b.getConnInfo(siteId)
+@click.option('-c', 'res_type', flag_value='Container', default=True)
+@click.option('-att/-unatt', '--attach/--un-attach', 'isbind', is_flag=True, help='exposed/un-exposed port for continer services')
+@click.option('-p', '--port', 'port', type=int, help='number of port')
+@click.option('-s', '--site', 'siteId', type=int, help='site id')
+def net(siteId, port, isbind, res_type):
+
+    if res_type == 'Container':
+        b = Sites()
+        if isbind:
+            b.exposedPort(siteId, port)
+        else:
+            b.unbindPort(siteId, port)
 
 
 @click.group()
@@ -421,7 +425,7 @@ cli.add_command(rm)
 cli.add_command(ls)
 cli.add_command(mv)
 cli.add_command(cp)
-cli.add_command(bind)
+cli.add_command(net)
 
 if __name__ == "__main__":
     cli()

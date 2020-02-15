@@ -11,15 +11,14 @@ def test_init_twcc_session():
     mySession = Session2()
     assert mySession.getApiKey() == Session2._getApiKey()
 
-def test_list_cntr():
-    from examples.twccli import cli
-    print(_TWCC_SESSION_)
-    mySession = Session2()
-    runner = CliRunner()
-    result = runner.invoke(cli, ['ls', '-c'])
-    print (">"*10, result.output)
-    print (">"*10, result.exception)
-    assert result.exit_code == 0
+#def test_list_cntr():
+#    print(_TWCC_SESSION_)
+#    mySession = Session2()
+#    runner = CliRunner()
+#    result = runner.invoke(cli, ['ls', '-c'])
+#    print (">"*10, result.output)
+#    print (">"*10, result.exception)
+#    assert result.exit_code == 0
 
 
 #def test_list_cos():
