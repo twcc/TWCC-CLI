@@ -14,11 +14,11 @@ python27:
   stage: test
   script: tox -e py27
   only: 
-  - aug_dev_Feb
+  - amber_dev
 python37:
   image: python:3.7
   stage: test
   script: tox -e py37
   only: 
-  - aug_dev_Feb
+  - amber_dev
 
