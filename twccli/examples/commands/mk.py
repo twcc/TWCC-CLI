@@ -1,10 +1,25 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import click
+import time
 from twcc.services.compute import GpuSite as Sites
 from twcc.services.solutions import solutions
 from twcc import GupSiteBlockSet
 from twcc.services.s3_tools import S3
+from twcc.util import pp, table_layout, SpinCursor, isNone
+from twcc.services.base import acls, users, image_commit, Keypairs
+from twcc import GupSiteBlockSet, Session2
+
+
+def doSiteReady(site_id):
+    b = Sites(debug=False)
+    wait_ready = False
+    while not wait_ready:
+        print("Waiting for container to be Ready.")
+        if b.isReady(site_id):
+            wait_ready = True
+        time.sleep(5)
+    return site_id
 
 def create_bucket(bucket_name):
     s3 = S3()
@@ -55,9 +70,25 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 def cli():
     pass
 
+@click.option('-key', '--keypair', 'res_type_opt', flag_value='Keypair',
+              help="Create or add a keypair for VCS.")
+@click.option('--name', 'name', default="twccli", type=str,
+              help="Enter name for your resources.")
+@click.argument('ids_or_names', nargs=-1)
 @click.command(help="abbr for vcs")
-def v():
-    print("list vcs")
+def v(res_type_opt, name, ids_or_names):
+    if name=='twccli' and not len(ids_or_names)==0:
+        name = ids_or_names[0]
+
+    if isNone(name) or name=='twccli':
+        raise ValueError("`--n` is required.")
+
+    keyring = Keypairs()
+
+    if 'name' in keyring.queryById(name):
+        raise ValueError("Duplicated name for keypair")
+    print(Session2._getTwccDataPath())
+    keyring.createKeyPair(name)
 
 
 @click.option('--name', 'name', default="twccli", type=str,
@@ -68,7 +99,8 @@ def o(name):
 
 # end object ===============================================================
 
-@click.option('--name', 'name', default="twccli", type=str,
+@click.command(help="abbr for cntr")
+@click.option('-name', '--name','name',default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('--gpu', '--gpu_number', 'gpu', default=1, type=int,
               help="Enter desire number for GPU.")
@@ -77,8 +109,7 @@ def o(name):
 @click.option('--img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name. Please check through `twccli ls -t cos -img`")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
-        help='Wait until resources are provisioned')
-@click.command(help="abbr for cntr")
+ help='Wait until resources are provisioned')
 def c(name, gpu, sol, img_name, wait):
     create_cntr(name, gpu, sol, img_name, wait)
 

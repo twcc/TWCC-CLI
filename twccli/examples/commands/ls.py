@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import click
+import json
 from twcc.util import pp, table_layout, SpinCursor, isNone
 from twcc.services.compute import GpuSite as Sites
 from twcc import GupSiteBlockSet
 from twcc.services.solutions import solutions
 from twcc.services.base import acls, users, image_commit
 from twcc.services.s3_tools import S3
+from twcc.services.network import Networks
+from twcc.services.base import acls, users, image_commit, Keypairs
+
+def list_port(site_id):
+    b = Sites()
+    conn_info = b.getConnInfo(site_id)
 
 def list_commit():
     print('list commit')
@@ -36,26 +43,32 @@ def gen_cntr(s_id):
     conn_info = b.getConnInfo(site_id)
     print(conn_info)
 
-def list_cntr(site_id, isTable, isAll):
+def list_cntr(site_ids_or_names, isTable, isAll):
+    col_name = ['id', 'name', 'create_time', 'status']
+    a = Sites()
 
-    if not type(site_id) == type(1):
-        raise ValueError("Site number: '{0}' error.".format(site_id))
-
-    if not isTable:
-        gen_cntr(site_id)
+    if len(site_ids_or_names) == 0:
+        my_sites = a.list(isAll=isAll)
     else:
-        a = Sites()
-        if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
-            isAll = False
-        if site_id == 0:
-            my_sites = a.list(isAll=isAll)
-            if len(my_sites) > 0:
-                col_name = ['id', 'name', 'create_time', 'status']
-                table_layout('sites', my_sites, caption_row=col_name, isPrint=True)
+        my_sites = []
+        for ele in site_ids_or_names:
+            try:
+                site_id = int(ele)
+                if is_site_id(site_id):
+                    my_sites.append(a.queryById(ele))
+            except:
+                # @todo add query filter
+                pass
+    if len(my_sites) > 0:
+        if isAll:
+            col_name.append('user')
+
+        if isTable:
+            table_layout('sites', my_sites, caption_row=col_name, isPrint=True)
         else:
-            res = a.queryById(site_id)
-            col_name = ['id', 'name', 'create_time', 'status', 'status_reason']
-            table_layout('sites: %s' % site_id, res, caption_row=col_name, isPrint=True)
+            return my_sites
+    return []
+
 
 def list_buckets():
     s3 = S3()
@@ -70,20 +83,54 @@ def list_files(bucket_name):
 # end orginal function ====================================
 
 # Create groups for command
-@click.group(help="test")
+@click.group(help="List Command")
 def cli():
     pass
 
-@click.command(help="abbr for vcs")
-@click.pass_context
-def v(ctx):
-    print(ctx)
-    print("list vcs")
+@click.command(help='abbr for vcs')
+@click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
+                help="List your keypairs in TWCC VCS.")
+@click.option('-net', '--network', 'res_property', flag_value='Network',
+                help="List existing network in TWCC VCS.")
+@click.argument('site_ids_or_names', nargs=-1)
+@click.option('--json / --nojson', 'isJson', is_flag=True, default=False,
+              help="Show information in JSON view.")
+@click.option('--table / --notable', 'isTable', is_flag=True, default=True,
+              help="Show information in table view.")
 
-# end vcs ================================================== 
+def v(res_property, site_ids_or_names, isJson, isTable):
+    if res_property == 'Network':
+        net = Networks()
+        if len(site_ids_or_names)>0:
+            ans = [ net.queryById(x) for x in site_ids_or_names]
+            cols = [ "id", "name", "cidr", "create_time", "gateway", "nameservers", "status", "user"]
+        else:
+            ans = net.list()
+            cols = [ "id", "name", "cidr", "create_time", "status"]
+
+        if isJson:
+             print(json.dumps(ans, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')))
+        elif isTable:
+            table_layout("VCS Networks", ans, cols, isPrint=True)
+        return True
+
+    if res_property == 'Keypair':
+        keyring = Keypairs()
+        if len(site_ids_or_names)>0:
+             ans = []
+             cols = ['name', 'fingerprint', 'create_time', 'user']
+             for ele in site_ids_or_names:
+                 ans.append(keyring.queryById(ele))
+        else:
+             cols = ['name', 'fingerprint']
+             ans = keyring.list()
+
+        table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
+
+# end vcs ==================================================
+@click.command(help='cos')
 @click.option('-name', 'name', default=None, type=str,
-            help="Enter name for your resources.")
-@click.command(help="abbr for cos")
+            help="Enter name for your resource name")
 def o(name):
 
     if isNone(name):
@@ -91,27 +138,34 @@ def o(name):
     else:
         list_files(name)
 
-# end object ================================================== 
+# end object ==================================================
 
 @click.option('-img', 'res_property', flag_value='image')
 @click.option('-commit', 'res_property', flag_value='commit')
-@click.option('-site',  'site_id', default=0, type=int, help="Enter the site id")
-@click.option('-table', 'is_table', default=True, type=bool, help="Show cntr info in table style.")
+@click.option('--table / --notable', 'isTable', is_flag=True, default=True,
+            help="Show information in table view.")
 @click.option('-all',   'is_all', is_flag=True, type=bool, help="Show all container.")
-@click.command(help="abbr for cntr")
-@click.pass_context
-def c(ctx, res_property, site_id, is_table, is_all):
+@click.command(help='abbr for cntr')
+@click.argument('site_ids_or_names', nargs=-1)
+@click.option('--port', 'show_ports', is_flag=True, help="Show site port information in table style [cntr only].")
+def c(res_property, site_ids_or_names, isTable, is_all, show_ports):
     if res_property == 'image':
         print('image')
         list_all_img()
-    
+
     if res_property == 'commit':
         list_commit()
 
     if not res_property:
-        list_cntr(site_id, is_table, is_all)
+        if show_ports:
+            if len(site_ids_or_names)>0:
+                for ele in site_ids_or_names:
+                    print(ele)
+                    list_port(ele)
+        else:
+            list_cntr(site_ids_or_names, isTable, is_all)
 
-# end cntr ====================================================        
+# end cntr ===================================================
 
 cli.add_command(v)
 cli.add_command(o)
@@ -120,9 +174,6 @@ cli.add_command(c)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

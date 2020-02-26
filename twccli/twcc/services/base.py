@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from twcc.session import Session2
 from collections import defaultdict
-from twcc.util import isNone
+from twcc.util import isNone, table_layout
 from twcc.services.generic import GenericService
 
 
@@ -46,18 +47,18 @@ class users(GenericService):
 
 class image_commit(GenericService):
     def __init__(self, debug=False):
-        GenericService.__init__(self, debug=debug)
+        GenericService.__init__(self)
 
         self._csite_ = "goc"
 
     def getCommitList(self):
-        return self._do_api()
+        return table_layout("commited images", self._do_api(), isPrint=False, isWrap=False)
 
     def createCommit(self, siteid, tag, image):
         self.http_verb = "post"
         self.data_dic = {"site": siteid, "tag": tag, "image": image}
         self.res_type = "txt"
-        return self._do_api()
+        return table_layout("commited images", self._do_api(), isPrint=False)
 
 
 class acls(GenericService):
@@ -87,21 +88,19 @@ class acls(GenericService):
         return self._do_api()
 
 
-class keypairs(GenericService):
+class Keypairs(GenericService):
     """ This Class is for keypairs api call
     """
 
-    def __init__(self, api_key_tag, debug=False):
+    def __init__(self):
         """ constractor for this keypairs class
 
         Args:
             api_key_tag (str): see YAML for detail
         """
         GenericService.__init__(self)
-        # current working information
-        self._csite_ = "openstack-taichung-suse"
-        self._api_key_ = api_key_tag
-        self._debug_ = debug
+        self._func_ = "keypairs"
+        self._csite_ = Session2._getClusterName("VCS")
 
     def list(self):
         return self._do_api()

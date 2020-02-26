@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from twcc.session import Session2
 from twcc.services.generic import GpuService, CpuService
 from twcc.services.base import projects
 from twcc.util import pp, isNone, table_layout, isDebug
@@ -15,7 +16,7 @@ class GpuSite(GpuService):
         GpuService.__init__(self)
 
         self._func_ = "sites"
-        self._csite_ = "k8s-taichung-default"
+        self._csite_ = Session2._getClusterName("CNTR")
         print(">"*10, "GpuSite", "<"*10, self._api_key_ )
         self._cache_sol_ = {}
 
@@ -182,8 +183,10 @@ class GpuSite(GpuService):
 
     def getConnInfo(self, site_id):
         info_gen = self.queryById(site_id)
+
         info_detail = self.getDetail(site_id)
-        usr_name = info_gen['user']['username']
+        #usr_name = Session2._whoami()[0]['username']
+        usr_name = Session2._whoami()['username']
 
         info_port = [x for x in info_detail['Service'][0]['ports']]
         print (info_port)
@@ -229,6 +232,7 @@ class GpuSite(GpuService):
 class VcsSite(CpuService):
     def __init__(self):
 
+        self._csite_ = Session2._getClusterName("VCS")
         """ Description
         Site creates VCS Computing Resources in TWCC
         """

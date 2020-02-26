@@ -31,7 +31,8 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk -c -name {} -gpu {} -sol {} -img_name {} -wait True".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
+        cmd_list = u"mk c --name {} --gpu {} --sol {} --img {} --wait".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
+        print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
     def _list(self):
@@ -39,44 +40,43 @@ class TestCntrLifecyc:
         match = re.search('SiteId: (?P<site_id>[0-9]*)\.', self.create_out)
         self.site_id = match.group('site_id')
         assert type(int(self.site_id)) == type(1)
-        cmd_list = "ls -c -site {}".format(self.site_id)
+        cmd_list = "ls c {}".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
     def _listDetail(self, isatt=True):
-        cmd_list = "ls -c -site {} -table False".format(self.site_id)
+        cmd_list = "ls c --port {}".format(self.site_id)
         out = self.__run(cmd_list.split(" "))
         out = out.split("\n")
+        print(out)
         import json
         if isatt:
             flg = False
-            print(">>>"*14, type(out[-3]))
-            for exp_port in json.loads(out[-3].replace("\'", "\"").replace("u\"", "\"")):
-            #for exp_port in json.loads(out[-3].replace("'", '"')):
+            print(">>>"*14, type(out[-2]))
+            for exp_port in json.loads(out[-2].replace("\'", "\"").replace("u\"", "\"")):
                 if exp_port['target_port'] == 3000:
                     flg = True
             assert flg
         else:
             flg = True
-            for exp_port in json.loads(out[-3].replace("\'", "\"").replace("u\"", "\"")):
-            #for exp_port in json.loads(out[-3].replace("'", '"')):
+            for exp_port in json.loads(out[-2].replace("\'", "\"").replace("u\"", "\"")):
                 if exp_port['target_port'] == 3000:
                     flg = False
             assert flg
 
 
     def _exposedPort(self):
-        cmd_list = "net -c -s {} -att -p 3000".format(self.site_id)
+        cmd_list = "net c -s {} -att -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _unexposedPort(self):
-        cmd_list = "net -c -s {} -unatt -p 3000".format(self.site_id)
+        cmd_list = "net c -s {} -unatt -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _delete(self):
-        cmd_list = "rm -c {}".format(self.site_id)
+        cmd_list = "rm c {}".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 

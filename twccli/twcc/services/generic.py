@@ -11,7 +11,7 @@ from twcc.clidriver import ServiceOperation
 
 class GenericService(object):
 
-    def __init__(self, api_key=None, skip_session=False):
+    def __init__(self, api_key=None, cluster_tag=None, skip_session=False):
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
@@ -28,19 +28,23 @@ class GenericService(object):
             self._api_key_ = api_key
 
         self.twcc._debug = isDebug()
-        self.cluster_tag = "CNTR"
-        
+
+        self.cluster_tag = cluster_tag
+        if isNone(self.cluster_tag):
+            self.cluster_tag = "CNTR"
+
         if not skip_session:
             self.twcc_session = twcc._TWCC_SESSION_
             print(">"*15, self.twcc_session)
             self._project_code = self.twcc_session.getDefaultProject()
             self.project_ids = self.twcc_session.twcc_proj_id
+            print(self.project_ids, self.cluster_tag)
             self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
 
-        
+
         # set defult project id
         self._csite_ = Session2._getClusterName( self.cluster_tag )
-        
+
         # map to url
         self.url_dic = None
         # map to data entries
@@ -122,7 +126,7 @@ class GenericService(object):
 
     def delete(self, mid):
         self.http_verb = "delete"
-        self.url_dic = {self.__class__.__name__: mid}
+        self.url_dic = {self._func_: mid}
         res = self._do_api()
         return res
 
@@ -133,15 +137,14 @@ class GenericService(object):
 
 class CpuService(GenericService):
     def __init__(self):
-        GenericService.__init__(self)
-        self._csite_ = "openstack-taichung-community"
+        GenericService.__init__(self, cluster_tag="VCS")
 
 
 class GpuService(GenericService):
     def __init__(self):
         GenericService.__init__(self)
         self.cluster_tag = "CNTR"
-        self._csite_ = "k8s-taichung-default"
+        self._csite_ = Session2._getClusterName(self.cluster_tag)
 
 
 if __name__ == "__main__":
