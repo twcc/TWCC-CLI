@@ -13,6 +13,14 @@ def chkPortPair(x): return True if type(x) == type({}) and len(
 class GpuSite(GpuService):
 
     def __init__(self, debug=False):
+    '''
+    Initial of Gpu Site Object
+
+    Keyword Argument:
+         _func_ {[String]} -- [description] (default: {None})
+         _cite {[String]} -- [description] (default: {None})
+
+    '''
         GpuService.__init__(self)
 
         self._func_ = "sites"
@@ -22,6 +30,9 @@ class GpuSite(GpuService):
 
     @staticmethod
     def getGpuList(mtype='list'):
+    '''
+    Return Gpu set
+    '''
         # @todo, python 3 is not good with dict key object
         gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'), # twcc test only
                     (1, '1 GPU + 04 cores + 090GB memory'),

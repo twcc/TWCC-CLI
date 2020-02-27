@@ -12,6 +12,15 @@ from twcc.clidriver import ServiceOperation
 class GenericService(object):
 
     def __init__(self, api_key=None, cluster_tag=None, skip_session=False):
+        '''
+        Basic class for doAPI
+
+        Keyword Arguments:
+            _csite_ {[string]} -- [description] (default: {__UNDEF__})
+            _api_key_  {[String]} -- [description] api key (default: {None})
+            twcc_session {[twcc.session]} -- [description] Class for do session (default: {None})
+            http_verb {[type]} -- [description] action (default: {None})
+        '''
         # current working information
         self._csite_ = "__UNDEF__"
         self._func_ = self.__class__.__name__
@@ -59,6 +68,12 @@ class GenericService(object):
         self.http_verb_valid = self.twcc.http_verb_valid
 
     def _chkSite_(self):
+    '''
+    check if site is avaiable or not
+
+    Returns:
+        [bool]
+    '''
         if isNone(self._csite_):
             raise ValueError("No site value.")
         elif not self._csite_ in self.getSites():
@@ -68,14 +83,30 @@ class GenericService(object):
             return True
 
     def getSites(self):
+    '''
+    get site basic info
+    Returns:
+        [list]
+    '''
         exclu = ['admin', 'harbor', 'goc',
                  'test_sit', 'nchc-ad', 'haproxy_stats']
         return [x for x in self.twcc._session_.clusters if not x in exclu]
 
     def _isAlive(self):
+    ''''
+    call cliDriver.py method try_alive
+    send msg to get isAlive or not
+    ''''
         return self.twcc.try_alive()
 
     def _do_api(self):
+    '''
+    get data list from self param
+    and do api to get result
+
+    Returns:
+        []
+    '''
         if self._debug_:
             pp(csite=self._csite_,
                 func=self._func_,
@@ -105,11 +136,21 @@ class GenericService(object):
         pass
 
     def list(self):
+    '''
+    do list function
+    Returns:
+        [dict]
+    '''
         self.http_verb = 'get'
         self.res_type = 'json'
         return self._do_api()
 
     def queryById(self, mid):
+    '''
+    Query site info by specific id
+    Returns:
+        [dict]
+    '''
         self.url_dic = {self._func_: mid}
         self.http_verb = 'get'
         res = self._do_api()
@@ -118,6 +159,9 @@ class GenericService(object):
 
     @property
     def project_id(self):
+    '''
+    propery get project_id
+    '''
         return self._project_id
 
     @project_id.setter
@@ -125,23 +169,33 @@ class GenericService(object):
         self._project_id = proj_id
 
     def delete(self, mid):
+    '''
+    do delete api
+    '''
         self.http_verb = "delete"
         self.url_dic = {self._func_: mid}
         res = self._do_api()
         return res
 
     def __log(self, mstr):
+    '''
+    print log trace
+    '''
         if self._debug_:
             print("DEBUG in [{}]: {}".format(self.__class__.__name__, mstr))
 
 
 class CpuService(GenericService):
+
     def __init__(self):
         GenericService.__init__(self, cluster_tag="VCS")
 
 
 class GpuService(GenericService):
     def __init__(self):
+    '''
+
+    '''
         GenericService.__init__(self)
         self.cluster_tag = "CNTR"
         self._csite_ = Session2._getClusterName(self.cluster_tag)
