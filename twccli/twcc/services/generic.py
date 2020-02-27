@@ -15,7 +15,7 @@ class GenericService(object):
         '''
         Basic class for doAPI
 
-        Keyword Arguments:
+        params:
             _csite_ {[string]} -- [description] (default: {__UNDEF__})
             _api_key_  {[String]} -- [description] api key (default: {None})
             twcc_session {[twcc.session]} -- [description] Class for do session (default: {None})
