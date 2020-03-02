@@ -7,10 +7,17 @@
 
 NOTE:
 
-Please update your TWCC-CLI constantly to make sure all functionalities works up-to-date, thanks! 
+- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
+- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
+- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
 
-any questions: please check on https://www.twcc.ai/doc?page=deploy_env_cli or email to isupport@narlabs.org.tw THANKS!
 
+New Features:
+1. VCS (Virtual Compute Service) Operations.
+2. New command line interfaces.
+3. Json standard output for all resources listing.
+
+for more information, please email to [iservice|isupport]@narlabs.org.tw
 :::
 
 INDEX: 
