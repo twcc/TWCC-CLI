@@ -65,9 +65,9 @@ def doSiteReady(site_id):
 
 @click.command()
 @click.option('-cntr', 'cntr_name', default = "twcc-cli", type = str, help = "Enter containr name")
-@click.option('-gpu', default = 1, type = int, help = "Enter number of gpu")
-@click.option('-sol', 'sol_name', default = "TensorFlow", type = str, help = "Enter solution name")
-@click.option('-img', 'sol_img', default = None, type = str, help = "Enter image name")
+@click.option('-gpu', default = '1m', type = str, help = "Enter number of gpu")
+@click.option('-sol', 'sol_name', default = "CUDA", type = str, help = "Enter solution name")
+@click.option('-img', 'sol_img', default = 'cuda-10.1-cudnn7-devel-ubuntu18.04:latest', type = str, help = "Enter image name")
 #@click.option('-s3','s3', default = [], multiple = True, help = "Enter S3 bucket") # dont use
 @click.option('-wait', 'isWait', default = True, type = bool,  help = "Need to wait for cntr")
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):

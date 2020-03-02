@@ -23,16 +23,17 @@ class sites(GenericService):
             print("__del__")
 
     @staticmethod
-    def getGpuList(mtype='list'):
+    def getGpuList(mtype='dict'):
       #@todo, python 3 is not good with dict key object
-      gpu_list = [ (1, '1 GPU + 04 cores + 090GB memory'),
-           (2, '2 GPU + 08 cores + 180GB memory'),
-           (4, '4 GPU + 16 cores + 360GB memory'),
-           (8, '8 GPU + 32 cores + 720GB memory')]
-      if mtype=='list':
-          return gpu_list
-      elif mtype=='dict':
-          return dict(gpu_list)
+      gpu_list = [ ('1', '1 GPU + 04 cores + 090GB memory'),
+           ('2', '2 GPU + 08 cores + 180GB memory'),
+           ('4', '4 GPU + 16 cores + 360GB memory'),
+           ('8', '8 GPU + 32 cores + 720GB memory'),
+           ('1m', '1 GPU + 04 cores + 060GB memory + 030GB share memory'),
+           ('2m', '2 GPU + 08 cores + 120GB memory + 060GB share memory'),
+           ('4m', '4 GPU + 16 cores + 240GB memory + 120GB share memory'),
+           ('8m', '8 GPU + 32 cores + 480GB memory + 240GB share memory')]
+      return dict(gpu_list)
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
@@ -66,7 +67,7 @@ class sites(GenericService):
         return self._do_api()
 
     @staticmethod
-    def getGpuDefaultHeader(gpus=2):
+    def getGpuDefaultHeader(gpus=1):
         gpu_list = sites.getGpuList(mtype='dict')
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
