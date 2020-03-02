@@ -66,16 +66,16 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 # end original function ==================================================
 
 # Create groups for command
-@click.group(help="test")
+@click.group(help="Create Service")
 def cli():
     pass
 
+@click.command()
 @click.option('-key', '--keypair', 'res_type_opt', flag_value='Keypair',
               help="Create or add a keypair for VCS.")
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="abbr for vcs")
 def v(res_type_opt, name, ids_or_names):
     if name=='twccli' and not len(ids_or_names)==0:
         name = ids_or_names[0]
@@ -93,7 +93,7 @@ def v(res_type_opt, name, ids_or_names):
 
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.command(help="abbr for cos")
+@click.command(help="abbr for Cloud Object Storage")
 def o(name):
     create_bucket(name)
 
@@ -107,7 +107,7 @@ def o(name):
 @click.option('--sol', '--solution', 'sol', default="TensorFlow", type=str,
               help="Enter TWCC solution name.")
 @click.option('--img', '--img_name', 'img_name', default=None, type=str,
-              help="Enter image name. Please check through `twccli ls -t cos -img`")
+              help="Enter image name. Please check through `twccli ls t cos -img`")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
  help='Wait until resources are provisioned')
 def c(name, gpu, sol, img_name, wait):

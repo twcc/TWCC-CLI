@@ -83,11 +83,11 @@ def list_files(bucket_name):
 # end orginal function ====================================
 
 # Create groups for command
-@click.group(help="List Command")
+@click.group(help="List Information")
 def cli():
     pass
 
-@click.command(help='abbr for vcs')
+@click.command(help='Abbrevation for Virtual Compute Service')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
                 help="List your keypairs in TWCC VCS.")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -128,7 +128,7 @@ def v(res_property, site_ids_or_names, isJson, isTable):
         table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
 
 # end vcs ==================================================
-@click.command(help='cos')
+@click.command(help='Abbreviation of Cloud Object Storage')
 @click.option('-name', 'name', default=None, type=str,
             help="Enter name for your resource name")
 def o(name):
@@ -139,15 +139,18 @@ def o(name):
         list_files(name)
 
 # end object ==================================================
-
-@click.option('-img', 'res_property', flag_value='image')
-@click.option('-commit', 'res_property', flag_value='commit')
+@click.command(help='Abbrevation of Container')
+@click.option('-img', 'res_property', flag_value='image',
+             help = 'View all image files')
+@click.option('-commit', 'res_property', flag_value='commit',
+             help='List the submitted requests')
 @click.option('--table / --notable', 'isTable', is_flag=True, default=True,
             help="Show information in table view.")
-@click.option('-all',   'is_all', is_flag=True, type=bool, help="Show all container.")
-@click.command(help='abbr for cntr')
+@click.option('-all',   'is_all', is_flag=True, type=bool,
+            help="List all the containers in the project (Tenant Administrators only)")
+@click.option('--port', 'show_ports', is_flag=True,
+            help='Show site port information in table style cntr only')
 @click.argument('site_ids_or_names', nargs=-1)
-@click.option('--port', 'show_ports', is_flag=True, help="Show site port information in table style [cntr only].")
 def c(res_property, site_ids_or_names, isTable, is_all, show_ports):
     if res_property == 'image':
         print('image')

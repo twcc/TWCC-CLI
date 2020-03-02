@@ -61,17 +61,22 @@ def download(source, directory, key, r):
 # end original code ===============================================
 
 # Create groups for command
-@click.group(help="test")
+@click.group(help="Command for Upload/Download File")
 def cli():
     pass
 
 
-@click.command(help="abbr for cos")
-@click.option('-upload', 'op', flag_value='upload')
-@click.option('-download', 'op', flag_value='download')
-@click.option('-s', '--source', 'source', required=True, help='Name of the File.')
-@click.option('-d', '--directory', 'directory', required=True, help='Name of the Bucket.')
-@click.option('-k', '--key', 'key', help='The name of the key to upload to.')
+@click.command(help="Abbreviation for Cloud Object Storage")
+@click.option('-upload', 'op', flag_value='upload',
+               help='Upload files or folders to bucket')
+@click.option('-download', 'op', flag_value='download',
+               help='Download the files in the bucket or the entire bucket')
+@click.option('-s', '--source', 'source', required=True,
+               help='Source storage name')
+@click.option('-d', '--directory', 'directory', required=True,
+               help='Download to the specific path')
+@click.option('-k', '--key', 'key',
+               help='The name of the key to upload to.')
 @click.option('-r', 'r', is_flag=True, help='Recursively copy entire directories.')
 def o(op, source, directory, key, r):
     if op == 'upload':

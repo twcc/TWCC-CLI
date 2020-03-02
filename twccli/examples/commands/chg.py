@@ -3,19 +3,19 @@ from __future__ import print_function
 import click
 
 # Create groups for command
-@click.group(help="test")
+@click.group(help="Change configuration")
 def cli():
     pass
 
-@click.command(help="abbr for vcs")
+@click.command(help="Abbreviation for Virual Compute Service")
 def v():
     print("list vcs")
 
-@click.command(help="abbr for cos")
+@click.command(help="Abbreviation for Cloud Object Storage")
 def o():
     print("list cos")
 
-@click.command(help="abbr for cntr")
+@click.command(help="Abbreviation for container")
 def c():
     print("list cntr")
 
@@ -26,9 +26,6 @@ cli.add_command(c)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

@@ -12,11 +12,11 @@ def Snapshots(show_list, id_num):
 # end original ===============================================
 
 # Create groups for command
-@click.group(help="test")
+@click.group(help="Make copy")
 def cli():
     pass
 
-@click.command(help="abbr for vcs")
+@click.command(help="abbr for Virtual Compute Service")
 def v():
     print("list vcs")
 
@@ -26,9 +26,9 @@ def v():
 def o():
     Snapshots(show_list, id_num)
 
-@click.command(help="abbr for cntr")
+@click.command(help="Abbreviation for Container")
 def c():
-    print("list cntr")
+    print("move container")
 
 cli.add_command(v)
 cli.add_command(o)
@@ -37,9 +37,6 @@ cli.add_command(c)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

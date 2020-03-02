@@ -14,7 +14,7 @@ def c(siteId, port, isbind):
         b.unbindPort(siteId, port)
 
 
-@click.group(help="test")
+@click.group(help="Network Service")
 def cli():
     pass
 

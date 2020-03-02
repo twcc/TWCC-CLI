@@ -37,7 +37,7 @@ def del_keypair(key_name, isForce=False):
         else:
             raise ValueError("Keypair: {}, not found.".format(key_name))
 # Create groups for command
-@click.group(help="test")
+@click.group(help="Remove Service")
 def cli():
     pass
 
