@@ -94,9 +94,6 @@ cli.add_command(o)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

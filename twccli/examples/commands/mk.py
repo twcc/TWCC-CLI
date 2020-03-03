@@ -99,7 +99,7 @@ def o(name):
 
 # end object ===============================================================
 
-@click.command(help="abbr for cntr")
+@click.command(help="Abbreviation of Container")
 @click.option('-name', '--name','name',default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('--gpu', '--gpu_number', 'gpu', default=1, type=int,
@@ -120,9 +120,6 @@ cli.add_command(c)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

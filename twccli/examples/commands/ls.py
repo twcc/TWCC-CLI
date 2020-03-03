@@ -87,7 +87,7 @@ def list_files(bucket_name):
 def cli():
     pass
 
-@click.command(help='Abbrevation for Virtual Compute Service')
+@click.command(help='Abbreviation of Virtual Compute Service')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
                 help="List your keypairs in TWCC VCS.")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -139,7 +139,7 @@ def o(name):
         list_files(name)
 
 # end object ==================================================
-@click.command(help='Abbrevation of Container')
+@click.command(help='Abbreviation of Container')
 @click.option('-img', 'res_property', flag_value='image',
              help = 'View all image files')
 @click.option('-commit', 'res_property', flag_value='commit',

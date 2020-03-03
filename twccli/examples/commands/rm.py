@@ -56,7 +56,7 @@ def v(res_property, name , ids_or_names, force):
          for ele in ids_or_names:
               del_keypair(ele, force)
 
-@click.command(help="abbr for cos")
+@click.command(help="Abbreviation for Cloud Object Storage")
 def o():
     if not name:
         print('please enter bucket_name')
@@ -65,7 +65,7 @@ def o():
         del_bucket(name, r)
 
 
-@click.command(help="abbr for cntr")
+@click.command(help="Abbreviation for Container")
 @click.argument('ids_or_names', nargs=-1)
 def c(ids_or_names):
 

@@ -16,11 +16,11 @@ def Snapshots(show_list, id_num):
 def cli():
     pass
 
-@click.command(help="abbr for Virtual Compute Service")
+@click.command(help="Abbreviation for Virtual Compute Service")
 def v():
     print("list vcs")
 
-@click.command(help="abbr for cos")
+@click.command(help="Abbreviation for Cloud Object Storage")
 @click.option('-l', '--list', 'show_list', is_flag=True, help="Show list of snapshots")
 @click.option('-id', 'id_num', default=None, help="The snapshot id")
 def o():
