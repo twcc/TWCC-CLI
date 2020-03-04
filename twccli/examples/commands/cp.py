@@ -61,12 +61,12 @@ def download(source, directory, key, r):
 # end original code ===============================================
 
 # Create groups for command
-@click.group(help="Command for Upload/Download File")
+@click.group(help="Upload / Download File")
 def cli():
     pass
 
 
-@click.command(help="Abbreviation for Cloud Object Storage")
+@click.command(help="cos(Cloud Object Service)")
 @click.option('-upload', 'op', flag_value='upload',
                help='Upload files or folders to bucket')
 @click.option('-download', 'op', flag_value='download',

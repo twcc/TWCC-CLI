@@ -87,7 +87,7 @@ def list_files(bucket_name):
 def cli():
     pass
 
-@click.command(help='Abbreviation of Virtual Compute Service')
+@click.command(help='vcs(Virtual Compute Service)')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
                 help="List your keypairs in TWCC VCS.")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -95,7 +95,7 @@ def cli():
 @click.argument('site_ids_or_names', nargs=-1)
 @click.option('--json / --nojson', 'isJson', is_flag=True, default=False,
               help="Show information in JSON view.")
-@click.option('--table / --notable', 'isTable', is_flag=True, default=True,
+@click.option('-table / -notable','--table-view / --no-table-view', 'isTable', is_flag=True, default=True,
               help="Show information in table view.")
 
 def v(res_property, site_ids_or_names, isJson, isTable):
@@ -128,7 +128,7 @@ def v(res_property, site_ids_or_names, isJson, isTable):
         table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
 
 # end vcs ==================================================
-@click.command(help='Abbreviation of Cloud Object Storage')
+@click.command(help='cos(Cloud Object Storage)')
 @click.option('-name', 'name', default=None, type=str,
             help="Enter name for your resource name")
 def o(name):
@@ -139,14 +139,14 @@ def o(name):
         list_files(name)
 
 # end object ==================================================
-@click.command(help='Abbreviation of Container')
-@click.option('-img', 'res_property', flag_value='image',
+@click.command(help='ccs(Container Computer Service)')
+@click.option('-img', '--image','res_property', flag_value='image',
              help = 'View all image files')
-@click.option('-commit', 'res_property', flag_value='commit',
+@click.option('-clone', '--make-clone', 'res_property', flag_value='commit',
              help='List the submitted requests')
-@click.option('--table / --notable', 'isTable', is_flag=True, default=True,
+@click.option('--table-view / --no-table-view', 'isTable', is_flag=True, default=True,
             help="Show information in table view.")
-@click.option('-all',   'is_all', is_flag=True, type=bool,
+@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
             help="List all the containers in the project (Tenant Administrators only)")
 @click.option('--port', 'show_ports', is_flag=True,
             help='Show site port information in table style cntr only')

@@ -8,7 +8,7 @@ import pytest
 
 env_options = {"cicd_pytorch": (1, "PyTorch", "pytorch-19.11-py3:latest"),
                "cicd_tensorflow": (1, "TensorFlow", "tensorflow-19.11-tf2-py3:latest"),
-               "cicd_test0gpu": (0, u"影像檔測試區", "ngc/nvidia/tensorflow-19.11-tf2-py3:latest")}
+               "cicd_test0gpu": (0, u"影像檔測試區", "ngc/nvidia/tensorrt-19.08-py3:latest")}
 
 class TestCntrLifecyc:
     def _loadParams(self):
@@ -31,7 +31,8 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk c --name {} --gpu {} --sol {} --img {} --wait".format(self.cntr_name, self.gpu_num, self.sol, self.img_name)
+        cmd_list = u"mk c -name {} -gpu {} -sol {} -img {} -wait".format(self.cntr_name, self.gpu_num
+        , self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 

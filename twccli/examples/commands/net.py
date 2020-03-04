@@ -2,10 +2,10 @@ from twcc.services.compute import GpuSite as Sites
 import click
 
 
-@click.command(help='Abbreviation of Container')
-@click.option('-att/-unatt', '--attach/--un-attach', 'isbind', is_flag=True, help='exposed/un-exposed port for continer services')
-@click.option('-p', '--port', 'port', type=int, help='number of port')
-@click.option('-s', '--site', 'siteId', type=int, help='site id')
+@click.command(help='ccs(Container Compute Service)')
+@click.option('-att/-unatt', '--attach-port/--unattach-port', 'isbind', is_flag=True, help='exposed/un-exposed port for continer services')
+@click.option('-p', '--port', 'port', type=int, help='port nummber')
+@click.option('-s', '--site-id', 'siteId', type=int, help='site id')
 def c(siteId, port, isbind):
     b = Sites()
     if isbind:

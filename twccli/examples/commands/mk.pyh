@@ -70,14 +70,13 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 def cli():
     pass
 
-@click.command(help='vcs(Virtual Compute Service)')
+@click.command('vcs(Virtual Compute Service)')
 @click.option('-key', '--keypair', 'res_type_opt', flag_value='Keypair',
               help="Create or add a keypair for VCS.")
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.argument('ids_or_names', nargs=-1)
 def v(res_type_opt, name, ids_or_names):
-
     if name=='twccli' and not len(ids_or_names)==0:
         name = ids_or_names[0]
 
@@ -91,7 +90,7 @@ def v(res_type_opt, name, ids_or_names):
 
     print(Session2._getTwccDataPath())
     keyring.createKeyPair(name)
-
+    print('create key')
 
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")

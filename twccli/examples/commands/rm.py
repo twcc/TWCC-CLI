@@ -47,7 +47,7 @@ def cli():
 @click.option('--force / --noforce', 'force', is_flag=True,
               help='Force to delete any resource at your own cost.')
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="abbr for vcs")
+@click.command(help="vcs(Virtual Compute Service)")
 def v(res_property, name , ids_or_names, force):
     if res_property == "Keypair":
         if not isNone(name):
@@ -56,7 +56,7 @@ def v(res_property, name , ids_or_names, force):
          for ele in ids_or_names:
               del_keypair(ele, force)
 
-@click.command(help="Abbreviation for Cloud Object Storage")
+@click.command(help="cos(Cloud Object Service)")
 def o():
     if not name:
         print('please enter bucket_name')
@@ -65,7 +65,7 @@ def o():
         del_bucket(name, r)
 
 
-@click.command(help="Abbreviation for Container")
+@click.command(help="ccs(Container Compute Service)")
 @click.argument('ids_or_names', nargs=-1)
 def c(ids_or_names):
 
