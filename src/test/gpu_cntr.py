@@ -12,7 +12,7 @@ def TWCC_LOGO():
     )
 TWCC_LOGO() ## here is logo
 import re
-from twcc.util import pp, table_layout, SpinCursor
+from twcc.util import pp, table_layout, SpinCursor, isNone
 from twcc.services.solutions import solutions
 from twcc.services.base import acls, users, image_commit
 from twcc.services.projects import projects
@@ -33,17 +33,23 @@ def list_projects():
 
 
 @click.command()
-def list_all_img():
+@click.option('-sol', '--solution-name','solution_name', default=None,
+        help="Show images under TWCC solutions, ie. 'Custom Image' ")
+def list_all_img(solution_name):
     print("NOTE: This operation will take 1~2 mins.")
     a = solutions()
-    cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set]
+    if isNone(solution_name):
+        cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set]
+    else:
+        cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set and cntr['name'].lower()==solution_name.lower()]
+
     sol_list = sites.getSolList(name_only=True)
     base_site = sites(debug=False)
     output = []
     for (sol_name, sol_id) in cntrs:
         output.append( {"sol_name":sol_name,
             "sol_id":sol_id,
-            "images":base_site.getAvblImg(sol_id, sol_name)} )
+            "images":list(set(base_site.getAvblImg(sol_id, sol_name)))} )
 
     table_layout("img", output, ['sol_name', 'sol_id', 'images'])
 
@@ -72,7 +78,6 @@ def doSiteReady(site_id):
 @click.option('-wait', 'isWait', default = True, type = bool,  help = "Need to wait for cntr")
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
     def_header = sites.getGpuDefaultHeader(gpu)
-
     a = solutions()
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in block_set and cntr['name']==sol_name])
     if len(cntrs)>0:
@@ -91,6 +96,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
             raise ValueError("Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
     res = b.create(cntr_name, sol_id, def_header)
+
     if 'id' not in res.keys():
         if 'message' in res:
             raise ValueError("Can't find id, please check error message : {}".format(res['message']))
@@ -106,14 +112,16 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 
 def list_all_solutions():
     a = solutions()
-    cntrs = a.list()
+    sols = a.list()
     col_name = ['id','name', 'create_time']
-    table_layout("all avalible solutions", cntrs, caption_row=col_name)
+    table_layout("all avalible solutions", sols, caption_row=col_name)
+    return sols
 
 @click.command()
 def list_sol():
-    list_all_solutions()
-    print(sites.getSolList(mtype='list', name_only=True))
+    #sols = list_all_solutions()
+    avbl_sols = sites.getSolList(mtype='list', name_only=True)
+    print(avbl_sols)
 
 def del_all():
     a = sites()

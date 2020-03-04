@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from twcc.services.generic import GenericService
+from twcc.services.solutions import solutions
 from twcc.services.base import projects
 from twcc.util import pp, isNone, table_layout
 
@@ -32,7 +33,13 @@ class sites(GenericService):
            ('1m', '1 GPU + 04 cores + 060GB memory + 030GB share memory'),
            ('2m', '2 GPU + 08 cores + 120GB memory + 060GB share memory'),
            ('4m', '4 GPU + 16 cores + 240GB memory + 120GB share memory'),
-           ('8m', '8 GPU + 32 cores + 480GB memory + 240GB share memory')]
+           ('8m', '8 GPU + 32 cores + 480GB memory + 240GB share memory'),
+           ('1p', '1 GPU + 9 cores + 042GB memory'),
+           ('2p', '2 GPU + 18 cores + 084GB memory'),
+           ('4p', '4 GPU + 36 cores + 168GB memory'),
+           ('1pm', '1 GPU + 9 cores + 028GB memory + 014GB share memory'),
+           ('2pm', '2 GPU + 18 cores + 056GB memory + 028GB share memory'),
+           ('4pm', '4 GPU + 36 cores + 112GB memory + 056GB share memory')]
       return dict(gpu_list)
 
     @staticmethod
@@ -49,6 +56,12 @@ class sites(GenericService):
           (42, "Theano"),
           (49, "Torch"),
           (52, "DIGITS") ]
+
+        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image'])
+        sols = solutions().list()
+        for ele in sols:
+            if ele['name'] in ext_cntr_sol:
+                sol_list.append((ele['id'], ele['name']))
 
         if reverse:
             sol_list = [ (y, x) for (x, y) in sol_list]
