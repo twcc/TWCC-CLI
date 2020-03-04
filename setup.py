@@ -37,6 +37,7 @@ def load_requirements(fname):
     return [str(ir.req) for ir in reqs]
 
 reqs = [
+        'netaddr',
         'boto3==1.11.17',
         'botocore==1.14.17',
         'certifi==2019.11.28',
@@ -63,7 +64,7 @@ reqs = [
 
 setup(
     name='twccli',
-    version='0.2',
+    version='0.5',
     py_modules=['twccli'],
     packages=find_packages(),
     install_requires= reqs,
@@ -71,7 +72,7 @@ setup(
     license="Apache License 2.0",
     entry_points='''
         [console_scripts]
-        twccli=twccli.examples.twccli:cli
+        twccli=twccli.twccli:cli
     ''',
     package_data={
         "twccli": ["yaml/*yaml"],

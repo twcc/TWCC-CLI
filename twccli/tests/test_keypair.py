@@ -2,7 +2,7 @@
 from click.testing import CliRunner
 from twcc import _TWCC_SESSION_, Session2
 import click
-from examples.twccli import cli
+from twccli import cli
 import pytest
 import uuid
 

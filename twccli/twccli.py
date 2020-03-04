@@ -3,6 +3,7 @@ import os
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 
+
 class MyCLI(click.MultiCommand):
     def list_commands(self, ctx):
         rv = []
@@ -20,9 +21,10 @@ class MyCLI(click.MultiCommand):
             eval(code, ns, ns)
         return ns['cli']
 
-cli = MyCLI(help='Welcome to TWCC, Taiwan Compute Cloud. '
-        'Thanks For Using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
-        'You succeed, We Succeed!!')
+
+cli = MyCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
+            'Thanks for using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
+            'You succeed, We Succeed!!')
 
 if __name__ == '__main__':
     cli()

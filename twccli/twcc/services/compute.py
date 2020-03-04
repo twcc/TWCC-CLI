@@ -2,6 +2,7 @@
 from __future__ import print_function
 from twcc.session import Session2
 from twcc.services.generic import GpuService, CpuService
+from twcc.services.solutions import solutions
 from twcc.services.base import projects
 from twcc.util import pp, isNone, table_layout, isDebug
 
@@ -34,40 +35,53 @@ class GpuSite(GpuService):
             Return Gpu set
         '''
         # @todo, python 3 is not good with dict key object
-        gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'), # twcc test only
-                    (1, '1 GPU + 04 cores + 090GB memory'),
-                    (2, '2 GPU + 08 cores + 180GB memory'),
-                    (4, '4 GPU + 16 cores + 360GB memory'),
-                    (8, '8 GPU + 32 cores + 720GB memory')]
-        if mtype == 'list':
-            return gpu_list
-        elif mtype == 'dict':
-            return dict(gpu_list)
+        gpu_list = [('0', '0 GPU + 01 cores + 008GB memory'), # twcc test only
+                    ('1', '1 GPU + 04 cores + 090GB memory'),
+                    ('2', '2 GPU + 08 cores + 180GB memory'),
+                    ('4', '4 GPU + 16 cores + 360GB memory'),
+                    ('8', '8 GPU + 32 cores + 720GB memory'),
+                    ('1m', '1 GPU + 04 cores + 060GB memory + 030GB share memory'),
+                    ('2m', '2 GPU + 08 cores + 120GB memory + 060GB share memory'),
+                    ('4m', '4 GPU + 16 cores + 240GB memory + 120GB share memory'),
+                    ('8m', '8 GPU + 32 cores + 480GB memory + 240GB share memory'),
+                    ('1p', '1 GPU + 9 cores + 042GB memory'),
+                    ('2p', '2 GPU + 18 cores + 084GB memory'),
+                    ('4p', '4 GPU + 36 cores + 168GB memory'),
+                    ('1pm', '1 GPU + 9 cores + 028GB memory + 014GB share memory'),
+                    ('2pm', '2 GPU + 18 cores + 056GB memory + 028GB share memory'),
+                    ('4pm', '4 GPU + 36 cores + 112GB memory + 056GB share memory')]
+        return dict(gpu_list)
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
-        sol_list = [(4, "TensorFlow"),
-                    (9, "Caffe2"),
-                    (10, "Caffe"),
-                    (13, "CNTK"),
-                    (16, "CUDA"),
-                    (19, "MXNet"),
-                    (24, "PyTorch"),
-                    # (29, "TensorRT"), # not avalible for now
-                    # (35, "TensorRT_Server"), # not avalible for now
-                    (42, "Theano"),
-                    (49, "Torch"),
-                    (52, "DIGITS")]
+        sol_list = [ (4, "TensorFlow"),
+          (9, "Caffe2"),
+          (10, "Caffe"),
+          (13, "CNTK"),
+          (16, "CUDA"),
+          (19, "MXNet"),
+          (24, "PyTorch"),
+          #(29, "TensorRT"), # not avalible for now
+          #(35, "TensorRT_Server"), # not avalible for now
+          (42, "Theano"),
+          (49, "Torch"),
+          (52, "DIGITS") ]
+
+        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image'])
+        sols = solutions().list()
+        for ele in sols:
+            if ele['name'] in ext_cntr_sol:
+                sol_list.append((ele['id'], ele['name']))
 
         if reverse:
-            sol_list = [(y, x) for (x, y) in sol_list]
+            sol_list = [ (y, x) for (x, y) in sol_list]
 
-        if name_only and mtype == 'list':
-            sol_list = [y for (x, y) in sol_list]
+        if name_only and mtype=='list':
+            sol_list = [ y for (x, y) in sol_list]
 
-        if mtype == 'list':
+        if mtype=='list':
             return sol_list
-        elif mtype == 'dict' and not name_only:
+        elif mtype=='dict' and not name_only:
             return dict(sol_list)
 
     def getCommitList(self, mtype='list'):
@@ -192,7 +206,7 @@ class GpuSite(GpuService):
         table_info = ans['site_extra_prop']
         self._cache_sol_[sol_id] = table_info
 
-    def getConnInfo(self, site_id):
+    def getConnInfo(self, site_id, ssh_only=False):
         info_gen = self.queryById(site_id)
 
         info_detail = self.getDetail(site_id)
@@ -200,13 +214,15 @@ class GpuSite(GpuService):
         usr_name = Session2._whoami()['username']
 
         info_port = [x for x in info_detail['Service'][0]['ports']]
-        print (info_port)
-        table_layout("", info_port)
-        info_port = [x['port'] for x in info_detail['Service']
-                     [0]['ports'] if x['target_port'] == 22][0]
-        info_pub_ip = info_detail['Service'][0]['public_ip'][0]
+        if not ssh_only:
+            return info_port;
+        else:
+            table_layout("", info_port)
+            info_port = [x['port'] for x in info_detail['Service']
+                        [0]['ports'] if x['target_port'] == 22][0]
+            info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
-        return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
+            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
