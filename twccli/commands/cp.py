@@ -78,7 +78,7 @@ def cli():
 @click.option('-k', '--key', 'key',
                help='The name of the key to upload to.')
 @click.option('-r', 'r', is_flag=True, help='Recursively copy entire directories.')
-def o(op, source, directory, key, r):
+def cos(op, source, directory, key, r):
     if op == 'upload':
         print('enter upload')
         upload(source, directory, key, r=r)
@@ -88,7 +88,7 @@ def o(op, source, directory, key, r):
 
 
 
-cli.add_command(o)
+cli.add_command(cos)
 
 
 

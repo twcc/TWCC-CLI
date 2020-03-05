@@ -31,7 +31,7 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk c -name {} -gpu {} -sol {} -img {} -wait".format(self.cntr_name, self.gpu_num
+        cmd_list = u"mk ccs -name {} -gpu {} -sol {} -img {} -wait".format(self.cntr_name, self.gpu_num
         , self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
@@ -41,12 +41,12 @@ class TestCntrLifecyc:
         match = re.search('SiteId: (?P<site_id>[0-9]*)\.', self.create_out)
         self.site_id = match.group('site_id')
         assert type(int(self.site_id)) == type(1)
-        cmd_list = "ls c {}".format(self.site_id)
+        cmd_list = "ls ccs {}".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
     def _listDetail(self, isatt=True):
-        cmd_list = "ls c --port {}".format(self.site_id)
+        cmd_list = "ls ccs --port {}".format(self.site_id)
         out = self.__run(cmd_list.split(" "))
         out = out.split("\n")
         print(out)
@@ -67,17 +67,17 @@ class TestCntrLifecyc:
 
 
     def _exposedPort(self):
-        cmd_list = "net c -s {} -att -p 3000".format(self.site_id)
+        cmd_list = "net ccs -s {} -exp -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _unexposedPort(self):
-        cmd_list = "net c -s {} -unatt -p 3000".format(self.site_id)
+        cmd_list = "net ccs -s {} -unexp -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _delete(self):
-        cmd_list = "rm c {}".format(self.site_id)
+        cmd_list = "rm ccs {}".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 

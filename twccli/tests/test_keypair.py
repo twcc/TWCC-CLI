@@ -25,17 +25,17 @@ class TestKeypairLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk v -key --name {}".format(self.key_name)
+        cmd_list = u"mk vcs -key --name {}".format(self.key_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
     def _list(self):
-        cmd_list = "ls v -key {}".format(self.key_name)
+        cmd_list = "ls vcs -key {}".format(self.key_name)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
     def _delete(self):
-        cmd_list = "rm v -key --force {}".format(self.key_name)
+        cmd_list = "rm vcs -key --force {}".format(self.key_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 

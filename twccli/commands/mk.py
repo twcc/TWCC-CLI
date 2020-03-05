@@ -76,7 +76,7 @@ def cli():
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.argument('ids_or_names', nargs=-1)
-def v(res_type_opt, name, ids_or_names):
+def vcs(res_type_opt, name, ids_or_names):
 
     if name=='twccli' and not len(ids_or_names)==0:
         name = ids_or_names[0]
@@ -96,7 +96,7 @@ def v(res_type_opt, name, ids_or_names):
 @click.option('--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.command(help="cos(Cloud Object Storage)")
-def o(name):
+def cos(name):
     create_bucket(name)
 
 # end object ===============================================================
@@ -112,12 +112,12 @@ def o(name):
               help="Enter image name. Please check through `twccli ls t cos -img`")
 @click.option('-wait/-nowait', '--wait-ready/--no-wait-ready', 'wait', is_flag=True, default=False,
  help='Wait until resources are provisioned')
-def c(name, gpu, sol, img_name, wait):
+def ccs(name, gpu, sol, img_name, wait):
     create_cntr(name, gpu, sol, img_name, wait)
 
-cli.add_command(v)
-cli.add_command(o)
-cli.add_command(c)
+cli.add_command(vcs)
+cli.add_command(cos)
+cli.add_command(ccs)
 
 
 

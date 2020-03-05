@@ -131,28 +131,46 @@ def cos(name):
 # end object ==================================================
 @click.command(help='Operations for CCS (Container Computer Service)')
 @click.option('-img', '--image','res_property', flag_value='image',
-             help = 'View all image files. Provid solution name for filtering.')
+            help = 'View all image files. Provid solution name for filtering.')
+@click.option('-net', '--network', 'res_property', flag_value='Network',
+            help="List existing network in TWCC VCS.")
 @click.option('-clone', '--show-clone-status', 'res_property', flag_value='commit',
-             help='List the submitted CCS clone requests')
+            help='List the submitted CCS clone requests')
 @click.option('-table / -notable', '--table-view / --no-table-view', 'is_table', 
             is_flag=True, default=True, show_default=True,
             help="Show information in Table view.")
-@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json', 
-            is_flag=True, default=False, show_default=True,
-            help="Show information in JSON view, conflict with -table. @todo")
 @click.option('-sol', '--solution-name','res_property', default=None, flag_value='solution',
-        help="Show TWCC solutions for CCS.")
+            help="Show TWCC solutions for CCS.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
             help="List all the containers in the project. (Tenant Administrators only)")
 @click.option('-p', '--port', 'show_ports', is_flag=True,
             help='Show port information.')
-@click.argument('ids_or_names', nargs=-1)
-def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
+@click.option('--table / --notable', 'isTable', is_flag=True, default=True,
+            help="Show information in table view.", show_default=True)
+@click.option('--json / --nojson', 'isJson', is_flag=True, default=False,
+            help="Show information in JSON view.", show_default=True)
+@click.argument('site_ids_or_names', nargs=-1)
+def ccs(res_property, site_ids_or_names, is_table, isTable, isJson, is_all, show_ports):
     if res_property == 'image':
-        list_all_img(ids_or_names)
+        list_all_img(site_ids_or_names)
 
     if res_property == 'commit':
         list_commit()
+
+    if res_property == 'Network':
+        net = Networks()
+        if len(site_ids_or_names)>0:
+            ans = [ net.queryById(x) for x in site_ids_or_names]
+            cols = [ "id", "name", "cidr", "create_time", "gateway", "nameservers", "status", "user"]
+        else:
+            ans = net.list()
+            cols = [ "id", "name", "cidr", "create_time", "status"]
+
+        if isJson:
+            print(json.dumps(ans, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')))
+        elif isTable:
+            table_layout("VCS Networks", ans, cols, isPrint=True)
+        return True
 
     if res_property == "solution":
         avbl_sols = Sites().getSolList(mtype='list', name_only=True)
@@ -160,11 +178,11 @@ def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
 
     if not res_property:
         if show_ports:
-            if len(ids_or_names)>0:
-                for ele in ids_or_names:
+            if len(site_ids_or_names)>0:
+                for ele in site_ids_or_names:
                     list_port(ele)
         else:
-            list_cntr(ids_or_names, is_table, is_all)
+            list_cntr(site_ids_or_names, is_table, is_all)
 
 # end cntr ===================================================
 

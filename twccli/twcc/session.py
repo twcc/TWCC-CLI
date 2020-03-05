@@ -5,7 +5,6 @@ import re
 import yaml
 import shutil
 from collections import defaultdict
-# from twcc import _TWCC_SESSION_
 from .util import *
 # print(_TWCC_SESSION_)
 
@@ -53,7 +52,7 @@ class Session2(object):
                  twcc_file_session=None,
                  twcc_project_code=None):
         """
-        Session2 controls all TWCC API required information, 
+        Session2 controls all TWCC API required information,
         incl. api_key, s3 keys, project code, parameters in user environment.
 
         Keyword Arguments:
@@ -147,8 +146,6 @@ class Session2(object):
         return Session2._isValidSession()
 
     def loadSession(self):
-        # if isNone(_TWCC_SESSION_) and type(_TWCC_SESSION_) == type(Session2) and _TWCC_SESSION_.isInitialized:
-        #     return _TWCC_SESSION_
         if self.isValidSession():
             self.sessConf = yaml.load(
                 open(self.twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
@@ -158,6 +155,7 @@ class Session2(object):
 
             self.twcc_username = self.sessConf["_default"]["twcc_username"]
             self.twcc_api_key = self.sessConf["_default"]["twcc_api_key"]
+
 
             self.twcc_s3_access_key = self.sessConf["_default"]["twcc_s3_access_key"]
             self.twcc_s3_secret_key = self.sessConf["_default"]["twcc_s3_secret_key"]
