@@ -120,13 +120,12 @@ def cli():
               help="Show information in JSON view, conflict with -table. ")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the containers in the project. (Tenant Administrators only)")
-@click.option('--n', '--name', 'name', default=None, type=str,
+@click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resources.")
 @click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view.")
 def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
-
     if isNone(res_property):
         vcs = VcsSite()
 
@@ -163,7 +162,7 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
         return True
 
     if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, isJson, isTable)
+        list_secg(name, site_ids_or_names, is_json, is_table)
         return True
 
     if res_property == 'Keypair':
@@ -205,7 +204,6 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
 @click.option('-name', 'name', default=None, type=str,
               help="Enter name for your resource name")
 def cos(name):
-
     if isNone(name):
         list_buckets()
     else:
