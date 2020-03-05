@@ -19,13 +19,13 @@ class GpuSite(GpuService):
 
         self._func_ = "sites"
         self._csite_ = Session2._getClusterName("CNTR")
-        print(">"*10, "GpuSite", "<"*10, self._api_key_ )
+        print(">"*10, "GpuSite", "<"*10, self._api_key_)
         self._cache_sol_ = {}
 
     @staticmethod
     def getGpuList(mtype='list'):
         # @todo, python 3 is not good with dict key object
-        gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'), # twcc test only
+        gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'),  # twcc test only
                     (1, '1 GPU + 04 cores + 090GB memory'),
                     (2, '2 GPU + 08 cores + 180GB memory'),
                     (4, '4 GPU + 16 cores + 360GB memory'),
@@ -236,7 +236,7 @@ class VcsSite(CpuService):
 
         self._func_ = "sites"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_ )
+        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, isAll=False):
         if isAll:
@@ -271,54 +271,53 @@ class VcsSite(CpuService):
 
     def getFlavors(self):
         flv = Flavors(self._csite_)
-        return dict([ (x['id'], x) for x in flv.list()])
+        return dict([(x['id'], x) for x in flv.list()])
 
     def getExtraProp(self, sol_id):
         extra_prop = self._do_list_solution(sol_id)
 
-
         # processing flavors
         extra_flv = set(extra_prop['flavor'])
-        filter_flv = lambda x: True if x in extra_flv else False
+        def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
-        tflvs = dict([ (flvs[x]['id'], flvs[x]) for x in flvs if filter_flv(flvs[x]['name']) ])
-        name2id = dict([ (tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
+        tflvs = dict([(flvs[x]['id'], flvs[x])
+                      for x in flvs if filter_flv(flvs[x]['name'])])
+        name2id = dict([(tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
         tflvs_keys = tflvs.keys()
 
         products = self.getIsrvFlavors()
-        wanted_pro = dict([ (x, products[x]['desc']) for x in products if x in tflvs_keys])
+        wanted_pro = dict([(x, products[x]['desc'])
+                           for x in products if x in tflvs_keys])
 
-        # target: name to fid, fid to isrv name, flavor raw
-        #pp(name2id=name2id)
-        #pp(pro=wanted_pro)
-        #pp(extra_flv=extra_flv)
-
-        name2isrv = dict([ (wanted_pro[name2id[x]], x) for x in name2id])
+        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
         res = {}
         for ele in extra_prop:
             if ele == 'flavor':
                 res["x-extra-property-{}".format(ele)] = name2isrv
             elif ele == 'image':
-                res["x-extra-property-{}".format(ele)] = [ x.split(")")[1] for x in extra_prop[ele] if re.search('public', x) ]
+                res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
+                                                          for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
-                res["x-extra-property-{}".format(ele)] = { "hdd": "block_storage-hdd",
-                        "ssd": "block_storage-ssd", "local": "local_disk"}
+                res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
+                                                          "ssd": "block_storage-ssd", "local": "local_disk"}
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
         return res
 
-
-    def getIsrvFlavors(self, name_or_id= "flavor_id"):
+    def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
-        filter_flavor_id = lambda x: True if "flavor_id" in json.loads(x['other_content']) else False
-        get_flavor_id = lambda x: int(json.loads(x['other_content'])['flavor_id'])
+        def filter_flavor_id(x): return True if "flavor_id" in json.loads(
+            x['other_content']) else False
+        def get_flavor_id(x): return int(
+            json.loads(x['other_content'])['flavor_id'])
 
-        fid_desc = dict([ (get_flavor_id(x), x) for x in isrv.getProducts() if filter_flavor_id(x) ])
+        fid_desc = dict([(get_flavor_id(x), x)
+                         for x in isrv.getProducts() if filter_flavor_id(x)])
         if name_or_id == "flavor_id":
             return fid_desc
         else:
-            return dict([ (fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
     def create(self, name, sol_id, extra_prop):
 
@@ -329,6 +328,7 @@ class VcsSite(CpuService):
                          "project": self._project_id,
                          "solution": sol_id}
         return self._do_api()
+
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
@@ -340,75 +340,81 @@ class VcsSecurityGroup(CpuService):
 
         self._func_ = "security_groups"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_ )
+        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, server_id=None):
         if not isNone(server_id):
             self.ext_get = {'project': self._project_id,
-                    'server':server_id}
+                            'server': server_id}
             return self._do_api()
 
     def addSecurityGroup(self, secg_id, port_num,
-            cidr, protocol, direction):
+                         cidr, protocol, direction):
 
         self.http_verb = "patch"
-        self.url_dic = {"security_groups":secg_id}
+        self.url_dic = {"security_groups": secg_id}
         self.data_dic = {"project": self._project_id,
-                "direction": direction,
-                "protocol": protocol,
-                "remote_ip_prefix": cidr,
-                "port_range_max": port_num,
-                "port_range_min": port_num}
+                         "direction": direction,
+                         "protocol": protocol,
+                         "remote_ip_prefix": cidr,
+                         "port_range_max": port_num,
+                         "port_range_min": port_num}
         self._do_api()
+
     def deleteRule(self, rule_id):
         self.http_verb = "delete"
         self.ext_get = {'project': self._project_id}
         self._func_ = "security_group_rules"
-        self.url_dic = {self._func_:rule_id}
+        self.url_dic = {self._func_: rule_id}
         self._do_api()
 
         # processing flavors
         extra_flv = set(extra_prop['flavor'])
-        filter_flv = lambda x: True if x in extra_flv else False
+        def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
-        tflvs = dict([ (flvs[x]['id'], flvs[x]) for x in flvs if filter_flv(flvs[x]['name']) ])
-        name2id = dict([ (tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
+        tflvs = dict([(flvs[x]['id'], flvs[x])
+                      for x in flvs if filter_flv(flvs[x]['name'])])
+        name2id = dict([(tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
         tflvs_keys = tflvs.keys()
 
         products = self.getIsrvFlavors()
-        wanted_pro = dict([ (x, products[x]['desc']) for x in products if x in tflvs_keys])
+        wanted_pro = dict([(x, products[x]['desc'])
+                           for x in products if x in tflvs_keys])
 
         # target: name to fid, fid to isrv name, flavor raw
-        #pp(name2id=name2id)
-        #pp(pro=wanted_pro)
-        #pp(extra_flv=extra_flv)
+        # pp(name2id=name2id)
+        # pp(pro=wanted_pro)
+        # pp(extra_flv=extra_flv)
 
-        name2isrv = dict([ (wanted_pro[name2id[x]], x) for x in name2id])
+        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
         res = {}
         for ele in extra_prop:
             if ele == 'flavor':
                 res["x-extra-property-{}".format(ele)] = name2isrv
             elif ele == 'image':
-                res["x-extra-property-{}".format(ele)] = [ x.split(")")[1] for x in extra_prop[ele] if re.search('public', x) ]
+                res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
+                                                          for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
-                res["x-extra-property-{}".format(ele)] = { "hdd": "block_storage-hdd",
-                        "ssd": "block_storage-ssd", "local": "local_disk"}
+                res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
+                                                          "ssd": "block_storage-ssd", "local": "local_disk"}
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
         return res
 
-
-    def getIsrvFlavors(self, name_or_id= "flavor_id"):
+    def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
-        filter_flavor_id = lambda x: True if "flavor_id" in json.loads(x['other_content']) else False
-        get_flavor_id = lambda x: int(json.loads(x['other_content'])['flavor_id'])
+        def filter_flavor_id(x): return True if "flavor_id" in json.loads(
+            x['other_content']) else False
+        def get_flavor_id(x): return int(
+            json.loads(x['other_content'])['flavor_id'])
 
-        fid_desc = dict([ (get_flavor_id(x), x) for x in isrv.getProducts() if filter_flavor_id(x) ])
+        fid_desc = dict([(get_flavor_id(x), x)
+                         for x in isrv.getProducts() if filter_flavor_id(x)])
         if name_or_id == "flavor_id":
             return fid_desc
         else:
-            return dict([ (fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
     def create(self, name, sol_id, extra_prop):
 
@@ -419,6 +425,7 @@ class VcsSecurityGroup(CpuService):
                          "project": self._project_id,
                          "solution": sol_id}
         return self._do_api()
+
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
@@ -430,32 +437,34 @@ class VcsSecurityGroup(CpuService):
 
         self._func_ = "security_groups"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_ )
+        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, server_id=None):
         if not isNone(server_id):
             self.ext_get = {'project': self._project_id,
-                    'server':server_id}
+                            'server': server_id}
             return self._do_api()
 
     def addSecurityGroup(self, secg_id, port_num,
-            cidr, protocol, direction):
+                         cidr, protocol, direction):
 
         self.http_verb = "patch"
-        self.url_dic = {"security_groups":secg_id}
+        self.url_dic = {"security_groups": secg_id}
         self.data_dic = {"project": self._project_id,
-                "direction": direction,
-                "protocol": protocol,
-                "remote_ip_prefix": cidr,
-                "port_range_max": port_num,
-                "port_range_min": port_num}
+                         "direction": direction,
+                         "protocol": protocol,
+                         "remote_ip_prefix": cidr,
+                         "port_range_max": port_num,
+                         "port_range_min": port_num}
         self._do_api()
+
     def deleteRule(self, rule_id):
         self.http_verb = "delete"
         self.ext_get = {'project': self._project_id}
         self._func_ = "security_group_rules"
-        self.url_dic = {self._func_:rule_id}
+        self.url_dic = {self._func_: rule_id}
         self._do_api()
+
 
 def getServerId(site_id):
     vcs = VcsSite()

@@ -126,6 +126,25 @@ def cli():
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view.")
 def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
+
+    if isNone(res_property):
+        vcs = VcsSite()
+
+        if len(site_ids_or_names) > 0:
+            cols = ['id', 'name', 'public_ip', 'create_time', 'user', 'status']
+            ans = [vcs.queryById(x) for x in site_ids_or_names]
+        else:
+            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+            ans = vcs.list(is_all)
+
+        if is_json:
+            print(json.dumps(ans, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
+        elif is_table:
+            table_layout("VCS VMs", ans, cols, isPrint=True)
+
+        return True
+
     if res_property == 'Network':
         net = Networks()
         if len(site_ids_or_names) > 0:
@@ -141,6 +160,10 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
                              sort_keys=True, indent=4, separators=(',', ': ')))
         elif is_table:
             table_layout("VCS Networks", ans, cols, isPrint=True)
+        return True
+
+    if res_property == 'SecurityGroup':
+        list_secg(name, site_ids_or_names, isJson, isTable)
         return True
 
     if res_property == 'Keypair':
