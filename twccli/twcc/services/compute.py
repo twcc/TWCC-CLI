@@ -180,7 +180,7 @@ class GpuSite(GpuService):
         table_info = ans['site_extra_prop']
         self._cache_sol_[sol_id] = table_info
 
-    def getConnInfo(self, site_id):
+    def getConnInfo(self, site_id, ssh_info=False):
         info_gen = self.queryById(site_id)
 
         info_detail = self.getDetail(site_id)
@@ -188,13 +188,14 @@ class GpuSite(GpuService):
         usr_name = Session2._whoami()['username']
 
         info_port = [x for x in info_detail['Service'][0]['ports']]
-        print(info_port)
-        table_layout("", info_port)
-        info_port = [x['port'] for x in info_detail['Service']
-                     [0]['ports'] if x['target_port'] == 22][0]
-        info_pub_ip = info_detail['Service'][0]['public_ip'][0]
+        if not ssh_info:
+            return info_port
+        else:
+            info_port = [x['port'] for x in info_detail['Service']
+                        [0]['ports'] if x['target_port'] == 22][0]
+            info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
-        return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
+            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
     def isReady(self, site_id):
         site_info = self.queryById(site_id)

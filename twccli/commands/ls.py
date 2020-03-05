@@ -13,29 +13,10 @@ from twcc.services.network import Networks
 from twcc.services.base import acls, users, image_commit, Keypairs
 
 
-def list_secg(name, ids_or_names, isJson=False, isTable=True):
-    if not isNone(name):
-        ids_or_names += (name, )
-    if not len(ids_or_names) > 0:
-        raise ValueError("Need resource id for listing security group")
-
-    if len(ids_or_names) == 1:
-        secg_list = getSecGroupList(ids_or_names[0])
-        secg_id = secg_list['id']
-        secg_detail = secg_list['security_group_rules']
-        if isJson:
-            print(json.dumps(secg_detail, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
-        elif isTable:
-            table_layout("SecurityGroup for {}".format(ids_or_names[0]),
-                         secg_detail, isPrint=True)
-        return True
-
-
 def list_port(site_id):
     b = GpuSite()
     table_layout("Port info. for {}".format(site_id),
-                 b.getConnInfo(site_id), isPrint=True)  # todo
+                 b.getConnInfo(site_id, ssh_info=False), isPrint=True)  # todo
 
 
 def list_commit():
@@ -231,11 +212,7 @@ def cos(name):
         list_files(name)
 
 # end object ==================================================
-
-
 @click.command(help='Operations for CCS (Container Computer Service)')
-@click.option('-net', '--network', 'res_property', flag_value='Network',
-              help="List existing network in TWCC VCS.")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-clone', '--show-clone-status', 'res_property', flag_value='commit',
@@ -260,23 +237,6 @@ def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
     if res_property == 'commit':
         list_commit()
 
-    if res_property == 'Network':
-        net = Networks()
-        if len(site_ids_or_names) > 0:
-            ans = [net.queryById(x) for x in site_ids_or_names]
-            cols = ["id", "name", "cidr", "create_time",
-                    "gateway", "nameservers", "status", "user"]
-        else:
-            ans = net.list()
-            cols = ["id", "name", "cidr", "create_time", "status"]
-
-        if isJson:
-            print(json.dumps(ans, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
-        elif isTable:
-            table_layout("VCS Networks", ans, cols, isPrint=True)
-        return True
-
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
         print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
@@ -285,7 +245,6 @@ def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
         if show_ports:
             if len(site_ids_or_names) > 0:
                 for ele in site_ids_or_names:
-
                     list_port(ele)
             else:
                 raise ValueError("Need at least one resource id.")
