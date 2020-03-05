@@ -182,7 +182,7 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
         return True
 
     if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, isJson, isTable)
+        list_secg(name, site_ids_or_names, is_json, is_table)
         return True
 
     if res_property == 'Keypair':
