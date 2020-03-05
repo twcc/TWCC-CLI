@@ -366,3 +366,109 @@ class VcsSecurityGroup(CpuService):
         self.url_dic = {self._func_:rule_id}
         self._do_api()
 
+        # processing flavors
+        extra_flv = set(extra_prop['flavor'])
+        filter_flv = lambda x: True if x in extra_flv else False
+
+        flvs = self.getFlavors()
+        tflvs = dict([ (flvs[x]['id'], flvs[x]) for x in flvs if filter_flv(flvs[x]['name']) ])
+        name2id = dict([ (tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
+        tflvs_keys = tflvs.keys()
+
+        products = self.getIsrvFlavors()
+        wanted_pro = dict([ (x, products[x]['desc']) for x in products if x in tflvs_keys])
+
+        # target: name to fid, fid to isrv name, flavor raw
+        #pp(name2id=name2id)
+        #pp(pro=wanted_pro)
+        #pp(extra_flv=extra_flv)
+
+        name2isrv = dict([ (wanted_pro[name2id[x]], x) for x in name2id])
+        res = {}
+        for ele in extra_prop:
+            if ele == 'flavor':
+                res["x-extra-property-{}".format(ele)] = name2isrv
+            elif ele == 'image':
+                res["x-extra-property-{}".format(ele)] = [ x.split(")")[1] for x in extra_prop[ele] if re.search('public', x) ]
+            elif ele == 'system-volume-type':
+                res["x-extra-property-{}".format(ele)] = { "hdd": "block_storage-hdd",
+                        "ssd": "block_storage-ssd", "local": "local_disk"}
+            else:
+                res["x-extra-property-{}".format(ele)] = extra_prop[ele]
+        return res
+
+
+    def getIsrvFlavors(self, name_or_id= "flavor_id"):
+        isrv = iservice()
+        filter_flavor_id = lambda x: True if "flavor_id" in json.loads(x['other_content']) else False
+        get_flavor_id = lambda x: int(json.loads(x['other_content'])['flavor_id'])
+
+        fid_desc = dict([ (get_flavor_id(x), x) for x in isrv.getProducts() if filter_flavor_id(x) ])
+        if name_or_id == "flavor_id":
+            return fid_desc
+        else:
+            return dict([ (fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+
+    def create(self, name, sol_id, extra_prop):
+
+        self.twcc.header_extra = extra_prop
+        self.http_verb = 'post'
+        self.data_dic = {"name": name,
+                         "desc": 'TWCC-Cli created VCS',
+                         "project": self._project_id,
+                         "solution": sol_id}
+        return self._do_api()
+    def isReady(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "Ready"
+
+
+class VcsSecurityGroup(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+
+        self._func_ = "security_groups"
+        self._csite_ = Session2._getClusterName("VCS")
+        print(">"*10, "CpuSite", "<"*10, self._api_key_ )
+
+    def list(self, server_id=None):
+        if not isNone(server_id):
+            self.ext_get = {'project': self._project_id,
+                    'server':server_id}
+            return self._do_api()
+
+    def addSecurityGroup(self, secg_id, port_num,
+            cidr, protocol, direction):
+
+        self.http_verb = "patch"
+        self.url_dic = {"security_groups":secg_id}
+        self.data_dic = {"project": self._project_id,
+                "direction": direction,
+                "protocol": protocol,
+                "remote_ip_prefix": cidr,
+                "port_range_max": port_num,
+                "port_range_min": port_num}
+        self._do_api()
+    def deleteRule(self, rule_id):
+        self.http_verb = "delete"
+        self.ext_get = {'project': self._project_id}
+        self._func_ = "security_group_rules"
+        self.url_dic = {self._func_:rule_id}
+        self._do_api()
+
+def getServerId(site_id):
+    vcs = VcsSite()
+    sites = vcs.queryById(site_id)
+    if not 'id' in sites:
+        raise ValueError("Site ID: {} is not found.".format(site_id))
+    if len(sites['servers']) == 1:
+        server_id = sites['servers'][0]
+        return server_id
+
+
+def getSecGroupList(site_id):
+    server_id = getServerId(site_id)
+    secg = VcsSecurityGroup()
+    secg_list = secg.list(server_id=server_id)
+    if len(secg_list) > 0:
+        return secg_list[0]
