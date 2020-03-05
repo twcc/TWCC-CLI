@@ -41,8 +41,8 @@ def ccs(siteId, port, isAttach):
               help='Applying security group directions.')
 @click.argument('site_ids_or_names', nargs=-1)
 def vcs(siteId, port, cidr, protocol, isIngress, site_ids_or_names):
-    if not isNone(siteId):
-        site_ids_or_names += (siteId,)
+    #if not isNone(siteId):
+        #site_ids_or_names += (siteId,)
 
     if len(site_ids_or_names) == 0:
         raise ValueError("Site ID is required.")
