@@ -3,7 +3,8 @@ from __future__ import print_function
 import click
 import json
 from twcc.util import pp, table_layout, SpinCursor, isNone
-from twcc.services.compute import GpuSite as Sites
+from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
+from twcc.services.compute import getServerId, getSecGroupList
 from twcc import GupSiteBlockSet
 from twcc.services.solutions import solutions
 from twcc.services.base import acls, users, image_commit
@@ -12,8 +13,10 @@ from twcc.services.network import Networks
 from twcc.services.base import acls, users, image_commit, Keypairs
 
 def list_port(site_id):
-    b = Sites()
-    table_layout("Port info. for {}".format(site_id), b.getConnInfo(site_id), isPrint=True) # todo
+    b = GpuSite()
+    table_layout("Port info. for {}".format(site_id),
+                 b.getConnInfo(site_id), isPrint=True)  # todo
+
 
 def list_commit():
     c = image_commit()
@@ -23,15 +26,17 @@ def list_commit():
 def list_all_img(solution_name):
     print("Note : this operation take 1-2 mins")
     a = solutions()
-    if isNone(solution_name) or len(solution_name)==0:
-        cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in GupSiteBlockSet]
+    if isNone(solution_name) or len(solution_name) == 0:
+        cntrs = [(cntr['name'], cntr['id'])
+                 for cntr in a.list() if not cntr['id'] in GupSiteBlockSet]
     else:
-        if len(solution_name)==1:
+        if len(solution_name) == 1:
             solution_name = solution_name[0]
-            cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower()==solution_name.lower()]
-        
-    sol_list = Sites.getSolList(name_only=True)
-    base_site = Sites(debug=False)
+            cntrs = [(cntr['name'], cntr['id']) for cntr in a.list() if not cntr['id']
+                     in GupSiteBlockSet and cntr['name'].lower() == solution_name.lower()]
+
+    sol_list = GpuSite.getSolList(name_only=True)
+    base_site = GpuSite(debug=False)
     output = []
     for (sol_name, sol_id) in cntrs:
         output.append({"sol_name": sol_name,
@@ -40,25 +45,27 @@ def list_all_img(solution_name):
 
     table_layout("img", output, ['sol_name', 'sol_id', 'images'], isPrint=True)
 
+
 def list_cntr(site_ids_or_names, is_table, isAll):
     col_name = ['id', 'name', 'create_time', 'status']
-    a = Sites()
+    a = GpuSite()
 
     if len(site_ids_or_names) == 0:
-        my_sites = a.list(isAll=isAll)
+        my_GpuSite = a.list(isAll=isAll)
     else:
-        my_sites = []
+        my_GpuSite = []
         for ele in site_ids_or_names:
             # site_id = int(ele)
-            my_sites.append(a.queryById(ele))
-    if len(my_sites) > 0:
+            my_GpuSite.append(a.queryById(ele))
+    if len(my_GpuSite) > 0:
         if isAll:
             col_name.append('user')
 
         if is_table:
-            table_layout('sites', my_sites, caption_row=col_name, isPrint=True)
+            table_layout('GpuSite', my_GpuSite,
+                         caption_row=col_name, isPrint=True)
         else:
-            return my_sites
+            return my_GpuSite
 
 
 def list_buckets():
@@ -66,10 +73,30 @@ def list_buckets():
     buckets = s3.list_bucket()
     s3.test_table(buckets)
 
+
 def list_files(bucket_name):
     s3 = S3()
     files = s3.list_object(bucket_name)
     s3.test_table(files)
+
+
+def list_secg(name, ids_or_names, isJson=False, isTable=True):
+    if not isNone(name):
+        ids_or_names += (name, )
+    if not len(ids_or_names) > 0:
+        raise ValueError("Need resource id for listing security group")
+
+    if len(ids_or_names) == 1:
+        secg_list = getSecGroupList(ids_or_names[0])
+        secg_id = secg_list['id']
+        secg_detail = secg_list['security_group_rules']
+        if isJson:
+            print(json.dumps(secg_detail, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
+        elif isTable:
+            table_layout("SecurityGroup for {}".format(ids_or_names[0]),
+                         secg_detail, isPrint=True)
+        return True
 
 # end orginal function ====================================
 
@@ -78,49 +105,81 @@ def list_files(bucket_name):
 def cli():
     pass
 
+
 @click.command(help='Operations for VCS (Virtual Compute Service)')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
-                help="List your keypairs in TWCC VCS.")
+              help="List your keypairs in TWCC VCS.")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
-                help="List existing network in TWCC VCS.")
+              help="List existing network in TWCC VCS.")
+@click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
+              help="List existing security groups for VCS instance.")
 @click.argument('site_ids_or_names', nargs=-1)
-@click.option('--json / --nojson', 'isJson', is_flag=True, default=False,
-              help="Show information in JSON view.")
-@click.option('-table / -notable','--table-view / --no-table-view', 'is_table', is_flag=True, default=True,
-              help="Show information in table view.")
-def vcs(res_property, site_ids_or_names, isJson, is_table):
+@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
+              is_flag=True, default=False, show_default=True,
+              help="Show information in JSON view, conflict with -table. ")
+@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
+              help="List all the containers in the project. (Tenant Administrators only)")
+@click.option('--n', '--name', 'name', default=None, type=str,
+              help="Enter name for your resources.")
+@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view.")
+def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
     if res_property == 'Network':
         net = Networks()
-        if len(site_ids_or_names)>0:
-            ans = [ net.queryById(x) for x in site_ids_or_names]
-            cols = [ "id", "name", "cidr", "create_time", "gateway", "nameservers", "status", "user"]
+        if len(site_ids_or_names) > 0:
+            ans = [net.queryById(x) for x in site_ids_or_names]
+            cols = ["id", "name", "cidr", "create_time",
+                    "gateway", "nameservers", "status", "user"]
         else:
             ans = net.list()
-            cols = [ "id", "name", "cidr", "create_time", "status"]
+            cols = ["id", "name", "cidr", "create_time", "status"]
 
-        if isJson:
-             print(json.dumps(ans, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')))
+        if is_json:
+            print(json.dumps(ans, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
         elif is_table:
             table_layout("VCS Networks", ans, cols, isPrint=True)
         return True
 
     if res_property == 'Keypair':
         keyring = Keypairs()
-        if len(site_ids_or_names)>0:
-             ans = []
-             cols = ['name', 'fingerprint', 'create_time', 'user']
-             for ele in site_ids_or_names:
-                 ans.append(keyring.queryById(ele))
+        if len(site_ids_or_names) > 0:
+            ans = []
+            cols = ['name', 'fingerprint', 'create_time', 'user']
+            for ele in site_ids_or_names:
+                ans.append(keyring.queryById(ele))
         else:
-             cols = ['name', 'fingerprint']
-             ans = keyring.list()
+            cols = ['name', 'fingerprint']
+            ans = keyring.list()
 
         table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
+
+    if res_property == 'SecurityGroup':
+        list_secg(name, site_ids_or_names, is_json, is_table)
+        return True
+
+    if isNone(res_property):  # add for list vcs, @amber need to work on this
+        vcs = VcsSite()
+
+        if len(site_ids_or_names) > 0:
+            cols = ['id', 'name', 'public_ip', 'create_time', 'user', 'status']
+            ans = [vcs.queryById(x) for x in site_ids_or_names]
+        else:
+            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+            ans = vcs.list(is_all)
+
+        if is_json:
+            print(json.dumps(ans, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
+        elif is_table:
+            table_layout("VCS VMs", ans, cols, isPrint=True)
+
 
 # end vcs ==================================================
 @click.command(help='Operations for COS (Cloud Object Storage)')
 @click.option('-name', 'name', default=None, type=str,
-            help="Enter name for your resource name")
+              help="Enter name for your resource name")
 def cos(name):
 
     if isNone(name):
@@ -130,22 +189,22 @@ def cos(name):
 
 # end object ==================================================
 @click.command(help='Operations for CCS (Container Computer Service)')
-@click.option('-img', '--image','res_property', flag_value='image',
-             help = 'View all image files. Provid solution name for filtering.')
+@click.option('-img', '--image', 'res_property', flag_value='image',
+              help='View all image files. Provid solution name for filtering.')
 @click.option('-clone', '--show-clone-status', 'res_property', flag_value='commit',
-             help='List the submitted CCS clone requests')
-@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table', 
-            is_flag=True, default=True, show_default=True,
-            help="Show information in Table view.")
-@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json', 
-            is_flag=True, default=False, show_default=True,
-            help="Show information in JSON view, conflict with -table. @todo")
-@click.option('-sol', '--solution-name','res_property', default=None, flag_value='solution',
-        help="Show TWCC solutions for CCS.")
+              help='List the submitted CCS clone requests')
+@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view.")
+@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
+              is_flag=True, default=False, show_default=True,
+              help="Show information in JSON view, conflict with -table. @todo")
+@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
+              help="Show TWCC solutions for CCS.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
-            help="List all the containers in the project. (Tenant Administrators only)")
+              help="List all the containers in the project. (Tenant Administrators only)")
 @click.option('-p', '--port', 'show_ports', is_flag=True,
-            help='Show port information.')
+              help='Show port information.')
 @click.argument('ids_or_names', nargs=-1)
 def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
     if res_property == 'image':
@@ -155,12 +214,12 @@ def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
         list_commit()
 
     if res_property == "solution":
-        avbl_sols = Sites().getSolList(mtype='list', name_only=True)
+        avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
         print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
 
     if not res_property:
         if show_ports:
-            if len(ids_or_names)>0:
+            if len(ids_or_names) > 0:
                 for ele in ids_or_names:
                     list_port(ele)
             else:
@@ -170,10 +229,10 @@ def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
 
 # end cntr ===================================================
 
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
-
 
 
 def main():
