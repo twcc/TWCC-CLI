@@ -12,6 +12,26 @@ from twcc.services.s3_tools import S3
 from twcc.services.network import Networks
 from twcc.services.base import acls, users, image_commit, Keypairs
 
+
+def list_secg(name, ids_or_names, isJson=False, isTable=True):
+    if not isNone(name):
+        ids_or_names += (name, )
+    if not len(ids_or_names) > 0:
+        raise ValueError("Need resource id for listing security group")
+
+    if len(ids_or_names) == 1:
+        secg_list = getSecGroupList(ids_or_names[0])
+        secg_id = secg_list['id']
+        secg_detail = secg_list['security_group_rules']
+        if isJson:
+            print(json.dumps(secg_detail, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
+        elif isTable:
+            table_layout("SecurityGroup for {}".format(ids_or_names[0]),
+                         secg_detail, isPrint=True)
+        return True
+
+
 def list_port(site_id):
     b = GpuSite()
     table_layout("Port info. for {}".format(site_id),
@@ -142,6 +162,10 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
             table_layout("VCS Networks", ans, cols, isPrint=True)
         return True
 
+    if res_property == 'SecurityGroup':
+        list_secg(name, site_ids_or_names, isJson, isTable)
+        return True
+
     if res_property == 'Keypair':
         keyring = Keypairs()
         if len(site_ids_or_names) > 0:
@@ -188,8 +212,9 @@ def cos(name):
         list_files(name)
 
 # end object ==================================================
-@click.command(help='Operations for CCS (Container Computer Service)')
 
+
+@click.command(help='Operations for CCS (Container Computer Service)')
 @click.option('-net', '--network', 'res_property', flag_value='Network',
               help="List existing network in TWCC VCS.")
 @click.option('-img', '--image', 'res_property', flag_value='image',
@@ -218,15 +243,17 @@ def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
 
     if res_property == 'Network':
         net = Networks()
-        if len(site_ids_or_names)>0:
-            ans = [ net.queryById(x) for x in site_ids_or_names]
-            cols = [ "id", "name", "cidr", "create_time", "gateway", "nameservers", "status", "user"]
+        if len(site_ids_or_names) > 0:
+            ans = [net.queryById(x) for x in site_ids_or_names]
+            cols = ["id", "name", "cidr", "create_time",
+                    "gateway", "nameservers", "status", "user"]
         else:
             ans = net.list()
-            cols = [ "id", "name", "cidr", "create_time", "status"]
+            cols = ["id", "name", "cidr", "create_time", "status"]
 
         if isJson:
-            print(json.dumps(ans, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')))
+            print(json.dumps(ans, ensure_ascii=False,
+                             sort_keys=True, indent=4, separators=(',', ': ')))
         elif isTable:
             table_layout("VCS Networks", ans, cols, isPrint=True)
         return True
@@ -237,7 +264,7 @@ def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
 
     if not res_property:
         if show_ports:
-            if len(site_ids_or_names)>0:
+            if len(site_ids_or_names) > 0:
                 for ele in site_ids_or_names:
 
                     list_port(ele)
