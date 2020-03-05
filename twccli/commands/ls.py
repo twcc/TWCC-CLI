@@ -163,6 +163,8 @@ def ccs(res_property, ids_or_names, is_table, is_json, is_all, show_ports):
             if len(ids_or_names)>0:
                 for ele in ids_or_names:
                     list_port(ele)
+            else:
+                raise ValueError("Need at least one resource id.")
         else:
             list_cntr(ids_or_names, is_table, is_all)
 
