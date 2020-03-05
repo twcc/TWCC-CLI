@@ -14,20 +14,9 @@ import click
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
               help='Resource id for CCS.')
-@click.argument('site_ids_or_names', nargs=-1)
-def ccs(siteId, port, isAttach, site_ids_or_names):
-    if not isNone(siteId):
-        site_ids_or_names += (siteId,)
-    if isNone(port):
-        raise ValueError("Port number is required.")
-
-    if len(site_ids_or_names) == 1:
-        siteId = site_ids_or_names[0]
-
+def ccs(siteId, port, isAttach):
     b = GpuSite()
     tsite = b.queryById(siteId)
-    if not 'id' in tsite:
-        raise ValueError("Site ID: {} is not found.".format(siteId))
     if isAttach:
         b.exposedPort(siteId, port)
     else:
