@@ -142,27 +142,25 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 def cli():
     pass
 
-
-@click.command(help='vcs(Virtual Compute Service)')
-@click.option('-key', '--keypair', 'res_type_opt', flag_value='Keypair',
-              help="Create or add a keypair for VCS.")
-@click.option('--name', 'name', default="twccli", type=str,
+@click.command(context_settings=dict(max_content_width=500) , help="vcs(Virtual Compute Service)")
+@click.option('-key', '--keypair', 'keypair', flag_value='Keypair',
+              help="Delete existing keypair(s) for VCS.")
+@click.option('-name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.option('--sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
               help="Chose system volume disk type. [VCS only]", show_default=True)
-@click.option('--flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
+@click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
               help="Chose hardware configuration. -VCS only-", show_default=True)
-@click.option('--img', '--img_name', 'img_name', default=None, type=str,
+@click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
-        help='Wait until resources are provisioned')
-@click.option('--net', '--network', 'network', default=None, type=str,
+              help='Wait until resources are provisioned')
+@click.option('-net', '--network', 'network', default=None, type=str,
               help="Enter network name. -VCS only-")
-@click.option('--fip/--nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
-        help='Set this flag for applying a floating IP. -VCS only-')
+@click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
+              help='Set this flag for applying a floating IP. -VCS only-')
 @click.argument('ids_or_names', nargs=-1)
-def vcs(res_type_opt, name, ids_or_names, sys_vol, flavor
-        , img_name, wait, network, fip):
+def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, fip):
 
     if name == 'twccli' and not len(ids_or_names) == 0:
         name = ids_or_names[0]
@@ -174,12 +172,12 @@ def vcs(res_type_opt, name, ids_or_names, sys_vol, flavor
 
         if sys_vol == "TensorFlow":
             sys_vol = "ubuntu"
-        ans = create_vcs(name, sys_vol, img_name, network, res_type_opt,
-            flavor, sys_vol, fip)
+        ans = create_vcs(name, sys_vol, img_name, network, keypair,
+                         flavor, sys_vol, fip)
         if wait:
             doSiteReady(ans['id'], site_type='vcs')
         print(ans)
-        return True    
+        return True
 
     keyring = Keypairs()
 
