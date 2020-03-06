@@ -39,18 +39,11 @@ def ccs(siteId, port, isAttach):
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
               is_flag=True, default=True,  show_default=False,
               help='Applying security group directions.')
-@click.argument('site_ids_or_names', nargs=-1)
-def vcs(siteId, port, cidr, protocol, isIngress, site_ids_or_names):
+def vcs(siteId, port, cidr, protocol, isIngress, ):
     #if not isNone(siteId):
         #site_ids_or_names += (siteId,)
 
-    if len(site_ids_or_names) == 0:
-        raise ValueError("Site ID is required.")
-
     avbl_proto = ['tcp', 'udp', 'icmp']
-
-    if len(site_ids_or_names) == 1:
-        siteId = site_ids_or_names[0]
 
     secg_list = getSecGroupList(siteId)
     secg_id = secg_list['id']
