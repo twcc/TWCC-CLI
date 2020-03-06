@@ -44,6 +44,7 @@ def create_vcs(name, sol, img_name, network,
     # x-extra-property-keypair
     if isNone(keypair):
         raise ValueError("Missing parameter: `--key`.")
+    print("!!", keypair)
     if not keypair in set(extra_props['x-extra-property-keypair']):
         raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                          ", ".join(extra_props['x-extra-property-keypair'])))
@@ -143,7 +144,7 @@ def cli():
     pass
 
 @click.command(context_settings=dict(max_content_width=500) , help="vcs(Virtual Compute Service)")
-@click.option('-key', '--keypair', 'keypair', flag_value='Keypair',
+@click.option('-key', '--keypair', 'keypair',
               help="Delete existing keypair(s) for VCS.")
 @click.option('-name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
@@ -153,6 +154,8 @@ def cli():
               help="Chose hardware configuration. -VCS only-", show_default=True)
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.")
+@click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
+              help="Enter TWCC solution name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
@@ -160,8 +163,9 @@ def cli():
 @click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
               help='Set this flag for applying a floating IP. -VCS only-')
 @click.argument('ids_or_names', nargs=-1)
-def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, fip):
-
+def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, fip, sol):
+    print('img_name=' , img_name)
+    #return
     if name == 'twccli' and not len(ids_or_names) == 0:
         name = ids_or_names[0]
 
@@ -172,7 +176,7 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, f
 
         if sys_vol == "TensorFlow":
             sys_vol = "ubuntu"
-        ans = create_vcs(name, sys_vol, img_name, network, keypair,
+        ans = create_vcs(name, sol, img_name, network, keypair,
                          flavor, sys_vol, fip)
         if wait:
             doSiteReady(ans['id'], site_type='vcs')
