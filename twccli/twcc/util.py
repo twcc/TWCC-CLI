@@ -87,7 +87,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, isPr
 
     for ele in json_obj:
         table_info.append([ele[cap] for cap in caption_row if cap in ele])
-    table = AsciiTable(table_info, title)
+    table = AsciiTable(table_info, " {} ".format(title))
 
     for idy in range(len(table.table_data)):
         for idx in range(len(table.table_data[idy])):
