@@ -1,4 +1,4 @@
-from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
+from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
 from twcc.util import isNone
 from twcc.services.compute import getServerId, getSecGroupList
 import click
@@ -24,8 +24,10 @@ def ccs(siteId, port, isAttach):
 
 
 @click.command(help='Security Group operations for VCS (Virtual Compute Service)')
+@click.option('-fip / -nofip', '--floading-ip / --no-floating-ip', 'fip',
+              is_flag=True, default=True,  show_default=False,
+              help='Configure your VCS environment with or without floating IP.')
 @click.option('-p', '--port', 'port', type=int,
-              required=True,
               help='Port number for your VCS environment.')
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
@@ -37,28 +39,30 @@ def ccs(siteId, port, isAttach):
               help='Network protocol for security group.',
               default='tcp', show_default=True)
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
-              is_flag=True, default=True,  show_default=False,
+              is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
-def vcs(siteId, port, cidr, protocol, isIngress, ):
-    #if not isNone(siteId):
-        #site_ids_or_names += (siteId,)
-
-    avbl_proto = ['tcp', 'udp', 'icmp']
-
-    secg_list = getSecGroupList(siteId)
-    secg_id = secg_list['id']
-    from netaddr import IPNetwork
-    IPNetwork(cidr)
-
+def vcs(siteId, port, cidr, protocol, isIngress, fip):
     if isNone(port):
-        raise ValueError("Port number is required.")
+        if fip:
+            VcsServerNet().associateIP(siteId)
+        else:
+            VcsServerNet().deAssociateIP(siteId)
 
-    if not protocol in avbl_proto:
-        raise ValueError(
-            "Protocol is not valid. available: {}.".format(avbl_proto))
 
-    secg = VcsSecurityGroup()
-    secg.addSecurityGroup(secg_id, port, cidr, protocol,
+    else:
+        avbl_proto = ['tcp', 'udp', 'icmp']
+
+        secg_list = getSecGroupList(siteId)
+        secg_id = secg_list['id']
+        from netaddr import IPNetwork
+        IPNetwork(cidr)
+
+        if not protocol in avbl_proto:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
+
+        secg = VcsSecurityGroup()
+        secg.addSecurityGroup(secg_id, port, cidr, protocol,
                           "ingress" if isIngress else "egress")
 
 

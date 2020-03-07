@@ -19,7 +19,6 @@ class GpuSite(GpuService):
 
         self._func_ = "sites"
         self._csite_ = Session2._getClusterName("CNTR")
-        print(">"*10, "GpuSite", "<"*10, self._api_key_)
         self._cache_sol_ = {}
 
     @staticmethod
@@ -184,7 +183,6 @@ class GpuSite(GpuService):
         info_gen = self.queryById(site_id)
 
         info_detail = self.getDetail(site_id)
-        #usr_name = Session2._whoami()[0]['username']
         usr_name = Session2._whoami()['username']
 
         info_port = [x for x in info_detail['Service'][0]['ports']]
@@ -236,7 +234,6 @@ class VcsSite(CpuService):
 
         self._func_ = "sites"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, isAll=False):
         if isAll:
@@ -340,7 +337,6 @@ class VcsSecurityGroup(CpuService):
 
         self._func_ = "security_groups"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, server_id=None):
         if not isNone(server_id):
@@ -381,11 +377,6 @@ class VcsSecurityGroup(CpuService):
         products = self.getIsrvFlavors()
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
-
-        # target: name to fid, fid to isrv name, flavor raw
-        # pp(name2id=name2id)
-        # pp(pro=wanted_pro)
-        # pp(extra_flv=extra_flv)
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
         res = {}
@@ -430,6 +421,27 @@ class VcsSecurityGroup(CpuService):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
 
+class VcsServerNet(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+        self._func_ = "servers"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def associateIP(self, site_id):
+        self.action(site_id, is_bind=True)
+
+    def deAssociateIP(self, site_id):
+        self.action(site_id, is_bind=False)
+
+    def action(self, site_id, is_bind=True):
+        server_id = getServerId(site_id)
+        self.http_verb = 'put'
+        self.url_dic = {self._func_: server_id, 'action': ""}
+        self.data_dic = {
+                "action":"associateIP" if is_bind else "disassociateIP"
+        }
+        self._do_api()
+
 
 class VcsSecurityGroup(CpuService):
     def __init__(self):
@@ -437,7 +449,6 @@ class VcsSecurityGroup(CpuService):
 
         self._func_ = "security_groups"
         self._csite_ = Session2._getClusterName("VCS")
-        print(">"*10, "CpuSite", "<"*10, self._api_key_)
 
     def list(self, server_id=None):
         if not isNone(server_id):

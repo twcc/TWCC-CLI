@@ -14,6 +14,11 @@ production:
         - 'goc'
 avalible_funcs:
     -
+      name: "servers"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'put'
+    -
       name: "security_group_rules"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:

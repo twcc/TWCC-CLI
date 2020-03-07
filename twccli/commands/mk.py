@@ -76,8 +76,6 @@ def create_vcs(name, sol="", img_name="", network="",
     #        print(ele, "!!!"*3)
     #        required[ele] = extra_props[ele]
 
-    print("create vm")
-    print(required)
     return vcs.create(name, exists_sol[sol], required)
 
 
@@ -110,7 +108,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 
     b = Sites(debug=False)
     imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
-    print(imgs)
+
     if type(sol_img) == type(None) or len(sol_name) == 0:
         def_header['x-extra-property-image'] = imgs[0]
     else:
@@ -142,7 +140,8 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 def cli():
     pass
 
-@click.command(context_settings=dict(max_content_width=500) , help="Operations for VCS (Virtual Compute Service)")
+
+@click.command(context_settings=dict(max_content_width=500), help="Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'keypair',
               help="Delete existing keypair(s)")
 @click.option('-n', 'name', default="twccli", type=str,
@@ -171,17 +170,17 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
     if name == 'twccli':
         name = "{}_{}".format(name, flavor)
     ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
-                         flavor=flavor, sys_vol=sys_vol, fip=fip)
+                     flavor=flavor, sys_vol=sys_vol, fip=fip)
     if wait:
         doSiteReady(ans['id'], site_type='vcs')
 
     #keyring = Keypairs()
 
-    #if 'name' in keyring.queryById(name):
+    # if 'name' in keyring.queryById(name):
     #    raise ValueError("Duplicated name for keypair")
 
-    #print(Session2._getTwccDataPath())
-    #keyring.createKeyPair(name)
+    # print(Session2._getTwccDataPath())
+    # keyring.createKeyPair(name)
 
 
 @click.option('--name', 'name', default="twccli", type=str,

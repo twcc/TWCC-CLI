@@ -9,6 +9,7 @@ from twcc.clidriver import ServiceOperation
 
 # change to new-style-class https://goo.gl/AYgxqp
 
+
 class GenericService(object):
 
     def __init__(self, api_key=None, cluster_tag=None, skip_session=False):
@@ -35,15 +36,14 @@ class GenericService(object):
 
         if not skip_session:
             self.twcc_session = twcc._TWCC_SESSION_
-            print(">"*15, self.twcc_session)
+            # print(">"*15, self.twcc_session)
             self._project_code = self.twcc_session.getDefaultProject()
             self.project_ids = self.twcc_session.twcc_proj_id
-            print(self.project_ids, self.cluster_tag)
+            # print(self.project_ids, self.cluster_tag)
             self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
 
-
         # set defult project id
-        self._csite_ = Session2._getClusterName( self.cluster_tag )
+        self._csite_ = Session2._getClusterName(self.cluster_tag)
 
         # map to url
         self.url_dic = None

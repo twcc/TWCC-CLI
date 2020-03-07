@@ -6,37 +6,6 @@ import yaml
 import shutil
 from collections import defaultdict
 from .util import *
-# print(_TWCC_SESSION_)
-
-# class TwccApiValidator(Validator):
-#    def validate(self, document):
-#        ok = re.match(
-#            '^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', document.text)
-#        if not ok:
-#            raise ValidationError(
-#                message='Please enter a TWCC API key',
-#                cursor_position=len(document.text))  # Move cursor to end
-
-
-# custom_style_2 = style_from_dict({
-#    Token.Separator: '#6C6C6C',
-#    Token.QuestionMark: '#FF9D00 bold',
-#    # Token.Selected: '',  # default
-#    Token.Selected: '#5F819D',
-#    Token.Pointer: '#FF9D00 bold',
-#    Token.Instruction: '',  # default
-#    Token.Answer: '#5F819D bold',
-#    Token.Question: '',
-# })
-#
-# quest_api = [
-#    {
-#        'type': 'input',
-#        'name': 'TWCC_API_KEY',
-#        'message': "Your API Key from www.TWCC.ai",
-#        'validate': TwccApiValidator
-#    },
-# ]
 
 
 class Session2(object):
@@ -79,14 +48,14 @@ class Session2(object):
         if self.isValidSession():
             self.isInitialized = True
             self.loadSession()
-            print("load session")
-            print(">>>", self.twcc_proj_id)
-            print(">>>", self.twcc_s3_access_key)
+            #print("load session")
+            #print(">>>", self.twcc_proj_id)
+            #print(">>>", self.twcc_s3_access_key)
         else:
             # print(self.getSessionData())
             self.isInitialized = False
             self.initSession()
-            print("init session")
+            #print("init session")
 
     def initSession(self):
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
@@ -94,12 +63,6 @@ class Session2(object):
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
                 self.getSessionData(), fn, encoding='utf-8', allow_unicode=True)
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
             print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
@@ -131,9 +94,9 @@ class Session2(object):
     @staticmethod
     def _isValidSession():
         twcc_file_session = Session2._getSessionFile()
-        print("twcc_file_session:", twcc_file_session)
-        print("rule 1:", not isNone(twcc_file_session))
-        print("rule 2:", not isFile(twcc_file_session))
+        #print("twcc_file_session:", twcc_file_session)
+        #print("rule 1:", not isNone(twcc_file_session))
+        #print("rule 2:", not isFile(twcc_file_session))
         if not isNone(twcc_file_session) and isFile(twcc_file_session):
             sessConf = yaml.load(
                 open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
@@ -155,7 +118,6 @@ class Session2(object):
 
             self.twcc_username = self.sessConf["_default"]["twcc_username"]
             self.twcc_api_key = self.sessConf["_default"]["twcc_api_key"]
-
 
             self.twcc_s3_access_key = self.sessConf["_default"]["twcc_s3_access_key"]
             self.twcc_s3_secret_key = self.sessConf["_default"]["twcc_s3_secret_key"]
@@ -198,10 +160,11 @@ class Session2(object):
     def _getDefaultProject(twcc_proj_code=None):
         if isNone(twcc_proj_code):
             if "TWCC_PROJ_CODE" in os.environ:
-                print(os.environ["TWCC_PROJ_CODE"])
+                # print(os.environ["TWCC_PROJ_CODE"])
                 return os.environ["TWCC_PROJ_CODE"]
             else:
-                print("input project code")
+                pass
+                #print("input project code")
         return twcc_proj_code
 
     def getDefaultProject(self):
@@ -221,7 +184,6 @@ class Session2(object):
     @staticmethod
     def _getTwccS3Keys(proj_code, api_key):
         from twcc.services.base import projects
-        print(">>>", proj_code)
         twcc_proj = projects(api_key=api_key)
         twcc_proj.setCluster(Session2._getClusterName("COS"))
         return twcc_proj.getS3Keys(proj_code)
@@ -334,7 +296,6 @@ class Session2(object):
         return Session2._getSessionData()
 
     def __str__(self):
-        print("---"*10, self.twcc_proj_code)
         key_values = [
             {"key": "twcc_data_path", "value": self.twcc_data_path},
             {"key": "twcc_api_key", "value": self.twcc_api_key},
@@ -343,8 +304,8 @@ class Session2(object):
             {"key": "twcc_file_resources", "value": self.twcc_file_resources},
             {"key": "twcc_proj_code", "value": self.twcc_proj_code},
         ]
-
-        return table_layout("paramters", key_values, isPrint=False)
+        return ""
+        # return table_layout("parameters", key_values, isPrint=False, isWrap=False)
 
 
 # if __name__ == '__main__':
