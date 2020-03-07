@@ -67,6 +67,10 @@ def list_cntr(site_ids_or_names, is_table, isAll):
                          caption_row=col_name, isPrint=True)
         else:
             return my_GpuSite
+    else:
+        table_layout('GpuSite', [],
+                     caption_row=col_name, isPrint=True)
+
 
 
 def list_buckets(is_json):
@@ -84,7 +88,8 @@ def list_files(ids_or_names, is_table, is_json):
         files = s3.list_object(bucket_name)
 
         if is_table and not isNone(files):
-            table_layout(" COS objects {}".format(bucket_name), files, isPrint=True)
+            table_layout(" COS objects {}".format(
+                bucket_name), files, isPrint=True)
 
         if is_json:
             jpp(files)
