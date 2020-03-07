@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import os 
+import os
 import boto3
 import click
 
-from botocore.exceptions import ClientError 
+from botocore.exceptions import ClientError
 from .. import _TWCC_SESSION_
 from ..clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
 from tqdm import tqdm
-
+from twcc.util import sizeof_fmt, pp, isNone
+from dateutil import tz
+from datetime import datetime
 
 class S3():
     def __init__(self):
@@ -25,53 +27,69 @@ class S3():
         self.access_key = _TWCC_SESSION_.twcc_s3_access_key
         self.secret_key = _TWCC_SESSION_.twcc_s3_secret_key
 
-        
         # Make sure there are value input here
         if not self.access_key or not self.secret_key:
             raise Exception("No key entered by user")
 
         session = boto3.session.Session()
-        self.s3_cli = session.client(service_name = self.service_name,
-                                     aws_access_key_id = self.access_key,
-                                     aws_secret_access_key = self.secret_key,
-                                     endpoint_url = 'https://' + self.endpoint_url, 
+        self.s3_cli = session.client(service_name=self.service_name,
+                                     aws_access_key_id=self.access_key,
+                                     aws_secret_access_key=self.secret_key,
+                                     endpoint_url='https://' + self.endpoint_url,
                                      verify=False)
 
     def list_bucket(self):
         """ Listing all the bucket for S3 directory
 
-            :return            : List all S3 buckets 
+            :return            : List all S3 buckets
         """
         response = self.s3_cli.list_buckets()
-        head_data = [bucket_name for bucket_name in response['Buckets'][0].keys()]
-        #total_data = [self.c_t(bucket['CreationDate']),self.c_t(str(bucket['Name']).split('.')[0])] if bucket['Name'] in self.new_bucket else [bucket['Name'],str(bucket['CreationDate']).split('.')[0]] for bucket in response['Buckets']]
-        total_data = [[str(bucket['CreationDate']).split('.')[0],bucket['Name']] for bucket in response['Buckets']]
-        total_data.insert(0,head_data)
-        return total_data
+        from_zone = tz.tzutc()
+        to_zone = tz.tzlocal()
+        # return [ (y, x[y].astimezone(to_zone).strftime("%m/%d/%Y, %H:%M:%S")) if y ==u'CreationDate' else (y, x[y])
+        res = []
+        for x in response['Buckets']:
+            ele = {}
+            for y in x:
+                if y == u'CreationDate':
+                    ele[y] = x[y].astimezone(to_zone).strftime("%m/%d/%Y %H:%M:%S")
+                else:
+                    ele[y] = x[y]
+            res.append(ele)
+        return res
 
-    def list_object(self,bucket_name):
+    def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
             :param bucket_name : Unique string name
-            :return            : List all object inside of S3 bucket. 
+            :return            : List all object inside of S3 bucket.
         """
         res = self.s3_cli.list_objects(Bucket=bucket_name)
+        not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
+        from_zone = tz.tzutc()
+        to_zone = tz.tzlocal()
         if 'Contents' in res.keys():
-            head_data = [bucket_name for bucket_name in res['Contents'][0].keys() if bucket_name not in ('ETag','Owner')]
-            for num in range(len(res['Contents'])):
-                tmp_list = [res['Contents'][num][x] if x != 'LastModified' else str(res['Contents'][num][x]).split('.')[0] for x in head_data]
-                tmp.append(tmp_list)
-            tmp.insert(0,head_data)       
+            for ele in res['Contents']:
+                if isNone(ele):
+                    return []
+                res = {}
+                for key in ele:
+                    if not key in not_show:
+                        if key =="Size":
+                            res[key] = sizeof_fmt(ele[key])
+                        elif key == "LastModified":
+                            res[key] = ele[key].astimezone(to_zone).strftime("%m/%d/%Y %H:%M:%S")
+                        else:
+                            res[key] = ele[key]
+                tmp.append(res)
             return tmp
-        else:
-            tmp = [['Nothing inside the bucket']]
-            return tmp
-        
-    def upload_bucket(self,file_name=None,bucket_name=None,key=None,path=None,r=False):
+        return None
+
+    def upload_bucket(self, file_name=None, bucket_name=None, key=None, path=None, r=False):
         """ Upload to S3
 
-            :param file_name         : The name of the upload file 
+            :param file_name         : The name of the upload file
             :param path              : The path for the files, r must set ot True
             :param bucket_name       : The bucket name
             :param key               : The file name shows inside the bucket
@@ -80,13 +98,18 @@ class S3():
         """
         if r == True:
             if os.path.isdir(path):
-                on_local_path_len = len("/".join(path.split('/')[:-1])) # Get the len of the local path.
-                for root,dirs,files in tqdm(os.walk(path)): # Loop through all the files in the local.
+                # Get the len of the local path.
+                on_local_path_len = len("/".join(path.split('/')[:-1]))
+                # Loop through all the files in the local.
+                for root, dirs, files in tqdm(os.walk(path)):
                     for f_name in files:
-                        local_file_path = os.path.join(root,f_name) # Get the local file path. 
-                        remote_file_path = local_file_path[on_local_path_len + 1:] # Create the key name on S3.
+                        # Get the local file path.
+                        local_file_path = os.path.join(root, f_name)
+                        # Create the key name on S3.
+                        remote_file_path = local_file_path[on_local_path_len + 1:]
                         try:
-                            self.s3_cli.upload_file(local_file_path,bucket_name,remote_file_path)
+                            self.s3_cli.upload_file(
+                                local_file_path, bucket_name, remote_file_path)
                         except ClientError as e:
                             print(e)
                             return False
@@ -94,14 +117,14 @@ class S3():
                 print("No such path")
         else:
             try:
-                response = self.s3_cli.upload_file(file_name,bucket_name,key)
-                print("Successfully upload file : ",key)
+                response = self.s3_cli.upload_file(file_name, bucket_name, key)
+                print("Successfully upload file : ", key)
             except ClientError as e:
                 print(e)
                 return False
             return True
 
-    def download_bucket(self,bucket_name=None,key=None,file_name=None,path=None,r=False):
+    def download_bucket(self, bucket_name=None, key=None, file_name=None, path=None, r=False):
         """ Download from S3
 
             :param bucket_name       : The bucket name
@@ -124,7 +147,7 @@ class S3():
                     if not os.path.isdir(check_path):
                         os.mkdir(check_path)
                     # download to the correct path
-                    self.s3_cli.download_file(bucket_name,i[2],ff_name)
+                    self.s3_cli.download_file(bucket_name, i[2], ff_name)
             else:
                 print("No such path")
         else:
@@ -136,15 +159,15 @@ class S3():
                 if not os.path.isdir(check_path):
                     os.mkdir(check_path)
 
-                response = self.s3_cli.download_file(bucket_name,key,file_name)
-                print("Successfully download file : ",file_name)
+                response = self.s3_cli.download_file(
+                    bucket_name, key, file_name)
+                print("Successfully download file : ", file_name)
             except ClientError as e:
-                print("ERROR during download : ",e)
+                print("ERROR during download : ", e)
                 return False
             return True
 
-
-    def create_bucket(self,bucket):
+    def create_bucket(self, bucket):
         """ Create an S3 bucket
 
             :param bucket_name: Unique string name
@@ -153,34 +176,35 @@ class S3():
         try:
             self.s3_cli.create_bucket(Bucket=bucket)
             self.new_bucket.append(bucket)
-            print("Successfully create bucket :",self.c_t(bucket))
+            print("Successfully create bucket :", self.c_t(bucket))
         except ClientError as e:
-            print("ERROR during create : ",e)
+            print("ERROR during create : ", e)
             return False
         return True
 
-    def del_bucket(self,bucket_name,y):
+    def del_bucket(self, bucket_name, recursive=False):
         """ Delete a bucket from S3
 
             :param bucket_name: Unique string name
+            :param recursive: recursive or no
             :return: True if bucket is deleted, else False
         """
         try:
-            a = self.list_object(bucket_name)[1:]
-            if y == True:
-                for i in a:
-                    self.del_object(bucket_name = bucket_name, file_name = i[2])
-            res = self.s3_cli.delete_bucket(Bucket = bucket_name)
-            print("Successfully delete bucket :",bucket_name)
-        except ClientError as e: 
+            if recursive == True:
+                for i in self.list_object(bucket_name):
+                    self.del_object(bucket_name=bucket_name, file_name=i['Key'])
+            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+            print("Successfully delete bucket :", bucket_name)
+        except ClientError as e:
             if e.response['Error']['Code'] == 'BucketNotEmpty':
-                error_msg = "{} still has files inside it.".format(e.response['Error']['BucketName'])
+                error_msg = "{} still has files inside it.".format(
+                    e.response['Error']['BucketName'])
                 print(error_msg)
             else:
                 print(e.response)
-        return True 
-    
-    def del_object(self,bucket_name,file_name):
+        return True
+
+    def del_object(self, bucket_name, file_name):
         """ Delete a file from S3
 
             :param bucket_name: Unique string name
@@ -188,35 +212,35 @@ class S3():
             :return           : True if object is deleted, else False
         """
         try:
-            res = self.s3_cli.delete_object(Bucket = bucket_name,
-                                            Key = file_name)
-            print("Successfully delete object :",file_name)
+            res = self.s3_cli.delete_object(Bucket=bucket_name,
+                                            Key=file_name)
+            print("Successfully delete object :", file_name)
         except ClientError as e:
             print(e.response)
         return True
-            
 
-    def test_table(self,table_data):
-        """ Testing showing table
-        """
-        table = AsciiTable(table_data)
-        print(table.table)
+    # def test_table(self, table_data):
+    #     """ Testing showing table
+    #     """
+    #     table = AsciiTable(table_data)
+    #     print(table.table)
 
-    def c_t(self,txt,color="red"):
-        return colored(txt,color)
+    def c_t(self, txt, color="red"):
+        return colored(txt, color)
 
-    def check_4_bucket(self,bucket_name):
+    def check_4_bucket(self, bucket_name):
         try:
             res = self.s3_cli.head_bucket(Bucket=bucket_name)
         except ClientError as e:
             return False
         return True
 
-    def list_files_v2(self,bucket_name,delimiter='',prefix=''):
+    def list_files_v2(self, bucket_name, delimiter='', prefix=''):
         try:
-            res = self.s3_cli.list_objects_v2(Bucket=bucket_name,Delimiter=delimiter,Prefix=prefix)
+            res = self.s3_cli.list_objects_v2(
+                Bucket=bucket_name, Delimiter=delimiter, Prefix=prefix)
             return [now_dict['Key'] for now_dict in res['Contents']]
-            #for now_dict in res['Contents']:
+            # for now_dict in res['Contents']:
             #    print(now_dict['Key'])
         except ClientError as e:
             return False

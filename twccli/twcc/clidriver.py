@@ -80,12 +80,27 @@ class ServiceOperation:
     def isFunValid(self, func):
         return True if func in self.valid_funcs else False
 
-    def _api_act(self, t_api, t_headers, t_data=None, mtype="get"):
+    def _to_curl(self, t_api, t_headers, t_data=None, mtype="get"):
+
+        headers = ['"{0}: {1}"'.format(k, v) for k, v in t_headers.items()]
+        headers = " \\\n -H ".join(headers)
+
+        if isNone(t_data):
+            command = "curl -s -X {method} \\\n -H {headers} \\\n '{uri}'"
+            return command.format(method=mtype.upper(), headers=headers, data=t_data, uri=t_api)
+        else:
+            command = "curl -s -X {method} \\\n -H {headers} \\\n -d '{data}' \\\n '{uri}'"
+            return command.format(method=mtype.upper(), headers=headers, data=t_data, uri=t_api)
+    def _api_act(self, t_api, t_headers, t_data=None, mtype="get", show_curl=False):
+
+        if show_curl:
+            self._to_curl(t_api, t_headers, t_data, mtype)
 
         start_time = time.time()
 
         if mtype == 'get':
             r = requests.get(t_api, headers=t_headers, verify=False)
+
         elif mtype == 'post':
             r = requests.post(t_api, headers=t_headers,
                               data=json.dumps(t_data), verify=False)

@@ -12,8 +12,8 @@ from twcc.services.base import acls, users, image_commit, Keypairs
 from twcc import GupSiteBlockSet, Session2
 
 
-def create_vcs(name, sol, img_name, network,
-               keypair, flavor, sys_vol, fip):
+def create_vcs(name, sol="", img_name="", network="",
+               keypair="", flavor="", sys_vol="", fip=""):
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -28,7 +28,7 @@ def create_vcs(name, sol, img_name, network,
     required = {}
     # check for all param
     if isNone(name):
-        raise ValueError("Missing parameter: `--name`.")
+        raise ValueError("Missing parameter: `-n`.")
 
     extra_props = vcs.getExtraProp(exists_sol[sol])
     # x-extra-property-image
@@ -43,7 +43,8 @@ def create_vcs(name, sol, img_name, network,
 
     # x-extra-property-keypair
     if isNone(keypair):
-        raise ValueError("Missing parameter: `--key`.")
+        raise ValueError("Missing parameter: `-key`.")
+    print(keypair)
     if not keypair in set(extra_props['x-extra-property-keypair']):
         raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                          ", ".join(extra_props['x-extra-property-keypair'])))
@@ -142,50 +143,45 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 def cli():
     pass
 
-@click.command(context_settings=dict(max_content_width=500) , help="vcs(Virtual Compute Service)")
-@click.option('-key', '--keypair', 'keypair', flag_value='Keypair',
-              help="Delete existing keypair(s) for VCS.")
-@click.option('-name', 'name', default="twccli", type=str,
+@click.command(context_settings=dict(max_content_width=500) , help="Operations for VCS (Virtual Compute Service)")
+@click.option('-key', '--keypair', 'keypair',
+              help="Delete existing keypair(s)")
+@click.option('-n', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
-              help="Chose system volume disk type. [VCS only]", show_default=True)
+              show_default=True,
+              help="Chose system volume disk type.")
 @click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
-              help="Chose hardware configuration. -VCS only-", show_default=True)
+              show_default=True,
+              help="Chose hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
-              help="Enter network name. -VCS only-")
+              help="Enter network name.")
+@click.option('-sol', '--solution', 'sol', default="Ubuntu", type=str,
+              help="Enter TWCC solution name.")
 @click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
-              help='Set this flag for applying a floating IP. -VCS only-')
+              help='Set this flag for applying a floating IP.')
 @click.argument('ids_or_names', nargs=-1)
-def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, fip):
+def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip):
 
-    if name == 'twccli' and not len(ids_or_names) == 0:
-        name = ids_or_names[0]
+    if name == 'twccli':
+        name = "{}_{}".format(name, flavor)
+    ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
+                         flavor=flavor, sys_vol=sys_vol, fip=fip)
+    if wait:
+        doSiteReady(ans['id'], site_type='vcs')
+    print(ans)
 
-    if isNone(name) or name == 'twccli':
-        raise ValueError("`--n` is required.")
+    #keyring = Keypairs()
 
-    if not isNone(sys_vol) & isNone(flavor):
+    #if 'name' in keyring.queryById(name):
+    #    raise ValueError("Duplicated name for keypair")
 
-        if sys_vol == "TensorFlow":
-            sys_vol = "ubuntu"
-        ans = create_vcs(name, sys_vol, img_name, network, keypair,
-                         flavor, sys_vol, fip)
-        if wait:
-            doSiteReady(ans['id'], site_type='vcs')
-        print(ans)
-        return True
-
-    keyring = Keypairs()
-
-    if 'name' in keyring.queryById(name):
-        raise ValueError("Duplicated name for keypair")
-
-    print(Session2._getTwccDataPath())
-    keyring.createKeyPair(name)
+    #print(Session2._getTwccDataPath())
+    #keyring.createKeyPair(name)
 
 
 @click.option('--name', 'name', default="twccli", type=str,

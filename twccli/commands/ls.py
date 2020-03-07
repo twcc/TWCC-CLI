@@ -2,7 +2,7 @@
 from __future__ import print_function
 import click
 import json
-from twcc.util import pp, table_layout, SpinCursor, isNone
+from twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
 from twcc.services.compute import getServerId, getSecGroupList
 from twcc import GupSiteBlockSet
@@ -69,21 +69,29 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             return my_GpuSite
 
 
-def list_buckets():
+def list_buckets(is_json):
     s3 = S3()
     buckets = s3.list_bucket()
-    s3.test_table(buckets)
+    if is_json:
+        jpp(buckets)
+    else:
+        table_layout(" COS buckets {}", buckets, isWrap=False, isPrint=True)
 
 
-def list_files(bucket_name):
+def list_files(ids_or_names, is_table, is_json):
     s3 = S3()
-    files = s3.list_object(bucket_name)
-    s3.test_table(files)
+    for bucket_name in ids_or_names:
+        files = s3.list_object(bucket_name)
+
+        if is_table and not isNone(files):
+            table_layout(" COS objects {}".format(bucket_name), files, isPrint=True)
+
+        if is_json:
+            jpp(files)
 
 
 def list_secg(name, ids_or_names, isJson=False, isTable=True):
-    if not isNone(name):
-        ids_or_names += (name, )
+    ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         raise ValueError("Need resource id for listing security group")
 
@@ -92,8 +100,7 @@ def list_secg(name, ids_or_names, isJson=False, isTable=True):
         secg_id = secg_list['id']
         secg_detail = secg_list['security_group_rules']
         if isJson:
-            print(json.dumps(secg_detail, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
+            jpp(secg_detail)
         elif isTable:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail, isPrint=True)
@@ -137,8 +144,7 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
             ans = vcs.list(is_all)
 
         if is_json:
-            print(json.dumps(ans, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
+            jpp(ans)
         elif is_table:
             table_layout("VCS VMs", ans, cols, isPrint=True)
 
@@ -155,8 +161,7 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
             cols = ["id", "name", "cidr", "create_time", "status"]
 
         if is_json:
-            print(json.dumps(ans, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
+            jpp(ans)
         elif is_table:
             table_layout("VCS Networks", ans, cols, isPrint=True)
         return True
@@ -193,21 +198,28 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
             ans = vcs.list(is_all)
 
         if is_json:
-            print(json.dumps(ans, ensure_ascii=False,
-                             sort_keys=True, indent=4, separators=(',', ': ')))
+            jpp(ans)
         elif is_table:
             table_layout("VCS VMs", ans, cols, isPrint=True)
 
 
 # end vcs ==================================================
 @click.command(help='Operations for COS (Cloud Object Storage)')
-@click.option('-name', 'name', default=None, type=str,
+@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view.")
+@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
+              is_flag=True, default=False, show_default=True,
+              help="Show information in JSON view, conflict with -table.")
+@click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resource name")
-def cos(name):
-    if isNone(name):
-        list_buckets()
+@click.argument('ids_or_names', nargs=-1)
+def cos(name, is_table, is_json, ids_or_names):
+    ids_or_names = mk_names(name, ids_or_names)
+    if len(ids_or_names) == 0:
+        list_buckets(is_json)
     else:
-        list_files(name)
+        list_files(ids_or_names, is_table, is_json)
 
 # end object ==================================================
 @click.command(help='Operations for CCS (Container Computer Service)')
