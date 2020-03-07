@@ -44,7 +44,6 @@ def create_vcs(name, sol="", img_name="", network="",
     # x-extra-property-keypair
     if isNone(keypair):
         raise ValueError("Missing parameter: `-key`.")
-    print(keypair)
     if not keypair in set(extra_props['x-extra-property-keypair']):
         raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                          ", ".join(extra_props['x-extra-property-keypair'])))
@@ -156,6 +155,8 @@ def cli():
               help="Chose hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.")
+@click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
+              help="Enter TWCC solution name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
@@ -173,7 +174,6 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
                          flavor=flavor, sys_vol=sys_vol, fip=fip)
     if wait:
         doSiteReady(ans['id'], site_type='vcs')
-    print(ans)
 
     #keyring = Keypairs()
 
