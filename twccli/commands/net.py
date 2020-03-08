@@ -66,7 +66,7 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip):
                           "ingress" if isIngress else "egress")
 
 
-@click.group(help="Network related operations.")
+@click.group(help="NETwork related operations.")
 def cli():
     pass
 

@@ -66,32 +66,30 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             table_layout('GpuSite', my_GpuSite,
                          caption_row=col_name, isPrint=True)
         else:
-            return my_GpuSite
+            jpp(my_GpuSite)
     else:
         table_layout('GpuSite', [],
                      caption_row=col_name, isPrint=True)
 
 
-
-def list_buckets(is_json):
+def list_buckets(is_table):
     s3 = S3()
     buckets = s3.list_bucket()
-    if is_json:
-        jpp(buckets)
+    if is_table:
+        table_layout("COS buckets {}", buckets, isWrap=False, isPrint=True)
     else:
-        table_layout(" COS buckets {}", buckets, isWrap=False, isPrint=True)
+        jpp(buckets)
 
 
-def list_files(ids_or_names, is_table, is_json):
+def list_files(ids_or_names, is_table):
     s3 = S3()
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
 
         if is_table and not isNone(files):
-            table_layout(" COS objects {}".format(
+            table_layout("COS objects {}".format(
                 bucket_name), files, isPrint=True)
-
-        if is_json:
+        else:
             jpp(files)
 
 
@@ -114,30 +112,28 @@ def list_secg(name, ids_or_names, isJson=False, isTable=True):
 # end orginal function ====================================
 
 # Create groups for command
-@click.group(help="List Information")
+@click.group(help="LiSt resources operations.")
 def cli():
     pass
 
 
 @click.command(help='Operations for VCS (Virtual Compute Service)')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
-              help="List your keypairs in TWCC VCS.")
+              help="List your keypairs in TWCC VCS. Euals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
               help="List existing network in TWCC VCS.")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
 @click.argument('site_ids_or_names', nargs=-1)
-@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
-              is_flag=True, default=False, show_default=True,
-              help="Show information in JSON view, conflict with -table. ")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the containers in the project. (Tenant Administrators only)")
 @click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resources.")
-@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
-              help="Show information in Table view.")
-def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
+              help="Show information in Table view or JSON view.")
+@click.pass_context
+def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     if isNone(res_property):
         vcs = VcsSite()
 
@@ -148,10 +144,10 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
 
-        if is_json:
-            jpp(ans)
-        elif is_table:
+        if is_table:
             table_layout("VCS VMs", ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 
         return True
 
@@ -176,17 +172,9 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
         return True
 
     if res_property == 'Keypair':
-        keyring = Keypairs()
-        if len(site_ids_or_names) > 0:
-            ans = []
-            cols = ['name', 'fingerprint', 'create_time', 'user']
-            for ele in site_ids_or_names:
-                ans.append(keyring.queryById(ele))
-        else:
-            cols = ['name', 'fingerprint']
-            ans = keyring.list()
-
-        table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
+        # forward to key()
+        ctx.invoke(key, ids_or_names=site_ids_or_names,
+                   name=name, is_table=is_table)
 
     if res_property == 'SecurityGroup':
         list_secg(name, site_ids_or_names, is_json, is_table)
@@ -210,21 +198,18 @@ def vcs(res_property, site_ids_or_names, name, is_json, is_table, is_all):
 
 # end vcs ==================================================
 @click.command(help='Operations for COS (Cloud Object Storage)')
-@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
-              help="Show information in Table view.")
-@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
-              is_flag=True, default=False, show_default=True,
-              help="Show information in JSON view, conflict with -table.")
+              help="Show information in Table view or JSON view.")
 @click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
-def cos(name, is_table, is_json, ids_or_names):
+def cos(name, is_table, ids_or_names):
     ids_or_names = mk_names(name, ids_or_names)
     if len(ids_or_names) == 0:
-        list_buckets(is_json)
+        list_buckets(is_table)
     else:
-        list_files(ids_or_names, is_table, is_json)
+        list_files(ids_or_names, is_table)
 
 # end object ==================================================
 @click.command(help='Operations for CCS (Container Computer Service)')
@@ -232,12 +217,9 @@ def cos(name, is_table, is_json, ids_or_names):
               help='View all image files. Provid solution name for filtering.')
 @click.option('-clone', '--show-clone-status', 'res_property', flag_value='commit',
               help='List the submitted CCS clone requests')
-@click.option('-table / -notable', '--table-view / --no-table-view', 'is_table',
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
-              help="Show information in Table view.")
-@click.option('-json / -nojson', '--json-view / --no-json-view', 'is_json',
-              is_flag=True, default=False, show_default=True,
-              help="Show information in JSON view, conflict with -table. @todo")
+              help="Show information in Table view or JSON view.")
 @click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
               help="Show TWCC solutions for CCS.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
@@ -245,7 +227,7 @@ def cos(name, is_table, is_json, ids_or_names):
 @click.option('-p', '--port', 'show_ports', is_flag=True,
               help='Show port information.')
 @click.argument('site_ids_or_names', nargs=-1)
-def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
+def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
     if res_property == 'image':
         list_all_img(site_ids_or_names)
 
@@ -266,12 +248,39 @@ def ccs(res_property, site_ids_or_names, is_table, is_json, is_all, show_ports):
         else:
             list_cntr(site_ids_or_names, is_table, is_all)
 
-# end cntr ===================================================
+
+@click.command(help='List your keypairs in VCS.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.option('-n', '--name', 'name', default=None, type=str,
+              help="Enter name for your resource name")
+@click.argument('ids_or_names', nargs=-1)
+@click.pass_context
+def key(ctx, name, is_table, ids_or_names):
+    print(ctx.params)
+    ids_or_names = mk_names(name, ids_or_names)
+
+    keyring = Keypairs()
+    if len(ids_or_names) > 0:
+        ans = []
+        cols = ['name', 'fingerprint', 'create_time', 'user']
+        for ele in ids_or_names:
+            ans.append(keyring.queryById(ele))
+    else:
+        cols = ['name', 'fingerprint']
+        ans = keyring.list()
+
+    if is_table:
+        table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
+cli.add_command(key)
 
 
 def main():

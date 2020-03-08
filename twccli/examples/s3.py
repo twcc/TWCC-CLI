@@ -12,7 +12,7 @@ def TWCC_LOGO():
     )
 TWCC_LOGO() ## here is logo
 import re
-from twcc.services.s3_tools import S3
+from twccli.twcc.services.s3_tools import S3
 
 import click,time
 

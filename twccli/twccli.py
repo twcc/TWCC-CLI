@@ -1,6 +1,5 @@
 import click
 import os
-
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 
 
@@ -23,6 +22,6 @@ class MyCLI(click.MultiCommand):
 
 cli = MyCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
             'Thanks for using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
-            'You succeed, We Succeed!!')
+            '-- You Succeed, We Succeed!! --')
 if __name__ == '__main__':
     cli()

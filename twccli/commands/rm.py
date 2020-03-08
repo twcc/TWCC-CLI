@@ -89,7 +89,7 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
                     secg.deleteRule(rule['id'])
 
 # Create groups for command
-@click.group(help="Remove resource operations.")
+@click.group(help="ReMove resources operations.")
 def cli():
     pass
 
@@ -163,9 +163,6 @@ cli.add_command(ccs)
 
 
 def main():
-    """
-    this is a test main function
-    """
     cli()
 
 

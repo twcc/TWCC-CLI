@@ -136,7 +136,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
 # end original function ==================================================
 
 # Create groups for command
-@click.group(help="Create Service")
+@click.group(help="Allocate (MaKe) resources operations.")
 def cli():
     pass
 

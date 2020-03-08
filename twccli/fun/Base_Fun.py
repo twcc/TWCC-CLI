@@ -1,6 +1,6 @@
 from __future__ import print_function
-from twcc.services.base import acls,api_key,keypairs,projects,users
-from twcc.util import pp,isNone,table_layout
+from twccli.twcc.services.base import acls,api_key,keypairs,projects,users
+from twccli.twcc.util import pp,isNone,table_layout
 
 import click
 

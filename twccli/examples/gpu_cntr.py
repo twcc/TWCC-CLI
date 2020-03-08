@@ -2,12 +2,13 @@ from __future__ import print_function
 import click
 import time
 from prompt_toolkit.shortcuts import get_input
-from twcc.services.compute import sites
-from twcc.session import session_start
-from twcc.services.projects import projects
-from twcc.services.base import acls, users, image_commit
-from twcc.services.solutions import solutions
-from twcc.util import pp, table_layout, SpinCursor
+from twccli.twcc.services.compute import sites
+from twccli.twcc.session import session_start
+from twccli.twcc.services.projects import projects
+from twccli.twcc.services.base import acls, users, image_commit
+from twccli.twcc.services.solutions import solutions
+from twccli.twcc.util import pp, table_layout, SpinCursor
+from twccli.twcc import GupSiteBlockSet
 import re
 from termcolor import colored
 import sys

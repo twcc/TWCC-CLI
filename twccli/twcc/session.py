@@ -5,7 +5,7 @@ import re
 import yaml
 import shutil
 from collections import defaultdict
-from .util import *
+from util import *
 
 
 class Session2(object):
