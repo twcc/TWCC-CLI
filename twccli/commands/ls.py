@@ -271,7 +271,7 @@ def key(ctx, name, is_table, ids_or_names):
         ans = keyring.list()
 
     if is_table:
-        table_layout(' Existing Keypairs ', ans, cols, isPrint=True)
+        table_layout(' Existing Keypairs ', ans, cols, isPrint=True, isWrap=False)
     else:
         jpp(ans)
 
