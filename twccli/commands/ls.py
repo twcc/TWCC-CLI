@@ -132,6 +132,10 @@ def cli():
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
+              help="Show TWCC solutions for VCS.")
+@click.option('-img', '--image', 'res_property', flag_value='image',
+              help='View all image files. Provid solution name for filtering.')
 @click.pass_context
 def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     if isNone(res_property):
@@ -150,6 +154,13 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             jpp(ans)
 
         return True
+
+    if res_property == 'image':
+        list_all_img(site_ids_or_names)
+
+    if res_property == "solution":
+        avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
+        print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
 
     if res_property == 'Network':
         net = Networks()
