@@ -5,14 +5,15 @@ import boto3
 import click
 
 from botocore.exceptions import ClientError
-from .. import _TWCC_SESSION_
 from ..clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
 from tqdm import tqdm
+from twcc.session import Session2
 from twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
+
 
 class S3():
     def __init__(self):
@@ -24,8 +25,9 @@ class S3():
         self.new_files = []
         self.new_bucket = []
         self.twcc = ServiceOperation()
-        self.access_key = _TWCC_SESSION_.twcc_s3_access_key
-        self.secret_key = _TWCC_SESSION_.twcc_s3_secret_key
+        session = Session2()
+        self.access_key = session.twcc_s3_access_key
+        self.secret_key = session.twcc_s3_secret_key
 
         # Make sure there are value input here
         if not self.access_key or not self.secret_key:
@@ -44,15 +46,15 @@ class S3():
             :return            : List all S3 buckets
         """
         response = self.s3_cli.list_buckets()
-        from_zone = tz.tzutc()
-        to_zone = tz.tzlocal()
-        # return [ (y, x[y].astimezone(to_zone).strftime("%m/%d/%Y, %H:%M:%S")) if y ==u'CreationDate' else (y, x[y])
         res = []
+        to_zone = tz.tzlocal()
+
         for x in response['Buckets']:
             ele = {}
             for y in x:
                 if y == u'CreationDate':
-                    ele[y] = x[y].astimezone(to_zone).strftime("%m/%d/%Y %H:%M:%S")
+                    ele[y] = x[y].astimezone(
+                        to_zone).strftime("%m/%d/%Y %H:%M:%S")
                 else:
                     ele[y] = x[y]
             res.append(ele)
@@ -67,7 +69,6 @@ class S3():
         res = self.s3_cli.list_objects(Bucket=bucket_name)
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
-        from_zone = tz.tzutc()
         to_zone = tz.tzlocal()
         if 'Contents' in res.keys():
             for ele in res['Contents']:
@@ -76,10 +77,11 @@ class S3():
                 res = {}
                 for key in ele:
                     if not key in not_show:
-                        if key =="Size":
+                        if key == "Size":
                             res[key] = sizeof_fmt(ele[key])
                         elif key == "LastModified":
-                            res[key] = ele[key].astimezone(to_zone).strftime("%m/%d/%Y %H:%M:%S")
+                            res[key] = ele[key].astimezone(
+                                to_zone).strftime("%m/%d/%Y %H:%M:%S")
                         else:
                             res[key] = ele[key]
                 tmp.append(res)
@@ -192,7 +194,8 @@ class S3():
         try:
             if recursive == True:
                 for i in self.list_object(bucket_name):
-                    self.del_object(bucket_name=bucket_name, file_name=i['Key'])
+                    self.del_object(bucket_name=bucket_name,
+                                    file_name=i['Key'])
             res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:

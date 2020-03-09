@@ -8,7 +8,8 @@ from twcc.services.generic import GenericService
 
 class Users(GenericService):
     def __init__(self, api_key=None):
-        GenericService.__init__(self, skip_session=True)
+        # raw_input("in users "+api_key)
+        GenericService.__init__(self, skip_session=True, api_key=api_key)
 
         self._csite_ = "goc"
         if not isNone(api_key):
@@ -118,10 +119,9 @@ class projects(GenericService):
     """
 
     def __init__(self, api_key=None):
-        GenericService.__init__(self, api_key=None, skip_session=True)
+        self.api_key = api_key
+        GenericService.__init__(self, api_key=api_key, skip_session=True)
 
-        if not isNone(api_key):
-            self.api_key = api_key
         self._csite_ = "goc"
 
     def setCluster(self, cluster_name=None):

@@ -18,15 +18,9 @@ class GenericService(object):
         self._func_ = self.__class__.__name__
         self._res_type_ = "json"
         self._debug_ = isDebug()
-
-        self.twcc = ServiceOperation()
-        if type(api_key) == type(None):
-            # here, while Session2 using this class,
-            # we don't really need session to assist
-            self._api_key_ = Session2._getApiKey()
-        else:
-            print("using passed api_key", api_key)
-            self._api_key_ = api_key
+        self._api_key_ = Session2._getApiKey(api_key)
+        
+        self.twcc = ServiceOperation(api_key=api_key)
 
         self.twcc._debug = isDebug()
 
@@ -35,11 +29,10 @@ class GenericService(object):
             self.cluster_tag = "CNTR"
 
         if not skip_session:
-            self.twcc_session = twcc._TWCC_SESSION_
-            # print(">"*15, self.twcc_session)
+
+            self.twcc_session = Session2()
             self._project_code = self.twcc_session.getDefaultProject()
             self.project_ids = self.twcc_session.twcc_proj_id
-            # print(self.project_ids, self.cluster_tag)
             self._project_id = self.twcc_session.twcc_proj_id[self.cluster_tag]
 
         # set defult project id

@@ -161,15 +161,13 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             ans = net.list()
             cols = ["id", "name", "cidr", "create_time", "status"]
 
-        if is_json:
-            jpp(ans)
-        elif is_table:
+        if is_table:
             table_layout("VCS Networks", ans, cols, isPrint=True)
-        return True
+        else:
+            jpp(ans)
 
     if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, is_json, is_table)
-        return True
+        list_secg(name, site_ids_or_names, is_table)
 
     if res_property == 'Keypair':
         # forward to key()
@@ -177,8 +175,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
                    name=name, is_table=is_table)
 
     if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, is_json, is_table)
-        return True
+        list_secg(name, site_ids_or_names, is_table)
 
     if isNone(res_property):  # add for list vcs, @amber need to work on this
         vcs = VcsSite()
@@ -190,10 +187,10 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
 
-        if is_json:
-            jpp(ans)
-        elif is_table:
+        if is_table:
             table_layout("VCS VMs", ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 
 
 # end vcs ==================================================
@@ -288,3 +285,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

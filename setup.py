@@ -1,5 +1,7 @@
 import os
 from setuptools import setup, find_packages
+from distutils.util import convert_path
+
 try:
     # pip >=20
     from pip._internal.network.session import PipSession
@@ -15,6 +17,11 @@ except ImportError:
         from pip.req import parse_requirements
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+TWCC_CONFIG = {}
+ver_path = convert_path('twccli/version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), TWCC_CONFIG)
 
 
 def find_version(*file_paths):
@@ -38,6 +45,7 @@ def load_requirements(fname):
 
 reqs = [
         'netaddr',
+        'pytz',
         'boto3==1.11.17',
         'botocore==1.14.17',
         'certifi==2019.11.28',
@@ -64,7 +72,7 @@ reqs = [
 
 setup(
     name='twccli',
-    version='0.5',
+    version=TWCC_CONFIG['__version__'],
     py_modules=['twccli'],
     packages=find_packages(),
     install_requires= reqs,

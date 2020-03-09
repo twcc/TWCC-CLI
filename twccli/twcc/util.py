@@ -1,6 +1,7 @@
 import threading
 import sys
 import os
+import re
 import time
 import unicodedata
 
@@ -34,8 +35,7 @@ def strShorten(mstr, max_len=6):
         return mstr
 
 
-def isNone(x):
-    return True if type(x) == type(None) else False
+isNone = lambda x: True if type(x) == type(None) else False
 
 
 def mkdir_p(path):
@@ -230,3 +230,7 @@ def sizeof_fmt(num, suffix='B'):
             return "%3.1f %s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f %s%s" % (num, 'Yi', suffix)
+
+
+def validate(apikey):
+    return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)

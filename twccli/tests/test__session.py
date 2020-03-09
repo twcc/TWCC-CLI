@@ -1,4 +1,4 @@
-from twcc import _TWCC_SESSION_, Session2
+from twcc import Session2
 import pytest
 from click.testing import CliRunner
 

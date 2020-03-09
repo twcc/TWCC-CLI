@@ -43,7 +43,7 @@ def ccs(siteId, port, isAttach):
               help='Applying security group directions.')
 def vcs(siteId, port, cidr, protocol, isIngress, fip):
     if isNone(port):
-        if fip:
+        if fip: # @todo need to add check
             VcsServerNet().associateIP(siteId)
         else:
             VcsServerNet().deAssociateIP(siteId)

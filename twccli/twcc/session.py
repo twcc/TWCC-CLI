@@ -4,9 +4,10 @@ import os
 import re
 import yaml
 import shutil
+import datetime
 from collections import defaultdict
-from twcc.util import *
-
+from twcc.util import isNone, isFile, mkdir_p, table_layout
+from version import __version__
 
 class Session2(object):
     # static varibles
@@ -37,8 +38,7 @@ class Session2(object):
         Returns:
             [type] -- [description]
         """
-
-        self.twcc_api_key = Session2._getApiKey()
+        self.twcc_api_key = twcc_api_key
         self.twcc_data_path = Session2._getTwccDataPath(twcc_data_path)
         self.twcc_file_session = Session2._getSessionFile(twcc_file_session)
         self.twcc_file_resources = Session2._getResourceFile()
@@ -48,22 +48,16 @@ class Session2(object):
         if self.isValidSession():
             self.isInitialized = True
             self.loadSession()
-            #print("load session")
-            #print(">>>", self.twcc_proj_id)
-            #print(">>>", self.twcc_s3_access_key)
         else:
-            # print(self.getSessionData())
-            self.isInitialized = False
-            self.initSession()
-            #print("init session")
+            self._initSession()
 
-    def initSession(self):
+    def _initSession(self):
+
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
         mkdir_p(session_path)
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
-                self.getSessionData(), fn, encoding='utf-8', allow_unicode=True)
-            print(">>>>>>>>>>>>>>>>>>> write to file <<<<<<<<<<<<<<<<<<<<<<<<<<<")
+                Session2._getSessionData(self.twcc_api_key), fn, encoding='utf-8', allow_unicode=True)
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
     def isApiKey(self):
@@ -92,17 +86,16 @@ class Session2(object):
             return twcc_file_resources
 
     @staticmethod
-    def _isValidSession():
+    def _isValidSession(isConfig=False):
         twcc_file_session = Session2._getSessionFile()
-        #print("twcc_file_session:", twcc_file_session)
-        #print("rule 1:", not isNone(twcc_file_session))
-        #print("rule 2:", not isFile(twcc_file_session))
         if not isNone(twcc_file_session) and isFile(twcc_file_session):
             sessConf = yaml.load(
                 open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
-            # print(sessConf)
             if not type(sessConf) == type(None):
-                return True
+                if isConfig:
+                    return sessConf
+                else:
+                    return True
         return False
 
     def isValidSession(self):
@@ -118,7 +111,6 @@ class Session2(object):
 
             self.twcc_username = self.sessConf["_default"]["twcc_username"]
             self.twcc_api_key = self.sessConf["_default"]["twcc_api_key"]
-
             self.twcc_s3_access_key = self.sessConf["_default"]["twcc_s3_access_key"]
             self.twcc_s3_secret_key = self.sessConf["_default"]["twcc_s3_secret_key"]
 
@@ -148,8 +140,6 @@ class Session2(object):
     @staticmethod
     def _getIsrvProjs(api_key=None):
         from twcc.services.base import projects
-        # get proj info from iservice,
-        # that maybe include not allow to twcc services.
         twcc_proj = projects(api_key=api_key)
         return twcc_proj.getProjects()
 
@@ -159,12 +149,12 @@ class Session2(object):
     @staticmethod
     def _getDefaultProject(twcc_proj_code=None):
         if isNone(twcc_proj_code):
-            if "TWCC_PROJ_CODE" in os.environ:
-                # print(os.environ["TWCC_PROJ_CODE"])
+            # raw_input((isNone(os.environ['TWCC_PROJ_CODE']), os.environ['TWCC_PROJ_CODE']))
+            if "TWCC_PROJ_CODE" in os.environ and not isNone(os.environ['TWCC_PROJ_CODE']):
                 return os.environ["TWCC_PROJ_CODE"]
-            else:
-                pass
-                #print("input project code")
+            if Session2._isValidSession():
+                return Session2._isValidSession(isConfig=True)['_default']['twcc_proj_code']
+            raise ValueError("input project code")
         return twcc_proj_code
 
     def getDefaultProject(self):
@@ -212,7 +202,7 @@ class Session2(object):
 
         twcc_proj = projects(api_key=api_key)
 
-        iserv_proj = Session2._getIsrvProjs()
+        iserv_proj = Session2._getIsrvProjs(api_key=api_key)
 
         twcc_proj = defaultdict(dict)
 
@@ -247,7 +237,8 @@ class Session2(object):
     @staticmethod
     def _whoami(api_key=None):
         from twcc.services.base import Users
-        twcc_api = Users(api_key=Session2._getApiKey())
+        # raw_input(api_key)
+        twcc_api = Users(api_key=api_key)
         info = twcc_api.getInfo()
         if len(info) > 0:
             return info[0]
@@ -258,31 +249,41 @@ class Session2(object):
         return Session2._whoami(self.twcc_api_key)
 
     @staticmethod
-    def _getApiKey():
+    def _getApiKey(twcc_api_key):
         if 'TWCC_API_KEY' in os.environ:
             return os.environ['TWCC_API_KEY']
         else:
-            print("prompt user enter API Key")
+            if Session2._isValidSession():
+                return Session2._isValidSession(isConfig=True)['_default']['twcc_api_key']
+            else:
+                # raw_input("_getApiKey(twcc_api_key) " + twcc_api_key)
+                if not isNone(twcc_api_key):
+                    return twcc_api_key
+                else:
+                    raise ValueError("Not existing API Key.")
 
     def getApiKey(self):
         return Session2._getApiKey()
 
     @staticmethod
-    def _getSessionData():
+    def _getSessionData(twcc_api_key=None):
         sessionData = defaultdict(dict)
-
-        whoami = Session2._whoami()
+        whoami = Session2._whoami(twcc_api_key)
         sessionData["_default"]['twcc_username'] = whoami['username']
-        sessionData["_default"]['twcc_api_key'] = Session2._getApiKey()
+        sessionData["_default"]['twcc_api_key'] = twcc_api_key
         sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject()
 
+        sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S')
+        sessionData["_meta"]['cli_version'] = __version__
+
         s3keys = Session2._getTwccS3Keys(
-            Session2._getDefaultProject(), Session2._getApiKey())
+            Session2._getDefaultProject(), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
 
         resources = Session2._getTwccResourses()
-        projects = Session2._getAvblProjs()
+        projects = Session2._getAvblProjs(twcc_api_key)
         for proj in projects:
             proj_codes = dict()
             for res in resources:
@@ -292,11 +293,16 @@ class Session2(object):
 
         return dict(sessionData)
 
-    def getSessionData(self):
-        return Session2._getSessionData()
-
     def __str__(self):
+        from datetime import datetime
+
         key_values = [
+            {"key": "session_created_time", "value":
+                self.sessConf['_meta']['ctime']},
+            {"key": "twcc_cli_version",
+                "value": self.sessConf['_meta']['cli_version']},
+            {"key": "twcc_apikey_owner", "value": Session2._whoami(self.twcc_api_key)[
+                'display_name']},
             {"key": "twcc_data_path", "value": self.twcc_data_path},
             {"key": "twcc_api_key", "value": self.twcc_api_key},
             {"key": "package_yaml", "value": self.package_yaml},
@@ -304,8 +310,8 @@ class Session2(object):
             {"key": "twcc_file_resources", "value": self.twcc_file_resources},
             {"key": "twcc_proj_code", "value": self.twcc_proj_code},
         ]
-        return ""
-        # return table_layout("parameters", key_values, isPrint=False, isWrap=False)
+        # return ""
+        return table_layout("parameters", key_values, ['key', 'value'], isPrint=False, isWrap=False)
 
 
 # if __name__ == '__main__':

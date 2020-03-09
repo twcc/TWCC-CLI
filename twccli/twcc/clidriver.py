@@ -14,9 +14,9 @@ urllib3.disable_warnings()
 
 
 class ServiceOperation:
-    def __init__(self):
+    def __init__(self, api_key=None):
+        self.api_key = Session2._getApiKey(api_key)
         self._load()
-
         self.http_verb_valid = set(['get', 'post', 'delete', 'patch', 'put'])
         self.res_type_valid = set(['txt', 'json'])
 
@@ -28,7 +28,7 @@ class ServiceOperation:
             self._setDebug()
 
     def _load(self):
-        self.api_key = Session2._getApiKey()
+        # raw_input("in clidriver "+self.api_key)
         self.twcc_config = Session2._getTwccliConfig()
         self.host_url = Session2._getTwccApiHost()
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from click.testing import CliRunner
-from twcc import _TWCC_SESSION_, Session2
+from twcc import Session2
 import click
 from twccli import cli
 import pytest

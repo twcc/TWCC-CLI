@@ -13,41 +13,14 @@ if sys.version_info[0] == 2:
 #
 # Get our data path to be added to botocore's search path
 #
-_TWCC_data_path_ = []
-if 'TWCC_DATA_PATH' in os.environ:
-    for path in os.environ['TWCC_DATA_PATH'].split(os.pathsep):
-        path = os.path.expandvars(path)
-        path = os.path.expanduser(path)
-        _TWCC_data_path_.append(path)
-
-
 if "HOME" in os.environ:
-    _TWCC_data_path_.append(
-        os.path.join(os.environ['HOME'], '.twcc_data')
-    )
+    _TWCC_data_path_ = os.path.join(os.environ['HOME'], '.twcc_data')
 else:
-    _TWCC_data_path_.append("/tmp")
+    _TWCC_data_path_ = "/tmp"
 
-os.environ['TWCC_DATA_PATH'] = os.pathsep.join(_TWCC_data_path_)
-
-SCALAR_TYPES = set([
-    'string', 'float', 'integer', 'long', 'boolean', 'double',
-    'blob', 'timestamp'
-])
-COMPLEX_TYPES = set(['structure', 'map', 'list'])
-
-__all__ = ["clidriver", "util", "services"]
+os.environ['TWCC_DATA_PATH'] = _TWCC_data_path_
 
 GupSiteBlockSet = set([182, 29, 35, 120])
-
-_TWCC_SESSION_ = None
-while True:
-    _TWCC_SESSION_ = Session2()
-    # print("_TWCC_SESSION_.isInitialized", _TWCC_SESSION_.isInitialized)
-    if _TWCC_SESSION_.isInitialized:
-        break
-    else:
-        print("XXXX create again")
 
 
 # By default, requests logs following message if verify=False
