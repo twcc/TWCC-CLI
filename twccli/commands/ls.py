@@ -258,7 +258,6 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, is_table, ids_or_names):
-    print(ctx.params)
     ids_or_names = mk_names(name, ids_or_names)
 
     keyring = Keypairs()
