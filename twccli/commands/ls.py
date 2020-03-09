@@ -119,7 +119,7 @@ def cli():
 
 @click.command(help='Operations for VCS (Virtual Compute Service)')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
-              help="List your keypairs in TWCC VCS. Euals to `ls key`")
+              help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
               help="List existing network in TWCC VCS.")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
