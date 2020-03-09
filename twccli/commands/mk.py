@@ -174,13 +174,6 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
     if wait:
         doSiteReady(ans['id'], site_type='vcs')
 
-    #keyring = Keypairs()
-
-    # if 'name' in keyring.queryById(name):
-    #    raise ValueError("Duplicated name for keypair")
-
-    # print(Session2._getTwccDataPath())
-    # keyring.createKeyPair(name)
 
 
 @click.option('--name', 'name', default="twccli", type=str,
@@ -188,6 +181,19 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
 @click.command(help="cos(Cloud Object Storage)")
 def cos(name):
     create_bucket(name)
+
+
+@click.command(help="key")
+@click.option('-n', 'name', default="twccli", type=str,
+              help="Enter name for your resources.")
+def key(name):
+    keyring = Keypairs()
+
+    if 'name' in keyring.queryById(name):
+        raise ValueError("Duplicated name for keypair")
+
+    print(Session2._getTwccDataPath())
+    keyring.createKeyPair(name)
 
 # end object ===============================================================
 
@@ -210,7 +216,7 @@ def ccs(name, gpu, sol, img_name, wait):
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
-
+cli.add_command(key)
 
 def main():
     cli()
