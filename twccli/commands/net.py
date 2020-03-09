@@ -24,7 +24,7 @@ def ccs(siteId, port, isAttach):
 
 
 @click.command(help='Security Group operations for VCS (Virtual Compute Service)')
-@click.option('-fip / -nofip', '--floading-ip / --no-floating-ip', 'fip',
+@click.option('-fip / -nofip', '--floating-ip / --no-floating-ip', 'fip',
               is_flag=True, default=True,  show_default=False,
               help='Configure your VCS environment with or without floating IP.')
 @click.option('-p', '--port', 'port', type=int,
