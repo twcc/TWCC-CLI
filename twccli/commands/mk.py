@@ -176,7 +176,7 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
 
 
 
-@click.option('--name', 'name', default="twccli", type=str,
+@click.option('-n','--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.command(help="cos(Cloud Object Storage)")
 def cos(name):
