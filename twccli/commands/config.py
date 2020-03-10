@@ -2,9 +2,9 @@
 from __future__ import print_function
 import click
 import os
-from twcc.util import validate, isNone
-from twcc.session import Session2
-from twccli import pass_environment
+from twccli.twcc.util import validate, isNone
+from twccli.twcc.session import Session2
+from twccli.twccli import pass_environment
 
 
 @click.command(help='Get exsiting info.')

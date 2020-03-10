@@ -9,8 +9,8 @@ from ..clidriver import ServiceOperation
 from termcolor import colored
 from terminaltables import AsciiTable
 from tqdm import tqdm
-from twcc.session import Session2
-from twcc.util import sizeof_fmt, pp, isNone
+from twccli.twcc.session import Session2
+from twccli.twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
 

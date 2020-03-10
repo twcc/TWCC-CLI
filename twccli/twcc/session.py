@@ -6,8 +6,8 @@ import yaml
 import shutil
 import datetime
 from collections import defaultdict
-from twcc.util import isNone, isFile, mkdir_p, table_layout
-from version import __version__
+from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout
+from twccli.version import __version__
 
 class Session2(object):
     # static varibles

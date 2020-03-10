@@ -2,10 +2,9 @@
 from __future__ import print_function
 import os
 import yaml
-import twcc
-from twcc.session import Session2
-from twcc.util import pp, isNone, isDebug
-from twcc.clidriver import ServiceOperation
+from twccli.twcc.session import Session2
+from twccli.twcc.util import pp, isNone, isDebug
+from twccli.twcc.clidriver import ServiceOperation
 
 # change to new-style-class https://goo.gl/AYgxqp
 
@@ -19,7 +18,7 @@ class GenericService(object):
         self._res_type_ = "json"
         self._debug_ = isDebug()
         self._api_key_ = Session2._getApiKey(api_key)
-        
+
         self.twcc = ServiceOperation(api_key=api_key)
 
         self.twcc._debug = isDebug()

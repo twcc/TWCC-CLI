@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twcc.session import Session2
+from twccli.twcc.session import Session2
 from collections import defaultdict
-from twcc.util import isNone, table_layout
-from twcc.services.generic import GenericService
+from twccli.twcc.util import isNone, table_layout
+from twccli.twcc.services.generic import GenericService
 
 
 class Users(GenericService):

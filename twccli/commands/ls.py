@@ -2,15 +2,15 @@
 from __future__ import print_function
 import click
 import json
-from twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
-from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
-from twcc.services.compute import getServerId, getSecGroupList
-from twcc import GupSiteBlockSet
-from twcc.services.solutions import solutions
-from twcc.services.base import acls, users, image_commit
-from twcc.services.s3_tools import S3
-from twcc.services.network import Networks
-from twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
+from twccli.twcc.services.compute import getServerId, getSecGroupList
+from twccli.twcc import GupSiteBlockSet
+from twccli.twcc.services.solutions import solutions
+from twccli.twcc.services.base import acls, users, image_commit
+from twccli.twcc.services.s3_tools import S3
+from twccli.twcc.services.network import Networks
+from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
 
 def list_port(site_id):

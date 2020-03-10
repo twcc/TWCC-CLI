@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twcc.services.generic import CpuService
-from twcc.services.base import projects
-from twcc.util import pp, isNone, table_layout
+from twccli.twcc.services.generic import CpuService
+from twccli.twcc.services.base import projects
+from twccli.twcc.util import pp, isNone, table_layout
 
 class Networks(CpuService):
     def __init__(self):

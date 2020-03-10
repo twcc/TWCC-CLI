@@ -2,14 +2,14 @@
 from __future__ import print_function
 import click
 import time
-from twcc.services.compute import GpuSite as Sites
-from twcc.services.compute import VcsSite, VcsSecurityGroup
-from twcc.services.solutions import solutions
-from twcc import GupSiteBlockSet
-from twcc.services.s3_tools import S3
-from twcc.util import pp, table_layout, SpinCursor, isNone
-from twcc.services.base import acls, users, image_commit, Keypairs
-from twcc import GupSiteBlockSet, Session2
+from twccli.twcc.services.compute import GpuSite as Sites
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup
+from twccli.twcc.services.solutions import solutions
+from twccli.twcc import GupSiteBlockSet
+from twccli.twcc.services.s3_tools import S3
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone
+from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc import GupSiteBlockSet, Session2
 
 
 def create_vcs(name, sol="", img_name="", network="",

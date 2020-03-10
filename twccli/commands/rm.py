@@ -2,10 +2,10 @@
 from __future__ import print_function
 import click
 import re
-from twcc.util import pp, table_layout, SpinCursor, isNone, mk_names
-from twcc.services.base import acls, users, image_commit, Keypairs
-from twcc.services.s3_tools import S3
-from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names
+from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.services.s3_tools import S3
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
 from prompt_toolkit.shortcuts import yes_no_dialog
 
 

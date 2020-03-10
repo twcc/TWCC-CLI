@@ -1,6 +1,6 @@
-from twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
-from twcc.util import isNone
-from twcc.services.compute import getServerId, getSecGroupList
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
+from twccli.twcc.util import isNone
+from twccli.twcc.services.compute import getServerId, getSecGroupList
 import click
 
 

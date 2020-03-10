@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import click
-from twcc.services.s3_tools import S3
+from twccli.twcc.services.s3_tools import S3
 
 def upload(source, directory, key, r):
     s3 = S3()
