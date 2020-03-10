@@ -1,7 +1,6 @@
-# Copyright 2018 NCHC
 import os, sys
-from .util import isNone
-from .session import Session2
+from util import isNone
+from twccli.twcc.session import Session2
 from requests.packages import urllib3
 
 if sys.version_info[0] == 2:

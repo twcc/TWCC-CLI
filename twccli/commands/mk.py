@@ -79,8 +79,14 @@ def create_vcs(name, sol="", img_name="", network="",
     return vcs.create(name, exists_sol[sol], required)
 
 
-def doSiteReady(site_id):
-    b = Sites(debug=False)
+def doSiteReady(site_id, site_type='cntr'):
+    if site_type == 'cntr':
+        b = Sites()
+    elif site_type == 'vcs':
+        b = VcsSite()
+    else:
+        ValueError("Error")
+
     wait_ready = False
     while not wait_ready:
         print("Waiting for container to be Ready.")
@@ -144,7 +150,7 @@ def cli():
 @click.command(context_settings=dict(max_content_width=500), help="Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'keypair',
               help="Delete existing keypair(s)")
-@click.option('-n', 'name', default="twccli", type=str,
+@click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
               show_default=True,
@@ -154,8 +160,6 @@ def cli():
               help="Chose hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.")
-@click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
-              help="Enter TWCC solution name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
@@ -184,7 +188,7 @@ def cos(name):
 
 
 @click.command(help="key")
-@click.option('-n', 'name', default="twccli", type=str,
+@click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 def key(name):
     keyring = Keypairs()

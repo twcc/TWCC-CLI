@@ -33,13 +33,9 @@ def init(ctx, apikey, proj_code, verbose):
         else:
             os.environ['TWCC_API_KEY'] = apikey
 
-        if not isNone(proj_code):
-            if not 'TWCC_PROJ_CODE' in os.environ:
-                # raw_input("assign pcode:{}".format(proj_code))
-                os.environ['TWCC_PROJ_CODE'] = proj_code
-            else:
-                raise ValueError(
-                    "$TWCC_PROJ_CODE or `--project-code` is required.")
+        if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:
+            proj_code = os.environ['TWCC_PROJ_CODE']
+
         if validate(apikey):
             ctx.vlog("Receiving Project Code: %s", (proj_code))
             ctx.vlog("Receiving API Key: %s", (apikey))

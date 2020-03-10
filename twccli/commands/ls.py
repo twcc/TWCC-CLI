@@ -13,10 +13,13 @@ from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
 
-def list_port(site_id):
+def list_port(site_id, is_table=True):
     b = GpuSite()
-    table_layout("Port info. for {}".format(site_id),
-                 b.getConnInfo(site_id, ssh_info=False), isPrint=True)  # todo
+    ans = b.getConnInfo(site_id, ssh_info=False)
+    if is_table:
+        table_layout("Port info. for {}".format(site_id), ans, isPrint=True)
+    else:
+        jpp(ans)
 
 
 def list_commit():
@@ -245,9 +248,8 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 
     if not res_property:
         if show_ports:
-            if len(site_ids_or_names) > 0:
-                for ele in site_ids_or_names:
-                    list_port(ele)
+            if len(site_ids_or_names) ==1:
+                list_port(site_ids_or_names[0], is_table)
             else:
                 raise ValueError("Need at least one resource id.")
         else:

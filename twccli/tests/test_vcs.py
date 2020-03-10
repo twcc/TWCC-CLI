@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from click.testing import CliRunner
-from twcc import Session2
-from twcc.util import isNone
+from ..twcc import Session2
+from ..twcc.util import isNone
+import os
 import re
 import click
 import json
-from examples.twccli import cli
+from ..twccli import cli
 import pytest
 import uuid
 
@@ -15,11 +16,11 @@ class TestVcsLifecyc:
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
         (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 16.04", "local")
         self.ext_port = "81"
+        self.apikey = os.environ['TWCC_API_KEY']
+        self.pcode = os.environ['TWCC_PROJ_CODE']
 
     def _loadSession(self):
-        mySession = Session2()
         self.runner = CliRunner()
-        assert mySession.getApiKey() == Session2._getApiKey()
 
     def __run(self, cmd_list):
         result = self.runner.invoke(cli, cmd_list)
@@ -30,12 +31,12 @@ class TestVcsLifecyc:
         return result.output
 
     def _create_key(self):
-        cmd_list = "mk vcs -key --name {}".format(self.key_name)
+        cmd_list = "mk key --name {}".format(self.key_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
     def _list_key(self):
-        cmd_list = "ls -key {}".format(self.key_name)
+        cmd_list = "ls key -n {} -json".format(self.key_name)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
@@ -46,15 +47,16 @@ class TestVcsLifecyc:
         print(out)
 
     def _create_vcs(self):
-        paras = ["mk", "-v",
+        paras = ["mk", "vcs",
                 "--name",           self.key_name,
-                "--sol",            self.sol,
+                "--solution",       self.sol,
                 "--flavor-name",    self.flv,
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
                 "--wait",
                 ]
+        print(" ".join(paras))
         out = self.__run(paras)
         for mstr in out.split("\n"):
             if re.search("Waiting for resource:", mstr):
@@ -62,7 +64,7 @@ class TestVcsLifecyc:
                 return True
 
     def _list_vcs(self):
-        cmd_list = "ls -v --json {}".format(self.vcs_id)
+        cmd_list = "ls -v -json {}".format(self.vcs_id)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
@@ -77,7 +79,7 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _list_secg(self):
-        cmd_list = "ls -v -secg --json {}".format(self.vcs_id)
+        cmd_list = "ls -v -secg -json {}".format(self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         json_str = "[    {" + out.replace("\n", "").split("[    {")[1]
