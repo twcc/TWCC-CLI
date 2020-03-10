@@ -93,7 +93,7 @@ def list_files(ids_or_names, is_table):
             jpp(files)
 
 
-def list_secg(name, ids_or_names, isJson=False, isTable=True):
+def list_secg(name, ids_or_names, is_table=True):
     ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         raise ValueError("Need resource id for listing security group")
@@ -102,11 +102,11 @@ def list_secg(name, ids_or_names, isJson=False, isTable=True):
         secg_list = getSecGroupList(ids_or_names[0])
         secg_id = secg_list['id']
         secg_detail = secg_list['security_group_rules']
-        if isJson:
-            jpp(secg_detail)
-        elif isTable:
+        if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail, isPrint=True)
+        else:
+            jpp(secg_detail)
         return True
 
 # end orginal function ====================================
@@ -184,9 +184,6 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         # forward to key()
         ctx.invoke(key, ids_or_names=site_ids_or_names,
                    name=name, is_table=is_table)
-
-    if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, is_table)
 
     if isNone(res_property):  # add for list vcs, @amber need to work on this
         vcs = VcsSite()

@@ -5,7 +5,7 @@ import json
 from twccli.twcc.session import Session2
 from twccli.twcc.services.generic import GpuService, CpuService
 from twccli.twcc.services.base import projects, Flavors, iservice
-from twccli.twcc.util import pp, isNone, table_layout, isDebug
+from twccli.twcc.util import pp, isNone, table_layout, isDebug, strShorten
 
 
 def chkPortPair(x): return True if type(x) == type({}) and len(
@@ -491,5 +491,6 @@ def getSecGroupList(site_id):
     server_id = getServerId(site_id)
     secg = VcsSecurityGroup()
     secg_list = secg.list(server_id=server_id)
+
     if len(secg_list) > 0:
         return secg_list[0]

@@ -53,7 +53,7 @@ def isFile(fn):
     return True if os.path.isfile(fn) else False
 
 
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, isPrint=False):
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False):
     from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
