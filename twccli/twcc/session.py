@@ -139,7 +139,7 @@ class Session2(object):
 
     @staticmethod
     def _getIsrvProjs(api_key=None):
-        from twcc.services.base import projects
+        from twccli.twcc.services.base import projects
         twcc_proj = projects(api_key=api_key)
         return twcc_proj.getProjects()
 
@@ -173,7 +173,7 @@ class Session2(object):
 
     @staticmethod
     def _getTwccS3Keys(proj_code, api_key):
-        from twcc.services.base import projects
+        from twccli.twcc.services.base import projects
         twcc_proj = projects(api_key=api_key)
         twcc_proj.setCluster(Session2._getClusterName("COS"))
         return twcc_proj.getS3Keys(proj_code)
@@ -183,7 +183,7 @@ class Session2(object):
 
     @staticmethod
     def _getTwccProjs(cluster_name, api_key=None):
-        from twcc.services.base import projects
+        from twccli.twcc.services.base import projects
         # get twcc existing proj info,
         # that maybe include project has been expired.
 
@@ -196,7 +196,7 @@ class Session2(object):
 
     @staticmethod
     def _getAvblProjs(api_key=None):
-        from twcc.services.base import projects
+        from twccli.twcc.services.base import projects
 
         config = Session2._getTwccliConfig()
 
@@ -236,7 +236,7 @@ class Session2(object):
 
     @staticmethod
     def _whoami(api_key=None):
-        from twcc.services.base import Users
+        from twccli.twcc.services.base import Users
         # raw_input(api_key)
         twcc_api = Users(api_key=api_key)
         info = twcc_api.getInfo()
