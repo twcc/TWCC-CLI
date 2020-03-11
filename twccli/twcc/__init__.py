@@ -1,5 +1,5 @@
 import os, sys
-from util import isNone
+from twccli.twcc.util import isNone
 from twccli.twcc.session import Session2
 from requests.packages import urllib3
 
