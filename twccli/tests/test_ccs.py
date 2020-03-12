@@ -33,7 +33,7 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk ccs -name {} -gpu {} -sol {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
+        cmd_list = u"mk ccs -n {} -gpu {} -sol {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
         , self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
@@ -75,9 +75,9 @@ class TestCntrLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _delete(self):
-        cmd_list = "rm ccs -f {}".format(self.site_id)
-        print(cmd_list)
-        out = self.__run(cmd_list.split(" "))
+        cmd_list = ["rm", "ccs", "-f", "%s"%self.site_id ]
+        print(" ".join(cmd_list))
+        out = self.__run(cmd_list)
 
 
     def test_lifecycle(self):

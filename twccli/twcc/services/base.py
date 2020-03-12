@@ -59,7 +59,7 @@ class image_commit(GenericService):
         self.http_verb = "post"
         self.data_dic = {"site": siteid, "tag": tag, "image": image}
         self.res_type = "txt"
-        return table_layout("commited images", self._do_api(), isPrint=False)
+        self._do_api()
 
 
 class acls(GenericService):

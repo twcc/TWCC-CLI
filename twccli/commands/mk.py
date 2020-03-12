@@ -12,6 +12,28 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 
 
+def create_commit(site_id, tag, isAll=False):
+    ccs = Sites()
+
+    site = ccs.getDetail(site_id)
+    if 'Pod' in site:
+        img_name = site['Pod'][0]['container'][0]['image'].split('/')[-1].split(":")[0]
+        c = image_commit()
+        return c.createCommit(site_id, tag, img_name)
+    #if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
+    #    isAll = False
+
+    #    my_sites = a.list(isAll=isAll)
+    #    if len(my_sites) > 0:
+    #        col_name = ['id', 'name', 'create_time', 'status']
+    #        table_layout('sites', my_sites, caption_row=col_name)
+
+    #site_id = get_input(
+    #    u'Please Input the site ID which you would like to commit: ')
+    #tag = get_input(u'Please Input the image tag  ')
+    #image = get_input(u'Please Input the image name: ')
+
+# cli start from here
 def create_vcs(name, sol="", img_name="", network="",
                keypair="", flavor="", sys_vol="", fip=""):
 
@@ -211,7 +233,7 @@ def key(name):
 
 
 @click.command(help="ccs(Container Computer Service)")
-@click.option('-name', '--name', 'name', default="twccli", type=str,
+@click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('-gpu', '--gpu-number', 'gpu', default=1, type=int,
               help="Enter desire number for GPU.")
@@ -219,21 +241,38 @@ def key(name):
               help="Enter TWCC solution name.")
 @click.option('-img', '--img-name', 'img_name', default=None, type=str,
               help="Enter image name. Please check through `twccli ls t cos -img`")
-@click.option('-wait/-nowait', '--wait-ready/--no-wait-ready', 'wait', is_flag=True, default=False,
+@click.option('-wait/-nowait', '--wait-ready/--no-wait-ready', 'wait',
+              is_flag=True, default=False,
               help='Wait until resources are provisioned')
+@click.option('-cln', '--request-clone', 'request_clone',
+              default=False, is_flag=True,
+              help='Request CCS clone environment.')
+@click.option('-s', '--site-id', 'siteId', type=int,
+              default=None,
+              help='Resource id for your clone.')
+@click.option('-tag', '--clone-tag', 'clone_tag',
+              default=None,
+              help='Tag your clone environment.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-def ccs(name, gpu, sol, img_name, wait, is_table):
-    ans = create_cntr(name, gpu, sol, img_name)
-    if wait:
-        doSiteReady(ans['id'])
-
-    if is_table:
-        cols = ["id", "name", "status"]
-        table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
+def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_table):
+    if request_clone:
+        if isNone(siteId):
+            raise ValueError("`-s` is required for cloning")
+        if isNone(clone_tag):
+            raise ValueError("`-tag` is required for cloning")
+        create_commit(siteId, clone_tag)
     else:
-        jpp(ans)
+        ans = create_cntr(name, gpu, sol, img_name)
+        if wait:
+            doSiteReady(ans['id'])
+
+        if is_table:
+            cols = ["id", "name", "status"]
+            table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 
 
 cli.add_command(vcs)

@@ -223,7 +223,7 @@ def cos(name, is_table, ids_or_names):
 @click.command(help='Operations for CCS (Container Computer Service)')
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
-@click.option('-clone', '--show-clone-status', 'res_property', flag_value='commit',
+@click.option('-cln', '--show-clone-status', 'res_property', flag_value='commit',
               help='List the submitted CCS clone requests')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,

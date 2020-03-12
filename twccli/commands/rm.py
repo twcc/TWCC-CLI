@@ -50,11 +50,7 @@ def del_ccs(ids_or_names, isForce=False):
         ccs = GpuSite()
         for con_id in ids_or_names:
             ans = ccs.delete(con_id)
-            if "detail" in ans:
-                raise ValueError(
-                    "Resource id {} can not be deleted!".format(con_id))
-            else:
-                print("Successfully remove {}".format(con_id))
+            print("Successfully remove {}".format(con_id))
     else:
         print("No delete operations.")
 
