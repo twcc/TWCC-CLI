@@ -14,6 +14,13 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
 
 def list_port(site_id, is_table=True):
+    """List port by site id, print information in table/json format 
+
+    :param site_id: list of site id
+    :type site_id: string or tuple
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    """
     b = GpuSite()
     ans = b.getConnInfo(site_id, ssh_info=False)
     if is_table:
@@ -23,11 +30,18 @@ def list_port(site_id, is_table=True):
 
 
 def list_commit():
+    """List copy image by site id 
+    """
     c = image_commit()
     print(c.getCommitList())
 
 
 def list_all_img(solution_name):
+    """List all image by solution name
+
+    :param solution_name: Enter name for your resources.
+    :type solution_name: string
+    """
     print("Note : this operation take 1-2 mins")
     a = solutions()
     if isNone(solution_name) or len(solution_name) == 0:
@@ -51,6 +65,15 @@ def list_all_img(solution_name):
 
 
 def list_cntr(site_ids_or_names, is_table, isAll):
+    """List container by site ids in table/json format or list all containers
+
+    :param site_ids_or_names: list of site id
+    :type site_ids_or_names: string or tuple
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    :param is_all: List all the containers in the project. (Tenant Administrators only)
+    :type is_all: bool
+    """  
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
@@ -76,6 +99,11 @@ def list_cntr(site_ids_or_names, is_table, isAll):
 
 
 def list_buckets(is_table):
+    """List buckets in table/json format
+
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    """
     s3 = S3()
     buckets = s3.list_bucket()
     if is_table:
@@ -85,6 +113,15 @@ def list_buckets(is_table):
 
 
 def list_files(ids_or_names, is_table):
+    """List file in specific folder in buckets table/json format
+
+    :param ids_or_names: list of site id
+    :type ids_or_names: string or tuple
+    :param name: Enter name for your resources.
+    :type name: string
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    """  
     s3 = S3()
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
@@ -97,6 +134,15 @@ def list_files(ids_or_names, is_table):
 
 
 def list_secg(name, ids_or_names, is_table=True):
+    """List security group by site ids in table/json format
+
+    :param site_ids_or_names: list of site id
+    :type site_ids_or_names: string or tuple
+    :param name: Enter name for your resources.
+    :type name: string
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    """   
     ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         raise ValueError("Need resource id for listing security group")
@@ -141,6 +187,27 @@ def cli():
               help='View all image files. Provid solution name for filtering.')
 @click.pass_context
 def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
+    """Command line for List VCS
+    Function list :
+    1. list port
+    2. list commit
+    3. list all image
+    4. list containers
+    5. list buckets
+    6. list files in specific foder
+    7. list security group by site 
+
+    :param res_property: Funtion type (network, keypair, solution, image)
+    :type res_property: string
+    :param site_ids_or_names: list of site id
+    :type site_ids_or_names: string or tuple
+    :param name: Enter name for your resources.
+    :type name: string
+    :param is_table: Show information in Table view or JSON view.
+    :type is_table: bool
+    :param is_all: List all the containers in the project. (Tenant Administrators only)
+    :type is_all: bool
+    """  
     if isNone(res_property):
         vcs = VcsSite()
 
@@ -213,6 +280,11 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
 def cos(name, is_table, ids_or_names):
+    """Command line for List COS
+       Functions:
+       1. list bucket
+       2. list files in specific folder in bucket
+    """
     ids_or_names = mk_names(name, ids_or_names)
     if len(ids_or_names) == 0:
         list_buckets(is_table)
@@ -236,6 +308,13 @@ def cos(name, is_table, ids_or_names):
               help='Show port information.')
 @click.argument('site_ids_or_names', nargs=-1)
 def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
+    """Command line for List Container
+       Functions:
+       1. list container
+       2. list container image
+       3. list image copy
+       4. list solution
+    """
     if res_property == 'image':
         list_all_img(site_ids_or_names)
 
@@ -265,6 +344,8 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, is_table, ids_or_names):
+    """Command line for List Key
+    """
     ids_or_names = mk_names(name, ids_or_names)
 
     keyring = Keypairs()

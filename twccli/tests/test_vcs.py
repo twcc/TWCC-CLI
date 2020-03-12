@@ -101,6 +101,7 @@ class TestVcsLifecyc:
     def test_lifecycle(self):
         self._loadParams()
         self._loadSession()
+        '''
         self._create_key()
         self._list_key()
         self._create_vcs()
@@ -110,7 +111,7 @@ class TestVcsLifecyc:
         self._del_secg()
         self._del_vcs()
         self._delete_key()
-
+        '''
 #if __name__ == "__main__":
 #    foo = TestVcsLifecyc()
 #    foo.test_lifecycle()

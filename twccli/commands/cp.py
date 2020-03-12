@@ -4,6 +4,17 @@ import click
 from twccli.twcc.services.s3_tools import S3
 
 def upload(source, directory, key, r):
+    """Attempt to upload file or directory to bucket
+    
+    :param source: source file path
+    :type source: string
+    :param directory: destination file path
+    :type directory: string
+    :param key: file name for upload file
+    :type key: string
+    :param r: is recursive
+    :type r: bool
+    """
     s3 = S3()
     # Check for source type
     if os.path.isdir(source):
@@ -23,6 +34,17 @@ def upload(source, directory, key, r):
 
 
 def download(source, directory, key, r):
+    """Download file or directory from bucket
+    
+    :param source: Source storage name
+    :type source: string
+    :param directory: Download to the specific path
+    :type directory: string
+    :param key: The name of the key to upload to.
+    :type key: string
+    :param r: Recursively copy entire directories.
+    :type r: bool
+    """
     print('enter download')
     s3 = S3()
     if not s3.check_4_bucket(source):
@@ -78,7 +100,20 @@ def cli():
 @click.option('-k', '--key', 'key',
                help='The name of the key to upload to.')
 @click.option('-r', 'r', is_flag=True, help='Recursively copy entire directories.')
+
 def cos(op, source, directory, key, r):
+    """Command line for upload/download
+    :param source: Source storage name
+    :type source: string
+    :param upload: Upload files or folders to bucket
+    :type upload: string
+    :param directory: Download to the specific path
+    :type directory: string
+    :param key: The name of the key to upload to.
+    :type key: string
+    :param r: Recursively copy entire directories.
+    :type r: bool
+    """
     if op == 'upload':
         print('enter upload')
         upload(source, directory, key, r=r)

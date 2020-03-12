@@ -14,6 +14,25 @@ from twccli.twcc import GupSiteBlockSet, Session2
 
 def create_vcs(name, sol="", img_name="", network="",
                keypair="", flavor="", sys_vol="", fip=""):
+    """Create vcs
+    create vcs by set solution, image name, flavor
+    create vcs by default value
+
+    :param sys_vol: Chose system volume disk type
+    :type sys_vol: string
+    :param flavor: Choose hardware configuration
+    :type flavor: string
+    :param img_name: Enter image name.Enter image name
+    :type img_name: string
+    :param network: Enter network name
+    :type network: string
+    :param sol: Enter TWCC solution name
+    :type sol: string
+    :param fip: Set this flag for applying a floating IP
+    :type fip: bool
+    :param name: Enter name
+    :type name: string
+    """
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -80,6 +99,13 @@ def create_vcs(name, sol="", img_name="", network="",
 
 
 def doSiteReady(site_id, site_type='cntr'):
+    """Check if site is created or not
+
+    :param site_id: Enter site id
+    :type site_id: string
+    :param site_type: Enter site type
+    :type site_type: string
+    """
     if site_type == 'cntr':
         b = Sites()
     elif site_type == 'vcs':
@@ -97,11 +123,27 @@ def doSiteReady(site_id, site_type='cntr'):
 
 
 def create_bucket(bucket_name):
+    """Create bucket by name
+
+    :param bucket_name: Enter bucket name
+    :type bucket_name: string
+    """
     s3 = S3()
     s3.create_bucket(bucket_name)
 
 
 def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
+    """Create container
+       Create container by default value
+       Create container by set vaule of name, solution name, gpu number, solution number
+
+    :param cntr_name: Enter container name
+    :type cntr_name: string
+    :param sol_img: Enter solution image
+    :type sol_img: string
+    :param isWait: Enter network name
+    :type isWait: bool
+    """
     def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
     cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
@@ -157,9 +199,9 @@ def cli():
               help="Chose system volume disk type.")
 @click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
               show_default=True,
-              help="Chose hardware configuration.")
+              help="Choose hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
-              help="Enter image name.")
+              help="Enter image name.Enter image name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
@@ -169,8 +211,31 @@ def cli():
 @click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
               help='Set this flag for applying a floating IP.')
 @click.argument('ids_or_names', nargs=-1)
-def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip):
 
+def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip):
+    """Command line for create VCS
+
+    :param keypair: Delete existing keypair(s)
+    :type keypair: string
+    :param name: Enter name for your resources
+    :type name: string
+    :param sys_vol: Chose system volume disk type
+    :type sys_vol: string
+    :param flavor: Choose hardware configuration
+    :type flavor: string
+    :param img_name: Enter image name.Enter image name
+    :type img_name: string
+    :param wait: Wait until resources are provisioned
+    :type wait: bool
+    :param network: Enter network name
+    :type network: string
+    :param sol: Enter TWCC solution name
+    :type sol: string
+    :param fip: Set this flag for applying a floating IP
+    :type fip: bool
+    :param ids_or_names: Enter ids or names
+    :type ids_or_names: string or tuple
+    """
     if name == 'twccli':
         name = "{}_{}".format(name, flavor)
     ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
@@ -183,14 +248,26 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
 @click.option('-n','--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.command(help="cos(Cloud Object Storage)")
+
 def cos(name):
+    """Command line for create cos
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
     create_bucket(name)
 
 
 @click.command(help="key")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
+
 def key(name):
+    """Command line for create key
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
     keyring = Keypairs()
 
     if 'name' in keyring.queryById(name):
@@ -213,7 +290,21 @@ def key(name):
               help="Enter image name. Please check through `twccli ls t cos -img`")
 @click.option('-wait/-nowait', '--wait-ready/--no-wait-ready', 'wait', is_flag=True, default=False,
               help='Wait until resources are provisioned')
+
 def ccs(name, gpu, sol, img_name, wait):
+    """Command line for create ccs
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param gpu: Enter desire number for GPU.
+    :type gpu: integer
+    :param sol: Enter TWCC solution name.
+    :type sol: string
+    :param img_name: Enter image name. Please check through `twccli ls t cos -img`
+    :type img_name: string
+    :param wait: Wait until resources are provisioned.
+    :type wait: bool
+    """
     create_cntr(name, gpu, sol, img_name, wait)
 
 
