@@ -335,6 +335,19 @@ def key(name):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_table):
+    """Command line for create ccs
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param gpu: Enter desire number for GPU.
+    :type gpu: integer
+    :param sol: Enter TWCC solution name.
+    :type sol: string
+    :param img_name: Enter image name. Please check through `twccli ls t cos -img`
+    :type img_name: string
+    :param wait: Wait until resources are provisioned.
+    :type wait: bool
+    """
     if request_clone:
         if isNone(siteId):
             raise ValueError("`-s` is required for cloning")
@@ -352,20 +365,6 @@ def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_tab
         else:
             jpp(ans)
 
-def ccs(name, gpu, sol, img_name, wait):
-    """Command line for create ccs
-
-    :param name: Enter name for your resources.
-    :type name: string
-    :param gpu: Enter desire number for GPU.
-    :type gpu: integer
-    :param sol: Enter TWCC solution name.
-    :type sol: string
-    :param img_name: Enter image name. Please check through `twccli ls t cos -img`
-    :type img_name: string
-    :param wait: Wait until resources are provisioned.
-    :type wait: bool
-    """
 
 cli.add_command(vcs)
 cli.add_command(cos)

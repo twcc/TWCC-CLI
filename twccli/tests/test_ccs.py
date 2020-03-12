@@ -9,12 +9,11 @@ from ..twccli import cli
 
 
 env_options = {"cicd_pytorch": (1, "PyTorch", "pytorch-19.11-py3:latest"),
-               "cicd_tensorflow": (1, "TensorFlow", "tensorflow-19.11-tf2-py3:latest"),
-               "cicd_test0gpu": (0, u"影像檔測試區", "ngc/nvidia/tensorrt-19.08-py3:latest")}
+               "cicd_tensorflow": (1, "TensorFlow", "tensorflow-19.11-tf2-py3:latest"), }
 
 class TestCntrLifecyc:
     def _loadParams(self):
-        test_env = "cicd_test0gpu"
+        test_env = "cicd_pytorch"
         env_pick = env_options[test_env]
         self.apikey = os.environ['TWCC_API_KEY']
         self.pcode = os.environ['TWCC_PROJ_CODE']
