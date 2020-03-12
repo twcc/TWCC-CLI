@@ -33,15 +33,14 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk ccs -name {} -gpu {} -sol {} -img {} -wait".format(self.cntr_name, self.gpu_num
+        cmd_list = u"mk ccs -name {} -gpu {} -sol {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
         , self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
+        ans = json.loads(self.create_out)
+        self.site_id = int(ans['id'])
 
     def _list(self):
-        import re
-        match = re.search('SiteId: (?P<site_id>[0-9]*)\.', self.create_out)
-        self.site_id = match.group('site_id')
         assert type(int(self.site_id)) == type(1)
         cmd_list = "ls ccs {} ".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))

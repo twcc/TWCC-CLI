@@ -41,7 +41,7 @@ class TestVcsLifecyc:
         print(self.list_out)
 
     def _delete_key(self):
-        cmd_list = "rm -key --force {}".format(self.key_name)
+        cmd_list = "rm vcs -key --force {}".format(self.key_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
@@ -54,36 +54,32 @@ class TestVcsLifecyc:
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
-                "--wait",
+                "-wait", "-json"
                 ]
         print(" ".join(paras))
         out = self.__run(paras)
-        for mstr in out.split("\n"):
-            if re.search("Waiting for resource:", mstr):
-                self.vcs_id = mstr.split(" ")[3]
-                return True
+        self.vcs_id = json.loads(out)['id']
 
     def _list_vcs(self):
-        cmd_list = "ls -v -json {}".format(self.vcs_id)
+        cmd_list = "ls vcs -json {}".format(self.vcs_id)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
     def _del_vcs(self):
-        cmd_list = "rm -v --force {}".format(self.vcs_id)
+        cmd_list = "rm vcs --force {}".format(self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg(self):
-        cmd_list = "net -secg -p {} {}".format(self.ext_port, self.vcs_id)
+        cmd_list = "net vcs -secg -p {} -s {}".format(self.ext_port, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _list_secg(self):
-        cmd_list = "ls -v -secg -json {}".format(self.vcs_id)
+        cmd_list = "ls vcs -secg -json {}".format(self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
-        json_str = "[    {" + out.replace("\n", "").split("[    {")[1]
-        jobj = json.loads(json_str)
+        jobj = json.loads(out)
         for ele in jobj:
             if not isNone(ele['port_range_min']):
                 if int(self.ext_port) == int(ele['port_range_min']):
@@ -92,7 +88,7 @@ class TestVcsLifecyc:
         raise Exception("Error, can not find port {}".format(self.ext_port))
 
     def _del_secg(self):
-        cmd_list = "rm -secg --force {}".format(self.secg_id)
+        cmd_list = "rm vcs -secg --force {}".format(self.secg_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
