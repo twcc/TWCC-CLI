@@ -153,7 +153,7 @@ def create_bucket(bucket_name):
     s3.create_bucket(bucket_name)
 
 
-def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
+def create_cntr(cntr_name, gpu, sol_name, sol_img):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
@@ -162,8 +162,6 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
     :type cntr_name: string
     :param sol_img: Enter solution image
     :type sol_img: string
-    :param isWait: Enter network name
-    :type isWait: bool
     """
     def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
@@ -219,7 +217,7 @@ def cli():
               help="Choose hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.Enter image name.")
-@click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
+@click.option('-wait/-nowait', '--wait-until-ready/--no-wait-until-ready', 'wait', is_flag=True, default=False,
 
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
@@ -233,7 +231,7 @@ def cli():
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 
-def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip):
+def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -254,6 +252,8 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
     :type sol: string
     :param fip: Set this flag for applying a floating IP
     :type fip: bool
+    :param is_table: Set this flag table view or json view
+    :type is_table: bool
     :param ids_or_names: Enter ids or names
     :type ids_or_names: string or tuple
     """
