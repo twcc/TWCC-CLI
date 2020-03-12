@@ -187,7 +187,9 @@ class GpuSite(GpuService):
 
         info_port = [x for x in info_detail['Service'][0]['ports']]
         if not ssh_info:
-            return info_port
+            # don't show node port
+            ans = [ dict([(y, x[y]) for y in x if not y == 'node_port']) for x in info_port ]
+            return ans
         else:
             info_port = [x['port'] for x in info_detail['Service']
                         [0]['ports'] if x['target_port'] == 22][0]

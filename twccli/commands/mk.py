@@ -7,7 +7,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 
@@ -115,7 +115,6 @@ def doSiteReady(site_id, site_type='cntr'):
 
     wait_ready = False
     while not wait_ready:
-        print("Waiting for container to be Ready.")
         if b.isReady(site_id):
             wait_ready = True
         time.sleep(5)
@@ -175,11 +174,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
             raise ValueError(
                 "Can't find id, please check error message : {}".format(res['detail']))
     else:
-        print("SiteId: {0}.".format(res['id']))
-
-    if isWait:
-        doSiteReady(res['id'])
-    return int(res['id'])
+        return res
 
 # end original function ==================================================
 
@@ -203,6 +198,7 @@ def cli():
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.Enter image name.")
 @click.option('--wait/--nowait', '--wait_ready/--no_wait_ready', 'wait', is_flag=True, default=False,
+
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Enter network name.")
@@ -210,6 +206,9 @@ def cli():
               help="Enter TWCC solution name.")
 @click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
               help='Set this flag for applying a floating IP.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 
 def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip):
@@ -240,8 +239,18 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
         name = "{}_{}".format(name, flavor)
     ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
                      flavor=flavor, sys_vol=sys_vol, fip=fip)
+    ans["solution"] = sol
+    ans["flavor"] = flavor
+
     if wait:
         doSiteReady(ans['id'], site_type='vcs')
+
+    if is_table:
+        cols = ["id", "name", "status"]
+        table_layout("VCS Site", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
+
 
 
 
@@ -305,8 +314,6 @@ def ccs(name, gpu, sol, img_name, wait):
     :param wait: Wait until resources are provisioned.
     :type wait: bool
     """
-    create_cntr(name, gpu, sol, img_name, wait)
-
 
 cli.add_command(vcs)
 cli.add_command(cos)
