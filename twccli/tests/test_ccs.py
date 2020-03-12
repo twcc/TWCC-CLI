@@ -41,12 +41,6 @@ class TestCntrLifecyc:
         self.site_id = int(ans['id'])
 
     def _list(self):
-<<<<<<< HEAD
-        import re
-        match = re.search('SiteId: (?P<site_id>[0-9]*)\\.', self.create_out)
-        self.site_id = match.group('site_id')
-=======
->>>>>>> d57436cfa1894cf16799f440f4eea52008ccc053
         assert type(int(self.site_id)) == type(1)
         cmd_list = "ls ccs {} ".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))
