@@ -10,6 +10,15 @@ from prompt_toolkit.shortcuts import yes_no_dialog
 
 
 def del_bucket(ids_or_names, is_recursive, isForce=False):
+    """Delete bucket 
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param is_recursive: is recursive or not
+    :type is_recursive: bool
+    :param isForce: Force to delete any resources at your own cost.
+    :type isForce: bool
+    """
     txt = "!! Recursive is ON !!\n"*3 if is_recursive else ""
     if getConfirm("COS Delete Buckets", ",".join(ids_or_names), isForce, ext_txt=txt):
         s3 = S3()
@@ -18,6 +27,15 @@ def del_bucket(ids_or_names, is_recursive, isForce=False):
             print("Bucket name '{}' is deleted".format(bucket_name))
 
 def del_object(ids_or_names, bucket_name, isForce=False):
+    """Delete Objects by bucket name
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param bucket_name: bucket name
+    :type bucket_name: string
+    :param isForce: Force to delete any resources at your own cost.
+    :type isForce: bool
+    """
     txt = "Deleting objects in bucket name: {}".format(bucket_name)
     if getConfirm("COS Delete Buckets", ",".join(ids_or_names), isForce, ext_txt=txt):
         for obj_key in ids_or_names:
@@ -33,6 +51,15 @@ def del_vcs(ids_or_names, isForce=False):
                 print("VCS resources {} deleted.".format(ele))
 
 def getConfirm(res_name, entity_name, isForce, ext_txt=""):
+    """Popup confirm dialog for double confirming to make sure if user really want to delete or not
+
+    :param res_name: name for deleting object.
+    :type res_name: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param ext_txt: extra text
+    :type ext_txt: string
+    """
     if isForce:
         return isForce
     import sys
@@ -46,6 +73,13 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
 
 
 def del_ccs(ids_or_names, isForce=False):
+    """Delete ccs by id or name
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
     if getConfirm(u"Delete CCS", ", ".join(ids_or_names), isForce):
         ccs = GpuSite()
         for con_id in ids_or_names:
@@ -56,6 +90,13 @@ def del_ccs(ids_or_names, isForce=False):
 
 
 def del_keypair(ids_or_names, isForce=False):
+    """Delete keypair by name
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
     if getConfirm("Keypair", ", ".join(ids_or_names), isForce):
         keyring = Keypairs()
         for key_name in ids_or_names:
@@ -67,6 +108,17 @@ def del_keypair(ids_or_names, isForce=False):
 
 
 def del_secg(ids_or_names, isForce=False, isAll=False):
+    """Delete security group by site id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
+    :type is_recursive: bool
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param isAll: Operates as tenant admin
+    :type isAll: bool
+    """
     secg_id = ids_or_names[0]
     if len(secg_id) <= 6:
         raise ValueError(
@@ -103,6 +155,24 @@ def cli():
               help="Operates as tenant admin.")
 @click.argument('ids_or_names', nargs=-1)
 def vcs(res_property, name, force, is_all, ids_or_names):
+    """Command line for VCS removing 
+        Function :
+        1. Keypair
+        2. Security Group
+        
+        :param res_property: Function type (Keypair, SecurityGroup)
+        :type res_property: string
+        :param name: Key name, security group hash id, or VCS resource id.
+        :type name: string
+        :param name: Key name, security group hash id, or VCS resource id.
+        :type name: string
+        :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
+        :type is_recursive: bool
+        :param force: Force to delete any resources at your own cost.
+        :type force: bool
+        :param is_all: Operates as tenant admin.
+        :type is_all: bool
+    """
     ids_or_names = mk_names(name, ids_or_names)
     if res_property == "Keypair":
         if len(ids_or_names) > 0:
@@ -129,7 +199,19 @@ def vcs(res_property, name, force, is_all, ids_or_names):
               is_flag=True, show_default=True,
               help='Force to delete any resources at your own cost.')
 @click.argument('ids_or_names', nargs=-1)
+
 def cos(name, force, ids_or_names, is_recursive):
+    """Command Line for COS deleting buckets
+
+    :param name: Bucket name for deleting object.
+    :type name: string
+    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
+    :type is_recursive: bool
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param force: ids_or_names
+    :type force: string or tuple
+    """
     ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         print('please enter bucket_name')

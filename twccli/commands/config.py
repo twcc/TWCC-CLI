@@ -11,6 +11,11 @@ from twccli.twccli import pass_environment
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @pass_environment
 def whoami(ctx, verbose):
+    """Command line for whoami, print information of account and session
+    
+    :param verbose: Enables verbose mode
+    :type verbose: bool
+    """
     ctx.verbose = verbose
     ctx.log("Hi, {}, nice to meet you!".format(
         Session2._whoami()['display_name']))
@@ -25,6 +30,15 @@ def whoami(ctx, verbose):
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @pass_environment
 def init(ctx, apikey, proj_code, verbose):
+    """Constructor method
+    
+    :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
+    :type apikey: string
+    :param proj_code: TWCC project code for default, ie: GOV108009.
+    :type proj_code: string
+    :param verbose: Enables verbose mode.
+    :type verbose: bool
+    """
     ctx.verbose = verbose
     if not Session2._isValidSession():
         if isNone(apikey):

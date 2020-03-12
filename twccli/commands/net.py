@@ -15,6 +15,17 @@ import click
               required=True,
               help='Resource id for CCS.')
 def ccs(siteId, port, isAttach):
+    """Command line for network function of ccs
+    Functions:
+    expose/unbind port
+
+    :param port: Port number for your VCS environment
+    :type port: integer
+    :param siteId: Resource id for VCS
+    :type siteId: integer
+    :param isAttach: exposed/un-exposed port for continer services
+    :type isAttach: bool
+    """
     b = GpuSite()
     tsite = b.queryById(siteId)
     if isAttach:
@@ -42,6 +53,21 @@ def ccs(siteId, port, isAttach):
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
 def vcs(siteId, port, cidr, protocol, isIngress, fip):
+    """Command line for network function of vcs
+
+    :param fip: Configure your VCS environment with or without floating IP
+    :type fip: bool
+    :param port: Port number for your VCS environment
+    :type port: integer
+    :param siteId: Resource id for VCS
+    :type siteId: integer
+    :param cidr: Network range for security group
+    :type cidr: string
+    :param protocol: Network protocol for security group
+    :type protocol: string
+    :param isIngress: Applying security group directions.
+    :type isIngress: bool
+    """
     if isNone(port):
         if fip: # @todo need to add check
             VcsServerNet().associateIP(siteId)
