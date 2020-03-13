@@ -1,23 +1,32 @@
 image: python
 
 stages:
-- test
+    - test
+
+cache:
+    paths:
+        - .cache/pip
+        - venv/
 
 before_script:
-- curl -O https://bootstrap.pypa.io/get-pip.py
-- python get-pip.py
-- pip install tox
-- echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - python -V
+    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - curl -O https://bootstrap.pypa.io/get-pip.py
+    - python get-pip.py
 
 python27:
   stage: test
   image: python:2.7
-  script: tox -e py27
+  script: 
+    - pip install tox
+    - tox -e py27
   only: 
-    - merge_amber_aug
+    - dev
 python37:
   stage: test
   image: python:3.7
-  script: tox -e py37
+  script: 
+    - pip install tox
+    - tox -e py37
   only: 
-    - merge_amber_aug
+    - dev
