@@ -320,7 +320,7 @@ def cos(name, is_table, ids_or_names):
         list_files(ids_or_names, is_table)
 
 # end object ==================================================
-@click.command(help='Operations for CCS (Container Computer Service)')
+@click.command(help='List operations for CCS (Container Computer Service)')
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
