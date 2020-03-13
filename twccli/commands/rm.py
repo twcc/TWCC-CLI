@@ -141,6 +141,22 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
 def cli():
     pass
 
+@click.command(help="Key Operations for VCS (Virtual Compute Service)")
+@click.option('-n', '--name', 'name', default=None, type=str,
+              help="Enter name for your resource name")
+@click.option('-f / --nof', '--force / --noforce', 'force',
+        is_flag=True, show_default=True,
+        help='Force to delete any resource at your own cost.')
+@click.argument('ids_or_names', nargs=-1)
+@click.pass_context
+def key(ctx, name, ids_or_names, force):
+    ids_or_names = mk_names(name, ids_or_names)
+
+    if len(ids_or_names) > 0:
+        del_keypair(ids_or_names, force)
+    else:
+        print("Key name is required.")
+
 
 @click.command(help="Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
@@ -173,12 +189,6 @@ def vcs(res_property, name, force, is_all, ids_or_names):
         :param is_all: Operates as tenant admin.
         :type is_all: bool
     """
-    ids_or_names = mk_names(name, ids_or_names)
-    if res_property == "Keypair":
-        if len(ids_or_names) > 0:
-            del_keypair(ids_or_names, force)
-        else:
-            print("Key name is required.")
 
     if res_property == "SecurityGroup":
         del_secg(ids_or_names, force, is_all)
@@ -238,7 +248,7 @@ def ccs(site_id, force, ids_or_names):
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
-
+cli.add_command(key)
 
 def main():
     cli()
