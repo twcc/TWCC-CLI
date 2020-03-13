@@ -88,7 +88,7 @@ def cli():
     pass
 
 
-@click.command(help="cos(Cloud Object Service)")
+@click.command(help="'Upload/Download' Operations for COS(Cloud Object Service)")
 @click.option('-upload', 'op', flag_value='upload',
                help='Upload files or folders to bucket')
 @click.option('-download', 'op', flag_value='download',

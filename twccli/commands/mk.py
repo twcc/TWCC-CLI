@@ -204,7 +204,7 @@ def cli():
     pass
 
 
-@click.command(context_settings=dict(max_content_width=500), help="Operations for VCS (Virtual Compute Service)")
+@click.command(context_settings=dict(max_content_width=500), help="'Make' Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'keypair',
               help="Delete existing keypair(s)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
@@ -277,7 +277,7 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
 
 @click.option('-n','--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.command(help="cos(Cloud Object Storage)")
+@click.command(help="'Make' Operations for COS(Cloud Object Service)")
 
 def cos(name):
     """Command line for create cos
@@ -288,7 +288,7 @@ def cos(name):
     create_bucket(name)
 
 
-@click.command(help="key")
+@click.command(help="Create your key")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 
@@ -309,7 +309,7 @@ def key(name):
 # end object ===============================================================
 
 
-@click.command(help="ccs(Container Computer Service)")
+@click.command(help="'Make' Operations for CCS(Container Computer Service)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 @click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,

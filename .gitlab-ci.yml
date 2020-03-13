@@ -30,4 +30,5 @@ python37:
     - pip install tox
     - tox -e py37
   only: 
-    - dev
+  - dev
+
