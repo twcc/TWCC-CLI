@@ -150,6 +150,15 @@ def cli():
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, ids_or_names, force):
+    """Removing key operation 
+
+    :param name: Enter name for your resource name
+    :type name: string
+    :param ids_or_names: Enter ids or names
+    :type ids_or_names: string
+    :param force: Force to delete any resource at your own cost.
+    :type force: bool
+    """
     ids_or_names = mk_names(name, ids_or_names)
 
     if len(ids_or_names) > 0:

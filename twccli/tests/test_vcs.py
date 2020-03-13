@@ -41,7 +41,7 @@ class TestVcsLifecyc:
         print(self.list_out)
 
     def _delete_key(self):
-        cmd_list = "rm vcs -key --force {}".format(self.key_name)
+        cmd_list = "rm key --force {}".format(self.key_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
