@@ -347,6 +347,8 @@ class VcsSite(CpuService):
         return site_info['status'] == "Ready"
 
 
+
+
 class VcsSecurityGroup(CpuService):
     def __init__(self):
         CpuService.__init__(self)
@@ -490,8 +492,51 @@ class VcsSecurityGroup(CpuService):
         self.ext_get = {'project': self._project_id}
         self._func_ = "security_group_rules"
         self.url_dic = {self._func_: rule_id}
-        self._do_api()
+        return self._do_api()
 
+class VcsImage(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+        self._func_ = "images"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def list(self, srv_id, isAll=False):
+        self.ext_get = {'project': self._project_id}
+        ans = self._do_api()
+        for y in ans:
+            if not isNone(y['server']):
+                if y['server']['id']==srv_id:
+                    return y
+        else:
+            return {}
+
+    def createSnapshot(self, sid, name, desc_str):
+        vcs = VcsSite()
+        sites = vcs.queryById(sid)
+        site_name = sites['name']
+        server = VcsServer()
+        server_detail = server.getServerDetail(sid)
+        if len(server_detail)>0:
+            tsrv = server_detail[0]
+
+            self.http_verb = "put"
+            self.url_dic = {self._func_: "{}/save/".format(tsrv['id'])}
+            self.data_dic = {"name": name,
+                "desc":desc_str,
+                "os":tsrv['os'],
+                "os_version":tsrv['os_version']}
+        return self._do_api()
+
+class VcsServer(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+        self._func_ = "servers"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def getServerDetail(self, site_id):
+        self.ext_get = {'project': self._project_id,
+                        'site': site_id}
+        return self._do_api()
 
 def getServerId(site_id):
     vcs = VcsSite()

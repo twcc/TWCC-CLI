@@ -3,8 +3,9 @@ from __future__ import print_function
 import click
 import json
 import re
+import datetime
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
@@ -12,6 +13,20 @@ from twccli.twcc.services.base import acls, users, image_commit
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+
+def list_snapshot(site_ids_or_names, is_table, desc):
+    if len(site_ids_or_names)==1:
+        sid = site_ids_or_names[0]
+        img = VcsImage()
+        srv_id = getServerId(sid)
+        ans = img.list(srv_id)
+        if len(ans)>0:
+            ans['site_id'] = sid
+        cols = ['id', 'site_id', 'name', 'status', 'create_time']
+        if is_table:
+            table_layout("Snapshot Result", ans, cols, isPrint=True, isWrap=False)
+        else:
+            jpp(ans)
 
 def list_gpu_flavor(is_table=True):
     ans = GpuSite.getGpuList()
@@ -189,27 +204,31 @@ def cli():
 
 
 @click.command(help="'List' Operations for VCS (Virtual Compute Service)")
+@click.option('-n', '--name', 'name', default=None, type=str,
+              help="Enter name for your resources.")
+@click.option('-s', '--site-id', 'name', type=str,
+              help="Enter name for your resources id.")
+@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
+              help="List all the containers in the project. (Tenant Administrators only)")
+@click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
+              show_default=True,
+              help="List all available flavor for VCS.")
+@click.option('-img', '--image', 'res_property', flag_value='image',
+              help='View all image files. Provid solution name for filtering.')
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
               help="List existing network in TWCC VCS.")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
-@click.argument('site_ids_or_names', nargs=-1)
-@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
-              help="List all the containers in the project. (Tenant Administrators only)")
-@click.option('-n', '--name', 'name', default=None, type=str,
-              help="Enter name for your resources.")
+@click.option('-snap', '--snapshots', 'res_property', flag_value='Snapshot',
+              help="List snapshot for specific VCS. `-s` is required!")
+@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
+              help="Show TWCC solutions for VCS.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
-              help="Show TWCC solutions for VCS.")
-@click.option('-img', '--image', 'res_property', flag_value='image',
-              help='View all image files. Provid solution name for filtering.')
-@click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
-              show_default=True,
-              help="List all available flavor for VCS.")
+@click.argument('site_ids_or_names', nargs=-1)
 @click.pass_context
 def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     """Command line for List VCS
@@ -233,6 +252,8 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
     """
+    site_ids_or_names = mk_names(name, site_ids_or_names)
+
     if isNone(res_property):
         vcs = VcsSite()
 
@@ -248,7 +269,10 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         else:
             jpp(ans)
 
-        return True
+    if res_property == 'Snapshot':
+        desc_str = "twccli_{}".format(datetime.datetime.now().strftime("_%m%d%H%M"))
+        list_snapshot(site_ids_or_names, is_table, desc_str)
+
 
     if res_property == 'image':
         list_all_img(site_ids_or_names)
