@@ -20,5 +20,5 @@ python37:
   stage: test
   script: tox -e py37
   only: 
-  - merge_amber_aug
+  - dev
 
