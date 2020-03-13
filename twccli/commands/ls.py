@@ -188,7 +188,7 @@ def cli():
     pass
 
 
-@click.command(help='Operations for VCS (Virtual Compute Service)')
+@click.command(help="'List' Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -300,7 +300,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
 
 # end vcs ==================================================
-@click.command(help='Operations for COS (Cloud Object Storage)')
+@click.command(help="'List' Operations for COS (Cloud Object Storage)")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -320,7 +320,7 @@ def cos(name, is_table, ids_or_names):
         list_files(ids_or_names, is_table)
 
 # end object ==================================================
-@click.command(help='List operations for CCS (Container Computer Service)')
+@click.command(help="'List' Operations for CCS (Container Computer Service)")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',

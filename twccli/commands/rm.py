@@ -141,7 +141,7 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
 def cli():
     pass
 
-@click.command(help="Key Operations for VCS (Virtual Compute Service)")
+@click.command(help="Remove your key in VCS ")
 @click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resource name")
 @click.option('-f / --nof', '--force / --noforce', 'force',
@@ -167,7 +167,7 @@ def key(ctx, name, ids_or_names, force):
         print("Key name is required.")
 
 
-@click.command(help="Operations for VCS (Virtual Compute Service)")
+@click.command(help="'Remove' Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="Delete existing keypair(s) for VCS.")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
@@ -209,7 +209,7 @@ def vcs(res_property, name, force, is_all, ids_or_names):
             print("Key name is required.")
 
 
-@click.command(help="Operations for COS (Cloud Object Service)")
+@click.command(help="'Remove' Operations for COS (Cloud Object Service)")
 @click.option('-bkt', '--bucket_name', 'name', help='Bucket name for deleting object. ')
 @click.option('-r', '--recursive', 'is_recursive',
               is_flag=True, show_default=True, default=False,
@@ -240,7 +240,7 @@ def cos(name, force, ids_or_names, is_recursive):
         del_object(ids_or_names, name, force)
 
 
-@click.command(help="Operations for CCS (Container Compute Service)")
+@click.command(help="'Remove' Operations for CCS (Container Compute Service)")
 @click.option('-s', '--site-id', 'site_id',
               help='Resource id for CCS')
 @click.option('-f / --nof', '--force / --noforce', 'force',
