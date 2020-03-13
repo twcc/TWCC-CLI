@@ -2,6 +2,7 @@
 from __future__ import print_function
 import click
 import json
+import re
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup
 from twccli.twcc.services.compute import getServerId, getSecGroupList
@@ -12,9 +13,30 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
+def list_gpu_flavor(is_table=True):
+    ans = GpuSite.getGpuList()
+    formated_ans = [ {"`-gpu` tag":x, "description":ans[x]} for x in ans ]
+    if is_table:
+        table_layout("Existing `-gpu` flavor", formated_ans, isPrint=True, isWrap=False)
+    else:
+        jpp(ans)
+
+def list_vcs_flavor(is_table=True):
+    ans = VcsSite().getIsrvFlavors()
+    wanted_ans = []
+    for x in ans:
+        if re.search("^v\..+super$", ans[x]['desc']):
+            wanted_ans.append({"flavor name": ans[x]['desc'],
+                "spec": ans[x]['spec']} )
+
+    if is_table:
+        table_layout("VCS Flavors", wanted_ans, isPrint=True, isWrap=False)
+    else:
+        jpp(wanted_ans)
+
 
 def list_port(site_id, is_table=True):
-    """List port by site id, print information in table/json format 
+    """List port by site id, print information in table/json format
 
     :param site_id: list of site id
     :type site_id: string or tuple
@@ -30,7 +52,7 @@ def list_port(site_id, is_table=True):
 
 
 def list_commit():
-    """List copy image by site id 
+    """List copy image by site id
     """
     c = image_commit()
     print(c.getCommitList())
@@ -73,7 +95,7 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     :type is_table: bool
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
-    """  
+    """
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
@@ -121,7 +143,7 @@ def list_files(ids_or_names, is_table):
     :type name: string
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
-    """  
+    """
     s3 = S3()
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
@@ -142,7 +164,7 @@ def list_secg(name, ids_or_names, is_table=True):
     :type name: string
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
-    """   
+    """
     ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         raise ValueError("Need resource id for listing security group")
@@ -185,6 +207,9 @@ def cli():
               help="Show TWCC solutions for VCS.")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
+@click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
+              show_default=True,
+              help="List all available flavor for VCS.")
 @click.pass_context
 def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     """Command line for List VCS
@@ -195,7 +220,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     4. list containers
     5. list buckets
     6. list files in specific foder
-    7. list security group by site 
+    7. list security group by site
 
     :param res_property: Funtion type (network, keypair, solution, image)
     :type res_property: string
@@ -207,7 +232,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     :type is_table: bool
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
-    """  
+    """
     if isNone(res_property):
         vcs = VcsSite()
 
@@ -227,6 +252,9 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
     if res_property == 'image':
         list_all_img(site_ids_or_names)
+
+    if res_property == 'flavor':
+        list_vcs_flavor(is_table)
 
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
@@ -295,6 +323,8 @@ def cos(name, is_table, ids_or_names):
 @click.command(help='Operations for CCS (Container Computer Service)')
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
+@click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
+              help='View available gpu environment for creating CCS.')
 @click.option('-cln', '--show-clone-status', 'res_property', flag_value='commit',
               help='List the submitted CCS clone requests')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
@@ -315,6 +345,9 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
        3. list image copy
        4. list solution
     """
+    if res_property == 'flavor':
+        list_gpu_flavor(is_table)
+
     if res_property == 'image':
         list_all_img(site_ids_or_names)
 

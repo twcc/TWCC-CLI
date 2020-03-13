@@ -230,7 +230,6 @@ def cli():
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-
 def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip, is_table):
     """Command line for create VCS
 
