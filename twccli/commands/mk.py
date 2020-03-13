@@ -312,7 +312,7 @@ def key(name):
 @click.command(help="ccs(Container Computer Service)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.option('-gpu', '--gpu-number', 'gpu', default=1, type=int,
+@click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
               help="Enter desire number for GPU.")
 @click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
               help="Enter TWCC solution name.")

@@ -81,13 +81,12 @@ class GpuSite(GpuService):
         return self._do_api()
 
     @staticmethod
-    def getGpuDefaultHeader(gpus=1):
-        gpu_list = GpuSite.getGpuList(mtype='dict')
+    def getGpuDefaultHeader(gpus="1"):
+        gpu_list = GpuSite.getGpuList()
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
 
         gpu_default = {
-            # 'bucket' : None,
             'command': "whoami; sleep 600;",
             'flavor': gpu_list[gpus],
             'replica': '1',
