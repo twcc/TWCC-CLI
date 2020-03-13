@@ -47,15 +47,16 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
 
 
 @click.command(cls=TWCCLI)
-@click.option(
-    "--home",
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
-    help="Changes the folder to operate on.",
-)
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @pass_environment
 def cli(ctx, verbose, home):
-    """A complex command line interface."""
+    """
+        Welcome to TWCC, TaiWan Compute Cloud.
+
+        https://github.com/TW-NCHC/TWCC-CLI
+
+        -- You Succeed, We Succeed!! --
+    """
     ctx.verbose = verbose
 
 
