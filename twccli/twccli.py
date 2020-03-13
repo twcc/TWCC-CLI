@@ -49,7 +49,7 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
 @click.command(cls=TWCCLI)
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @pass_environment
-def cli(ctx, verbose, home):
+def cli(ctx, verbose):
     """
         Welcome to TWCC, TaiWan Compute Cloud.
 
