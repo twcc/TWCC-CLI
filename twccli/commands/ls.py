@@ -281,6 +281,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         list_vcs_flavor(is_table)
 
     if res_property == "solution":
+        # why GpuSite?!
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
         print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
 
@@ -306,22 +307,6 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         # forward to key()
         ctx.invoke(key, ids_or_names=site_ids_or_names,
                    name=name, is_table=is_table)
-
-    if isNone(res_property):  # add for list vcs, @amber need to work on this
-        vcs = VcsSite()
-
-        if len(site_ids_or_names) > 0:
-            cols = ['id', 'name', 'public_ip', 'create_time', 'user', 'status']
-            ans = [vcs.queryById(x) for x in site_ids_or_names]
-        else:
-            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
-            ans = vcs.list(is_all)
-
-        if is_table:
-            table_layout("VCS VMs", ans, cols, isPrint=True)
-        else:
-            jpp(ans)
-
 
 # end vcs ==================================================
 @click.command(help="'List' Operations for COS (Cloud Object Storage)")
