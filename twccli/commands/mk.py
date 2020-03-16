@@ -224,8 +224,8 @@ def cli():
               help="Create snapshot for specific VCS. `-s` is required!")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.Enter image name.")
-@click.option('-wait/-nowait', '--wait-until-ready/--no-wait-until-ready', 'wait',
-              is_flag=True, default=False,
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Enter network name.")
@@ -342,8 +342,8 @@ def key(name):
               help="Enter TWCC solution name.")
 @click.option('-img', '--img-name', 'img_name', default=None, type=str,
               help="Enter image name. Please check through `twccli ls t cos -img`")
-@click.option('-wait/-nowait', '--wait-ready/--no-wait-ready', 'wait',
-              is_flag=True, default=False,
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
               help='Wait until resources are provisioned')
 @click.option('-cln', '--request-clone', 'request_clone',
               default=False, is_flag=True,
