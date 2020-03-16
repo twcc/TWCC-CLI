@@ -3,11 +3,6 @@ image: python
 stages:
     - test
 
-cache:
-    paths:
-        - .cache/pip
-        - venv/
-
 before_script:
     - python -V
     - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
@@ -20,8 +15,6 @@ python27:
   script: 
     - pip install tox
     - tox -e py27
-  only: 
-    - dev
 
 python37:
   stage: test
@@ -29,6 +22,4 @@ python37:
   script: 
     - pip install tox
     - tox -e py37
-  only: 
-  - dev
 
