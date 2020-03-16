@@ -2,12 +2,13 @@
 from __future__ import print_function
 import click
 import time
+from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 
@@ -204,34 +205,41 @@ def cli():
     pass
 
 
-@click.command(context_settings=dict(max_content_width=500), help="Operations for VCS (Virtual Compute Service)")
+@click.command(context_settings=dict(max_content_width=500),
+              help="'Make' Operations for VCS (Virtual Compute Service)")
 @click.option('-key', '--keypair', 'keypair',
               help="Delete existing keypair(s)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
+@click.option('-s', '--site-id', 'site_id', type=str,
+              help="Enter name for your resources id.")
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
               show_default=True,
               help="Chose system volume disk type.")
 @click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
               show_default=True,
               help="Choose hardware configuration.")
+@click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
+              default=False,
+              help="Create snapshot for specific VCS. `-s` is required!")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Enter image name.Enter image name.")
-@click.option('-wait/-nowait', '--wait-until-ready/--no-wait-until-ready', 'wait', is_flag=True, default=False,
-
+@click.option('-wait/-nowait', '--wait-until-ready/--no-wait-until-ready', 'wait',
+              is_flag=True, default=False,
               help='Wait until resources are provisioned')
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Enter network name.")
 @click.option('-sol', '--solution', 'sol', default="Ubuntu", type=str,
               help="Enter TWCC solution name.")
-@click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip', is_flag=True, default=False,
+@click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip',
+              is_flag=True, default=False,
               help='Set this flag for applying a floating IP.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-
-def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, sol, fip, is_table):
+@click.pass_context
+def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wait, network, snapshot, sol, fip, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -246,6 +254,8 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
     :type img_name: string
     :param wait: Wait until resources are provisioned
     :type wait: bool
+    :param snapshot: create snapshot list for some VCS
+    :type snapshot: bool
     :param network: Enter network name
     :type network: string
     :param sol: Enter TWCC solution name
@@ -257,28 +267,41 @@ def vcs(keypair, name, ids_or_names, sys_vol, flavor, img_name, wait, network, s
     :param ids_or_names: Enter ids or names
     :type ids_or_names: string or tuple
     """
-    if name == 'twccli':
-        name = "{}_{}".format(name, flavor)
-    ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
-                     flavor=flavor, sys_vol=sys_vol, fip=fip)
-    ans["solution"] = sol
-    ans["flavor"] = flavor
 
-    if wait:
-        doSiteReady(ans['id'], site_type='vcs')
+    if snapshot:
+        sids = mk_names(site_id, ids_or_names)
+        if not isNone(sids) or len(sids)>0:
+            sid= sids[0]
+            print("create snapshot for {}".format(sid))
+            img = VcsImage()
+            desc_str = "twccli created at {}".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            if name=='twccli':
+                name += datetime.now().strftime("%d%m%H%M")
+            return img.createSnapshot(sid, name, desc_str)
 
-    if is_table:
-        cols = ["id", "name", "status"]
-        table_layout("VCS Site", ans, cols, isPrint=True)
     else:
-        jpp(ans)
+        if name == 'twccli':
+            name = "{}_{}".format(name, flavor)
+        ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
+                     flavor=flavor, sys_vol=sys_vol, fip=fip)
+        ans["solution"] = sol
+        ans["flavor"] = flavor
+
+        if wait:
+            doSiteReady(ans['id'], site_type='vcs')
+
+        if is_table:
+            cols = ["id", "name", "status"]
+            table_layout("VCS Site", ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 
 
 
 
 @click.option('-n','--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.command(help="cos(Cloud Object Storage)")
+@click.command(help="'Make' Operations for COS(Cloud Object Service)")
 
 def cos(name):
     """Command line for create cos
@@ -289,7 +312,7 @@ def cos(name):
     create_bucket(name)
 
 
-@click.command(help="key")
+@click.command(help="Create your key")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
 
@@ -310,10 +333,10 @@ def key(name):
 # end object ===============================================================
 
 
-@click.command(help="ccs(Container Computer Service)")
+@click.command(help="'Make' Operations for CCS(Container Computer Service)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Enter name for your resources.")
-@click.option('-gpu', '--gpu-number', 'gpu', default=1, type=int,
+@click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
               help="Enter desire number for GPU.")
 @click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
               help="Enter TWCC solution name.")

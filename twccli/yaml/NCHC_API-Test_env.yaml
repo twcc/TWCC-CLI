@@ -58,10 +58,16 @@ avalible_funcs:
       http_verb:
         - 'get'
     -
+      name: "servers"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
       name: "images"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'put'
     -
       name: "image_commit"
       url_type: "/api/v2/{FUNCTION}/"

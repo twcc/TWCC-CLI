@@ -107,7 +107,6 @@ class ServiceOperation:
         elif mtype == "delete":
             r = requests.delete(t_api, headers=t_headers, verify=False)
         elif mtype == "patch":
-            # @todo
             r = requests.patch(t_api, headers=t_headers,
                               data=json.dumps(t_data), verify=False)
         elif mtype == "put":

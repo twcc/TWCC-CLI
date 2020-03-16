@@ -4,6 +4,7 @@ import re
 import json
 from twccli.twcc.session import Session2
 from twccli.twcc.services.generic import GpuService, CpuService
+from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.base import projects, Flavors, iservice
 from twccli.twcc.util import pp, isNone, table_layout, isDebug, strShorten
 
@@ -22,20 +23,28 @@ class GpuSite(GpuService):
         self._cache_sol_ = {}
 
     @staticmethod
-    def getGpuList(mtype='list'):
+    def getGpuList():
         # @todo, python 3 is not good with dict key object
-        gpu_list = [(0, '0 GPU + 01 cores + 008GB memory'),  # twcc test only
-                    (1, '1 GPU + 04 cores + 090GB memory'),
-                    (2, '2 GPU + 08 cores + 180GB memory'),
-                    (4, '4 GPU + 16 cores + 360GB memory'),
-                    (8, '8 GPU + 32 cores + 720GB memory')]
-        if mtype == 'list':
-            return gpu_list
-        elif mtype == 'dict':
-            return dict(gpu_list)
+        gpu_list = [('0', '0 GPU + 01 cores + 008GB memory'),  # twcc test only
+                    ('1', '1 GPU + 04 cores + 090GB memory'),
+                    ('2', '2 GPU + 08 cores + 180GB memory'),
+                    ('4', '4 GPU + 16 cores + 360GB memory'),
+                    ('8', '8 GPU + 32 cores + 720GB memory'),
+                    ('1m', '1 GPU + 04 cores + 060GB memory + 030GB share memory'),
+                    ('2m', '2 GPU + 08 cores + 120GB memory + 060GB share memory'),
+                    ('4m', '4 GPU + 16 cores + 240GB memory + 120GB share memory'),
+                    ('8m', '8 GPU + 32 cores + 480GB memory + 240GB share memory'),
+                    ('1p', '1 GPU + 9 cores + 042GB memory'),
+                    ('2p', '2 GPU + 18 cores + 084GB memory'),
+                    ('4p', '4 GPU + 36 cores + 168GB memory'),
+                    ('1pm', '1 GPU + 9 cores + 028GB memory + 014GB share memory'),
+                    ('2pm', '2 GPU + 18 cores + 056GB memory + 028GB share memory'),
+                    ('4pm', '4 GPU + 36 cores + 112GB memory + 056GB share memory')]
+
+        return dict(gpu_list)
 
     @staticmethod
-    def getSolList(mtype='list', name_only=False, reverse=False):
+    def getSolList(mtype='dict', name_only=False, reverse=False):
         sol_list = [(4, "TensorFlow"),
                     (9, "Caffe2"),
                     (10, "Caffe"),
@@ -48,6 +57,12 @@ class GpuSite(GpuService):
                     (42, "Theano"),
                     (49, "Torch"),
                     (52, "DIGITS")]
+
+        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image'])
+        sols = solutions().list()
+        for ele in sols:
+            if ele['name'] in ext_cntr_sol:
+                sol_list.append((ele['id'], ele['name']))
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -66,13 +81,12 @@ class GpuSite(GpuService):
         return self._do_api()
 
     @staticmethod
-    def getGpuDefaultHeader(gpus=1):
-        gpu_list = GpuSite.getGpuList(mtype='dict')
+    def getGpuDefaultHeader(gpus="1"):
+        gpu_list = GpuSite.getGpuList()
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
 
         gpu_default = {
-            # 'bucket' : None,
             'command': "whoami; sleep 600;",
             'flavor': gpu_list[gpus],
             'replica': '1',
@@ -333,6 +347,8 @@ class VcsSite(CpuService):
         return site_info['status'] == "Ready"
 
 
+
+
 class VcsSecurityGroup(CpuService):
     def __init__(self):
         CpuService.__init__(self)
@@ -476,8 +492,51 @@ class VcsSecurityGroup(CpuService):
         self.ext_get = {'project': self._project_id}
         self._func_ = "security_group_rules"
         self.url_dic = {self._func_: rule_id}
-        self._do_api()
+        return self._do_api()
 
+class VcsImage(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+        self._func_ = "images"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def list(self, srv_id, isAll=False):
+        self.ext_get = {'project': self._project_id}
+        ans = self._do_api()
+        for y in ans:
+            if not isNone(y['server']):
+                if y['server']['id']==srv_id:
+                    return y
+        else:
+            return {}
+
+    def createSnapshot(self, sid, name, desc_str):
+        vcs = VcsSite()
+        sites = vcs.queryById(sid)
+        site_name = sites['name']
+        server = VcsServer()
+        server_detail = server.getServerDetail(sid)
+        if len(server_detail)>0:
+            tsrv = server_detail[0]
+
+            self.http_verb = "put"
+            self.url_dic = {self._func_: "{}/save/".format(tsrv['id'])}
+            self.data_dic = {"name": name,
+                "desc":desc_str,
+                "os":tsrv['os'],
+                "os_version":tsrv['os_version']}
+        return self._do_api()
+
+class VcsServer(CpuService):
+    def __init__(self):
+        CpuService.__init__(self)
+        self._func_ = "servers"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def getServerDetail(self, site_id):
+        self.ext_get = {'project': self._project_id,
+                        'site': site_id}
+        return self._do_api()
 
 def getServerId(site_id):
     vcs = VcsSite()
