@@ -71,13 +71,17 @@ reqs = [
 
 
 setup(
-    name='twccli',
+    name='TWCC-CLI',
+    author="TWCC SREr",
+    author_email=" 1803001@narlabs.org.tw",
+    description="TWCC-CLI is a toolkit for operating TWCC resources.",
     version=TWCC_CONFIG['__version__'],
     py_modules=['twccli'],
     packages=find_packages(),
     install_requires= reqs,
     include_package_data=True,
     license="Apache License 2.0",
+    url="https://github.com/TW-NCHC/TWCC-CLI",
     entry_points='''
         [console_scripts]
         twccli=twccli.twccli:cli
@@ -90,10 +94,10 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
-        'Natural Language :: English',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
     ],
+    zip_safe=True,
 )
