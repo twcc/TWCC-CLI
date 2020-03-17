@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 from twccli.twcc.services.s3_tools import S3
 
+
 def upload(source, directory, key, r):
     """Attempt to upload file or directory to bucket
 
@@ -89,20 +90,19 @@ def cli():
 
 
 @click.command(help="'Upload/Download' Operations for COS(Cloud Object Service)")
-@click.option('-upload', 'op', flag_value='upload',
-               help='Upload files or folders to bucket')
-@click.option('-download', 'op', flag_value='download',
-               help='Download the files in the bucket or the entire bucket')
-@click.option('-s', '--source', 'source', required=True,
-               help='Source storage name')
 @click.option('-d', '--directory', 'directory', required=True,
-               help='Download to the specific path')
+              help='Download to the specific path')
 @click.option('-k', '--key', 'key',
-               help='The name of the key to upload to.')
+              help='The name of the key to upload to.')
 @click.option('-r', '--recursively', 'recursive',
-               is_flag=True,
-               help='Recursively copy entire directories.')
-
+              is_flag=True,
+              help='Recursively copy entire directories.')
+@click.option('-s', '--source', 'source', required=True,
+              help='Source storage name')
+@click.option('-download', 'op', flag_value='download',
+              help='Download the files in the bucket or the entire bucket')
+@click.option('-upload', 'op', flag_value='upload',
+              help='Upload files or folders to bucket')
 def cos(op, source, directory, key, recursive):
     """Command line for upload/download
     :param source: Source storage name
@@ -122,10 +122,7 @@ def cos(op, source, directory, key, recursive):
         download(source, directory, key, r=recursive)
 
 
-
 cli.add_command(cos)
-
-
 
 
 def main():

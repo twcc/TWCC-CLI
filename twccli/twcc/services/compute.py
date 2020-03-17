@@ -202,11 +202,12 @@ class GpuSite(GpuService):
         info_port = [x for x in info_detail['Service'][0]['ports']]
         if not ssh_info:
             # don't show node port
-            ans = [ dict([(y, x[y]) for y in x if not y == 'node_port']) for x in info_port ]
+            ans = [dict([(y, x[y]) for y in x if not y == 'node_port'])
+                   for x in info_port]
             return ans
         else:
             info_port = [x['port'] for x in info_detail['Service']
-                        [0]['ports'] if x['target_port'] == 22][0]
+                         [0]['ports'] if x['target_port'] == 22][0]
             info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
             return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
@@ -286,6 +287,19 @@ class VcsSite(CpuService):
         flv = Flavors(self._csite_)
         return dict([(x['id'], x) for x in flv.list()])
 
+    @staticmethod
+    def getAvblImg(self, sol_name=None):
+        ans = VcsSite.getSolList()
+        avbl_imgs = [{"solution": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04']},
+                     {"solution": u"centos", "image": [
+                         u'CentOS-7-x86_64-1901']}
+                     ]
+        res = []
+        if isNone(sol_name) or len(sol_name) == 0:
+            return avbl_imgs
+        else:
+            return avbl_imgs[sol_name]
+
     def getExtraProp(self, sol_id):
         extra_prop = self._do_list_solution(sol_id)
 
@@ -313,9 +327,11 @@ class VcsSite(CpuService):
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
                 res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                                                          "ssd": "block_storage-ssd", "local": "local_disk"}
+                                                          "ssd": "block_storage-ssd",
+                                                          "local": "local_disk"}
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
+                
         return res
 
     def getIsrvFlavors(self, name_or_id="flavor_id"):
@@ -346,98 +362,6 @@ class VcsSite(CpuService):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
 
-
-
-
-class VcsSecurityGroup(CpuService):
-    def __init__(self):
-        CpuService.__init__(self)
-
-        self._func_ = "security_groups"
-        self._csite_ = Session2._getClusterName("VCS")
-
-    def list(self, server_id=None):
-        if not isNone(server_id):
-            self.ext_get = {'project': self._project_id,
-                            'server': server_id}
-            return self._do_api()
-
-    def addSecurityGroup(self, secg_id, port_num,
-                         cidr, protocol, direction):
-
-        self.http_verb = "patch"
-        self.url_dic = {"security_groups": secg_id}
-        self.data_dic = {"project": self._project_id,
-                         "direction": direction,
-                         "protocol": protocol,
-                         "remote_ip_prefix": cidr,
-                         "port_range_max": port_num,
-                         "port_range_min": port_num}
-        self._do_api()
-
-    def deleteRule(self, rule_id):
-        self.http_verb = "delete"
-        self.ext_get = {'project': self._project_id}
-        self._func_ = "security_group_rules"
-        self.url_dic = {self._func_: rule_id}
-        self._do_api()
-
-        # processing flavors
-        extra_flv = set(extra_prop['flavor'])
-        def filter_flv(x): return True if x in extra_flv else False
-
-        flvs = self.getFlavors()
-        tflvs = dict([(flvs[x]['id'], flvs[x])
-                      for x in flvs if filter_flv(flvs[x]['name'])])
-        name2id = dict([(tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
-        tflvs_keys = tflvs.keys()
-
-        products = self.getIsrvFlavors()
-        wanted_pro = dict([(x, products[x]['desc'])
-                           for x in products if x in tflvs_keys])
-
-        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
-        res = {}
-        for ele in extra_prop:
-            if ele == 'flavor':
-                res["x-extra-property-{}".format(ele)] = name2isrv
-            elif ele == 'image':
-                res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
-                                                          for x in extra_prop[ele] if re.search('public', x)]
-            elif ele == 'system-volume-type':
-                res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                                                          "ssd": "block_storage-ssd", "local": "local_disk"}
-            else:
-                res["x-extra-property-{}".format(ele)] = extra_prop[ele]
-        return res
-
-    def getIsrvFlavors(self, name_or_id="flavor_id"):
-        isrv = iservice()
-        def filter_flavor_id(x): return True if "flavor_id" in json.loads(
-            x['other_content']) else False
-        def get_flavor_id(x): return int(
-            json.loads(x['other_content'])['flavor_id'])
-
-        fid_desc = dict([(get_flavor_id(x), x)
-                         for x in isrv.getProducts() if filter_flavor_id(x)])
-        if name_or_id == "flavor_id":
-            return fid_desc
-        else:
-            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
-
-    def create(self, name, sol_id, extra_prop):
-
-        self.twcc.header_extra = extra_prop
-        self.http_verb = 'post'
-        self.data_dic = {"name": name,
-                         "desc": 'TWCC-Cli created VCS',
-                         "project": self._project_id,
-                         "solution": sol_id}
-        return self._do_api()
-
-    def isReady(self, site_id):
-        site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
 
 class VcsServerNet(CpuService):
     def __init__(self):
@@ -456,7 +380,7 @@ class VcsServerNet(CpuService):
         self.http_verb = 'put'
         self.url_dic = {self._func_: server_id, 'action': ""}
         self.data_dic = {
-                "action":"associateIP" if is_bind else "disassociateIP"
+            "action": "associateIP" if is_bind else "disassociateIP"
         }
         self._do_api()
 
@@ -494,6 +418,7 @@ class VcsSecurityGroup(CpuService):
         self.url_dic = {self._func_: rule_id}
         return self._do_api()
 
+
 class VcsImage(CpuService):
     def __init__(self):
         CpuService.__init__(self)
@@ -505,7 +430,7 @@ class VcsImage(CpuService):
         ans = self._do_api()
         for y in ans:
             if not isNone(y['server']):
-                if y['server']['id']==srv_id:
+                if y['server']['id'] == srv_id:
                     return y
         else:
             return {}
@@ -516,16 +441,17 @@ class VcsImage(CpuService):
         site_name = sites['name']
         server = VcsServer()
         server_detail = server.getServerDetail(sid)
-        if len(server_detail)>0:
+        if len(server_detail) > 0:
             tsrv = server_detail[0]
 
             self.http_verb = "put"
             self.url_dic = {self._func_: "{}/save/".format(tsrv['id'])}
             self.data_dic = {"name": name,
-                "desc":desc_str,
-                "os":tsrv['os'],
-                "os_version":tsrv['os_version']}
+                             "desc": desc_str,
+                             "os": tsrv['os'],
+                             "os_version": tsrv['os_version']}
         return self._do_api()
+
 
 class VcsServer(CpuService):
     def __init__(self):
@@ -537,6 +463,7 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+
 
 def getServerId(site_id):
     vcs = VcsSite()

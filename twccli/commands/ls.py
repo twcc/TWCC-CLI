@@ -14,27 +14,49 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
+
+def list_vcs_img(sol_name, is_table):
+    ans = VcsSite.getAvblImg(sol_name)
+    if is_table:
+        table_layout("Abvl. VCS images", ans, [
+                     "solution", "image"], isPrint=True, isWrap=False)
+    else:
+        jpp(ans)
+
+
+def list_vcs_sol(is_table):
+    ans = VcsSite.getSolList(mtype='list', name_only=True)
+    if is_table:
+        print("Avbl. VCS solutions: {}".format(", ".join(ans)))
+    else:
+        jpp(ans)
+
+
 def list_snapshot(site_ids_or_names, is_table, desc):
-    if len(site_ids_or_names)==1:
+    if len(site_ids_or_names) == 1:
         sid = site_ids_or_names[0]
         img = VcsImage()
         srv_id = getServerId(sid)
         ans = img.list(srv_id)
-        if len(ans)>0:
+        if len(ans) > 0:
             ans['site_id'] = sid
         cols = ['id', 'site_id', 'name', 'status', 'create_time']
         if is_table:
-            table_layout("Snapshot Result", ans, cols, isPrint=True, isWrap=False)
+            table_layout("Snapshot Result", ans, cols,
+                         isPrint=True, isWrap=False)
         else:
             jpp(ans)
 
+
 def list_gpu_flavor(is_table=True):
     ans = GpuSite.getGpuList()
-    formated_ans = [ {"`-gpu` tag":x, "description":ans[x]} for x in ans ]
+    formated_ans = [{"`-gpu` tag": x, "description": ans[x]} for x in ans]
     if is_table:
-        table_layout("Existing `-gpu` flavor", formated_ans, isPrint=True, isWrap=False)
+        table_layout("Existing `-gpu` flavor", formated_ans,
+                     isPrint=True, isWrap=False)
     else:
         jpp(ans)
+
 
 def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
@@ -42,7 +64,7 @@ def list_vcs_flavor(is_table=True):
     for x in ans:
         if re.search("^v\..+super$", ans[x]['desc']):
             wanted_ans.append({"flavor name": ans[x]['desc'],
-                "spec": ans[x]['spec']} )
+                               "spec": ans[x]['spec']})
 
     if is_table:
         table_layout("VCS Flavors", wanted_ans, isPrint=True, isWrap=False)
@@ -270,20 +292,18 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             jpp(ans)
 
     if res_property == 'Snapshot':
-        desc_str = "twccli_{}".format(datetime.datetime.now().strftime("_%m%d%H%M"))
+        desc_str = "twccli_{}".format(
+            datetime.datetime.now().strftime("_%m%d%H%M"))
         list_snapshot(site_ids_or_names, is_table, desc_str)
 
-
     if res_property == 'image':
-        list_all_img(site_ids_or_names)
+        list_vcs_img(site_ids_or_names, is_table)
 
     if res_property == 'flavor':
         list_vcs_flavor(is_table)
 
     if res_property == "solution":
-        # why GpuSite?!
-        avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
-        print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
+        list_vcs_sol(is_table)
 
     if res_property == 'Network':
         net = Networks()
@@ -330,21 +350,21 @@ def cos(name, is_table, ids_or_names):
 
 # end object ==================================================
 @click.command(help="'List' Operations for CCS (Container Computer Service)")
-@click.option('-img', '--image', 'res_property', flag_value='image',
-              help='View all image files. Provid solution name for filtering.')
+@click.option('-p', '--port', 'show_ports', is_flag=True,
+              help='Show port information.')
+@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
+              help="List all the containers in the project. (Tenant Administrators only)")
+@click.option('-dup', '--show-duplication-status', 'res_property', flag_value='commit',
+              help='List the submitted CCS duplication requests')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
               help='View available gpu environment for creating CCS.')
-@click.option('-cln', '--show-clone-status', 'res_property', flag_value='commit',
-              help='List the submitted CCS clone requests')
+@click.option('-img', '--image', 'res_property', flag_value='image',
+              help='View all image files. Provid solution name for filtering.')
+@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
+              help="Show TWCC solutions for CCS.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
-              help="Show TWCC solutions for CCS.")
-@click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
-              help="List all the containers in the project. (Tenant Administrators only)")
-@click.option('-p', '--port', 'show_ports', is_flag=True,
-              help='Show port information.')
 @click.argument('site_ids_or_names', nargs=-1)
 def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
     """Command line for List Container
@@ -369,7 +389,7 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 
     if not res_property:
         if show_ports:
-            if len(site_ids_or_names) ==1:
+            if len(site_ids_or_names) == 1:
                 list_port(site_ids_or_names[0], is_table)
             else:
                 raise ValueError("Need at least one resource id.")
@@ -378,11 +398,11 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 
 
 @click.command(help='List your keypairs in VCS.')
+@click.option('-n', '--name', 'name', default=None, type=str,
+              help="Enter name for your resource name")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.option('-n', '--name', 'name', default=None, type=str,
-              help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, is_table, ids_or_names):
@@ -401,7 +421,8 @@ def key(ctx, name, is_table, ids_or_names):
         ans = keyring.list()
 
     if is_table:
-        table_layout(' Existing Keypairs ', ans, cols, isPrint=True, isWrap=False)
+        table_layout(' Existing Keypairs ', ans,
+                     cols, isPrint=True, isWrap=False)
     else:
         jpp(ans)
 
@@ -418,4 +439,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
