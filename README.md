@@ -1,5 +1,4 @@
 # TWCC-CLI Project
-[![pipeline status](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/badges/aug_dev_Feb/pipeline.svg)](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/commits/aug_dev_Feb) | [![coverage report](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/badges/aug_dev_Feb/coverage.svg)](https://git.narl.org.tw/gitlab/ai-infra/twcc-cli/commits/aug_dev_Feb)
 
 
 ## REQUIRED PARAMETERS
@@ -8,8 +7,7 @@
 
 | key | meaning | example |
 | -- | -- | -- |
-| TWCC_API_KEY | TWCC api key | caaaxxxx-1bfa-4cd9-9ffc-4c0a53e901bb |
-| TWCC_CLI_STAGE | Show debug log | dev |
+| TWCC_API_KEY | TWCC api key | API_KEY_FROM_TWCC |
 | TWCC_PROJ_CODE | TWCC Project Code | GOV108029 |
 
 

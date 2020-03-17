@@ -69,12 +69,14 @@ reqs = [
         'urllib3==1.25.8',
         'wcwidth==0.1.8']
 
-
+long_desc = open("README.md", 'r').read()
+print(long_desc)
 setup(
     name='TWCC-CLI',
     author="TWCC SREr",
-    author_email=" 1803001@narlabs.org.tw",
+    author_email="isupport@narlabs.org.tw",
     description="TWCC-CLI is a toolkit for operating TWCC resources.",
+    long_description=long_desc,
     version=TWCC_CONFIG['__version__'],
     py_modules=['twccli'],
     packages=find_packages(),
@@ -87,7 +89,7 @@ setup(
         twccli=twccli.twccli:cli
     ''',
     package_data={
-        "twccli": ["yaml/*yaml"],
+        "twccli": ["yaml/*yaml", "commands/*py"],
         "":["requirements.txt"],
     },
     classifiers=[

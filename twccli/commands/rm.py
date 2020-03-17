@@ -10,7 +10,7 @@ from prompt_toolkit.shortcuts import yes_no_dialog
 
 
 def del_bucket(ids_or_names, is_recursive, isForce=False):
-    """Delete bucket 
+    """Delete bucket
 
     :param ids_or_names: name for deleting object.
     :type ids_or_names: string
@@ -66,7 +66,7 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     str_title=u'Confirm delete {}:[{}]'.format(res_name, entity_name)
     str_text=u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(ext_txt)
     # if py3
-    if sys.version_info[0] < 3:
+    if sys.version_info[0] < 3 or (sys.version_info[0]==3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
         return yes_no_dialog(title=str_title, text=str_text).run()
@@ -150,7 +150,7 @@ def cli():
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, ids_or_names, force):
-    """Removing key operation 
+    """Removing key operation
 
     :param name: Enter name for your resource name
     :type name: string
@@ -180,11 +180,11 @@ def key(ctx, name, ids_or_names, force):
               help="Operates as tenant admin.")
 @click.argument('ids_or_names', nargs=-1)
 def vcs(res_property, name, force, is_all, ids_or_names):
-    """Command line for VCS removing 
+    """Command line for VCS removing
         Function :
         1. Keypair
         2. Security Group
-        
+
         :param res_property: Function type (Keypair, SecurityGroup)
         :type res_property: string
         :param name: Key name, security group hash id, or VCS resource id.
