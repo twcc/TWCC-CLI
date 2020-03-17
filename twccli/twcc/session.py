@@ -57,7 +57,7 @@ class Session2(object):
         mkdir_p(session_path)
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
-                Session2._getSessionData(self.twcc_api_key), fn, encoding='utf-8', allow_unicode=True)
+                Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code), fn, encoding='utf-8', allow_unicode=True)
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
     def isApiKey(self):
@@ -237,7 +237,6 @@ class Session2(object):
     @staticmethod
     def _whoami(api_key=None):
         from twccli.twcc.services.base import Users
-        # raw_input(api_key)
         twcc_api = Users(api_key=api_key)
         info = twcc_api.getInfo()
         if len(info) > 0:
@@ -266,19 +265,19 @@ class Session2(object):
         return Session2._getApiKey()
 
     @staticmethod
-    def _getSessionData(twcc_api_key=None):
+    def _getSessionData(twcc_api_key=None, proj_code=None):
         sessionData = defaultdict(dict)
         whoami = Session2._whoami(twcc_api_key)
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = twcc_api_key
-        sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject()
+        sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(proj_code)
 
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
 
         s3keys = Session2._getTwccS3Keys(
-            Session2._getDefaultProject(), Session2._getApiKey(twcc_api_key))
+            Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
 

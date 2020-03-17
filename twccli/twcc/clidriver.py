@@ -173,7 +173,7 @@ class ServiceOperation:
         self.ctype = ctype
 
         return_header = {'X-API-HOST': site_sn,
-                         'x-api-key': self.api_key,
+                         'x-api-key': api_key,
                          'Content-Type': self.ctype}
 
         if len(self.header_extra.keys()) > 0:

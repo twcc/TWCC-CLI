@@ -35,8 +35,8 @@ class Users(GenericService):
 
 
 class users(GenericService):
-    def __init__(self, api_key=None, debug=False):
-        GenericService.__init__(self, debug=debug)
+    def __init__(self, api_key=None):
+        GenericService.__init__(self)
 
         self._csite_ = "goc"
         if not isNone(api_key):
@@ -61,21 +61,34 @@ class image_commit(GenericService):
         self.res_type = "txt"
         self._do_api()
 
+class ApiKey(GenericService):
+    def __init__(self, api_key=None):
+
+        GenericService.__init__(self, api_key=api_key, skip_session=True)
+        self._csite_ = "admin"
+        self._func_ = "api_key"
+        if not isNone(api_key):
+            self._api_key_ = api_key
+
+    def list(self):
+        print("in list"*3, self._api_key_)
+        self.http_verb = 'get'
+        self.res_type = 'json'
+        return self._do_api()
+
+
 
 class acls(GenericService):
     """ This Class is for ACL api call
     """
 
-    def __init__(self, debug=False):
-        """ constractor for this ACL class
+    def __init__(self, api_key=None):
 
-        Args:
-            api_key_tag (str): see YAML for detail
-        """
-        GenericService.__init__(self, debug=debug)
-
+        GenericService.__init__(self, api_key=api_key, skip_session=True)
         self._csite_ = "admin"
-        self.res_type = "json"
+        self._func_ = "acls"
+        if not isNone(api_key):
+            self._api_key_ = api_key
 
     def getSites(self):
         res = self.list()

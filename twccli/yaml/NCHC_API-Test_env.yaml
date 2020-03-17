@@ -58,6 +58,11 @@ avalible_funcs:
       http_verb:
         - 'get'
     -
+      name: "api_key"
+      url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
       name: "servers"
       url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
       http_verb:

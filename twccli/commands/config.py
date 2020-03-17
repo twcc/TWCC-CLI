@@ -5,6 +5,7 @@ import os
 from twccli.twcc.util import validate, isNone
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment
+from twccli.twcc.util import *
 
 
 @click.command(help='Get exsiting info.')
@@ -12,7 +13,7 @@ from twccli.twccli import pass_environment
 @pass_environment
 def whoami(ctx, verbose):
     """Command line for whoami, print information of account and session
-    
+
     :param verbose: Enables verbose mode
     :type verbose: bool
     """
@@ -31,7 +32,7 @@ def whoami(ctx, verbose):
 @pass_environment
 def init(ctx, apikey, proj_code, verbose):
     """Constructor method
-    
+
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
     :type apikey: string
     :param proj_code: TWCC project code for default, ie: GOV108009.
@@ -50,10 +51,18 @@ def init(ctx, apikey, proj_code, verbose):
         if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:
             proj_code = os.environ['TWCC_PROJ_CODE']
 
+        if isNone(apikey) or len(apikey)==0:
+            apikey = click.prompt('Please enter TWCC APIKEY', type=str)
+
+        if isNone(proj_code) or len(proj_code)==0:
+            proj_code = click.prompt('Please enter TWCC project code', type=str)
+
         if validate(apikey):
+            proj_code = proj_code.upper()
             ctx.vlog("Receiving Project Code: %s", (proj_code))
             ctx.vlog("Receiving API Key: %s", (apikey))
-            Session2(twcc_api_key=apikey)
+
+            Session2(twcc_api_key=apikey, twcc_project_code=proj_code)
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))

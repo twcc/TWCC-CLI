@@ -5,7 +5,7 @@ from twccli.twcc.services.s3_tools import S3
 
 def upload(source, directory, key, r):
     """Attempt to upload file or directory to bucket
-    
+
     :param source: source file path
     :type source: string
     :param directory: destination file path
@@ -35,7 +35,7 @@ def upload(source, directory, key, r):
 
 def download(source, directory, key, r):
     """Download file or directory from bucket
-    
+
     :param source: Source storage name
     :type source: string
     :param directory: Download to the specific path
@@ -99,9 +99,11 @@ def cli():
                help='Download to the specific path')
 @click.option('-k', '--key', 'key',
                help='The name of the key to upload to.')
-@click.option('-r', 'r', is_flag=True, help='Recursively copy entire directories.')
+@click.option('-r', '--recursively', 'recursive',
+               is_flag=True,
+               help='Recursively copy entire directories.')
 
-def cos(op, source, directory, key, r):
+def cos(op, source, directory, key, recursive):
     """Command line for upload/download
     :param source: Source storage name
     :type source: string
@@ -115,11 +117,9 @@ def cos(op, source, directory, key, r):
     :type r: bool
     """
     if op == 'upload':
-        print('enter upload')
-        upload(source, directory, key, r=r)
+        upload(source, directory, key, r=recursive)
     if op == 'download':
-        print('enter download')
-        download(source, directory, key, r=r)
+        download(source, directory, key, r=recursive)
 
 
 
