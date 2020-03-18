@@ -18,6 +18,7 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'put'
+        - 'get'
     -
       name: "security_group_rules"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
@@ -60,11 +61,6 @@ avalible_funcs:
     -
       name: "api_key"
       url_type: "/{FUNCTION}/"
-      http_verb:
-        - 'get'
-    -
-      name: "servers"
-      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
     -
