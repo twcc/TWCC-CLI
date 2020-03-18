@@ -2,6 +2,7 @@ image: python
 
 stages:
     - test
+    - deploy
 
 before_script:
     - python -V
@@ -38,6 +39,7 @@ manual deploy to pypi:
     - twine upload dist/*
   only:
     - dev
+    - aug_dev_03
   when: manual
   allow_failure: false
 
