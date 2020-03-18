@@ -192,7 +192,7 @@ def list_files(ids_or_names, is_table):
             jpp(files)
 
 
-def list_secg(name, ids_or_names, is_table=True):
+def list_secg(ids_or_names, is_table=True):
     """List security group by site ids in table/json format
 
     :param site_ids_or_names: list of site id
@@ -202,7 +202,6 @@ def list_secg(name, ids_or_names, is_table=True):
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
     """
-    ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         raise ValueError("Need resource id for listing security group")
 
@@ -322,10 +321,9 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             jpp(ans)
 
     if res_property == 'SecurityGroup':
-        list_secg(name, site_ids_or_names, is_table)
+        list_secg(site_ids_or_names, is_table)
 
     if res_property == 'Keypair':
-        # forward to key()
         ctx.invoke(key, ids_or_names=site_ids_or_names,
                    name=name, is_table=is_table)
 
