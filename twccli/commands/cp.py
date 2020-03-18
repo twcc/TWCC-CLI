@@ -2,6 +2,7 @@
 from __future__ import print_function
 import click
 from twccli.twcc.services.s3_tools import S3
+import os
 
 
 def upload(source, directory, key, r):
@@ -46,7 +47,6 @@ def download(source, directory, key, r):
     :param r: Recursively copy entire directories.
     :type r: bool
     """
-    print('enter download')
     s3 = S3()
     if not s3.check_4_bucket(source):
         raise Exception("No such bucket name {} exists".format(source))
@@ -90,10 +90,16 @@ def cli():
 
 
 @click.command(help="'Upload/Download' Operations for COS(Cloud Object Service)")
-@click.option('-d', '--directory', 'directory', required=True,
-              help='Download to the specific path')
-@click.option('-k', '--key', 'key',
-              help='The name of the key to upload to.')
+@click.option('-upload', 'op', flag_value='upload',
+               help='Upload files or folders to bucket')
+@click.option('-download', 'op', flag_value='download',
+               help='Download the files in the bucket or the entire bucket')
+@click.option('-src', '--source', 'source', required=True,
+               help='Source storage name')
+@click.option('-dest', '--destination', 'directory', required=True,
+               help='Download to the specific path')
+@click.option('-filename', '--file-name', 'key',
+               help='The name of the key to upload to.')
 @click.option('-r', '--recursively', 'recursive',
               is_flag=True,
               help='Recursively copy entire directories.')
