@@ -7,10 +7,7 @@
 
 NOTE:
 
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-
+- TWCC-CLI WILL BE CHANGED in early Mar. 2020.
 
 New Features:
 1. VCS (Virtual Compute Service) Operations.
