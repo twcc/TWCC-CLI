@@ -84,7 +84,7 @@ def download(source, directory, key, r):
 # end original code ===============================================
 
 # Create groups for command
-@click.group(help="Upload / Download File")
+@click.group(help="Upload / Download file")
 def cli():
     pass
 
@@ -103,12 +103,6 @@ def cli():
 @click.option('-r', '--recursively', 'recursive',
               is_flag=True,
               help='Recursively copy entire directories.')
-@click.option('-s', '--source', 'source', required=True,
-              help='Source storage name')
-@click.option('-download', 'op', flag_value='download',
-              help='Download the files in the bucket or the entire bucket')
-@click.option('-upload', 'op', flag_value='upload',
-              help='Upload files or folders to bucket')
 def cos(op, source, directory, key, recursive):
     """Command line for upload/download
     :param source: Source storage name

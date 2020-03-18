@@ -8,8 +8,8 @@ from twccli.twccli import pass_environment
 from twccli.twcc.util import *
 
 
-@click.command(help='Get exsiting info.')
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
+@click.command(help='Get exsisting information.')
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
 def whoami(ctx, verbose):
     """Command line for whoami, print information of account and session
@@ -23,12 +23,12 @@ def whoami(ctx, verbose):
     print(Session2())
 
 
-@click.command(help='Initialize CLI environment')
+@click.command(help='Configure the TWCC CLI.')
 @click.option('--apikey', 'apikey',
-              help="TWCC API Key for CLI. It also can read $TWCC_API_KEY.")
+              help="TWCC API Key for CLI.")
 @click.option('-pcode', '--project-code', 'proj_code',
-              help="TWCC project code for default, ie: GOV108009.")
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
+              help="TWCC project code for default.")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
 def init(ctx, apikey, proj_code, verbose):
     """Constructor method
@@ -37,7 +37,7 @@ def init(ctx, apikey, proj_code, verbose):
     :type apikey: string
     :param proj_code: TWCC project code for default, ie: GOV108009.
     :type proj_code: string
-    :param verbose: Enables verbose mode.
+    :param verbose: Enable verbose mode.
     :type verbose: bool
     """
     ctx.verbose = verbose

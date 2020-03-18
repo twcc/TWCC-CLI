@@ -189,43 +189,43 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 # end original function ==================================================
 
 # Create groups for command
-@click.group(help="Allocate (MaKe) resources operations.")
+@click.group(help="Create (allocate) your TWCC resources.")
 def cli():
     pass
 
 
 @click.command(context_settings=dict(max_content_width=500),
-               help="'Make' Operations for VCS (Virtual Compute Service)")
+               help="Create your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
+              help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
-              help="Enter name for your resources id.")
+              help="ID of the instance.")
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
-              help='Set this flag for applying a floating IP.')
+              help='Assign a floating IP to the instance.')
 @click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
               show_default=True,
-              help="Choose hardware configuration.")
+              help="The hardware configuration.")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
-              help="Enter image name.Enter image name.")
+              help="Name of the image.")
+@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
+              help="Name of the image type.")
 @click.option('-key', '--keypair', 'keypair',
-              help="Delete existing keypair(s)")
+              help="Name of the key pair for access your instance.")
 @click.option('-net', '--network', 'network', default=None, type=str,
-              help="Enter network name.")
+              help="Name of the network.")
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
-              help="Create snapshot for specific VCS. `-s` is required!")
-@click.option('-sol', '--solution', 'sol', default="Ubuntu", type=str,
-              help="Enter TWCC solution name.")
+              help="Create a snapshot for an instance. `-s` is required!")
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
               show_default=True,
-              help="Chose system volume disk type.")
+              help="Volume type of the boot volume.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
-              help='Wait until resources are provisioned')
+              help='Wait until your instance to be provisioned.')
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wait, network, snapshot, sol, fip, is_table):
@@ -288,8 +288,8 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
 
 
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
-@click.command(help="'Make' Operations for COS(Cloud Object Service)")
+              help="Name of the bucket.")
+@click.command(help="Create your COS (Cloud Object Service) buckets.")
 def cos(name):
     """Command line for create cos
 
@@ -299,9 +299,9 @@ def cos(name):
     create_bucket(name)
 
 
-@click.command(help="Create your key")
+@click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
+              help="Name of your instance.")
 def key(name):
     """Command line for create key
 
@@ -319,30 +319,30 @@ def key(name):
 # end object ===============================================================
 
 
-@click.command(help="'Make' Operations for CCS(Container Computer Service)")
+@click.command(help="'Make' Operations for CCS (Container Computer Service)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
+              help="Name of the container.")
 @click.option('-s', '--site-id', 'siteId', type=int,
               default=None,
-              help='Resource id for your duplicated CCS.')
+              help='The source container ID to create the duplicate from.')
 @click.option('-dup', '--request-duplication', 'req_dup',
               default=False, is_flag=True,
-              help='Request duplication for CCS environment.')
+              help='Request duplicating a container.')
 @click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
-              help="Enter desire number for GPU.")
-@click.option('-img', '--img-name', 'img_name', default=None, type=str,
-              help="Enter image name. Please check through `twccli ls t cos -img`")
-@click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
-              help="Enter TWCC solution name.")
+              help="Required number of GPU.")
+@click.option('-img', '--image-name', 'img_name', default=None, type=str,
+              help="Name of the image.")
+@click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
+              help="Name of the image type.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.option('-tag', '--duplication-tag', 'dup_tag',
               default=None,
-              help='Tag your duplicated environment.')
+              help='Create a tag to the duplicate.')
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
-              help='Wait until resources are provisioned')
+              help='Wait until your container to be provisioned.')
 def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
     """Command line for create ccs
 
