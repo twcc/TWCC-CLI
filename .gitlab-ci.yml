@@ -27,3 +27,18 @@ python37:
   only:
     - merge_requests
 
+manual deploy to pypi:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PYPI_USERNAME
+    TWINE_PASSWORD: $PYPI_PASSWORD
+  script:
+    - pip install twine
+    - python setup.py sdist
+    - twine upload dist/*
+  only:
+    - dev
+  when: manual
+  allow_failure: false
+
+
