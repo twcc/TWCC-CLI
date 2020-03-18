@@ -272,7 +272,6 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor)
-        print(fip)
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol, fip=fip)
         ans["solution"] = sol
