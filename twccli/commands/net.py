@@ -4,16 +4,16 @@ from twccli.twcc.services.compute import getServerId, getSecGroupList
 import click
 
 
-@click.command(help='Expose port perations for CCS (Container Compute Service)')
+@click.command(help='Manage CCS (Container Compute Service) ports.')
 @click.option('-p', '--port', 'port', type=int,
               required=True,
-              help='Port number in your CCS environment.')
+              help='Port number.')
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
-              help='Resource id for CCS.')
-@click.option('-exp/-unexp', '--exposed-port/--unexposed-port', 'isAttach', is_flag=True,
+              help='ID of the container.')
+@click.option('-open/-close', '--open-port/--close-port', 'isAttach', is_flag=True,
               show_default=True,
-              help='exposed/un-exposed port for continer services')
+              help='opens/close container ports.')
 def ccs(siteId, port, isAttach):
     """Command line for network function of ccs
     Functions:
@@ -34,23 +34,23 @@ def ccs(siteId, port, isAttach):
         b.unbindPort(siteId, port)
 
 
-@click.command(help='Security Group operations for VCS (Virtual Compute Service)')
+@click.command(help='Manage VCS security groups.')
 @click.option('-p', '--port', 'port', type=int,
-              help='Port number for your VCS environment.')
+              help='Port number.')
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
-              help='Resource id for VCS.')
+              help='ID of the container.')
 @click.option('-cidr', '--cidr-network', 'cidr', type=str,
               help='Network range for security group.',
               default='192.168.0.1/24', show_default=True)
 @click.option('-fip / -nofip', '--floating-ip / --no-floating-ip', 'fip',
               is_flag=True, default=True,  show_default=False,
-              help='Configure your VCS environment with or without floating IP.')
+              help='Configure your instance with or without a floating IP.')
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
 @click.option('-proto', '--protocol', 'protocol', type=str,
-              help='Network protocol for security group.',
+              help='Manage VCS security groups protocol.',
               default='tcp', show_default=True)
 def vcs(siteId, port, cidr, protocol, isIngress, fip):
     """Command line for network function of vcs

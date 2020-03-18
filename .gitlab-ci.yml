@@ -28,7 +28,7 @@ python37:
   only:
     - merge_requests
 
-manual deploy to pypi:
+manual deploy to PYPI:
   stage: deploy
   variables:
     TWINE_USERNAME: $PYPI_USERNAME
@@ -38,7 +38,7 @@ manual deploy to pypi:
     - python setup.py sdist
     - twine upload --verbose dist/*
   only:
-    - dev
+    - master
     - aug_dev_03
   when: manual
   allow_failure: false

@@ -220,23 +220,26 @@ def list_secg(name, ids_or_names, is_table=True):
 # end orginal function ====================================
 
 # Create groups for command
-@click.group(help="LiSt resources operations.")
+@click.group(help="LiSt your TWCC resources.")
 def cli():
     pass
 
 
-@click.command(help="'List' Operations for VCS (Virtual Compute Service)")
+@click.command(help="'List' details of your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default=None, type=str,
-              help="Enter name for your resources.")
+              help="Name of the instance.")
 @click.option('-s', '--site-id', 'name', type=str,
-              help="Enter name for your resources id.")
+              help="ID of the instance.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
-              help="List all the containers in the project. (Tenant Administrators only)")
+              help="List all the instances in the project.")
 @click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
               show_default=True,
-              help="List all available flavor for VCS.")
+              help="List VCS available flavors (hardware configuration).")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
+@click.option('-itype', '--image-type-name', 'res_property',
+              default=None, flag_value='solution',
+              help="List VCS image types.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -244,9 +247,7 @@ def cli():
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
 @click.option('-snap', '--snapshots', 'res_property', flag_value='Snapshot',
-              help="List snapshot for specific VCS. `-s` is required!")
-@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
-              help="Show TWCC solutions for VCS.")
+              help="List snapshots for the instance. `-s` is required!")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -329,12 +330,12 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
                    name=name, is_table=is_table)
 
 # end vcs ==================================================
-@click.command(help="'List' Operations for COS (Cloud Object Storage)")
+@click.command(help="'List' details of your COS (Cloud Object Storage) buckets.")
+@click.option('-n', '--name', 'name', default=None, type=str,
+              help="Name of the instance.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.option('-n', '--name', 'name', default=None, type=str,
-              help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
 def cos(name, is_table, ids_or_names):
     """Command line for List COS
@@ -349,19 +350,20 @@ def cos(name, is_table, ids_or_names):
         list_files(ids_or_names, is_table)
 
 # end object ==================================================
-@click.command(help="'List' Operations for CCS (Container Computer Service)")
+@click.command(help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p', '--port', 'show_ports', is_flag=True,
               help='Show port information.')
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the containers in the project. (Tenant Administrators only)")
 @click.option('-dup', '--show-duplication-status', 'res_property', flag_value='commit',
-              help='List the submitted CCS duplication requests')
+              help='List the submitted requests of duplicating containers.')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
-              help='View available gpu environment for creating CCS.')
+              help='List CCS available GPU environments.')
 @click.option('-img', '--image', 'res_property', flag_value='image',
-              help='View all image files. Provid solution name for filtering.')
-@click.option('-sol', '--solution-name', 'res_property', default=None, flag_value='solution',
-              help="Show TWCC solutions for CCS.")
+              help='List all CCS image name.')
+@click.option('-itype', '--image-type-name', 'res_property',
+              default=None, flag_value='solution',
+              help='List all CCS image types.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")

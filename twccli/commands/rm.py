@@ -141,7 +141,7 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
                     secg.deleteRule(rule['id'])
 
 # Create groups for command
-@click.group(help="ReMove resources operations.")
+@click.group(help="Delete your TWCC resources.")
 def cli():
     pass
 

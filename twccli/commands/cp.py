@@ -84,12 +84,12 @@ def download(source, directory, key, r):
 # end original code ===============================================
 
 # Create groups for command
-@click.group(help="Upload / Download File")
+@click.group(help="Upload / Download file")
 def cli():
     pass
 
 
-@click.command(help="'Upload/Download' Operations for COS(Cloud Object Service)")
+@click.command(help="'Upload/Download' Operations for COS (Cloud Object Service)")
 @click.option('-d', '--directory', 'directory', required=True,
               help='Download to the specific path')
 @click.option('-k', '--key', 'key',
