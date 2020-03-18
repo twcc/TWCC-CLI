@@ -143,13 +143,13 @@ class S3():
                 a = self.list_object(bucket_name)[1:]
                 # loop through all the objects
                 for i in a:
-                    ff_name = os.path.join(path+'/', i[2])
+                    ff_name = os.path.join(path+'/', i['Key'])
                     check_path = "/".join(ff_name.split('/')[:-1])
                     # check if the download folder exists
                     if not os.path.isdir(check_path):
                         os.mkdir(check_path)
                     # download to the correct path
-                    self.s3_cli.download_file(bucket_name, i[2], ff_name)
+                    self.s3_cli.download_file(bucket_name, i['Key'], ff_name)
             else:
                 print("No such path")
         else:
