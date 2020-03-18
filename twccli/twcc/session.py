@@ -174,6 +174,7 @@ class Session2(object):
     @staticmethod
     def _getTwccS3Keys(proj_code, api_key):
         from twccli.twcc.services.base import projects
+        print(api_key, "!!!")
         twcc_proj = projects(api_key=api_key)
         twcc_proj.setCluster(Session2._getClusterName("COS"))
         return twcc_proj.getS3Keys(proj_code)
@@ -249,7 +250,7 @@ class Session2(object):
 
     @staticmethod
     def _getApiKey(twcc_api_key):
-        if 'TWCC_API_KEY' in os.environ:
+        if 'TWCC_API_KEY' in os.environ and len(os.environ['TWCC_API_KEY'])>0:
             return os.environ['TWCC_API_KEY']
         else:
             if Session2._isValidSession():
@@ -275,7 +276,6 @@ class Session2(object):
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
-
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
