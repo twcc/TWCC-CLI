@@ -219,7 +219,7 @@ def vcs(res_property, name, force, is_all, ids_or_names):
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force delete the objects.')
-@click.option('-r', '--recursive', 'is_recursive',
+@click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
               help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
 @click.option('-bkt', '--bucket_name', 'name',
