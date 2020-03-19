@@ -6,7 +6,7 @@ jobs:
       docker:
         - image: circleci/python:3.6.6
       environment:
-        TOXENV: py27,py36,py37
+        TOXENV: py27
       steps: &toxsteps
         - checkout
         - run:
