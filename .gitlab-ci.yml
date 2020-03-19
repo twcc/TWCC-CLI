@@ -36,6 +36,7 @@ python36:
     - tox -e py36
   only:
     - merge_requests
+    - dev
 
 
 manual deploy to PYPI:
@@ -49,7 +50,7 @@ manual deploy to PYPI:
     - twine upload --verbose dist/*
   only:
     - master
-    - aug_dev_03
+    - dev
   when: manual
   allow_failure: false
 
