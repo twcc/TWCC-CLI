@@ -42,7 +42,7 @@ class TWCCLI(click.MultiCommand):
         return ns['cli']
 
 
-cli = TWCCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
+cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
              'Thanks for using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
              '-- You Succeed, We Succeed!! --')
 
