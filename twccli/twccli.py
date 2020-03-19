@@ -48,9 +48,8 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 
 
 @click.command(cls=TWCCLI)
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
-def cli(ctx, verbose):
+def cli(ctx, ):
     """
         Welcome to TWCC, TaiWan Compute Cloud.
 
@@ -58,7 +57,7 @@ def cli(ctx, verbose):
 
         -- You Succeed, We Succeed!! --
     """
-    ctx.verbose = verbose
+    pass
 
 
 if __name__ == '__main__':
