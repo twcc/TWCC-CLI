@@ -74,7 +74,7 @@ def init(ctx, apikey, proj_code, verbose):
         print(Session2())
 
 
-@click.group(help="TWCC CLI configuration process.")
+@click.group(help="Configure the TWCC CLI.")
 def cli():
     pass
 
