@@ -18,23 +18,12 @@ def create_commit(site_id, tag, isAll=False):
 
     site = ccs.getDetail(site_id)
     if 'Pod' in site:
-        img_name = site['Pod'][0]['container'][0]['image'].split('/')[-1].split(":")[0]
+        img_name = site['Pod'][0]['container'][0]['image'].split(
+            '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
-    #if type(a.list(isAll=isAll)) is dict and 'detail' in a.list(isAll=isAll).keys():
-    #    isAll = False
 
-    #    my_sites = a.list(isAll=isAll)
-    #    if len(my_sites) > 0:
-    #        col_name = ['id', 'name', 'create_time', 'status']
-    #        table_layout('sites', my_sites, caption_row=col_name)
 
-    #site_id = get_input(
-    #    u'Please Input the site ID which you would like to commit: ')
-    #tag = get_input(u'Please Input the image tag  ')
-    #image = get_input(u'Please Input the image name: ')
-
-# cli start from here
 def create_vcs(name, sol="", img_name="", network="",
                keypair="", flavor="", sys_vol="", fip=""):
     """Create vcs
@@ -200,43 +189,43 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 # end original function ==================================================
 
 # Create groups for command
-@click.group(help="Allocate (MaKe) resources operations.")
+@click.group(help="Create (allocate) your TWCC resources.")
 def cli():
     pass
 
 
 @click.command(context_settings=dict(max_content_width=500),
-              help="'Make' Operations for VCS (Virtual Compute Service)")
-@click.option('-key', '--keypair', 'keypair',
-              help="Delete existing keypair(s)")
+               help="Create your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
+              help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
-              help="Enter name for your resources id.")
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
-              show_default=True,
-              help="Chose system volume disk type.")
+              help="ID of the instance.")
+@click.option('-fip', '--need-floating-ip', 'fip',
+              is_flag=True, default=False,  flag_value=True,
+              help='Assign a floating IP to the instance.')
 @click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
               show_default=True,
-              help="Choose hardware configuration.")
+              help="The hardware configuration.")
+@click.option('-img', '--img_name', 'img_name', default=None, type=str,
+              help="Name of the image.")
+@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
+              help="Name of the image type.")
+@click.option('-key', '--keypair', 'keypair',
+              help="Name of the key pair for access your instance.")
+@click.option('-net', '--network', 'network', default=None, type=str,
+              help="Name of the network.")
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
-              help="Create snapshot for specific VCS. `-s` is required!")
-@click.option('-img', '--img_name', 'img_name', default=None, type=str,
-              help="Enter image name.Enter image name.")
-@click.option('-wait', '--wait-ready', 'wait',
-              is_flag=True, default=False, flag_value=True,
-              help='Wait until resources are provisioned')
-@click.option('-net', '--network', 'network', default=None, type=str,
-              help="Enter network name.")
-@click.option('-sol', '--solution', 'sol', default="Ubuntu", type=str,
-              help="Enter TWCC solution name.")
-@click.option('-fip/-nofip', '--need-floating-ip/--no-need-floating-ip', 'fip',
-              is_flag=True, default=False,
-              help='Set this flag for applying a floating IP.')
+              help="Create a snapshot for an instance. `-s` is required!")
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
+              show_default=True,
+              help="Volume type of the boot volume.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your instance to be provisioned.')
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wait, network, snapshot, sol, fip, is_table):
@@ -270,12 +259,13 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
-        if not isNone(sids) or len(sids)>0:
-            sid= sids[0]
+        if not isNone(sids) or len(sids) > 0:
+            sid = sids[0]
             print("create snapshot for {}".format(sid))
             img = VcsImage()
-            desc_str = "twccli created at {}".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            if name=='twccli':
+            desc_str = "twccli created at {}".format(
+                datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            if name == 'twccli':
                 name += datetime.now().strftime("%d%m%H%M")
             return img.createSnapshot(sid, name, desc_str)
 
@@ -283,7 +273,7 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
         if name == 'twccli':
             name = "{}_{}".format(name, flavor)
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
-                     flavor=flavor, sys_vol=sys_vol, fip=fip)
+                         flavor=flavor, sys_vol=sys_vol, fip=fip)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -297,12 +287,9 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
             jpp(ans)
 
 
-
-
-@click.option('-n','--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
-@click.command(help="'Make' Operations for COS(Cloud Object Service)")
-
+@click.option('-n', '--name', 'name', default="twccli", type=str,
+              help="Name of the bucket.")
+@click.command(help="Create your COS (Cloud Object Service) buckets.")
 def cos(name):
     """Command line for create cos
 
@@ -312,10 +299,9 @@ def cos(name):
     create_bucket(name)
 
 
-@click.command(help="Create your key")
+@click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
-
+              help="Name of your instance.")
 def key(name):
     """Command line for create key
 
@@ -333,31 +319,31 @@ def key(name):
 # end object ===============================================================
 
 
-@click.command(help="'Make' Operations for CCS(Container Computer Service)")
+@click.command(help="'Make' Operations for CCS (Container Computer Service)")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Enter name for your resources.")
-@click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
-              help="Enter desire number for GPU.")
-@click.option('-sol', '--solution', 'sol', default="TensorFlow", type=str,
-              help="Enter TWCC solution name.")
-@click.option('-img', '--img-name', 'img_name', default=None, type=str,
-              help="Enter image name. Please check through `twccli ls t cos -img`")
-@click.option('-wait', '--wait-ready', 'wait',
-              is_flag=True, default=False, flag_value=True,
-              help='Wait until resources are provisioned')
-@click.option('-cln', '--request-clone', 'request_clone',
-              default=False, is_flag=True,
-              help='Request CCS clone environment.')
+              help="Name of the container.")
 @click.option('-s', '--site-id', 'siteId', type=int,
               default=None,
-              help='Resource id for your clone.')
-@click.option('-tag', '--clone-tag', 'clone_tag',
-              default=None,
-              help='Tag your clone environment.')
+              help='The source container ID to create the duplicate from.')
+@click.option('-dup', '--request-duplication', 'req_dup',
+              default=False, is_flag=True,
+              help='Request duplicating a container.')
+@click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
+              help="Required number of GPU.")
+@click.option('-img', '--image-name', 'img_name', default=None, type=str,
+              help="Name of the image.")
+@click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
+              help="Name of the image type.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_table):
+@click.option('-tag', '--duplication-tag', 'dup_tag',
+              default=None,
+              help='Create a tag to the duplicate.')
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your container to be provisioned.')
+def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
     """Command line for create ccs
 
     :param name: Enter name for your resources.
@@ -371,12 +357,13 @@ def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_tab
     :param wait: Wait until resources are provisioned.
     :type wait: bool
     """
-    if request_clone:
+    if req_dup:
         if isNone(siteId):
-            raise ValueError("`-s` is required for cloning")
-        if isNone(clone_tag):
-            raise ValueError("`-tag` is required for cloning")
-        create_commit(siteId, clone_tag)
+            raise ValueError("`-s` is required for duplication")
+        if isNone(dup_tag):
+            dup_tag = "twccli_{}".format(
+                datetime.now().strftime("_%m%d%H%M"))
+        create_commit(siteId, dup_tag)
     else:
         ans = create_cntr(name, gpu, sol, img_name)
         if wait:
@@ -384,7 +371,8 @@ def ccs(name, gpu, sol, img_name, wait, request_clone, siteId, clone_tag, is_tab
 
         if is_table:
             cols = ["id", "name", "status"]
-            table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
+            table_layout("CCS Site:{}".format(
+                ans['id']), ans, cols, isPrint=True)
         else:
             jpp(ans)
 
@@ -393,6 +381,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
+
 
 def main():
     cli()

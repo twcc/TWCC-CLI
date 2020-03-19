@@ -37,7 +37,6 @@ def strShorten(mstr, max_len=6):
 
 isNone = lambda x: True if type(x) == type(None) else False
 
-
 def mkdir_p(path):
     import errno
     try:

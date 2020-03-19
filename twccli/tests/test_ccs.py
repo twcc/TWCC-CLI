@@ -32,7 +32,7 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk ccs -n {} -gpu {} -sol {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
+        cmd_list = u"mk ccs -n {} -gpu {} -itype {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
         , self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
@@ -64,12 +64,12 @@ class TestCntrLifecyc:
 
 
     def _exposedPort(self):
-        cmd_list = "net ccs -s {} -exp -p 3000".format(self.site_id)
+        cmd_list = "net ccs -s {} -open -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _unexposedPort(self):
-        cmd_list = "net ccs -s {} -unexp -p 3000".format(self.site_id)
+        cmd_list = "net ccs -s {} -close -p 3000".format(self.site_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 

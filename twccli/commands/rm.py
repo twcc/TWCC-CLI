@@ -26,6 +26,7 @@ def del_bucket(ids_or_names, is_recursive, isForce=False):
             s3.del_bucket(bucket_name, is_recursive)
             print("Bucket name '{}' is deleted".format(bucket_name))
 
+
 def del_object(ids_or_names, bucket_name, isForce=False):
     """Delete Objects by bucket name
 
@@ -42,6 +43,7 @@ def del_object(ids_or_names, bucket_name, isForce=False):
             S3().del_object(bucket_name=bucket_name, file_name=obj_key)
             print("Deleted bject name: {}.".format(obj_key))
 
+
 def del_vcs(ids_or_names, isForce=False):
     if getConfirm("VCS", ",".join(ids_or_names), isForce):
         vsite = VcsSite()
@@ -49,6 +51,7 @@ def del_vcs(ids_or_names, isForce=False):
             for ele in ids_or_names:
                 vsite.delete(ele)
                 print("VCS resources {} deleted.".format(ele))
+
 
 def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
@@ -63,10 +66,11 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     if isForce:
         return isForce
     import sys
-    str_title=u'Confirm delete {}:[{}]'.format(res_name, entity_name)
-    str_text=u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(ext_txt)
+    str_title = u'Confirm delete {}:[{}]'.format(res_name, entity_name)
+    str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
+        ext_txt)
     # if py3
-    if sys.version_info[0] < 3 or (sys.version_info[0]==3 and sys.version_info[1] < 7):
+    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
         return yes_no_dialog(title=str_title, text=str_text).run()
@@ -137,16 +141,17 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
                     secg.deleteRule(rule['id'])
 
 # Create groups for command
-@click.group(help="ReMove resources operations.")
+@click.group(help="Delete your TWCC resources.")
 def cli():
     pass
 
+
 @click.command(help="Remove your key in VCS ")
+@click.option('-f / --nof', '--force / --noforce', 'force',
+              is_flag=True, show_default=True,
+              help='Force to delete any resource at your own cost.')
 @click.option('-n', '--name', 'name', default=None, type=str,
               help="Enter name for your resource name")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-        is_flag=True, show_default=True,
-        help='Force to delete any resource at your own cost.')
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
 def key(ctx, name, ids_or_names, force):
@@ -167,17 +172,18 @@ def key(ctx, name, ids_or_names, force):
         print("Key name is required.")
 
 
-@click.command(help="'Remove' Operations for VCS (Virtual Compute Service)")
-@click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
-              help="Delete existing keypair(s) for VCS.")
-@click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
-              help="Delete existing security group(s) for VCS.")
-@click.option('-n', '--name', 'name', help='Key name, security group hash id, or VCS resource id.')
+@click.command(help="'Delete' Operations for VCS (Virtual Compute Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force to delete any resource at your own cost.')
+@click.option('-n', '--name', 'name', 
+              help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
+@click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
+              help="Delete existing keypair(s).")
+@click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
+              help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
 def vcs(res_property, name, force, is_all, ids_or_names):
     """Command line for VCS removing
@@ -209,16 +215,16 @@ def vcs(res_property, name, force, is_all, ids_or_names):
             print("Key name is required.")
 
 
-@click.command(help="'Remove' Operations for COS (Cloud Object Service)")
-@click.option('-bkt', '--bucket_name', 'name', help='Bucket name for deleting object. ')
-@click.option('-r', '--recursive', 'is_recursive',
-              is_flag=True, show_default=True, default=False,
-              help='Recursively delete all objects in COS. NOTE: Use this with caution.')
+@click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
-              help='Force to delete any resources at your own cost.')
+              help='Force delete the objects.')
+@click.option('-r', '--recursive', 'is_recursive',
+              is_flag=True, show_default=True, default=False,
+              help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
+@click.option('-bkt', '--bucket_name', 'name',
+              help='Name of the bucket.')
 @click.argument('ids_or_names', nargs=-1)
-
 def cos(name, force, ids_or_names, is_recursive):
     """Command Line for COS deleting buckets
 
@@ -240,12 +246,12 @@ def cos(name, force, ids_or_names, is_recursive):
         del_object(ids_or_names, name, force)
 
 
-@click.command(help="'Remove' Operations for CCS (Container Compute Service)")
-@click.option('-s', '--site-id', 'site_id',
-              help='Resource id for CCS')
+@click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
-              help='Force to delete any resource at your own cost.')
+              help='Force delete the container.')
+@click.option('-s', '--site-id', 'site_id',
+              help='ID of the container.')
 @click.argument('ids_or_names', nargs=-1)
 def ccs(site_id, force, ids_or_names):
     ids_or_names = mk_names(site_id, ids_or_names)
@@ -258,6 +264,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
+
 
 def main():
     cli()

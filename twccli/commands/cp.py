@@ -4,6 +4,7 @@ import click
 from twccli.twcc.services.s3_tools import S3
 import os
 
+
 def upload(source, directory, key, r):
     """Attempt to upload file or directory to bucket
 
@@ -100,9 +101,8 @@ def cli():
 @click.option('-filename', '--file-name', 'key',
                help=' Name of the file.')
 @click.option('-r', '--recursively', 'recursive',
-               is_flag=True,
-               help='Recursively copy entire directories.')
-
+              is_flag=True,
+              help='Recursively copy entire directories.')
 def cos(op, source, directory, key, recursive):
     """Command line for upload/download
     :param source: Source storage name
@@ -122,10 +122,7 @@ def cos(op, source, directory, key, recursive):
         download(source, directory, key, r=recursive)
 
 
-
 cli.add_command(cos)
-
-
 
 
 def main():

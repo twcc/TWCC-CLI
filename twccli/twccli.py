@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import click
 import os
 import sys
@@ -47,7 +48,7 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Compute Cloud. '
 
 
 @click.command(cls=TWCCLI)
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
 def cli(ctx, verbose):
     """

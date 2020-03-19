@@ -49,7 +49,7 @@ class TestVcsLifecyc:
     def _create_vcs(self):
         paras = ["mk", "vcs",
                 "--name",           self.key_name,
-                "--solution",       self.sol,
+                "--image-type-name",self.sol,
                 "--flavor-name",    self.flv,
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,

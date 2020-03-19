@@ -2,6 +2,7 @@ image: python
 
 stages:
     - test
+    - deploy
 
 before_script:
     - python -V
@@ -15,6 +16,8 @@ python27:
   script: 
     - pip install tox
     - tox -e py27
+  only:
+    - merge_requests
 
 python37:
   stage: test
@@ -22,4 +25,22 @@ python37:
   script: 
     - pip install tox
     - tox -e py37
+  only:
+    - merge_requests
+
+manual deploy to PYPI:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PYPI_USERNAME
+    TWINE_PASSWORD: $PYPI_PASSWORD
+  script:
+    - pip install twine
+    - python setup.py sdist
+    - twine upload --verbose dist/*
+  only:
+    - master
+    - aug_dev_03
+  when: manual
+  allow_failure: false
+
 
