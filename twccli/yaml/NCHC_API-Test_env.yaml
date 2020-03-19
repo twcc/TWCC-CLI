@@ -1,0 +1,150 @@
+info:
+    name:   "NCHC_API-Test_env"
+    ctime:  "2018-10-12 09:21:00"
+    auth:   "August Chao <1803001@narlabs.org.tw>"
+production:
+    host:   "https://apigateway.twcc.ai"
+    keys:
+    resources:
+        HPCJ: 'slurm-taichung-default'
+        COS: 'ceph-taichung-default'
+        CNTR: 'k8s-taichung-default'
+        VCS: 'openstack-taichung-default-2'
+    management:
+        - 'goc'
+avalible_funcs:
+    -
+      name: "servers"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'put'
+        - 'get'
+    -
+      name: "security_group_rules"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'delete'
+    -
+      name: "security_groups"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'patch'
+    -
+      name: "iservice"
+      url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "sites"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'put'
+        - 'delete'
+    -
+      name: "buckets"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "snapshots"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "volumes"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "api_key"
+      url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "images"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'put'
+    -
+      name: "image_commit"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+    -
+      name: "jobs"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "users"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "configuration"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'patch'
+    -
+      name: "solutions"
+      url_type: "/api/v2/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+    -
+      name: "networks"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "projects"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+      staus: [ "checked 2018-11-05, by Aug"
+             , ]
+    -
+      name: "flavors"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+    -
+      name: "keypairs"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+      staus: [ "checked 2020-02-15, by Aug",
+               "checked 2018-10-15, by Aug"
+             , ]
+    -
+      name: "acls-g"
+      url_type: "/api_key/acls/groups"
+      http_verb:
+        - 'get'
+      staus: [ "checked 2018-10-15, by Aug"
+             , ]
+    -
+      name: "api_key"
+      url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "acls"
+      url_type: "/api_key/{FUNCTION}/"
+      http_verb:
+        - 'get'
+      staus: [ "checked 2018-10-15, by Aug"
+             , ]

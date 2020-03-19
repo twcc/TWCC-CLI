@@ -1,25 +1,21 @@
 # TWCC-CLI Project
 
-> we cook twcc-cli
+## REQUIRED PARAMETERS
+
+> these parameters are required in environments
+
+| key | meaning | example |
+| -- | -- | -- |
+| TWCC_API_KEY | TWCC api key | API_KEY_FROM_TWCC |
+| TWCC_PROJ_CODE | TWCC Project Code | GOV108029 |
 
 
-:::info
 
-NOTE:
-
-- TWCC-CLI WILL BE CHANGED in early Mar. 2020.
-
-New Features:
-1. VCS (Virtual Compute Service) Operations.
-2. New command line interfaces.
-3. Json standard output for all resources listing.
-
-for more information, please email to [iservice|isupport]@narlabs.org.tw
-:::
-
-INDEX: 
-1. [S3](doc/S3_tutorial.md)
-1. [Customized Image](doc/Customed_Img_Tutorial.md)
+> **NOTE**:
+>
+> Please update your TWCC-CLI constantly to make sure all functionalities works up-to-date, thanks! 
+> 
+> any questions: please check [TWCC-CLI Manual](https://www.twcc.ai/doc?page=deploy_env_cli) or email to isupport@narlabs.org.tw THANKS!
 
 
 UPDATED:
