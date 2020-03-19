@@ -172,17 +172,18 @@ def key(ctx, name, ids_or_names, force):
         print("Key name is required.")
 
 
-@click.command(help="'Remove' Operations for VCS (Virtual Compute Service)")
+@click.command(help="'Delete' Operations for VCS (Virtual Compute Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force to delete any resource at your own cost.')
-@click.option('-n', '--name', 'name', help='Key name, security group hash id, or VCS resource id.')
+@click.option('-n', '--name', 'name', 
+              help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
-              help="Delete existing keypair(s) for VCS.")
+              help="Delete existing keypair(s).")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
-              help="Delete existing security group(s) for VCS.")
+              help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
 def vcs(res_property, name, force, is_all, ids_or_names):
     """Command line for VCS removing
@@ -214,15 +215,15 @@ def vcs(res_property, name, force, is_all, ids_or_names):
             print("Key name is required.")
 
 
-@click.command(help="'Remove' Operations for COS (Cloud Object Service)")
+@click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
-              help='Force to delete any resources at your own cost.')
+              help='Force delete the objects.')
 @click.option('-r', '--recursive', 'is_recursive',
               is_flag=True, show_default=True, default=False,
-              help='Recursively delete all objects in COS. NOTE: Use this with caution.')
+              help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
 @click.option('-bkt', '--bucket_name', 'name',
-              help='Bucket name for deleting object. ')
+              help='Name of the bucket.')
 @click.argument('ids_or_names', nargs=-1)
 def cos(name, force, ids_or_names, is_recursive):
     """Command Line for COS deleting buckets
@@ -245,12 +246,12 @@ def cos(name, force, ids_or_names, is_recursive):
         del_object(ids_or_names, name, force)
 
 
-@click.command(help="'Remove' Operations for CCS (Container Compute Service)")
+@click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
-              help='Force to delete any resource at your own cost.')
+              help='Force delete the container.')
 @click.option('-s', '--site-id', 'site_id',
-              help='Resource id for CCS')
+              help='ID of the container.')
 @click.argument('ids_or_names', nargs=-1)
 def ccs(site_id, force, ids_or_names):
     ids_or_names = mk_names(site_id, ids_or_names)

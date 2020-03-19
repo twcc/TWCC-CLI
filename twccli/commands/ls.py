@@ -314,7 +314,6 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         else:
             ans = net.list()
             cols = ["id", "name", "cidr", "create_time", "status"]
-
         if is_table:
             table_layout("VCS Networks", ans, cols, isPrint=True)
         else:

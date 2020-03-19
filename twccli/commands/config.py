@@ -27,7 +27,7 @@ def whoami(ctx, verbose):
 @click.option('--apikey', 'apikey',
               help="TWCC API Key for CLI.")
 @click.option('-pcode', '--project-code', 'proj_code',
-              help="TWCC project code for default.")
+              help=" TWCC project code (e.g., GOV108009)")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
 def init(ctx, apikey, proj_code, verbose):
@@ -35,7 +35,7 @@ def init(ctx, apikey, proj_code, verbose):
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
     :type apikey: string
-    :param proj_code: TWCC project code for default, ie: GOV108009.
+    :param proj_code: TWCC project code (e.g., GOV108009)
     :type proj_code: string
     :param verbose: Enable verbose mode.
     :type verbose: bool
@@ -51,11 +51,12 @@ def init(ctx, apikey, proj_code, verbose):
         if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:
             proj_code = os.environ['TWCC_PROJ_CODE']
 
-        if isNone(apikey) or len(apikey)==0:
+        if isNone(apikey) or len(apikey) == 0:
             apikey = click.prompt('Please enter TWCC APIKEY', type=str)
 
-        if isNone(proj_code) or len(proj_code)==0:
-            proj_code = click.prompt('Please enter TWCC project code', type=str)
+        if isNone(proj_code) or len(proj_code) == 0:
+            proj_code = click.prompt(
+                'Please enter TWCC project code', type=str)
 
         if validate(apikey):
             proj_code = proj_code.upper()
