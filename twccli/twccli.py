@@ -3,7 +3,8 @@ import click
 import os
 import sys
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
-
+os.environ['LANG'] = 'C.UTF-8'
+os.environ['LC_ALL'] = 'C.UTF-8'
 
 class Environment(object):
     def __init__(self):
