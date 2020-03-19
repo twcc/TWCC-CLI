@@ -75,6 +75,7 @@ setup(
     author_email="isupport@narlabs.org.tw",
     description="TWCC-CLI is a toolkit for operating TWCC resources.",
     long_description=long_desc,
+    long_description_content_type="text/markdown",
     version=TWCC_CONFIG['__version__'],
     py_modules=['twccli'],
     packages=find_packages(),
