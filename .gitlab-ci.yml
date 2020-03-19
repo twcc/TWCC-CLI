@@ -28,6 +28,16 @@ python37:
   only:
     - merge_requests
 
+python36:
+  stage: test
+  image: python:3.6
+  script: 
+    - pip install tox
+    - tox -e py36
+  only:
+    - merge_requests
+
+
 manual deploy to PYPI:
   stage: deploy
   variables:
