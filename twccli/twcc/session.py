@@ -174,7 +174,6 @@ class Session2(object):
     @staticmethod
     def _getTwccS3Keys(proj_code, api_key):
         from twccli.twcc.services.base import projects
-        print(api_key, "!!!")
         twcc_proj = projects(api_key=api_key)
         twcc_proj.setCluster(Session2._getClusterName("COS"))
         return twcc_proj.getS3Keys(proj_code)

@@ -329,7 +329,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 # end vcs ==================================================
 @click.command(help="'List' details of your COS (Cloud Object Storage) buckets.")
 @click.option('-n', '--name', 'name', default=None, type=str,
-              help="Name of the instance.")
+              help="Name of the Bucket.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")

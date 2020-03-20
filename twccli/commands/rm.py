@@ -222,7 +222,7 @@ def vcs(res_property, name, force, is_all, ids_or_names):
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
               help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
-@click.option('-bkt', '--bucket_name', 'name',
+@click.option('-bkt', '--bucket-name', 'name',
               help='Name of the bucket.')
 @click.argument('ids_or_names', nargs=-1)
 def cos(name, force, ids_or_names, is_recursive):
@@ -237,11 +237,10 @@ def cos(name, force, ids_or_names, is_recursive):
     :param force: ids_or_names
     :type force: string or tuple
     """
-    ids_or_names = mk_names(name, ids_or_names)
     if not len(ids_or_names) > 0:
         print('please enter bucket_name')
     if isNone(name):
-        del_bucket(ids_or_names, is_recursive, force)
+        del_bucket(name, is_recursive, force)
     else:
         del_object(ids_or_names, name, force)
 
