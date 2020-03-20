@@ -102,10 +102,6 @@ def create_vcs(name, sol="", img_name="", network="",
     # x-extra-property-availability-zone
     required['x-extra-property-availability-zone'] = "nova"
 
-    # for ele in extra_props:
-    #    if not ele in required:
-    #        print(ele, "!!!"*3)
-    #        required[ele] = extra_props[ele]
 
     return vcs.create(name, exists_sol[sol], required)
 
