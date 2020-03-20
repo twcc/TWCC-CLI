@@ -3,7 +3,8 @@ import click
 import os
 import sys
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
-
+os.environ['LANG'] = 'C.UTF-8'
+os.environ['LC_ALL'] = 'C.UTF-8'
 
 class Environment(object):
     def __init__(self):
@@ -48,9 +49,8 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 
 
 @click.command(cls=TWCCLI)
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
-def cli(ctx, verbose):
+def cli(ctx, ):
     """
         Welcome to TWCC, TaiWan Compute Cloud.
 
@@ -58,7 +58,7 @@ def cli(ctx, verbose):
 
         -- You Succeed, We Succeed!! --
     """
-    ctx.verbose = verbose
+    pass
 
 
 if __name__ == '__main__':

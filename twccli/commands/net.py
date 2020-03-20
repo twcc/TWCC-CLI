@@ -34,7 +34,7 @@ def ccs(siteId, port, isAttach):
         b.unbindPort(siteId, port)
 
 
-@click.command(help='Manage VCS security groups.')
+@click.command(help='Manage VCS (Virtual Compute Service) security groups.')
 @click.option('-p', '--port', 'port', type=int,
               help='Port number.')
 @click.option('-s', '--site-id', 'siteId', type=int,

@@ -24,11 +24,11 @@ def whoami(ctx, verbose):
 
 
 @click.command(help='Configure the TWCC CLI.')
-@click.option('--apikey', 'apikey',
-              help="TWCC API Key for CLI.")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
+@click.option('--apikey', 'apikey',
+              help="TWCC API Key for CLI.")
 @pass_environment
 def init(ctx, apikey, proj_code, verbose):
     """Constructor method
@@ -74,7 +74,7 @@ def init(ctx, apikey, proj_code, verbose):
         print(Session2())
 
 
-@click.group(help="TWCC CLI configuration process.")
+@click.group(help="Configure the TWCC CLI.")
 def cli():
     pass
 
