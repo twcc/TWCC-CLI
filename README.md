@@ -3,14 +3,13 @@
 > we cook twcc-cli
 
 
+## [TWCC-CLI v0.5.1](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5.1) [@PYPI](https://pypi.org/project/TWCC-CLI/)
+
+- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v051) (Draft)
+
 :::info
 
 NOTE:
-
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-- TWCC-CLI WILL BE CHANGE in early Mar. 2020.
-
 
 New Features:
 1. VCS (Virtual Compute Service) Operations.
@@ -18,7 +17,6 @@ New Features:
 3. Json standard output for all resources listing.
 
 for more information, please email to [iservice|isupport]@narlabs.org.tw
-:::
 
 INDEX: 
 1. [S3](doc/S3_tutorial.md)
