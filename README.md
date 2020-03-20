@@ -1,27 +1,23 @@
 # TWCC-CLI Project
 
-> we cook twcc-cli
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **V0.5.1**. (New version coming soon!)
 
+## INDEX: 
+1. [TWCC-CLI α v0.5.1](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5.1) 
+1. [@PYPI](https://pypi.org/project/TWCC-CLI/)
 
-## [TWCC-CLI v0.5.1](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5.1) [@PYPI](https://pypi.org/project/TWCC-CLI/)
+- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v051) (Draft) (New version coming soon!)
 
-- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v051) (Draft)
+## New Features:
+**New and structured CLI commands!**
+- Now you can use structured commands`config`, `mk`, `ls`, `rm`, `cp`, and `net` to customize and manage your TWCC Compute and Storage services, including VCS, CCS, and COS.
+- In addition to CCS and COS, now you can use TWCC CLI to manage your VCS resources, including VCS instances, security groups, snapshots, as well as keypairs.
+- Use commands`-table` or `-json show` to clearly diaplay your resource information in a table view or in JSON.
 
-:::info
+## UPDATED:
+- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!(New version coming soon!)
 
-NOTE:
-
-New Features:
-1. VCS (Virtual Compute Service) Operations.
-2. New command line interfaces.
-3. Json standard output for all resources listing.
-
-for more information, please email to [iservice|isupport]@narlabs.org.tw
-
-INDEX: 
-1. [S3](doc/S3_tutorial.md)
-1. [Customized Image](doc/Customed_Img_Tutorial.md)
-
-
-UPDATED:
-- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/doc?page=deploy_env_cli), thanks!
+## Contact us
+If you have any questions, please email us at: 
+- iservice@narlabs.org.tw for account support
+- isupport@narlabs.org.tw for technical support
