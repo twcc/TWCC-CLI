@@ -1,5 +1,10 @@
-__TWCC_CLI_MAJOR_ = "0"
-__TWCC_CLI_MINOR_ = "5"
-__TWCC_CLI_BATCH_ = "2"
-__version__ = "{}.{}.{}".format(
-    __TWCC_CLI_MAJOR_, __TWCC_CLI_MINOR_, __TWCC_CLI_BATCH_)
+__TWCC_CLI_MAJOR__ = "0"
+__TWCC_CLI_MINOR__ = "5"
+__TWCC_CLI_BATCH__ = "3"
+__TWCC_CLI_STAGE__ = "a"
+if len(__TWCC_CLI_STAGE__)==0:
+    __version__ = "{}.{}.{}".format(
+        __TWCC_CLI_MAJOR__, __TWCC_CLI_MINOR__, __TWCC_CLI_BATCH__)
+else:
+    __version__ = "{}.{}.{}.{}".format(
+        __TWCC_CLI_MAJOR__, __TWCC_CLI_MINOR__, __TWCC_CLI_BATCH__, __TWCC_CLI_STAGE__)

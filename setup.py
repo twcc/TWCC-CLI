@@ -80,7 +80,6 @@ setup(
     py_modules=['twccli'],
     packages=find_packages(),
     install_requires= reqs,
-    include_package_data=True,
     license="Apache License 2.0",
     url="https://github.com/TW-NCHC/TWCC-CLI",
     entry_points='''
@@ -89,8 +88,8 @@ setup(
     ''',
     package_data={
         "twccli": ["yaml/*yaml", "commands/*py"],
-        "":["requirements.txt"],
     },
+    include_package_data=True,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
