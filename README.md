@@ -11,7 +11,7 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 ## New Features:
 **New and structured CLI commands!**
 
-for Mar. 20th ,2020
+for Mar. 20th ,2020 (v0.5.2)
   - Now you can use structured commands`config`, `mk`, `ls`, `rm`, `cp`, and `net` to customize and manage your TWCC Compute and Storage services, including VCS, CCS, and COS.
   - In addition to CCS and COS, now you can use TWCC CLI to manage your VCS resources, including VCS instances, security groups, snapshots, as well as keypairs.
   - Use commands`-table` or `-json show` to clearly diaplay your resource information in a table view or in JSON.
