@@ -2,8 +2,9 @@
 from __future__ import print_function
 import click
 import re
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isFile
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -168,6 +169,9 @@ def key(ctx, name, ids_or_names, force):
 
     if len(ids_or_names) > 0:
         del_keypair(ids_or_names, force)
+        wfn = "{}/{}.pem".format(Session2._getTwccDataPath(), name)
+        if isFile(wfn):
+            print("Please `rm {}` by yourself!".format(wfn))
     else:
         print("Key name is required.")
 
@@ -176,7 +180,7 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force to delete any resource at your own cost.')
-@click.option('-n', '--name', 'name', 
+@click.option('-n', '--name', 'name',
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
