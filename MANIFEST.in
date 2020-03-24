@@ -1,2 +1,2 @@
-recursive-include twccli
+recursive-include twccli *.py
 
