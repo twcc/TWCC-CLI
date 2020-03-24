@@ -314,7 +314,7 @@ def key(name):
         print("Keypairs exists in {}".format(wfn))
     else:
         ans = keyring.createKeyPair(name)
-        with open(wfn, "w") as fp:
+        with open(wfn, "wb") as fp:
             fp.write(ans)
         import os
         os.chmod(wfn, 0o600)
