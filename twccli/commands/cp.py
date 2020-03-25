@@ -3,7 +3,7 @@ from __future__ import print_function
 import click
 from twccli.twcc.services.s3_tools import S3
 import os
-
+from twccli.twcc.util import isNone
 
 def upload(source, directory, key, r):
     """Attempt to upload file or directory to bucket
@@ -25,8 +25,7 @@ def upload(source, directory, key, r):
             raise Exception(
                 "{} is path, need to set recursive to True".format(source))
         else:
-            print('dir upload')
-            s3.upload_bucket(path=source, bucket_name=directory, r=r)
+            s3.upload_bucket(uploadPath=source, bucket_name=directory, r=r)
     else:
 
         if key == None:
@@ -114,11 +113,14 @@ def cos(op, source, directory, key, recursive):
     :param r: Recursively copy entire directories.
     :type r: bool
     """
-    if op == 'upload':
-        upload(source, directory, key, r=recursive)
-    if op == 'download':
-        download(source, directory, key, r=recursive)
-
+    if isNone(op):
+        print("please enter operation : upload/download")
+    else:
+        print('ssss')
+        if op == 'upload':
+            upload(source, directory, key, r=recursive)
+        if op == 'download':
+            download(source, directory, key, r=recursive)
 
 cli.add_command(cos)
 
