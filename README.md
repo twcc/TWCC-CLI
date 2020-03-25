@@ -1,6 +1,5 @@
 # TWCC-CLI Project
 
-
 ## REQUIRED PARAMETERS
 
 > these parameters are required in environments
@@ -8,7 +7,7 @@
 | key | meaning | example |
 | -- | -- | -- |
 | TWCC_API_KEY | TWCC api key | API_KEY_FROM_TWCC |
-| TWCC_PROJ_CODE | TWCC Project Code | GOV108029 |
+| TWCC_PROJ_CODE | TWCC Project Code | GOV108XXX |
 
 
 

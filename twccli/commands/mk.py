@@ -324,7 +324,7 @@ def key(name):
 # end object ===============================================================
 
 
-@click.command(help="'Make' Operations for CCS (Container Computer Service)")
+@click.command(help="‘Create’ your CCS (Container Computer Service) containers.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of the container.")
 @click.option('-s', '--site-id', 'siteId', type=int,

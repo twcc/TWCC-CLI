@@ -8,4 +8,3 @@ if len(__TWCC_CLI_STAGE__)==0:
 else:
     __version__ = "{}.{}.{}.{}".format(
         __TWCC_CLI_MAJOR__, __TWCC_CLI_MINOR__, __TWCC_CLI_BATCH__, __TWCC_CLI_STAGE__)
-
