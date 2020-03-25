@@ -37,6 +37,7 @@ python36:
   only:
     - merge_requests
     - dev
+    - master
 
 
 manual deploy to PYPI:
