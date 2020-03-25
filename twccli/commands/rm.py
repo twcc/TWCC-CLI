@@ -210,7 +210,7 @@ def vcs(res_property, name, force, is_all, ids_or_names):
     """
 
     if res_property == "SecurityGroup":
-        del_secg(ids_or_names, force, is_all)
+        del_secg(mk_names(name, ids_or_names), force, is_all)
 
     if isNone(res_property):
         if len(ids_or_names) > 0:
