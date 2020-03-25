@@ -108,22 +108,15 @@ class S3():
                 for singleFilePath in out.splitlines():
 
                     if os.path.isdir(singleFilePath) ==False:
-
                         singleFilePath = singleFilePath.replace("./", "")
-                        #localPath = os.path.dirname(os.path.dirname(os.path.abspath(singleFilePath)))+'/'+ singleFilePath
                         localPath = os.path.abspath(os.path.dirname(uploadPath))+'/'+ singleFilePath
-                        print('singleFilePath='+singleFilePath)
-                        print('localPath='+localPath)
-                        # Create the key name on S3.
-                        #remote_file_path = local_file_path[on_local_path_len + 1:]
              
                         try:
                             self.s3_cli.upload_file(
                                 localPath, bucket_name, singleFilePath)
                         except ClientError as e:
                             print(e)
-                            return False
-                
+                            return False  
             else:
                 print("No such path")
         else:
