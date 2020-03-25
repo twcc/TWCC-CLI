@@ -116,7 +116,6 @@ def cos(op, source, directory, key, recursive):
     if isNone(op):
         print("please enter operation : upload/download")
     else:
-        print('ssss')
         if op == 'upload':
             upload(source, directory, key, r=recursive)
         if op == 'download':
