@@ -3,7 +3,6 @@ from __future__ import print_function
 import os
 import boto3
 import click
-import subprocess
 
 from botocore.exceptions import ClientError
 from ..clidriver import ServiceOperation
@@ -89,34 +88,33 @@ class S3():
             return tmp
         return None
 
-    def upload_bucket(self, file_name=None, bucket_name=None, key=None, uploadPath=None, r=False):
+    def upload_bucket(self, file_name=None, bucket_name=None, key=None, path=None, r=False):
         """ Upload to S3
 
             :param file_name         : The name of the upload file
-            :param uploadPath        : The path for the files, r must set ot True
+            :param path              : The path for the files, r must set ot True
             :param bucket_name       : The bucket name
             :param key               : The file name shows inside the bucket
             :param r                 : Setting for recursive
             :return                  : True if success upload file to S3 bucket
         """
         if r == True:
-            if os.path.isdir(uploadPath):
-                cmd = ["find", uploadPath]
-                res =subprocess.run(cmd, capture_output=True)
-                out = res.stdout.decode('utf-8', 'replace')
-
-                for singleFilePath in out.splitlines():
-
-                    if os.path.isdir(singleFilePath) ==False:
-                        singleFilePath = singleFilePath.replace("./", "")
-                        localPath = os.path.abspath(os.path.dirname(uploadPath))+'/'+ singleFilePath
-             
+            if os.path.isdir(path):
+                # Get the len of the local path.
+                on_local_path_len = len("/".join(path.split('/')[:-1]))
+                # Loop through all the files in the local.
+                for root, dirs, files in tqdm(os.walk(path)):
+                    for f_name in files:
+                        # Get the local file path.
+                        local_file_path = os.path.join(root, f_name)
+                        # Create the key name on S3.
+                        remote_file_path = local_file_path[on_local_path_len + 1:]
                         try:
                             self.s3_cli.upload_file(
-                                localPath, bucket_name, singleFilePath)
+                                local_file_path, bucket_name, remote_file_path)
                         except ClientError as e:
                             print(e)
-                            return False  
+                            return False
             else:
                 print("No such path")
         else:
