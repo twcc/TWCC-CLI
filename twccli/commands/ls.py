@@ -5,7 +5,7 @@ import json
 import re
 import datetime
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
@@ -280,11 +280,18 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
         vcs = VcsSite()
 
         if len(site_ids_or_names) > 0:
-            cols = ['id', 'name', 'public_ip', 'create_time', 'user', 'status']
+            cols = ['id', 'name', 'public_ip', 'private_ip', 'private_network', 'create_time', 'status']
             ans = [vcs.queryById(x) for x in site_ids_or_names]
+
+            srvid = getServerId(x)
+            srv = VcsServer().queryById(srvid)
+            srv_net = srv[u'private_nets'][0]
+            ans[0]['private_network'] = srv_net[u'name']
+            ans[0]['private_ip'] = srv_net[u'ip']
         else:
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
+
 
         if is_table:
             table_layout("VCS VMs", ans, cols, isPrint=True)
