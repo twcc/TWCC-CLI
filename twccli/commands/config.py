@@ -73,6 +73,15 @@ def init(ctx, apikey, proj_code, verbose):
         ctx.log("load credential from {}".format(Session2()._getSessionFile()))
         print(Session2())
 
+@click.command(help='Show this version.')
+@pass_environment
+def version(ctx):
+    """Show TWCC-CLI version
+
+    """
+    from twccli.version import __version__
+    ctx.log("This version is {}".format(__version__))
+
 
 @click.group(help="Configure the TWCC CLI.")
 def cli():
@@ -81,6 +90,7 @@ def cli():
 
 cli.add_command(whoami)
 cli.add_command(init)
+cli.add_command(version)
 
 
 def main():
