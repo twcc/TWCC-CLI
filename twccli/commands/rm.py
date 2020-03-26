@@ -222,7 +222,7 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 
     if isNone(res_property):
         if len(ids_or_names) > 0:
-            del_vcs(mk_name(site_id, ids_or_names), force)
+            del_vcs(mk_names(site_id, ids_or_names), force)
         else:
             print("Key name is required.")
 
