@@ -51,6 +51,7 @@ manual deploy to PYPI:
     - twine upload --verbose dist/*
   only:
     - master
+    - dev
   when: manual
   allow_failure: false
 
