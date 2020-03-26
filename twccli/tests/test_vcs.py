@@ -62,8 +62,8 @@ class TestVcsLifecyc:
 
     def _list_vcs(self):
         cmd_list = "ls vcs -json {}".format(self.vcs_id)
-        self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
+        self.list_out = self.__run(cmd_list.split(" "))
 
     def _del_vcs(self):
         cmd_list = "rm vcs --force {}".format(self.vcs_id)
@@ -88,7 +88,7 @@ class TestVcsLifecyc:
         raise Exception("Error, can not find port {}".format(self.ext_port))
 
     def _del_secg(self):
-        cmd_list = "rm vcs -secg --force {}".format(self.secg_id)
+        cmd_list = "rm vcs -secg --force {} --site-id {}".format(self.secg_id, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)

@@ -62,7 +62,7 @@ def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
     wanted_ans = []
     for x in ans:
-        if re.search("^v\..+super$", ans[x]['desc']):
+        if re.search(r'^v..+super$', ans[x]['desc']):
             wanted_ans.append({"flavor name": ans[x]['desc'],
                                "spec": ans[x]['spec']})
 
@@ -281,13 +281,16 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
         if len(site_ids_or_names) > 0:
             cols = ['id', 'name', 'public_ip', 'private_ip', 'private_network', 'create_time', 'status']
-            ans = [vcs.queryById(x) for x in site_ids_or_names]
+            if len(site_ids_or_names)==1:
+                site_id = site_ids_or_names[0]
 
-            srvid = getServerId(x)
-            srv = VcsServer().queryById(srvid)
-            srv_net = srv[u'private_nets'][0]
-            ans[0]['private_network'] = srv_net[u'name']
-            ans[0]['private_ip'] = srv_net[u'ip']
+                ans = [vcs.queryById(site_id)]
+
+                srvid = getServerId(site_id)
+                srv = VcsServer().queryById(srvid)
+                srv_net = srv[u'private_nets'][0]
+                ans[0]['private_network'] = srv_net[u'name']
+                ans[0]['private_ip'] = srv_net[u'ip']
         else:
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
