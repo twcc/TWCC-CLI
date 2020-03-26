@@ -52,14 +52,12 @@ def download(source, directory, key, r):
         raise Exception("No such bucket name {} exists".format(source))
 
     if os.path.isdir(directory) and key == None:
-        print('is dir')
         if r != True:
             raise Exception(
                 "{} is path, need to set recursive to True".format(directory))
         else:
             s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
-        print('is file')
         if key.endswith('*'):
             files = s3.list_object(source)
             prefix_folder = '/'.join(key.split('/')[:-1])
@@ -80,7 +78,6 @@ def download(source, directory, key, r):
             s3.download_bucket(file_name=directory,
                                bucket_name=source, key=key)
 
-        print('download end')
 # end original code ===============================================
 
 # Create groups for command
@@ -116,11 +113,13 @@ def cos(op, source, directory, key, recursive):
     :param r: Recursively copy entire directories.
     :type r: bool
     """
-    if op == 'upload':
-        upload(source, directory, key, r=recursive)
-    if op == 'download':
-        download(source, directory, key, r=recursive)
-
+    if isNone(op):
+        print("please enter operation : upload/download")
+    else:
+        if op == 'upload':
+            upload(source, directory, key, r=recursive)
+        if op == 'download':
+            download(source, directory, key, r=recursive)
 
 cli.add_command(cos)
 
