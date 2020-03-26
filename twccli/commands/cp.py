@@ -52,14 +52,12 @@ def download(source, directory, key, r):
         raise Exception("No such bucket name {} exists".format(source))
 
     if os.path.isdir(directory) and key == None:
-        print('is dir')
         if r != True:
             raise Exception(
                 "{} is path, need to set recursive to True".format(directory))
         else:
             s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
-        print('is file')
         if key.endswith('*'):
             files = s3.list_object(source)
             prefix_folder = '/'.join(key.split('/')[:-1])
