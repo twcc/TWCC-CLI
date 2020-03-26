@@ -59,7 +59,7 @@ manual deploy to PYPI:
 manual deploy to GITHUB:
   stage: deploy
   variables:
-    FOOBAR: FOOBAR
+    FOOBAR: $FOOBAR
   script:
 	- git clone https://github.com/TW-NCHC/TWCC-CLI
 	- cd TWCC-CLI/
@@ -74,3 +74,4 @@ manual deploy to GITHUB:
     - dev
   when: manual
   allow_failure: false
+
