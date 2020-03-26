@@ -77,7 +77,6 @@ def download(source, directory, key, r):
             s3.download_bucket(file_name=directory,
                                bucket_name=source, key=key)
 
-        print('download end')
 # end original code ===============================================
 
 # Create groups for command
