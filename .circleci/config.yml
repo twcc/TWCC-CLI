@@ -12,9 +12,9 @@ jobs:
         - run:
             name: Install utils
             command: |
-              sudo pip install tox wheel
+              pip install tox wheel
         - run:
-            command: tox
+            command: tox -e py27
 
 workflows:
   version: 2
