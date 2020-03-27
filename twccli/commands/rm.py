@@ -2,8 +2,9 @@
 from __future__ import print_function
 import click
 import re
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isFile
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -111,7 +112,7 @@ def del_keypair(ids_or_names, isForce=False):
                 raise ValueError("Keypair: {}, not found.".format(key_name))
 
 
-def del_secg(ids_or_names, isForce=False, isAll=False):
+def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
     """Delete security group by site id
 
     :param ids_or_names: name for deleting object.
@@ -120,6 +121,8 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
     :type is_recursive: bool
     :param force: Force to delete any resources at your own cost.
     :type force: bool
+    :param site_id: resources for vcs id
+    :type site_id: int
     :param isAll: Operates as tenant admin
     :type isAll: bool
     """
@@ -129,7 +132,11 @@ def del_secg(ids_or_names, isForce=False, isAll=False):
             "Security Group id: {} need to longer than 6 characters".format(secg_id))
 
     vcs = VcsSite()
-    sites = vcs.list(isAll)
+    if isNone(site_id):
+        sites = vcs.list(isAll)
+    else:
+        sites = [vcs.queryById(site_id)]
+
     secg = VcsSecurityGroup()
     found = []
     for ele in sites:
@@ -168,6 +175,9 @@ def key(ctx, name, ids_or_names, force):
 
     if len(ids_or_names) > 0:
         del_keypair(ids_or_names, force)
+        wfn = "{}/{}.pem".format(Session2._getTwccDataPath(), name)
+        if isFile(wfn):
+            print("Please `rm {}` by yourself!".format(wfn))
     else:
         print("Key name is required.")
 
@@ -176,8 +186,10 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force to delete any resource at your own cost.')
-@click.option('-n', '--name', 'name', 
+@click.option('-n', '--name', 'name',
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
+@click.option('-s', '--site-id', 'site_id',
+              help='ID of the container.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
@@ -185,7 +197,7 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
-def vcs(res_property, name, force, is_all, ids_or_names):
+def vcs(res_property, name, force, is_all, site_id, ids_or_names):
     """Command line for VCS removing
         Function :
         1. Keypair
@@ -206,11 +218,11 @@ def vcs(res_property, name, force, is_all, ids_or_names):
     """
 
     if res_property == "SecurityGroup":
-        del_secg(ids_or_names, force, is_all)
+        del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
 
     if isNone(res_property):
         if len(ids_or_names) > 0:
-            del_vcs(ids_or_names, force)
+            del_vcs(mk_names(site_id, ids_or_names), force)
         else:
             print("Key name is required.")
 
@@ -240,9 +252,9 @@ def cos(name, force, ids_or_names, is_recursive):
     if not len(ids_or_names) > 0:
         print('please enter bucket_name')
     if isNone(name):
-        del_bucket(name, is_recursive, force)
+        del_bucket(mk_names(name, ids_or_names), is_recursive, force)
     else:
-        del_object(ids_or_names, name, force)
+        del_object(mk_names(name, ids_or_names), name, force)
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")

@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 from twccli.twcc.services.s3_tools import S3
 import os
+from twccli.twcc.util import isNone
 
 
 def upload(source, directory, key, r):
@@ -78,7 +79,6 @@ def download(source, directory, key, r):
             s3.download_bucket(file_name=directory,
                                bucket_name=source, key=key)
 
-        print('download end')
 # end original code ===============================================
 
 # Create groups for command
@@ -114,11 +114,13 @@ def cos(op, source, directory, key, recursive):
     :param r: Recursively copy entire directories.
     :type r: bool
     """
-    if op == 'upload':
-        upload(source, directory, key, r=recursive)
-    if op == 'download':
-        download(source, directory, key, r=recursive)
-
+    if isNone(op):
+        print("please enter operation : upload/download")
+    else:
+        if op == 'upload':
+            upload(source, directory, key, r=recursive)
+        if op == 'download':
+            download(source, directory, key, r=recursive)
 
 cli.add_command(cos)
 

@@ -8,7 +8,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 
@@ -309,8 +309,17 @@ def key(name):
     if 'name' in keyring.queryById(name):
         raise ValueError("Duplicated name for keypair")
 
-    print(Session2._getTwccDataPath())
-    keyring.createKeyPair(name)
+    wfn = "{}/{}.pem".format(Session2._getTwccDataPath(), name)
+    if isFile(wfn):
+        print("Keypairs exists in {}".format(wfn))
+    else:
+        ans = keyring.createKeyPair(name)
+        with open(wfn, "wb") as fp:
+            fp.write(ans)
+        import os
+        os.chmod(wfn, 0o600)
+        print("Your keypair is in `{}` with mode 600".format(wfn))
+
 
 # end object ===============================================================
 
