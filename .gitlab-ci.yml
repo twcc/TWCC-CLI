@@ -67,7 +67,7 @@ manual deploy to GITHUB:
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - git commit -m "TWCC-CLI weekly release"
-    - git push --set-upstream upstream v0.5
+    - git push
   only:
     - github_cd
     - dev
