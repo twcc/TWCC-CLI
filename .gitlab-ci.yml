@@ -60,10 +60,11 @@ manual deploy to GITHUB:
   variables:
     FOOBAR: $FOOBAR
   script:
+    - echo $CI_REGISTRY_USER $CI_REGISTRY_PASSWORD
     - git clone https://github.com/TW-NCHC/TWCC-CLI
     - cd TWCC-CLI/
     - git checkout v0.5
-    - git remote add upstream  https://git.narl.org.tw/gitlab/twcc/twcc-cli
+    - git remote add upstream https://git.narl.org.tw/gitlab/twcc/twcc-cli
     - git fetch upstream
     - git merge upstream/dev --no-commit --no-ff --allow-unrelated-histories
     - git commit -m "TWCC-CLI weekly release"
