@@ -61,7 +61,7 @@ manual deploy to GITHUB:
     - git clone https://github.com/TW-NCHC/TWCC-CLI 
     - cd TWCC-CLI/
     - git checkout v0.5
-    - git remote add upstream https://git.narl.org.tw/gitlab/twcc/twcc-cli/
+    - git remote add upstream $CI_REPOSITORY_URL
     - git fetch upstream
     - git config --global user.email "1803001@narlabs.org.tw"
     - git config --global user.name $GITHUB_USRERNAME
