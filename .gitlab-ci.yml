@@ -64,6 +64,7 @@ manual deploy to GITHUB:
     - git commit -m "TWCC-CLI weekly release"
     - git push --set-upstream upstream v0.5
   only:
+    - github_cd
     - dev
     - master
   when: manual
