@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 from twccli.twcc.services.s3_tools import S3
 import os
+from twccli.twcc.util import isNone
 
 
 def upload(source, directory, key, r):
