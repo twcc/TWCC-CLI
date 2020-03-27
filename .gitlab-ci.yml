@@ -58,7 +58,7 @@ manual deploy to PYPI:
 manual deploy to GITHUB:
   stage: deploy
   script:
-    - git clone https://github.com/TW-NCHC/TWCC-CLI 
+    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI 
     - cd TWCC-CLI/
     - git checkout v0.5
     - git remote add upstream $CI_REPOSITORY_URL
