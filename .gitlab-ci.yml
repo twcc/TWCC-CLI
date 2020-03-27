@@ -59,6 +59,7 @@ manual deploy to GITHUB:
   stage: deploy
   script:
     - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI
+    - git fetch upstream
     - git checkout upstream/v0.5
     - git merge upstream/master --no-commit --no-ff --allow-unrelated-histories
     - git commit -m "TWCC-CLI weekly release"
