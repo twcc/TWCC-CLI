@@ -15,5 +15,5 @@
 >
 > Please update your TWCC-CLI constantly to make sure all functionalities works up-to-date, thanks! 
 > 
-> any questions: please check latest [TWCC-CLI Manual]() or [leave commits here](https://github.com/TW-NCHC/TWCC-CLI/issues/new).
+> any questions: please check latest [TWCC-CLI Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) or [leave commits here](https://github.com/TW-NCHC/TWCC-CLI/issues/new).
 
