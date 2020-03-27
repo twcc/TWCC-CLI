@@ -57,18 +57,17 @@ manual deploy to PYPI:
 
 manual deploy to GITHUB:
   stage: deploy
-  variables:
-    FOOBAR: $FOOBAR
   script:
-    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI
-    - cd TWCC-CLI/
-    - git checkout v0.5
-    - git remote add upstream https://git.narl.org.tw/gitlab/twcc/twcc-cli
+    - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI
     - git fetch upstream
-    - git merge upstream/dev --no-commit --no-ff --allow-unrelated-histories
+    - git checkout upstream/v0.5
+    - git config --global user.email "1803001@narlabs.org.tw"
+    - git config --global user.name $GITHUB_USRERNAME
+    - git merge origin/master --no-commit --no-ff --allow-unrelated-histories
     - git commit -m "TWCC-CLI weekly release"
-    - git push --set-upstream origin v0.5
+    - git push --set-upstream upstream v0.5
   only:
+    - github_cd
     - dev
     - master
   when: manual
