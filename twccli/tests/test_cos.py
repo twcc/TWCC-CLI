@@ -48,7 +48,7 @@ class TestCosLifecyc:
         assert flag
 
     def _del_bucket(self):
-        cmd_list = "rm cos {} -f".format(self.bk_name)
+        cmd_list = "rm cos -bkt {} -f".format(self.bk_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))  
 
@@ -65,8 +65,17 @@ class TestCosLifecyc:
                 flag = False
 
         assert flag
-
+    '''
     def test_create_bucket(self):
+        self._loadSession()
+        self._loadParams()
+        self._create_bucket()
+        self._list_bucket_after_create()
+        self._del_bucket()
+        self._list_bucket_after_delete()
+    '''
+
+    def test_issue_78(self):
         self._loadSession()
         self._loadParams()
         self._create_bucket()

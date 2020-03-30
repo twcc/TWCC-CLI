@@ -7,9 +7,9 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
 from prompt_toolkit.shortcuts import yes_no_dialog
+from twccli.twcc.util import isNone
 
-
-def del_bucket(ids_or_names, is_recursive, isForce=False):
+def del_bucket(bk_name, is_recursive, isForce=False):
     """Delete bucket
 
     :param ids_or_names: name for deleting object.
@@ -20,11 +20,10 @@ def del_bucket(ids_or_names, is_recursive, isForce=False):
     :type isForce: bool
     """
     txt = "!! Recursive is ON !!\n"*3 if is_recursive else ""
-    if getConfirm("COS Delete Buckets", ",".join(ids_or_names), isForce, ext_txt=txt):
+    if getConfirm("COS Delete Buckets", bk_name, isForce, ext_txt=txt):
         s3 = S3()
-        for bucket_name in ids_or_names:
-            s3.del_bucket(bucket_name, is_recursive)
-            print("Bucket name '{}' is deleted".format(bucket_name))
+        s3.del_bucket(bk_name, is_recursive)
+        print("Bucket name '{}' is deleted".format(bk_name))
 
 
 def del_object(ids_or_names, bucket_name, isForce=False):
@@ -237,12 +236,15 @@ def cos(name, force, ids_or_names, is_recursive):
     :param force: ids_or_names
     :type force: string or tuple
     """
-    if not len(ids_or_names) > 0:
-        print('please enter bucket_name')
+    if not len(ids_or_names) > 0 and isNone(name):
+        print('please enter name')
+
     if isNone(name):
-        del_bucket(ids_or_names, is_recursive, force)
-    else:
+        print('del file')
         del_object(ids_or_names, name, force)
+    else:
+        print('del bkt')
+        del_bucket(name, is_recursive, force)
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
