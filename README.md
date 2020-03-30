@@ -1,23 +1,38 @@
+###### tags: `twcc`, `twccli`
+
 # TWCC-CLI Project
 
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
-## REQUIRED PARAMETERS
-
-> these parameters are required in environments
-
-| key | meaning | example |
-| -- | -- | -- |
-| TWCC_API_KEY | TWCC api key | API_KEY_FROM_TWCC |
-| TWCC_PROJ_CODE | TWCC Project Code | GOV108029 |
+## INDEX: 
+1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
+1. Release Notes
 
 
+### v0.5.3 Release Note
 
-> **NOTE**:
->
-> Please update your TWCC-CLI constantly to make sure all functionalities works up-to-date, thanks! 
-> 
-> any questions: please check [TWCC-CLI Manual](https://www.twcc.ai/doc?page=deploy_env_cli) or email to isupport@narlabs.org.tw THANKS!
+![img](https://media.giphy.com/media/xHMIDAy1qkzNS/giphy.gif)
+
+**new features**
+- We add encoding environ setting
+- add keypair write and del file
+- add private ip and network info while ls vcs
+
+**fix**
+- fix create keypair's bug
+- fix error in `MANIFEST.in`, remove vcs cos, list vcs, --help description of cos
 
 
-UPDATED:
-- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/doc?page=deploy_env_cli), thanks!
+### v0.5.2 Release Note
+**New and structured CLI commands!**
+
+for Mar. 20th ,2020 (v0.5.2)
+  - Now you can use structured commands`config`, `mk`, `ls`, `rm`, `cp`, and `net` to customize and manage your TWCC Compute and Storage services, including VCS, CCS, and COS.
+  - In addition to CCS and COS, now you can use TWCC CLI to manage your VCS resources, including VCS instances, security groups, snapshots, as well as keypairs.
+  - Use commands`-table` or `-json show` to clearly diaplay your resource information in a table view or in JSON.
+
+
+## Contact us
+If you have any questions, please email us at: 
+- iservice@narlabs.org.tw for account support
+- isupport@narlabs.org.tw for technical support
