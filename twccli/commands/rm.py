@@ -10,7 +10,7 @@ from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, get
 from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.util import isNone
 
-def del_bucket(bk_name, is_recursive, isForce=False):
+def del_bucket(name, is_recursive, isForce=False):
     """Delete bucket
 
     :param ids_or_names: name for deleting object.
@@ -21,10 +21,11 @@ def del_bucket(bk_name, is_recursive, isForce=False):
     :type isForce: bool
     """
     txt = "!! Recursive is ON !!\n"*3 if is_recursive else ""
-    if getConfirm("COS Delete Buckets", bk_name, isForce, ext_txt=txt):
+    if getConfirm("COS Delete Buckets", name, isForce, ext_txt=txt):
         s3 = S3()
-        s3.del_bucket(bk_name, is_recursive)
-        print("Bucket name '{}' is deleted".format(bk_name))
+        for bucket_name in name.split(','):
+            s3.del_bucket(bucket_name, is_recursive)
+            print("Bucket name '{}' is deleted".format(bucket_name))
 
 
 def del_object(ids_or_names, bucket_name, isForce=False):
@@ -42,6 +43,9 @@ def del_object(ids_or_names, bucket_name, isForce=False):
         for obj_key in ids_or_names:
             S3().del_object(bucket_name=bucket_name, file_name=obj_key)
             print("Deleted bject name: {}.".format(obj_key))
+
+
+
 
 
 def del_vcs(ids_or_names, isForce=False):
@@ -156,7 +160,7 @@ def cli():
 @click.option('-f / --nof', '--force / --noforce', 'force',
               is_flag=True, show_default=True,
               help='Force to delete any resource at your own cost.')
-@click.option('-n', '--name', 'name', default=None, type=str,
+@click.option('-n', '--name', 'name', default=None, 
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
@@ -233,7 +237,7 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
               help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
-@click.option('-n', '--name, 'name',
+@click.option('-n', '--name', 'name',
               help='Name of the bucket.')
 @click.argument('ids_or_names', nargs=-1)
 def cos(name, force, ids_or_names, is_recursive):
@@ -252,8 +256,10 @@ def cos(name, force, ids_or_names, is_recursive):
         print('please enter name')
 
     if isNone(name):
+        print('del file')
         del_object(ids_or_names, name, force)
     else:
+        print('del bucket')
         del_bucket(name, is_recursive, force)
 
 
