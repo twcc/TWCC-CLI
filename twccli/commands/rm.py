@@ -256,10 +256,8 @@ def cos(name, force, ids_or_names, is_recursive):
         print('please enter name')
 
     if isNone(name):
-        print('del file')
         del_object(ids_or_names, name, force)
     else:
-        print('del bucket')
         del_bucket(name, is_recursive, force)
 
 

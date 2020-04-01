@@ -22,11 +22,9 @@ def upload(source, directory, key, r):
     # Check for source type
     if os.path.isdir(source):
         if r != True:
-            print('r != True, directory')
             raise Exception(
                 "{} is path, need to set recursive to True".format(source))
         else:
-            print('dir upload')
             s3.upload_bucket(path=source, bucket_name=directory, r=r)
     else:
 
@@ -66,7 +64,6 @@ def download(source, directory, key, r):
                 bucket_name=source, delimiter='', prefix=prefix_folder)
             for desire_file in desire_files:
                 if not desire_file.endswith('/'):
-                    print('desire_file = '+desire_file)
                     new_directory = directory + desire_file
                     s3.download_bucket(file_name=new_directory,
                                        bucket_name=source, key=desire_file)
@@ -75,7 +72,6 @@ def download(source, directory, key, r):
             if directory.endswith('/'):
                 directory = directory + key
 
-            print('directory =' + directory)
             s3.download_bucket(file_name=directory,
                                bucket_name=source, key=key)
 
