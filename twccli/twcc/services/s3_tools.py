@@ -106,7 +106,6 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.split("\n"):
-                    print('path={}'.format(singleFilePath))
                     
                     if os.path.isdir(singleFilePath) ==False and len(singleFilePath)>0:
                         singleFilePath = singleFilePath.replace("./", "")
@@ -198,12 +197,9 @@ class S3():
         """
         try:
             if recursive == True:
-                print('bk_name={}'.format(bucket_name))
                 retKeys = self.list_object(bucket_name)
-                print(retKeys)
                 if retKeys != None:
                     for i in self.list_object(bucket_name):
-                        print(i)
                         self.del_object(bucket_name=bucket_name,
                                         file_name=i['Key'])
                 
