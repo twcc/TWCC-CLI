@@ -1,5 +1,8 @@
 ###### tags: `twcc`, `twccli`
 
+[![CircleCI](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5.svg?style=shield)](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5)
+
+
 # TWCC-CLI Project
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)

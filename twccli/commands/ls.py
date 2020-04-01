@@ -278,6 +278,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
     if isNone(res_property):
         vcs = VcsSite()
+        ans = []
 
         if len(site_ids_or_names) > 0:
             cols = ['id', 'name', 'public_ip', 'private_ip', 'private_network', 'create_time', 'status']
@@ -287,19 +288,25 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
                 ans = [vcs.queryById(site_id)]
 
                 srvid = getServerId(site_id)
+                if isNone(srvid):
+                    return None
                 srv = VcsServer().queryById(srvid)
-                srv_net = srv[u'private_nets'][0]
-                ans[0]['private_network'] = srv_net[u'name']
-                ans[0]['private_ip'] = srv_net[u'ip']
+                if len(srv)>0 and len(srv[u'private_nets'])>0:
+                    srv_net = srv[u'private_nets'][0]
+                    ans[0]['private_network'] = srv_net[u'name']
+                    ans[0]['private_ip'] = srv_net[u'ip']
+                else:
+                    ans[0]['private_network'] = ""
+                    ans[0]['private_ip'] = ""
         else:
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
 
-
-        if is_table:
-            table_layout("VCS VMs", ans, cols, isPrint=True)
-        else:
-            jpp(ans)
+        if len(ans)>0:
+            if is_table:
+                table_layout("VCS VMs" if not len(site_ids_or_names)==1 else "VCS Info.: {}".format(site_id), ans, cols, isPrint=True)
+            else:
+                jpp(ans)
 
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
