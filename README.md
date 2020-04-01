@@ -8,6 +8,18 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 1. Release Notes
 
+### v0.5.4 Release Note
+![img](https://media.giphy.com/media/MtIPR6C5okdt6/giphy.gif =60%x)
+
+
+**new features**
+- provides encoding setting, `twccli config init --set-bashrc`
+
+**fix bug**
+- no data while listing VCS 
+- can't delete bucket with data recursively
+- can't download hierarchy directory to local site 
+- modify parameter and description in command "CP"
 
 ### v0.5.3 Release Note
 
