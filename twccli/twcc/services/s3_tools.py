@@ -13,7 +13,7 @@ from twccli.twcc.session import Session2
 from twccli.twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
-
+import subprocess 
 
 class S3():
     def __init__(self):
@@ -100,21 +100,26 @@ class S3():
         """
         if r == True:
             if os.path.isdir(path):
-                # Get the len of the local path.
-                on_local_path_len = len("/".join(path.split('/')[:-1]))
-                # Loop through all the files in the local.
-                for root, dirs, files in tqdm(os.walk(path)):
-                    for f_name in files:
-                        # Get the local file path.
-                        local_file_path = os.path.join(root, f_name)
-                        # Create the key name on S3.
-                        remote_file_path = local_file_path[on_local_path_len + 1:]
+                cmd = ['find', path]
+                #res =subprocess.run(cmd, capture_output=True)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                out, err = p.communicate()
+
+                for singleFilePath in out.split("\n"):
+                    print('path={}'.format(singleFilePath))
+                    
+                    if os.path.isdir(singleFilePath) ==False and len(singleFilePath)>0:
+                        singleFilePath = singleFilePath.replace("./", "")
+                        localPath = os.path.abspath(os.path.dirname(path))+'/'+ singleFilePath
+                        remotePath = singleFilePath
+
                         try:
                             self.s3_cli.upload_file(
-                                local_file_path, bucket_name, remote_file_path)
+                                localPath, bucket_name, remotePath)
                         except ClientError as e:
                             print(e)
                             return False
+                    
             else:
                 print("No such path")
         else:
@@ -193,10 +198,16 @@ class S3():
         """
         try:
             if recursive == True:
-                for i in self.list_object(bucket_name):
-                    self.del_object(bucket_name=bucket_name,
-                                    file_name=i['Key'])
-            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+                print('bk_name={}'.format(bucket_name))
+                retKeys = self.list_object(bucket_name)
+                print(retKeys)
+                if retKeys != None:
+                    for i in self.list_object(bucket_name):
+                        print(i)
+                        self.del_object(bucket_name=bucket_name,
+                                        file_name=i['Key'])
+                
+                res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:
             if e.response['Error']['Code'] == 'BucketNotEmpty':
