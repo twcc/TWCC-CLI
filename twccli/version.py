@@ -1,3 +1,5 @@
+import os
+
 __TWCC_CLI_MAJOR__ = "0"
 __TWCC_CLI_MINOR__ = "5"
 __TWCC_CLI_BATCH__ = "4"

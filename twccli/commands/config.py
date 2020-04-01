@@ -7,6 +7,11 @@ from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment
 from twccli.twcc.util import *
 
+lang_encoding = """
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+export PYTHONIOENCODING=UTF-8
+"""
 
 @click.command(help='Get exsisting information.')
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
@@ -24,13 +29,16 @@ def whoami(ctx, verbose):
 
 
 @click.command(help='Configure the TWCC CLI.')
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
+@click.option("-v", "--verbose", is_flag=True,
+              help="Enable verbose mode.")
 @click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey',
               help="TWCC API Key for CLI.")
+@click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
+              help="Set bashrc parameters.")
 @pass_environment
-def init(ctx, apikey, proj_code, verbose):
+def init(ctx, apikey, proj_code, rc, verbose):
     """Constructor method
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
@@ -39,6 +47,8 @@ def init(ctx, apikey, proj_code, verbose):
     :type proj_code: string
     :param verbose: Enable verbose mode.
     :type verbose: bool
+    :param rc_setting: Set bashrc parameters.
+    :type rc_setting: bool
     """
     ctx.verbose = verbose
     if not Session2._isValidSession():
@@ -67,6 +77,14 @@ def init(ctx, apikey, proj_code, verbose):
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
+
+            if rc:
+                click.echo("Add language setting to `.bashrc`.")
+
+                open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
+            else:
+                click.echo("Please add encoding setting to your environment: \n {}".format(lang_encoding))
+
         else:
             raise ValueError("API Key is not validated.")
     else:
@@ -91,6 +109,7 @@ def cli():
 cli.add_command(whoami)
 cli.add_command(init)
 cli.add_command(version)
+
 
 
 def main():

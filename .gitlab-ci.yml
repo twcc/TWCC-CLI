@@ -36,7 +36,6 @@ python36:
     - tox -e py36
   only:
     - merge_requests
-    - dev
     - master
 
 
@@ -58,14 +57,16 @@ manual deploy to PYPI:
 manual deploy to GITHUB:
   stage: deploy
   script:
-    - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI
+    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI 
+    - cd TWCC-CLI/
+    - git checkout v0.5
+    - git remote add upstream $CI_REPOSITORY_URL
     - git fetch upstream
-    - git checkout upstream/v0.5
     - git config --global user.email "1803001@narlabs.org.tw"
     - git config --global user.name $GITHUB_USRERNAME
-    - git merge origin/master --no-commit --no-ff --allow-unrelated-histories
+    - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - git commit -m "TWCC-CLI weekly release"
-    - git push --set-upstream upstream v0.5
+    - git push
   only:
     - github_cd
     - dev
