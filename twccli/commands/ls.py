@@ -304,7 +304,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
         if len(ans)>0:
             if is_table:
-                table_layout("VCS VMs" if len(ans)>1 else "VCS Info.: {}".format(site_id), ans, cols, isPrint=True)
+                table_layout("VCS VMs" if not len(site_ids_or_names)==1 else "VCS Info.: {}".format(site_id), ans, cols, isPrint=True)
             else:
                 jpp(ans)
 
