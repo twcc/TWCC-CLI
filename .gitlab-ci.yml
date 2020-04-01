@@ -36,7 +36,6 @@ python36:
     - tox -e py36
   only:
     - merge_requests
-    - dev
     - master
 
 
