@@ -29,15 +29,15 @@ class TestCosLifecyc:
     def _create_bucket(self, bk):
         cmd_list = "mk cos -n {}".format(bk)
         print(cmd_list)
-        self.create_out = self.__run(cmd_list.split(u" "))  
+        self.create_out = self.__run(cmd_list.split(u" "))
 
     def _list_bucket_after_create(self):
         cmd_list = "ls cos -json"
         print(cmd_list)
-        self.list_out = self.__run(cmd_list.split(u" "))  
+        self.list_out = self.__run(cmd_list.split(u" "))
         print(self.list_out)
         out = json.loads(self.list_out)
-        
+
         flag = False
         for ele in out:
             if ele['Name'] == self.bk_name:
@@ -48,15 +48,15 @@ class TestCosLifecyc:
     def _del_bucket(self, bkt):
         cmd_list = "rm cos -n {} -f -r".format(bkt)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))  
+        out = self.__run(cmd_list.split(u" "))
 
 
     def _list_bucket_after_delete(self):
         cmd_list = "ls cos -json"
         print(cmd_list)
-        self.list_out = self.__run(cmd_list.split(u" "))  
+        self.list_out = self.__run(cmd_list.split(u" "))
         out = json.loads(self.list_out)
-        
+
         flag = True
         for ele in out:
             if ele['Name'] == self.bk_name:
@@ -67,7 +67,7 @@ class TestCosLifecyc:
     def _upload_files(self):
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(self.upload_dir, self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))  
+        out = self.__run(cmd_list.split(u" "))
         assert False
 
     def test_create_bucket(self):
@@ -87,7 +87,7 @@ class TestCosLifecyc:
         p = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
         p.communicate()
         p = subprocess.Popen(cmd2, stdout=subprocess.PIPE)
-        p.communicate()        
+        p.communicate()
         p = subprocess.Popen(cmd3, stdout=subprocess.PIPE)
         p.communicate()
         p = subprocess.Popen(cmd4, stdout=subprocess.PIPE)
@@ -97,7 +97,7 @@ class TestCosLifecyc:
     def _upload_files(self, bk, dir):
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(dir, bk)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))  
+        out = self.__run(cmd_list.split(u" "))
 
         
     def _download_files(self, bk, dir):
@@ -119,13 +119,13 @@ class TestCosLifecyc:
         '''
 
         # ================
-        
+
         cmd_remote = "ls cos -n {} -json".format("bk123")
         print(cmd_remote)
-        self.list_out = self.__run(cmd_remote.split(u" "))  
+        self.list_out = self.__run(cmd_remote.split(u" "))
         out2 = json.loads(self.list_out)
         print(out2)
-        
+
 
 
         #flag = True
@@ -134,7 +134,7 @@ class TestCosLifecyc:
             str = ele['Key']
             remoteList.append(str)
             print('remote = {}'.format(str))
- 
+
         for root, dirs, files in os.walk('./updir'):
             for name in files:
                 print("file={}".format(os.path.join(root, name)))
@@ -249,7 +249,7 @@ class TestCosLifecyc:
     def test_issue_85(self):
         bk_isu85 = "bk_isu85_{}".format(str(uuid.uuid1()).split("-")[0])
         isu85_Dir = "./isu85_{}".format(str(uuid.uuid1()).split("-")[0])
-        
+
         self._loadSession()
         self._create_bucket(bk_isu85)
 
@@ -273,4 +273,3 @@ class TestCosLifecyc:
         self._remove_dir(isu78_Dir, "")
         
 
-    
