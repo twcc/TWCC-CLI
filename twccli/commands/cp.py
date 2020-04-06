@@ -33,7 +33,10 @@ def upload(source, directory, key, r):
 
         s3.upload_bucket(file_name=source, bucket_name=directory, key=key)
 
-
+def downloadDir(source, directory, downdir):
+    s3 = S3()
+    s3.list_dir(source, directory, downdir)
+    
 def download(source, directory, key, r):
     """Download file or directory from bucket
 
@@ -51,12 +54,20 @@ def download(source, directory, key, r):
         raise Exception("No such bucket name {} exists".format(source))
 
     if os.path.isdir(directory) and key == None:
+       
         if r != True:
             raise Exception(
                 "{} is path, need to set recursive to True".format(directory))
         else:
+            # download whole bucket
             s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
+        
+        if key.find('.')>0:
+            # download single file
+            s3.download_file(bucket_name=source, path=directory, key=key)
+            return
+
         if key.endswith('*'):
             files = s3.list_object(source)
             prefix_folder = '/'.join(key.split('/')[:-1])
@@ -71,7 +82,7 @@ def download(source, directory, key, r):
 
             if directory.endswith('/'):
                 directory = directory + key
-
+            
             s3.download_bucket(file_name=directory,
                                bucket_name=source, key=key)
 
@@ -94,10 +105,12 @@ def cli():
                help='Path of the destination directory.')
 @click.option('-filename', '--file-name', 'key',
                help=' Name of the file.')
+@click.option('-downdir', '--download-directory', 'downdir',
+               help=' the directory which you want to download in cloud.')
 @click.option('-r', '--recursively', 'recursive',
               is_flag=True,
               help='Recursively copy entire directories.')
-def cos(op, source, directory, key, recursive):
+def cos(op, source, directory, key, recursive, downdir):
     """Command line for upload/download
     :param source: Source storage name
     :type source: string
@@ -116,8 +129,12 @@ def cos(op, source, directory, key, recursive):
         if op == 'upload':
             upload(source, directory, key, r=recursive)
         if op == 'download':
-            download(source, directory, key, r=recursive)
-
+            if isNone(downdir):
+                download(source, directory, key, r=recursive)
+            else:
+                downloadDir(source, directory, downdir)
+                
+                
 cli.add_command(cos)
 
 
