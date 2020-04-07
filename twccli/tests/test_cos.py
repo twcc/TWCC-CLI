@@ -23,7 +23,6 @@ class TestCosLifecyc:
     def __run(self, cmd_list):
         result = self.runner.invoke(cli, cmd_list)
         #print(result.output)
-        print(result)
         #assert result.exit_code == 0
         return result.output
 
@@ -100,6 +99,12 @@ class TestCosLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
+        
+    def _download_files(self, bk, dir):
+        cmd_list = "cp cos -download -src {} -dest {} -r".format(bk, dir)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))  
+
     def _del_isu85_files(self):
         dir = self.isu85_Dir.replace("./", "")
         cmd = ["rm", "-rf", self.isu85_Dir]
@@ -143,7 +148,103 @@ class TestCosLifecyc:
 
         assert False
 
+    def _mk_download_dir(self, downDir):
+        cmd = ["mkdir", downDir]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate()
+        
+    def _remove_dir(self, updir, downdir):
+        cmd1 = ["rm" , "-rf", updir]
+        cmd2 = ["rm" , "-rf", downdir]
+        p = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
+        p.communicate()      
+        
+        p = subprocess.Popen(cmd2, stdout=subprocess.PIPE)
+        p.communicate()    
+        
+    def _create_download_dir(self, dir):
+        cmd = ["mkdir" , dir]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate()     
+        
+    def _create_upload_file(self, file):
+        cmd = ["touch" , file]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate() 
+        
+    def _remove_upload_file(self, file):
+        cmd = ["rm" , file]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate() 
+    
+    def _upload_single_file(self, bk, file):
+        
+        cmd_list = "cp cos -upload -src {} -dest {}".format(file, bk)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))  
+    
+    def _download_single_file(self, bk, file, downdir):
+        
+        cmd_list = "cp cos -download -src {} -dest {} -filename {}".format(bk, downdir, file)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" ")) 
+        
+    def _download_specific_dir(self, bk, dest, downdir):
+        
+        cmd_list = "cp cos -download -src {} -dest {} -downdir {} -r".format(bk, dest, downdir)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" ")) 
+    
+    def test_issue_104(self):
+        bk_isu104 = "bk_isu104_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu104_upDir = "./isu104_up_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu104_downDir = "./isu104_down_{}".format(str(uuid.uuid1()).split("-")[0])
+        downdir = "subdir"
+        self._loadSession()
+        self._create_bucket(bk_isu104)
+        
+        self._mk_download_dir(isu104_downDir)
+        self._create_hierarchy_files(isu104_upDir)
+        self._upload_files(bk_isu104, isu104_upDir)  
+        self._download_specific_dir(bk_isu104, isu104_downDir,downdir) 
+        
+        self._remove_dir(isu104_upDir, isu104_downDir)
+        self._remove_dir(downdir, "")
+        self._del_bucket(bk_isu104)
+         
 
+    def test_issue_80(self):
+        bk_isu80 = "bk_isu80_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu80_upDir = "./isu80_up_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu80_downDir = "./isu80_down_{}".format(str(uuid.uuid1()).split("-")[0])
+        
+        self._loadSession()
+        self._create_bucket(bk_isu80)
+
+        self._create_hierarchy_files(isu80_upDir)
+        self._upload_files(bk_isu80, isu80_upDir)  
+        self._mk_download_dir(isu80_downDir)
+        self._download_files(bk_isu80, isu80_downDir)
+        self._remove_dir(isu80_upDir, isu80_downDir)
+        self._del_bucket(bk_isu80)
+
+    
+    def test_issue_103(self):
+        bk_isu103 = "bk_isu103_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu103_upDir = "./isu103_up_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu103_downDir = "./isu103_down_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu103_file = "./isu103_{}.txt".format(str(uuid.uuid1()).split("-")[0])
+
+
+        self._loadSession()
+        self._create_bucket(bk_isu103)    
+        self._create_upload_file(isu103_file)
+        self._create_download_dir(isu103_downDir)
+        self._upload_single_file(bk_isu103, isu103_file)
+        self._download_single_file( bk_isu103, isu103_file, isu103_downDir)
+        self._del_bucket(bk_isu103)
+        self._remove_dir(isu103_upDir, isu103_downDir)
+        self._remove_upload_file(isu103_file)
 
     def test_issue_85(self):
         bk_isu85 = "bk_isu85_{}".format(str(uuid.uuid1()).split("-")[0])
@@ -155,7 +256,7 @@ class TestCosLifecyc:
         self._create_hierarchy_files(isu85_Dir)
         self._upload_files(bk_isu85, isu85_Dir)
         self._del_bucket(bk_isu85)
-
+        self._remove_dir(isu85_Dir, "")
 
 
     def test_issue_78(self):
@@ -169,5 +270,6 @@ class TestCosLifecyc:
         self._create_hierarchy_files(isu78_Dir)
         self._upload_files(bk_isu78, isu78_Dir)
         self._del_bucket(bk_isu78)
-
+        self._remove_dir(isu78_Dir, "")
+        
 
