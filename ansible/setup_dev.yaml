@@ -2,7 +2,7 @@
 - hosts: twccli
   become: true 
   environment:
-    PATH: /home/ubuntu/anaconda2/bin:{{ ansible_env.PATH }}
+    PATH: :{{ conda_path }}:{{ ansible_env.PATH }}
   tasks:
     - name: Update apt-cache
       apt: update_cache=yes
@@ -16,20 +16,26 @@
           - libreadline-dev
           - libssl-dev
           - openssl
+    - name: get miniconda3
+      become: ubuntu
+      get_url: 
+        url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        dest: /tmp/miniconda.sh
+      when: conda_version == 3 
     - name: get miniconda2
       become: ubuntu
       get_url: 
         url: https://repo.anaconda.com/archive/Anaconda2-2019.10-Linux-x86_64.sh
         dest: /tmp/miniconda.sh
+      when: conda_version == 2 
     - name: setting miniconda
       become: ubuntu
-      shell: bash /tmp/miniconda.sh -b; source anaconda2/bin/activate;conda init
+      shell: bash /tmp/miniconda.sh -b; conda init
     - name: install TWCC-CLI
       become: ubuntu
       shell: pip install TWCC-CLI
     - name: setup twccli
       become: ubuntu
-      shell: twccli config init --apikey {{ twcc_api_key }} -pcode {{ twcc_proj_code }} -rc
+      shell: twccli config init --apikey {{ twcc_api_key }} -pcode {{ twcc_proj_code }} -rc 
       args:
         executable: /bin/bash
-
