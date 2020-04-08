@@ -255,10 +255,16 @@ def cos(name, force, ids_or_names, is_recursive):
     if not len(ids_or_names) > 0 and isNone(name):
         print('please enter name')
 
-    if isNone(name):
+    if len(ids_or_names) > 0:
+        print('dd')
         del_object(ids_or_names, name, force)
-    else:
+    else:   
+        print('ss')
         del_bucket(name, is_recursive, force)
+   
+        
+    
+        
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
