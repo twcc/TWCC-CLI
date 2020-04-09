@@ -266,8 +266,8 @@ def cos(name, force, ids_or_names, is_recursive):
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-              is_flag=True, show_default=True,
+@click.option('-f ', '--force', 'force',
+              is_flag=True, show_default=True, default = False,
               help='Force delete the container.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the container.')
