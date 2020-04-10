@@ -3,6 +3,8 @@ import sys
 import os
 import re
 import time
+import pytz
+import datetime
 import unicodedata
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
@@ -37,7 +39,9 @@ def strShorten(mstr, max_len=6):
         return mstr
 
 
-isNone = lambda x: True if type(x) == type(None) else False
+def isNone(x):
+    return True if type(x) == type(None) else False
+
 
 def mkdir_p(path):
     import errno
@@ -147,6 +151,11 @@ def dic_seperator(d):
     return non_dic_cap_table, dic_cap_table
 
 
+def timezone2local(time_str):
+    ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+    return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
+
+
 def create_table_list(obj, tt):
     from terminaltables import AsciiTable as AC
 
@@ -235,3 +244,17 @@ def sizeof_fmt(num, suffix='B'):
 
 def validate(apikey):
     return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
+
+
+def name_validator(name):
+    """
+    rules are in twcc/twcc-cli#98
+
+        :param name: validating name
+        :type name: string
+        :return: validate or not
+        :rtype: bool
+    """
+    if re.match("^[a-z][a-z-_0-9]{6,16}$", name):
+        return True
+    return False

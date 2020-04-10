@@ -32,15 +32,22 @@ def list_vcs_sol(is_table):
         jpp(ans)
 
 
-def list_snapshot(site_ids_or_names, is_table, desc):
+def list_snapshot(site_ids_or_names, is_all, is_table, desc):
     if len(site_ids_or_names) == 1:
         sid = site_ids_or_names[0]
         img = VcsImage()
         srv_id = getServerId(sid)
         ans = img.list(srv_id)
-        if len(ans) > 0:
-            ans['site_id'] = sid
+        if isNone(ans):
+            return None
+        ans['site_id'] = sid
         cols = ['id', 'site_id', 'name', 'status', 'create_time']
+    else:
+        img = VcsImage()
+        ans = img.list(isAll=is_all)
+        cols = ['id', 'name', 'status', 'create_time']
+
+    if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result", ans, cols,
                          isPrint=True, isWrap=False)
@@ -275,14 +282,14 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     :type is_all: bool
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
-
     if isNone(res_property):
         vcs = VcsSite()
         ans = []
 
         if len(site_ids_or_names) > 0:
-            cols = ['id', 'name', 'public_ip', 'private_ip', 'private_network', 'create_time', 'status']
-            if len(site_ids_or_names)==1:
+            cols = ['id', 'name', 'public_ip', 'private_ip',
+                    'private_network', 'create_time', 'status']
+            if len(site_ids_or_names) == 1:
                 site_id = site_ids_or_names[0]
 
                 ans = [vcs.queryById(site_id)]
@@ -291,7 +298,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
                 if isNone(srvid):
                     return None
                 srv = VcsServer().queryById(srvid)
-                if len(srv)>0 and len(srv[u'private_nets'])>0:
+                if len(srv) > 0 and len(srv[u'private_nets']) > 0:
                     srv_net = srv[u'private_nets'][0]
                     ans[0]['private_network'] = srv_net[u'name']
                     ans[0]['private_ip'] = srv_net[u'ip']
@@ -302,16 +309,17 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
             ans = vcs.list(is_all)
 
-        if len(ans)>0:
+        if len(ans) > 0:
             if is_table:
-                table_layout("VCS VMs" if not len(site_ids_or_names)==1 else "VCS Info.: {}".format(site_id), ans, cols, isPrint=True)
+                table_layout("VCS VMs" if not len(site_ids_or_names) == 1 else "VCS Info.: {}".format(
+                    site_id), ans, cols, isPrint=True)
             else:
                 jpp(ans)
 
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
-        list_snapshot(site_ids_or_names, is_table, desc_str)
+        list_snapshot(site_ids_or_names, is_all, is_table, desc_str)
 
     if res_property == 'image':
         list_vcs_img(site_ids_or_names, is_table)

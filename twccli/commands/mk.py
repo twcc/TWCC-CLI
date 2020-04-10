@@ -8,7 +8,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 
@@ -60,6 +60,10 @@ def create_vcs(name, sol="", img_name="", network="",
     # check for all param
     if isNone(name):
         raise ValueError("Missing parameter: `-n`.")
+
+    if not name_validator(name):
+        raise ValueError(
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{6,16}}$ only.".format(name))
 
     extra_props = vcs.getExtraProp(exists_sol[sol])
     # x-extra-property-image
@@ -135,6 +139,9 @@ def create_bucket(bucket_name):
     :param bucket_name: Enter bucket name
     :type bucket_name: string
     """
+    if not name_validator(bucket_name):
+        raise ValueError(
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{6,16}}$' only.".format(bucket_name))
     s3 = S3()
     s3.create_bucket(bucket_name)
 
@@ -170,6 +177,11 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
         else:
             raise ValueError(
                 "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
+    if not name_validator(cntr_name):
+        raise ValueError(
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{6,16}}$ only.".format(cntr_name))
+
 
     res = b.create(cntr_name, sol_id, def_header)
     if 'id' not in res.keys():
@@ -267,7 +279,7 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
 
     else:
         if name == 'twccli':
-            name = "{}_{}".format(name, flavor)
+            name = "{}_{}".format(name, flavor.split(".")[1])
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol, fip=fip)
         ans["solution"] = sol
