@@ -6,9 +6,10 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isF
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
 from prompt_toolkit.shortcuts import yes_no_dialog
-from twccli.twcc.util import isNone
+from twccli.twcc.util import isNone, timezone2local
+
 
 def del_bucket(name, is_recursive, isForce=False):
     """Delete bucket
@@ -45,10 +46,14 @@ def del_object(ids_or_names, bucket_name, isForce=False):
             print("Deleted bject name: {}.".format(obj_key))
 
 
-
-
-
 def del_vcs(ids_or_names, isForce=False):
+    """delete a vcs
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param isForce: Force to delete any resources at your own cost.
+    :type isForce: bool
+    """
     if getConfirm("VCS", ",".join(ids_or_names), isForce):
         vsite = VcsSite()
         if len(ids_or_names) > 0:
@@ -114,14 +119,36 @@ def del_keypair(ids_or_names, isForce=False):
             else:
                 raise ValueError("Keypair: {}, not found.".format(key_name))
 
+def del_snap(ids_or_names, isForce=False, isAll=False):
+    """Delete security group by site id
+
+    :param ids_or_names: ids for snapshots
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param site_id: resources for vcs id
+    :type site_id: int
+    :param isAll: Operates as tenant admin
+    :type isAll: bool
+    """
+    if len(ids_or_names)>0:
+        snap = VcsImage()
+        all_snaps = snap.list(isAll=isAll)
+        if isNone(all_snaps):
+            return None
+        for snap_id in ids_or_names:
+            the_snap = [ x for x in all_snaps if x['id']==int(snap_id) and x['status']=='ACTIVE']
+            if len(the_snap)>0:
+                the_snap = the_snap[0]
+                txt = "You about to delete snapshot \n- id: {}\n- created by: {}\n- created time: {}".format(snap_id, the_snap['user']['username'], timezone2local(the_snap['create_time']))
+                if getConfirm("Snapshots", snap_id, isForce, txt):
+                    snap.deleteById(snap_id)
 
 def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
     """Delete security group by site id
 
     :param ids_or_names: name for deleting object.
     :type ids_or_names: string
-    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
-    :type is_recursive: bool
     :param force: Force to delete any resources at your own cost.
     :type force: bool
     :param site_id: resources for vcs id
@@ -160,7 +187,7 @@ def cli():
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default = False,
               help='Force to delete any resource at your own cost.')
-@click.option('-n', '--name', 'name', default=None, 
+@click.option('-n', '--name', 'name', default=None,
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
@@ -192,11 +219,15 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-n', '--name', 'name',
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-s', '--site-id', 'site_id',
-              help='ID of the container.')
+              help='ID of the VCS.')
+@click.option('-snap-id', '--snapshot-id', 'name',
+              help='ID of snapshot.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="Delete existing keypair(s).")
+@click.option('-snap', '--snapshots', 'res_property', flag_value='Snapshot',
+              help="delete snapshots. `-s` is required!")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
@@ -219,15 +250,17 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
         :param is_all: Operates as tenant admin.
         :type is_all: bool
     """
-
     if res_property == "SecurityGroup":
         del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
+    if res_property == "Snapshot":
+        del_snap(mk_names(name, ids_or_names), force, is_all)
 
     if isNone(res_property):
+        ids_or_names = mk_names(site_id, ids_or_names)
         if len(ids_or_names) > 0:
-            del_vcs(mk_names(site_id, ids_or_names), force)
+            del_vcs(ids_or_names, force)
         else:
-            print("Key name is required.")
+            print("resource id is required.")
 
 
 @click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")

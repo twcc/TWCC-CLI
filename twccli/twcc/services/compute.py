@@ -331,7 +331,7 @@ class VcsSite(CpuService):
                                                           "local": "local_disk"}
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
-                
+
         return res
 
     def getIsrvFlavors(self, name_or_id="flavor_id"):
@@ -425,15 +425,30 @@ class VcsImage(CpuService):
         self._func_ = "images"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def list(self, srv_id, isAll=False):
-        self.ext_get = {'project': self._project_id}
-        ans = self._do_api()
-        for y in ans:
-            if not isNone(y['server']):
-                if y['server']['id'] == srv_id:
-                    return y
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.res_type = 'txt'
+        self.url_dic = {"images": sys_vol_id}
+        return self._do_api()
+
+    def list(self, srv_id=None, isAll=False):
+        if not isNone(srv_id):
+            self.ext_get = {'project': self._project_id}
+            ans = self._do_api()
+            for y in ans:
+                if not isNone(y['server']):
+                    if y['server']['id'] == srv_id:
+                        return y
         else:
-            return {}
+            self.ext_get = {'project': self._project_id,
+                    'sol_categ': 'os'}
+            ans = self._do_api()
+            all_sys_snap = [x for x in ans if not x['is_public']]
+            if isAll:
+                return all_sys_snap
+            else:
+                my_username = sess=Session2().twcc_username
+                return [ x for x in all_sys_snap if x["user"]['username'] == my_username ]
 
     def createSnapshot(self, sid, name, desc_str):
         vcs = VcsSite()

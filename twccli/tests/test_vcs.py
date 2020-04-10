@@ -2,11 +2,11 @@
 from click.testing import CliRunner
 from ..twcc import Session2
 from ..twcc.util import isNone
+from ..twccli import cli
 import os
 import re
 import click
 import json
-from ..twccli import cli
 import pytest
 import uuid
 
