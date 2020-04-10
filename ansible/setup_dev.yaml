@@ -2,7 +2,7 @@
 - hosts: twccli
   become: true 
   environment:
-    PATH: :{{ conda_path }}:{{ ansible_env.PATH }}
+    PATH: '{{ conda_path }}/bin:{{ ansible_env.PATH }}'
   tasks:
     - name: Update apt-cache
       apt: update_cache=yes
@@ -27,10 +27,10 @@
       get_url: 
         url: https://repo.anaconda.com/archive/Anaconda2-2019.10-Linux-x86_64.sh
         dest: /tmp/miniconda.sh
-      when: conda_version == 2 
+      when: conda_version == 2
     - name: setting miniconda
       become: ubuntu
-      shell: bash /tmp/miniconda.sh -b; conda init
+      shell: bash /tmp/miniconda.sh -b -p {{ conda_path }}; conda init
     - name: install TWCC-CLI
       become: ubuntu
       shell: pip install TWCC-CLI

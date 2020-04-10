@@ -6,4 +6,4 @@ twcc_api_key=
 twcc_proj_code=
 ansible_python_interpreter=/usr/bin/python3.5
 conda_version = 2
-conda_path = /home/ubuntu/anaconda2/bin
+conda_path = /home/ubuntu/conda
