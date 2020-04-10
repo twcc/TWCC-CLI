@@ -12,7 +12,7 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 1. Release Notes
 
 ### v0.5.5 Release Note
-![img](https://media.giphy.com/media/xThuWmOkO0SvRprLXy/giphy.gif =40%x)
+![img](https://media.giphy.com/media/xThuWmOkO0SvRprLXy/giphy.gif)
 
 
 **new features**
