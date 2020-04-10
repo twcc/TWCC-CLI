@@ -157,8 +157,8 @@ def cli():
 
 
 @click.command(help="Remove your key in VCS ")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-              is_flag=True, show_default=True,
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default = False,
               help='Force to delete any resource at your own cost.')
 @click.option('-n', '--name', 'name', default=None, 
               help="Enter name for your resource name")
@@ -186,8 +186,8 @@ def key(ctx, name, ids_or_names, force):
 
 
 @click.command(help="'Delete' Operations for VCS (Virtual Compute Service) resources.")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-              is_flag=True, show_default=True,
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default = False,
               help='Force to delete any resource at your own cost.')
 @click.option('-n', '--name', 'name',
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
@@ -231,8 +231,8 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 
 
 @click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-              is_flag=True, show_default=True,
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default = False,
               help='Force delete the objects.')
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
@@ -255,15 +255,19 @@ def cos(name, force, ids_or_names, is_recursive):
     if not len(ids_or_names) > 0 and isNone(name):
         print('please enter name')
 
-    if isNone(name):
+    if len(ids_or_names) > 0:
         del_object(ids_or_names, name, force)
-    else:
+    else:   
         del_bucket(name, is_recursive, force)
+   
+        
+    
+        
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
-@click.option('-f / --nof', '--force / --noforce', 'force',
-              is_flag=True, show_default=True,
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default = False,
               help='Force delete the container.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the container.')
