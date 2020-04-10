@@ -59,7 +59,39 @@ class S3():
                     ele[y] = x[y]
             res.append(ele)
         return res
+    
+    def list_dir(self, bucket_name, directory, downdir):
+        # list dir in cloud
+        res = self.list_object(bucket_name)
 
+        dir_set = set()
+        for i in res:
+            str = i['Key']
+            ele = str.split('/')
+            for ee in ele[:-1] :
+                dir_set.add(ee)
+        
+        if downdir in dir_set :
+            for i in res:
+                if i['Key'].find(downdir)>-1:
+                    #print("{} in".format(i['Key']))
+                    last_idx = i['Key'].rfind('/')
+                    file_name = os.path.join(directory+'/', i['Key'])
+                    file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
+                    cmd = ["mkdir" , "-p", file_dir]
+                    print(" ".join(cmd))
+                    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                    p.communicate() 
+                    #file_path = os.path.join(directory+'/', i['Key'])
+                    key = i['Key'][last_idx+1:]
+                    print(i['Key'])
+                    response = self.s3_cli.download_file(
+                        bucket_name, i['Key'], file_name)
+        else:
+            print("Can not find {} in {}".format(downdir, bucket_name))
+            return
+        
+        
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
@@ -67,6 +99,7 @@ class S3():
             :return            : List all object inside of S3 bucket.
         """
         res = self.s3_cli.list_objects(Bucket=bucket_name)
+
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
         to_zone = tz.tzlocal()
@@ -85,8 +118,19 @@ class S3():
                         else:
                             res[key] = ele[key]
                 tmp.append(res)
+
             return tmp
         return None
+    
+    def upload_file(self, bucket_name=None, key=None):
+        dir_path = os.getcwd().decode('utf8')
+        localPath = dir_path+'/'+ key
+        try:
+            self.s3_cli.upload_file(
+                key, bucket_name, key)
+        except ClientError as e:
+            print(e)
+            return False
 
     def upload_bucket(self, file_name=None, bucket_name=None, key=None, path=None, r=False):
         """ Upload to S3
@@ -105,7 +149,7 @@ class S3():
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                 out, err = p.communicate()
 
-                for singleFilePath in out.split("\n"):
+                for singleFilePath in out.decode('utf-8').split("\n"):
                     
                     if os.path.isdir(singleFilePath) ==False and len(singleFilePath)>0:
                         singleFilePath = singleFilePath.replace("./", "")
@@ -129,7 +173,15 @@ class S3():
                 print(e)
                 return False
             return True
+        
+    def download_file(self, bucket_name=None, key=None, file_name=None, path=None):
+        a = self.list_object(bucket_name)
 
+        for i in a:
+            ff_name = os.path.join(path+'/', i['Key'])
+            if ff_name.find(key)>0:
+                self.s3_cli.download_file(bucket_name, i['Key'], ff_name)
+        
     def download_bucket(self, bucket_name=None, key=None, file_name=None, path=None, r=False):
         """ Download from S3
 
@@ -144,7 +196,9 @@ class S3():
             # checking for download path exists
             if os.path.isdir(path):
                 # get the list of objects inside the bucket
-                a = self.list_object(bucket_name)[1:]
+                #a = self.list_object(bucket_name)[1:]
+                a = self.list_object(bucket_name)
+
                 # loop through all the objects
                 for i in a:
                     ff_name = os.path.join(path+'/', i['Key'])
@@ -161,7 +215,7 @@ class S3():
                 if not file_name.endswith('/'):
                     check_path = "/".join(file_name.split('/')[:-1])
 
-                print(check_path)
+
                 if not os.path.isdir(check_path):
                     os.mkdir(check_path)
 

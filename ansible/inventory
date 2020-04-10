@@ -1,0 +1,9 @@
+[twccli]
+{TWCC_VCS_IP} ansible_connection=ssh ansible_user=ubuntu ansible_ssh_private_key_file={TWCC_KEY_FILE}
+
+[twccli:vars]
+twcc_api_key=
+twcc_proj_code=
+ansible_python_interpreter=/usr/bin/python3.5
+conda_version = 2
+conda_path = /home/ubuntu/conda
