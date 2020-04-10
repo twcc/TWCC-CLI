@@ -130,9 +130,9 @@ def cos(op, source, directory, key, recursive, downdir):
         print("please enter operation : upload/download")
     else:
         if op == 'upload':
-            if isNone(key) or len(key) == 0:
+            if isNone(key):
                 # upload single file
-                if isNone(source) or len(source) == 0:
+                if isNone(source):
                     print('please enter file name or source directory')
                     return
 
