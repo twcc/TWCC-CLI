@@ -20,6 +20,9 @@ def upload(source, directory, key, r):
     """
     s3 = S3()
     # Check for source type
+    if source is None :
+        s3.upload_file(key=key, bucket_name=directory)
+        return
     if os.path.isdir(source):
         if r != True:
             raise Exception(
@@ -99,7 +102,7 @@ def cli():
                help='Upload files or folders to the bucket.')
 @click.option('-download', 'op', flag_value='download',
                help='Download files from the bucket or download the entire bucket.')
-@click.option('-src', '--source', 'source', required=True,
+@click.option('-src', '--source', 'source',
                help='Path of the source directory.')
 @click.option('-dest', '--destination', 'directory', required=True,
                help='Path of the destination directory.')
@@ -127,6 +130,12 @@ def cos(op, source, directory, key, recursive, downdir):
         print("please enter operation : upload/download")
     else:
         if op == 'upload':
+            if isNone(key) or len(key) == 0:
+                # upload single file
+                if isNone(source) or len(source) == 0:
+                    print('please enter file name or source directory')
+                    return
+
             upload(source, directory, key, r=recursive)
         if op == 'download':
             if isNone(downdir):

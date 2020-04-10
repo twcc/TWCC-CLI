@@ -121,6 +121,16 @@ class S3():
 
             return tmp
         return None
+    
+    def upload_file(self, bucket_name=None, key=None):
+        dir_path = os.getcwd().decode('utf8')
+        localPath = dir_path+'/'+ key
+        try:
+            self.s3_cli.upload_file(
+                key, bucket_name, key)
+        except ClientError as e:
+            print(e)
+            return False
 
     def upload_bucket(self, file_name=None, bucket_name=None, key=None, path=None, r=False):
         """ Upload to S3
@@ -139,7 +149,7 @@ class S3():
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                 out, err = p.communicate()
 
-                for singleFilePath in out.split("\n"):
+                for singleFilePath in out.decode('utf-8').split("\n"):
                     
                     if os.path.isdir(singleFilePath) ==False and len(singleFilePath)>0:
                         singleFilePath = singleFilePath.replace("./", "")
