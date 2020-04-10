@@ -11,6 +11,20 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 1. Release Notes
 
+### v0.5.5 Release Note
+![img](https://media.giphy.com/media/xThuWmOkO0SvRprLXy/giphy.gif)
+
+
+**new features**
+- snapshot delete functions, `twccli rm vsc -snap -snap-id $SNAPTSHOT_ID`
+
+**fix bug**
+- delete bucket and file operation
+- upload and download dir to bucket
+- remove flag 'noforce' in `twccli rm`
+- update listing all snapshots for Project Owner
+- `rm vcs` with `-s` flag
+
 ### v0.5.4 Release Note
 ![img](https://media.giphy.com/media/MtIPR6C5okdt6/giphy.gif)
 
