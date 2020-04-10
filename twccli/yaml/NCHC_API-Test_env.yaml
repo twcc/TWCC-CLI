@@ -69,6 +69,7 @@ avalible_funcs:
       http_verb:
         - 'get'
         - 'put'
+        - 'delete'
     -
       name: "image_commit"
       url_type: "/api/v2/{FUNCTION}/"
