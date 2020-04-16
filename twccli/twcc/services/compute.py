@@ -302,7 +302,7 @@ class VcsSite(CpuService):
 
     def getExtraProp(self, sol_id):
         extra_prop = self._do_list_solution(sol_id)
-
+        
         # processing flavors
         extra_flv = set(extra_prop['flavor'])
         def filter_flv(x): return True if x in extra_flv else False
@@ -318,6 +318,15 @@ class VcsSite(CpuService):
                            for x in products if x in tflvs_keys])
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
+
+        data_vol_type = {#"hdd": "hdd", # not open yet
+                         "ssd": "ssd",
+                         #"hdd-encrypt": "LUKS-hdd", # no open yet
+                         "ssd-encrypt": "LUKS-ssd"}
+
+        extra_prop["volume-type"] = data_vol_type
+        extra_prop["volume-size"] = 0
+
         res = {}
         for ele in extra_prop:
             if ele == 'flavor':
@@ -327,8 +336,7 @@ class VcsSite(CpuService):
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
                 res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                                                          "ssd": "block_storage-ssd",
-                                                          "local": "local_disk"}
+                                                          "ssd": "block_storage-ssd"}  # no local disk
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
@@ -441,14 +449,14 @@ class VcsImage(CpuService):
                         return y
         else:
             self.ext_get = {'project': self._project_id,
-                    'sol_categ': 'os'}
+                            'sol_categ': 'os'}
             ans = self._do_api()
             all_sys_snap = [x for x in ans if not x['is_public']]
             if isAll:
                 return all_sys_snap
             else:
-                my_username = sess=Session2().twcc_username
-                return [ x for x in all_sys_snap if x["user"]['username'] == my_username ]
+                my_username = sess = Session2().twcc_username
+                return [x for x in all_sys_snap if x["user"]['username'] == my_username]
 
     def createSnapshot(self, sid, name, desc_str):
         vcs = VcsSite()
