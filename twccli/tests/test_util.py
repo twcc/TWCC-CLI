@@ -6,6 +6,7 @@ from ..twcc.util import name_validator
 def test_name_validator():
 
     rules = {
+        "twccli" : True,
         "twcc_cli9" : True,
         "twcc-cli" : True,
         "twcc.cli" : False,
