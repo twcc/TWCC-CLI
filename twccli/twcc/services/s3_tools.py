@@ -13,7 +13,8 @@ from twccli.twcc.session import Session2
 from twccli.twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
-import subprocess 
+import subprocess
+
 
 class S3():
     def __init__(self):
@@ -59,7 +60,7 @@ class S3():
                     ele[y] = x[y]
             res.append(ele)
         return res
-    
+
     def list_dir(self, bucket_name, directory, downdir):
         # list dir in cloud
         res = self.list_object(bucket_name)
@@ -68,20 +69,20 @@ class S3():
         for i in res:
             str = i['Key']
             ele = str.split('/')
-            for ee in ele[:-1] :
+            for ee in ele[:-1]:
                 dir_set.add(ee)
-        
-        if downdir in dir_set :
+
+        if downdir in dir_set:
             for i in res:
-                if i['Key'].find(downdir)>-1:
+                if i['Key'].find(downdir) > -1:
                     #print("{} in".format(i['Key']))
                     last_idx = i['Key'].rfind('/')
                     file_name = os.path.join(directory+'/', i['Key'])
                     file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
-                    cmd = ["mkdir" , "-p", file_dir]
+                    cmd = ["mkdir", "-p", file_dir]
                     print(" ".join(cmd))
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-                    p.communicate() 
+                    p.communicate()
                     #file_path = os.path.join(directory+'/', i['Key'])
                     key = i['Key'][last_idx+1:]
                     print(i['Key'])
@@ -90,8 +91,7 @@ class S3():
         else:
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
-        
-        
+
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
@@ -121,10 +121,10 @@ class S3():
 
             return tmp
         return None
-    
+
     def upload_file(self, bucket_name=None, key=None):
         dir_path = os.getcwd().decode('utf8')
-        localPath = dir_path+'/'+ key
+        localPath = dir_path+'/' + key
         try:
             self.s3_cli.upload_file(
                 key, bucket_name, key)
@@ -150,10 +150,11 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
-                    
-                    if os.path.isdir(singleFilePath) ==False and len(singleFilePath)>0:
+
+                    if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
                         singleFilePath = singleFilePath.replace("./", "")
-                        localPath = os.path.abspath(os.path.dirname(path))+'/'+ singleFilePath
+                        localPath = os.path.abspath(
+                            os.path.dirname(path))+'/' + singleFilePath
                         remotePath = singleFilePath
 
                         try:
@@ -162,7 +163,7 @@ class S3():
                         except ClientError as e:
                             print(e)
                             return False
-                    
+
             else:
                 print("No such path")
         else:
@@ -173,15 +174,15 @@ class S3():
                 print(e)
                 return False
             return True
-        
+
     def download_file(self, bucket_name=None, key=None, file_name=None, path=None):
         a = self.list_object(bucket_name)
 
         for i in a:
             ff_name = os.path.join(path+'/', i['Key'])
-            if ff_name.find(key)>0:
+            if ff_name.find(key) > 0:
                 self.s3_cli.download_file(bucket_name, i['Key'], ff_name)
-        
+
     def download_bucket(self, bucket_name=None, key=None, file_name=None, path=None, r=False):
         """ Download from S3
 
@@ -214,7 +215,6 @@ class S3():
             try:
                 if not file_name.endswith('/'):
                     check_path = "/".join(file_name.split('/')[:-1])
-
 
                 if not os.path.isdir(check_path):
                     os.mkdir(check_path)
@@ -256,7 +256,7 @@ class S3():
                     for i in self.list_object(bucket_name):
                         self.del_object(bucket_name=bucket_name,
                                         file_name=i['Key'])
-                
+
                 res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:
