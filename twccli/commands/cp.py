@@ -24,7 +24,7 @@ def upload(source, directory, key, r):
 
     s3 = S3()
     # Check for source type
-    if source is None:
+    if isNone(source):
         s3.upload_file(key=key, bucket_name=directory)
         return
     if os.path.isdir(source):
@@ -35,7 +35,7 @@ def upload(source, directory, key, r):
             s3.upload_bucket(path=source, bucket_name=directory, r=r)
     else:
 
-        if key == None:
+        if isNone(key):
             key = source.split('/')[-1]
 
         s3.upload_bucket(file_name=source, bucket_name=directory, key=key)
