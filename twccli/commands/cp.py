@@ -18,6 +18,10 @@ def upload(source, directory, key, r):
     :param r: is recursive
     :type r: bool
     """
+    if isNone(source)== False :
+        if os.path.basename(source) == '':
+            source = source[:-1]
+
     s3 = S3()
     # Check for source type
     if source is None:
@@ -108,7 +112,7 @@ def cli():
               help='Path of the source directory.')
 @click.option('-dest', '--destination', 'directory', required=True,
               help='Path of the destination directory.')
-@click.option('-filename', '--file-name', 'key',
+@click.option('-fn', '--file-name', 'key',
               help=' Name of the file.')
 @click.option('-downdir', '--download-directory', 'downdir',
               help=' the directory which you want to download in cloud.')
