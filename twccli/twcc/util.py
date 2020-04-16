@@ -255,6 +255,6 @@ def name_validator(name):
         :return: validate or not
         :rtype: bool
     """
-    if re.match("^[a-z][a-z-_0-9]{6,16}$", name):
+    if re.match("^[a-z][a-z-_0-9]{5,15}$", name):
         return True
     return False
