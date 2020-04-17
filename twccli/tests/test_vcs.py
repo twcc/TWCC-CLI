@@ -14,7 +14,7 @@ import uuid
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 16.04", "local")
+        (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 16.04", "ssd")
         self.ext_port = "81"
         self.apikey = os.environ['TWCC_API_KEY']
         self.pcode = os.environ['TWCC_PROJ_CODE']
@@ -54,6 +54,8 @@ class TestVcsLifecyc:
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
+                "--data-volume-type", "ssd-encrypt", 
+                "--data-volume-size", "1",
                 "-wait", "-json"
                 ]
         print(" ".join(paras))
@@ -94,15 +96,15 @@ class TestVcsLifecyc:
         print(out)
 
 
-    def test_lifecycle(self):
-        self._loadParams()
-        self._loadSession()
-        self._create_key()
-        self._list_key()
-        self._create_vcs()
-        self._list_vcs()
-        self._add_secg()
-        self._list_secg()
-        self._del_secg()
-        self._del_vcs()
-        self._delete_key()
+    # def test_lifecycle(self):
+    #     self._loadParams()
+    #     self._loadSession()
+    #     self._create_key()
+    #     self._list_key()
+    #     self._create_vcs()
+    #     self._list_vcs()
+    #     self._add_secg()
+    #     self._list_secg()
+    #     self._del_secg()
+    #     self._del_vcs()
+    #     self._delete_key()
