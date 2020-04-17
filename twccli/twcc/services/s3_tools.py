@@ -75,7 +75,7 @@ class S3():
         if downdir in dir_set:
             for i in res:
                 if i['Key'].find(downdir) > -1:
-                    #print("{} in".format(i['Key']))
+                    # print("{} in".format(i['Key']))
                     last_idx = i['Key'].rfind('/')
                     file_name = os.path.join(directory+'/', i['Key'])
                     file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
@@ -83,9 +83,8 @@ class S3():
                     print(" ".join(cmd))
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                     p.communicate()
-                    #file_path = os.path.join(directory+'/', i['Key'])
+                    # file_path = os.path.join(directory+'/', i['Key'])
                     key = i['Key'][last_idx+1:]
-                    print(i['Key'])
                     response = self.s3_cli.download_file(
                         bucket_name, i['Key'], file_name)
         else:
@@ -122,12 +121,16 @@ class S3():
             return tmp
         return None
 
-    def upload_file(self, bucket_name=None, key=None):
-        dir_path = os.getcwd().decode('utf8')
-        localPath = dir_path+'/' + key
+    def upload_file(self, bucket_name=None, key=None, source=None):
+        if os.path.isabs(source) == False:
+            source = source.replace("./", "")
+            remotePath = os.path.abspath(source)+'/' + key
+        else:
+            remotePath = source + '/'+key
+
         try:
             self.s3_cli.upload_file(
-                key, bucket_name, key)
+                remotePath, bucket_name, key)
         except ClientError as e:
             print(e)
             return False
@@ -142,20 +145,27 @@ class S3():
             :param r                 : Setting for recursive
             :return                  : True if success upload file to S3 bucket
         """
+
         if r == True:
             if os.path.isdir(path):
                 cmd = ['find', path]
-                #res =subprocess.run(cmd, capture_output=True)
+                # res =subprocess.run(cmd, capture_output=True)
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
 
                     if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
-                        singleFilePath = singleFilePath.replace("./", "")
-                        localPath = os.path.abspath(
-                            os.path.dirname(path))+'/' + singleFilePath
-                        remotePath = singleFilePath
+                        if os.path.isabs(path) == False:
+                            singleFilePath = singleFilePath.replace("./", "")
+                            localPath = os.path.abspath(
+                                os.path.dirname(path))+'/' + singleFilePath
+                            remotePath = os.path.dirname(
+                                path)+'/'+singleFilePath
+                        else:
+                            localPath = singleFilePath
+                            remotePath = singleFilePath.replace(
+                                os.path.split(path)[0].decode('utf-8')+'/', '')
 
                         try:
                             self.s3_cli.upload_file(
@@ -197,7 +207,7 @@ class S3():
             # checking for download path exists
             if os.path.isdir(path):
                 # get the list of objects inside the bucket
-                #a = self.list_object(bucket_name)[1:]
+                # a = self.list_object(bucket_name)[1:]
                 a = self.list_object(bucket_name)
 
                 # loop through all the objects
