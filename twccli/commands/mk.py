@@ -191,7 +191,6 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
     if not name_validator(cntr_name):
         raise ValueError(
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
-
     res = b.create(cntr_name, sol_id, def_header)
     if 'id' not in res.keys():
         if 'message' in res:

@@ -147,7 +147,8 @@ class GpuSite(GpuService):
     def create(self, name, sol_id, extra_prop):
 
         # @todo change this
-        extra_prop['x-extra-property-gpfs01-mount-path'] = '/mnt/work'
+        extra_prop['x-extra-property-gpfs01-mount-path'] = '/work/{}'.format(
+            self.twcc_session.twcc_username)
         extra_prop['x-extra-property-gpfs02-mount-path'] = '/home/{}'.format(
             self.twcc_session.twcc_username)
 
@@ -302,7 +303,7 @@ class VcsSite(CpuService):
 
     def getExtraProp(self, sol_id):
         extra_prop = self._do_list_solution(sol_id)
-        
+
         # processing flavors
         extra_flv = set(extra_prop['flavor'])
         def filter_flv(x): return True if x in extra_flv else False
@@ -319,10 +320,10 @@ class VcsSite(CpuService):
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
 
-        data_vol_type = {#"hdd": "hdd", # not open yet
-                         "ssd": "ssd",
-                         #"hdd-encrypt": "LUKS-hdd", # no open yet
-                         "ssd-encrypt": "LUKS-ssd"}
+        data_vol_type = {  # "hdd": "hdd", # not open yet
+            "ssd": "ssd",
+            # "hdd-encrypt": "LUKS-hdd", # no open yet
+            "ssd-encrypt": "LUKS-ssd"}
 
         extra_prop["volume-type"] = data_vol_type
         extra_prop["volume-size"] = 0
