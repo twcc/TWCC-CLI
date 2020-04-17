@@ -24,8 +24,8 @@ def pp(**kwargs):
 
 def jpp(inobj):
     import json
-    print (json.dumps(inobj, ensure_ascii=False,
-                      sort_keys=True, indent=4, separators=(',', ': ')))
+    print(json.dumps(inobj, ensure_ascii=False,
+                     sort_keys=True, indent=4, separators=(',', ': ')))
 
 
 def isDebug():
@@ -56,6 +56,11 @@ def mkdir_p(path):
 
 def isFile(fn):
     return True if os.path.isfile(fn) else False
+
+
+def resource_id_validater(id):
+
+    return id.isdigit()
 
 
 def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False):
