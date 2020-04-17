@@ -6,11 +6,12 @@ from ..twcc.util import name_validator, resource_id_validater
 def test_name_validator():
 
     rules = {
-        "twcc_cli9": True,
-        "twcc-cli": True,
-        "twcc.cli": False,
-        "Twccli": False,
-        "9twccli": False,
+        "twccli" : True,
+        "twcc_cli9" : True,
+        "twcc-cli" : True,
+        "twcc.cli" : False,
+        "Twccli" : False,
+        "9twccli" : False,
         "abcdefghijklmnopqrstuvwxyz": False,
     }
 
