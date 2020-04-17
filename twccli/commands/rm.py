@@ -8,7 +8,7 @@ from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
 from prompt_toolkit.shortcuts import yes_no_dialog
-from twccli.twcc.util import isNone, timezone2local
+from twccli.twcc.util import isNone, timezone2local, resource_id_validater
 
 
 def del_bucket(name, is_recursive, isForce=False):
@@ -309,8 +309,17 @@ def ccs(site_id, force, ids_or_names):
     ids_or_names = mk_names(site_id, ids_or_names)
     if len(ids_or_names) == 0:
         raise ValueError("Resource id is required.")
-    del_ccs(ids_or_names, force)
-
+    else:
+        #print(isinstance(ids_or_names, int))
+        result = True
+        for id in ids_or_names:
+            if resource_id_validater(id) == False:
+                result = False 
+        
+        if result:
+            del_ccs(ids_or_names, force)
+        else:
+            print("site id must be integer")
 
 cli.add_command(vcs)
 cli.add_command(cos)

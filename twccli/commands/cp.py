@@ -18,7 +18,7 @@ def upload(source, directory, key, r):
     :param r: is recursive
     :type r: bool
     """
-    if isNone(source)== False :
+    if isNone(source) == False:
         if os.path.basename(source) == '':
             source = source[:-1]
 
