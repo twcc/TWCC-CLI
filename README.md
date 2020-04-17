@@ -7,9 +7,29 @@
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
+**NOTICE**
+Remeber to set locale in environment
+```
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+export PYTHONIOENCODING=UTF-8
+```
+
 ## INDEX: 
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 1. Release Notes
+
+### v0.5.6 Release Note
+![img](https://media.giphy.com/media/xUA7b7yLPq3IPOLnk4/giphy.gif)
+
+**new features**
+- You can create additional data volume in `ssd` and `ssd-encrypt` type.
+
+**fix bug**
+- upload file source path with slash is not work.
+- adding error condition in `rm ccs -s` while entering resource name, and adding `-s` parameter in `ls ccs`.
+- fix naming standard to 6-16 in length.
+- support customized clone image in CCS.
 
 ### v0.5.5 Release Note
 ![img](https://media.giphy.com/media/xThuWmOkO0SvRprLXy/giphy.gif)
