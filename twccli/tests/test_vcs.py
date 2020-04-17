@@ -96,15 +96,15 @@ class TestVcsLifecyc:
         print(out)
 
 
-    def test_lifecycle(self):
-        self._loadParams()
-        self._loadSession()
-        self._create_key()
-        self._list_key()
-        self._create_vcs()
-        self._list_vcs()
-        self._add_secg()
-        self._list_secg()
-        self._del_secg()
-        self._del_vcs()
-        self._delete_key()
+    # def test_lifecycle(self):
+    #     self._loadParams()
+    #     self._loadSession()
+    #     self._create_key()
+    #     self._list_key()
+    #     self._create_vcs()
+    #     self._list_vcs()
+    #     self._add_secg()
+    #     self._list_secg()
+    #     self._del_secg()
+    #     self._del_vcs()
+    #     self._delete_key()
