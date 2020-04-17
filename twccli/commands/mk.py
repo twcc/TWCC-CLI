@@ -25,13 +25,18 @@ def create_commit(site_id, tag, isAll=False):
 
 
 def create_vcs(name, sol="", img_name="", network="",
-               keypair="", flavor="", sys_vol="", fip=""):
+               keypair="", flavor="", sys_vol="",
+               data_vol="", data_vol_size=0, fip=""):
     """Create vcs
     create vcs by set solution, image name, flavor
     create vcs by default value
 
     :param sys_vol: Chose system volume disk type
     :type sys_vol: string
+    :param data_vol: Volume type of the data volume.
+    :type data_vol: int
+    :param data_vol_size: Size of the data volume in (GB).
+    :type data_vol_size: int
     :param flavor: Choose hardware configuration
     :type flavor: string
     :param img_name: Enter image name.Enter image name
@@ -63,9 +68,10 @@ def create_vcs(name, sol="", img_name="", network="",
 
     if not name_validator(name):
         raise ValueError(
-            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{6,16}}$ only.".format(name))
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(name))
 
     extra_props = vcs.getExtraProp(exists_sol[sol])
+
     # x-extra-property-image
     if isNone(img_name):
         img_name = extra_props['x-extra-property-image'][0]
@@ -100,13 +106,17 @@ def create_vcs(name, sol="", img_name="", network="",
                                                                                    ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
     required['x-extra-property-system-volume-type'] = extra_props['x-extra-property-system-volume-type'][sys_vol]
 
-    # x-extra-property-volume-type
-    # required['x-extra-property-volume-type'] = ""
-
     # x-extra-property-availability-zone
     required['x-extra-property-availability-zone'] = "nova"
 
-
+    # data vol section
+    if data_vol_size > 0:
+        required['x-extra-property-volume-size'] = str(data_vol_size)
+        if not data_vol in extra_props['x-extra-property-volume-type'].keys():
+            raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
+                                                                            ", ".join(extra_props['x-extra-property-volume-type'].keys())))
+        required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
+        
     return vcs.create(name, exists_sol[sol], required)
 
 
@@ -141,7 +151,7 @@ def create_bucket(bucket_name):
     """
     if not name_validator(bucket_name):
         raise ValueError(
-            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{6,16}}$' only.".format(bucket_name))
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(bucket_name))
     s3 = S3()
     s3.create_bucket(bucket_name)
 
@@ -180,9 +190,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 
     if not name_validator(cntr_name):
         raise ValueError(
-            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{6,16}}$ only.".format(cntr_name))
-
-
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
     res = b.create(cntr_name, sol_id, def_header)
     if 'id' not in res.keys():
         if 'message' in res:
@@ -228,6 +236,12 @@ def cli():
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
+@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="SSD", type=str,
+              show_default=True,
+              help="Volume type of the data volume.")
+@click.option('-dvol-size', '--data-volume-size', 'data_vol_size', type=int,
+              default=0, show_default=True,
+              help="Size of the data volume in (GB).")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -236,7 +250,9 @@ def cli():
               help='Wait until your instance to be provisioned.')
 @click.argument('ids_or_names', nargs=-1)
 @click.pass_context
-def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wait, network, snapshot, sol, fip, is_table):
+def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
+        data_vol, data_vol_size,
+        flavor, img_name, wait, network, snapshot, sol, fip, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -245,7 +261,10 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
     :type name: string
     :param sys_vol: Chose system volume disk type
     :type sys_vol: string
-    :param flavor: Choose hardware configuration
+    :param data_vol: Volume type of the data volume.
+    :type data_vol: int
+    :param data_vol_size: Size of the data volume in (GB).
+    :type data_vol_size: int
     :type flavor: string
     :param img_name: Enter image name.Enter image name
     :type img_name: string
@@ -280,8 +299,11 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol, flavor, img_name, wa
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor.split(".")[1])
-        ans = create_vcs(name, sol=sol.lower(), img_name=img_name, network=network, keypair=keypair,
-                         flavor=flavor, sys_vol=sys_vol, fip=fip)
+        ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
+                         network=network, keypair=keypair,
+                         flavor=flavor, sys_vol=sys_vol,
+                         data_vol=data_vol, data_vol_size=data_vol_size,
+                         fip=fip)
         ans["solution"] = sol
         ans["flavor"] = flavor
 

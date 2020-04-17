@@ -375,6 +375,8 @@ def cos(name, is_table, ids_or_names):
 @click.command(help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p', '--port', 'show_ports', is_flag=True,
               help='Show port information.')
+@click.option('-s', '--site-id', 'name', type=str,
+              help="ID of the CCS.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the containers in the project. (Tenant Administrators only)")
 @click.option('-dup', '--show-duplication-status', 'res_property', flag_value='commit',
@@ -390,7 +392,7 @@ def cos(name, is_table, ids_or_names):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
-def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
+def ccs(res_property, name, site_ids_or_names, is_table, is_all, show_ports):
     """Command line for List Container
        Functions:
        1. list container
@@ -413,10 +415,11 @@ def ccs(res_property, site_ids_or_names, is_table, is_all, show_ports):
 
     if not res_property:
         if show_ports:
+            site_ids_or_names = mk_names(name, site_ids_or_names)
             if len(site_ids_or_names) == 1:
                 list_port(site_ids_or_names[0], is_table)
             else:
-                raise ValueError("Need at least one resource id.")
+                raise ValueError("Need only one resource id.")
         else:
             list_cntr(site_ids_or_names, is_table, is_all)
 

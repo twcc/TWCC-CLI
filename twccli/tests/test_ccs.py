@@ -11,6 +11,7 @@ from ..twccli import cli
 env_options = {"cicd_pytorch": (1, "PyTorch", "pytorch-19.11-py3:latest"),
                "cicd_tensorflow": (1, "TensorFlow", "tensorflow-19.11-tf2-py3:latest"), }
 
+
 class TestCntrLifecyc:
     def _loadParams(self):
         test_env = "cicd_pytorch"
@@ -32,8 +33,8 @@ class TestCntrLifecyc:
         return result.output
 
     def _create(self):
-        cmd_list = u"mk ccs -n {} -gpu {} -itype {} -img {} -wait -json".format(self.cntr_name, self.gpu_num
-        , self.sol, self.img_name)
+        cmd_list = u"mk ccs -n {} -gpu {} -itype {} -img {} -wait -json".format(
+            self.cntr_name, self.gpu_num, self.sol, self.img_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
         ans = json.loads(self.create_out)
@@ -62,7 +63,6 @@ class TestCntrLifecyc:
                     flg = False
             assert flg
 
-
     def _exposedPort(self):
         cmd_list = "net ccs -s {} -open -p 3000".format(self.site_id)
         print(cmd_list)
@@ -74,10 +74,9 @@ class TestCntrLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _delete(self):
-        cmd_list = ["rm", "ccs", "-f", "%s"%self.site_id ]
+        cmd_list = ["rm", "ccs", "-f", "%s" % self.site_id]
         print(" ".join(cmd_list))
         out = self.__run(cmd_list)
-
 
     def test_lifecycle(self):
         self._loadParams()
@@ -89,6 +88,7 @@ class TestCntrLifecyc:
         self._unexposedPort()
         self._listDetail(isatt=False)
         self._delete()
+
 
 if __name__ == "__main__":
     TestCntrLifecyc().test_lifecycle()
