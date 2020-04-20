@@ -58,7 +58,7 @@ class GpuSite(GpuService):
                     (49, "Torch"),
                     (52, "DIGITS")]
 
-        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image'])
+        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image', u'Preemptive GPU(Custom Image)'])
         sols = solutions().list()
         for ele in sols:
             if ele['name'] in ext_cntr_sol:
