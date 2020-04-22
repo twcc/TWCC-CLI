@@ -18,16 +18,18 @@ def upload(source, directory, key, r):
     :param r: is recursive
     :type r: bool
     """
-    if isNone(source) == False:
-        if os.path.basename(source) == '':
-            source = source[:-1]
+
+    if os.path.basename(source) == '':
+        source = source[:-1]
 
     s3 = S3()
     # Check for source type
-    if isNone(source):
-        s3.upload_file(key=key, bucket_name=directory)
+    if isNone(key) == False:
+        s3.upload_file(key=key, bucket_name=directory, source=source)
         return
+
     if os.path.isdir(source):
+
         if r != True:
             raise Exception(
                 "{} is path, need to set recursive to True".format(source))
@@ -108,7 +110,7 @@ def cli():
               help='Upload files or folders to the bucket.')
 @click.option('-download', 'op', flag_value='download',
               help='Download files from the bucket or download the entire bucket.')
-@click.option('-src', '--source', 'source',
+@click.option('-src', '--source', 'source', default="./",
               help='Path of the source directory.')
 @click.option('-dest', '--destination', 'directory', required=True,
               help='Path of the destination directory.')
