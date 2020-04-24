@@ -154,17 +154,16 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
-                    print('sdf')
                     if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
                         if os.path.isabs(path) == False:
                             singleFilePath = singleFilePath.replace("./", "")
                             localPath = os.path.abspath(
                                 os.path.dirname(path))+'/' + singleFilePath
-                            print('localPath={}', localPath)
+
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-                            print('remotePath={}', remotePath)   
+
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
