@@ -71,7 +71,6 @@ class TestCosLifecyc:
             self.upload_dir, self.bk_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
-        assert False
 
     def test_create_bucket(self):
         self._loadSession()
@@ -151,6 +150,11 @@ class TestCosLifecyc:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         p.communicate()
 
+    def _remove_file(self, fn):
+        cmd = ["rm", fn]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        p.communicate()
+
     def _remove_dir(self, updir, downdir):
         cmd1 = ["rm", "-rf", updir]
         cmd2 = ["rm", "-rf", downdir]
@@ -174,6 +178,12 @@ class TestCosLifecyc:
         cmd = ["rm", file]
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         p.communicate()
+
+    def _upload_single_file_by_fn(self, src, bk, fn):
+
+        cmd_list = "cp cos -upload -src {} -dest {} -fn {}".format(src, bk, fn)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
 
     def _upload_single_file(self, bk, file):
 
@@ -275,10 +285,54 @@ class TestCosLifecyc:
         rand = random.randint(0, 1000)
         bk_isu105 = "bk_isu105_{}".format(str(rand))
         isu105_Dir = "./isu105_{}/".format(str(rand))
-        print(bk_isu105)
         self._loadSession()
         self._create_bucket(bk_isu105)
- 
+
         self._create_hierarchy_files(isu105_Dir)
         self._upload_files(bk_isu105, isu105_Dir)
         self._del_bucket(bk_isu105)
+        self._remove_dir(isu105_Dir, "")
+
+    def test_issue_132(self):
+
+        bk_isu132rel = "bk132rel{}".format(str(uuid.uuid1()).split("-")[0])
+        bk_isu132abs = "bk132abs{}".format(str(uuid.uuid1()).split("-")[0])
+        isu132_relDir = "./isu132_{}/".format(str(uuid.uuid1()).split("-")[0])
+        isu132_absDir = os.path.abspath(isu132_relDir)
+
+        isu132_relfn = "rel.txt"
+        isu132_absfn = "abs.txt"
+        isu132_onlyfn = "onlyfn.txt"
+        # upload by relative path
+
+        self._loadSession()
+        self._create_bucket(bk_isu132rel)
+        self._create_hierarchy_files(isu132_relDir)
+        self._upload_files(bk_isu132rel, isu132_relDir)
+
+        # upload by abs path
+
+        self._create_bucket(bk_isu132abs)
+        self._upload_files(bk_isu132abs, isu132_absDir)
+
+        # upload by src , single file
+
+        self._create_upload_file("./"+isu132_relfn)
+        self._create_upload_file("./"+isu132_absfn)
+        self._upload_single_file_by_fn(os.getcwd(), bk_isu132rel, isu132_relfn)
+        self._upload_single_file_by_fn("./", bk_isu132rel, isu132_absfn)
+        self._remove_file("./"+isu132_relfn)
+        self._remove_file("./"+isu132_absfn)
+
+        # upload onlyby fn
+        self._loadSession()
+        self._create_bucket(bk_isu132rel)
+        self._create_upload_file("./"+isu132_onlyfn)
+        self._upload_single_file_by_fn("", bk_isu132rel, isu132_onlyfn)
+
+        # delete file & bucket
+
+        self._del_bucket(bk_isu132abs)
+        self._del_bucket(bk_isu132rel)
+        self._remove_file("./"+isu132_onlyfn)
+        self._remove_dir(isu132_relDir, "")
