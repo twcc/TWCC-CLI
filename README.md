@@ -16,8 +16,19 @@ export PYTHONIOENCODING=UTF-8
 ```
 
 ## INDEX: 
-1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
-1. Release Notes
+1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+
+1. Release Notes :point_down:
+
+### v0.5.7 Release Note
+![img](https://media.giphy.com/media/dQpUkK59l5Imxsh8jN/giphy.gif)
+
+
+** We have updated our document in [TWCC-CLI α for v0.5](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+
+
+**fix bug**
+- fix bugs in COS and data-vol-type while creating VCS.
 
 ### v0.5.6 Release Note
 ![img](https://media.giphy.com/media/xUA7b7yLPq3IPOLnk4/giphy.gif)

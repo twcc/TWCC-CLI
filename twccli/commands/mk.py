@@ -116,7 +116,7 @@ def create_vcs(name, sol="", img_name="", network="",
             raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
                                                                             ", ".join(extra_props['x-extra-property-volume-type'].keys())))
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
-        
+
     return vcs.create(name, exists_sol[sol], required)
 
 
@@ -302,7 +302,7 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
-                         data_vol=data_vol, data_vol_size=data_vol_size,
+                         data_vol=data_vol.lower(), data_vol_size=data_vol_size,
                          fip=fip)
         ans["solution"] = sol
         ans["flavor"] = flavor
