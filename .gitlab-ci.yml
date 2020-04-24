@@ -69,7 +69,6 @@ manual deploy to GITHUB:
     - git push
   only:
     - github_cd
-    - dev
     - master
   when: manual
   allow_failure: false
