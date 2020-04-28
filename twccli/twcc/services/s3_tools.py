@@ -163,7 +163,8 @@ class S3():
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-
+                            if remotePath.startswith('/'):
+                                remotePath = remotePath[1:]
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
