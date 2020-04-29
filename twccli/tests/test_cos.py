@@ -158,9 +158,10 @@ class TestCosLifecyc:
     def _remove_dir(self, updir, downdir):
         cmd1 = ["rm", "-rf", updir]
         cmd2 = ["rm", "-rf", downdir]
+        print(cmd1)
         p = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
         p.communicate()
-
+        print(cmd2)
         p = subprocess.Popen(cmd2, stdout=subprocess.PIPE)
         p.communicate()
 
@@ -204,6 +205,18 @@ class TestCosLifecyc:
             bk, dest, downdir)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
+
+    def _mk_146_upload_file(self, dir):
+        cmd1 = ["mkdir", dir]
+        cmd2 = ["mkdir", dir + "/subdir"]
+        cmd3 = ["touch", dir+"/1.txt", dir+"/2.txt"]
+        cmd4 = ["touch", dir + "/subdir/1.txt", dir + "/subdir/2.txt"]
+
+        cmd_list = [cmd1, cmd2, cmd3, cmd4]
+
+        for cmd in cmd_list:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            p.communicate()
 
     def test_issue_104(self):
         rand = random.randint(0, 1000)
@@ -336,3 +349,19 @@ class TestCosLifecyc:
         self._del_bucket(bk_isu132rel)
         self._remove_file("./"+isu132_onlyfn)
         self._remove_dir(isu132_relDir, "")
+
+    def test_issue_146(self):
+        bk_isu146 = "bk146{}".format(str(uuid.uuid1()).split("-")[0])
+        isu146_upDir = "./isu146_{}/".format(str(uuid.uuid1()).split("-")[0])
+        isu146_downDir = "./isu146down_{}/".format(
+            str(uuid.uuid1()).split("-")[0])
+        # make upload file
+        self._loadSession()
+        self._create_bucket(bk_isu146)
+        self._mk_146_upload_file(isu146_upDir)
+        self._create_download_dir(isu146_downDir)
+        self._upload_files(bk_isu146, isu146_upDir)
+        self._download_specific_dir(bk_isu146, isu146_downDir, isu146_upDir)
+
+        self._del_bucket(bk_isu146)
+        self._remove_dir(isu146_downDir, isu146_upDir)

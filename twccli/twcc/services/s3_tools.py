@@ -72,6 +72,12 @@ class S3():
             for ee in ele[:-1]:
                 dir_set.add(ee)
 
+        if downdir.startswith('./'):
+            downdir = downdir.replace("./", "")
+
+        if downdir.endswith('/'):
+            downdir = downdir[:-1]
+
         if downdir in dir_set:
             for i in res:
                 if i['Key'].find(downdir) > -1:
@@ -80,7 +86,6 @@ class S3():
                     file_name = os.path.join(directory+'/', i['Key'])
                     file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
                     cmd = ["mkdir", "-p", file_dir]
-                    print(" ".join(cmd))
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                     p.communicate()
                     # file_path = os.path.join(directory+'/', i['Key'])
@@ -163,7 +168,8 @@ class S3():
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-
+                            if remotePath.startswith('/'):
+                                remotePath = remotePath[1:]
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
