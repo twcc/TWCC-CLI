@@ -21,7 +21,6 @@ def upload(source, directory, key, r):
 
     if os.path.basename(source) == '':
         source = source[:-1]
-    
 
     s3 = S3()
     # Check for source type
@@ -45,7 +44,7 @@ def upload(source, directory, key, r):
 
 
 def downloadDir(source, directory, downdir):
-    
+
     if os.path.basename(directory) == '':
         directory = directory[:-1]
 
@@ -68,7 +67,6 @@ def download(source, directory, key, r):
 
     if os.path.basename(directory) == '':
         directory = directory[:-1]
-    
 
     s3 = S3()
     if not s3.check_4_bucket(source):
