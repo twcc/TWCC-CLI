@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
+import re
 import boto3
 import click
-
+from distutils.dir_util import mkpath
 from botocore.exceptions import ClientError
 from ..clidriver import ServiceOperation
 from termcolor import colored
@@ -72,6 +73,12 @@ class S3():
             for ee in ele[:-1]:
                 dir_set.add(ee)
 
+        if downdir.startswith('./'):
+            downdir = downdir.replace("./", "")
+
+        if downdir.endswith('/'):
+            downdir = downdir[:-1]
+
         if downdir in dir_set:
             for i in res:
                 if i['Key'].find(downdir) > -1:
@@ -80,7 +87,6 @@ class S3():
                     file_name = os.path.join(directory+'/', i['Key'])
                     file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
                     cmd = ["mkdir", "-p", file_dir]
-                    print(" ".join(cmd))
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                     p.communicate()
                     # file_path = os.path.join(directory+'/', i['Key'])
@@ -154,17 +160,17 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
-                    print('sdf')
                     if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
                         if os.path.isabs(path) == False:
                             singleFilePath = singleFilePath.replace("./", "")
                             localPath = os.path.abspath(
                                 os.path.dirname(path))+'/' + singleFilePath
-                            print('localPath={}', localPath)
+
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-                            print('remotePath={}', remotePath)   
+                            if remotePath.startswith('/'):
+                                remotePath = remotePath[1:]
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
@@ -178,7 +184,7 @@ class S3():
                             return False
 
             else:
-                print("No such path")
+                raise Exception("Path: {} is not founded. ".format(path))
         else:
             try:
                 response = self.s3_cli.upload_file(file_name, bucket_name, key)
@@ -206,24 +212,29 @@ class S3():
             :param r                 : Setting for recursive
             :return            : True if success upload file to S3 bucket
         """
-        if r == True:
+        if r:
             # checking for download path exists
             if os.path.isdir(path):
                 # get the list of objects inside the bucket
                 # a = self.list_object(bucket_name)[1:]
-                a = self.list_object(bucket_name)
+                all_objs = self.list_object(bucket_name)
 
                 # loop through all the objects
-                for i in a:
-                    ff_name = os.path.join(path+'/', i['Key'])
-                    check_path = "/".join(ff_name.split('/')[:-1])
+                for obj in all_objs :
+                    full_path = os.path.abspath(path)
+                    if re.match("^\/", obj['Key']):
+                        ff_name = os.path.join(full_path, obj['Key'][1:])
+                    else:
+                        ff_name = os.path.join(full_path, obj['Key'])
+
+                    dest_path = os.path.abspath(ff_name)
                     # check if the download folder exists
-                    if not os.path.isdir(check_path):
-                        os.mkdir(check_path)
+                    if not os.path.isdir(dest_path):
+                        mkpath(os.path.sep.join(dest_path.split(os.path.sep)[:-1]))
                     # download to the correct path
-                    self.s3_cli.download_file(bucket_name, i['Key'], ff_name)
+                    self.s3_cli.download_file(bucket_name, obj['Key'], ff_name)
             else:
-                print("No such path")
+                raise Exception("Path: '{}' is not founded. ".format(path))
         else:
             try:
                 if not file_name.endswith('/'):
@@ -263,6 +274,7 @@ class S3():
             :return: True if bucket is deleted, else False
         """
         try:
+
             if recursive == True:
                 retKeys = self.list_object(bucket_name)
                 if retKeys != None:
@@ -270,7 +282,7 @@ class S3():
                         self.del_object(bucket_name=bucket_name,
                                         file_name=i['Key'])
 
-                res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:
             if e.response['Error']['Code'] == 'BucketNotEmpty':

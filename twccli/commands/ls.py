@@ -72,9 +72,9 @@ def list_vcs_flavor(is_table=True):
         if re.search(r'^v..+super$', ans[x]['desc']):
             wanted_ans.append({"flavor name": ans[x]['desc'],
                                "spec": ans[x]['spec']})
-
+    wanted_ans = sorted(wanted_ans, key=lambda x: x['spec'], reverse=True)
     if is_table:
-        table_layout("VCS Flavors", wanted_ans, isPrint=True, isWrap=False)
+        table_layout("VCS Product Types", wanted_ans, ['flavor name', 'spec'], isPrint=True, isWrap=False)
     else:
         jpp(wanted_ans)
 
@@ -238,9 +238,8 @@ def cli():
               help="ID of the instance.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the instances in the project.")
-@click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
-              show_default=True,
-              help="List VCS available flavors (hardware configuration).")
+@click.option('-ptype', '--product-type', 'res_property', flag_value='flavor',
+              help="List VCS available product types (hardware configuration).")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-itype', '--image-type-name', 'res_property',
