@@ -219,9 +219,9 @@ def cli():
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
-@click.option('-flvr', '--flavor-name', 'flavor', default="v.2xsuper", type=str,
+@click.option('-ptype', '--product-type', 'flavor', default="v.2xsuper", type=str,
               show_default=True,
-              help="The hardware configuration.")
+              help="The product types (hardware configuration).")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Name of the image.")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,

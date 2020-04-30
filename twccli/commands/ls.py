@@ -238,9 +238,8 @@ def cli():
               help="ID of the instance.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the instances in the project.")
-@click.option('-flvr', '--flavor-name', 'res_property', flag_value='flavor',
-              show_default=True,
-              help="List VCS available flavors (hardware configuration).")
+@click.option('-ptype', '--product-type', 'res_property', flag_value='flavor',
+              help="List VCS available product types (hardware configuration).")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-itype', '--image-type-name', 'res_property',
