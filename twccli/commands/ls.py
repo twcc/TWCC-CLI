@@ -72,9 +72,9 @@ def list_vcs_flavor(is_table=True):
         if re.search(r'^v..+super$', ans[x]['desc']):
             wanted_ans.append({"flavor name": ans[x]['desc'],
                                "spec": ans[x]['spec']})
-
+    wanted_ans = sorted(wanted_ans, key=lambda x: x['spec'], reverse=True)
     if is_table:
-        table_layout("VCS Flavors", wanted_ans, isPrint=True, isWrap=False)
+        table_layout("VCS Product Types", wanted_ans, ['flavor name', 'spec'], isPrint=True, isWrap=False)
     else:
         jpp(wanted_ans)
 
