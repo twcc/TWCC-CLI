@@ -14,7 +14,7 @@ class TestSessionLifecyc:
 
     def _init(self):
         cmd_list = "config init --apikey {} -pcode {}".format(
-                self.apikey, self.pcode )
+            self.apikey, self.pcode)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
@@ -37,4 +37,3 @@ class TestSessionLifecyc:
     def test_config_whoami(self):
         self._loadParams()
         self._whoami()
-

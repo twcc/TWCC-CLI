@@ -72,6 +72,12 @@ class S3():
             for ee in ele[:-1]:
                 dir_set.add(ee)
 
+        if downdir.startswith('./'):
+            downdir = downdir.replace("./", "")
+
+        if downdir.endswith('/'):
+            downdir = downdir[:-1]
+
         if downdir in dir_set:
             for i in res:
                 if i['Key'].find(downdir) > -1:
@@ -80,7 +86,6 @@ class S3():
                     file_name = os.path.join(directory+'/', i['Key'])
                     file_dir = os.path.join(directory+'/', i['Key'][:last_idx])
                     cmd = ["mkdir", "-p", file_dir]
-                    print(" ".join(cmd))
                     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                     p.communicate()
                     # file_path = os.path.join(directory+'/', i['Key'])
@@ -154,17 +159,17 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
-                    print('sdf')
                     if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
                         if os.path.isabs(path) == False:
                             singleFilePath = singleFilePath.replace("./", "")
                             localPath = os.path.abspath(
                                 os.path.dirname(path))+'/' + singleFilePath
-                            print('localPath={}', localPath)
+
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-                            print('remotePath={}', remotePath)   
+                            if remotePath.startswith('/'):
+                                remotePath = remotePath[1:]
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
@@ -263,6 +268,7 @@ class S3():
             :return: True if bucket is deleted, else False
         """
         try:
+
             if recursive == True:
                 retKeys = self.list_object(bucket_name)
                 if retKeys != None:
@@ -270,7 +276,7 @@ class S3():
                         self.del_object(bucket_name=bucket_name,
                                         file_name=i['Key'])
 
-                res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:
             if e.response['Error']['Code'] == 'BucketNotEmpty':
