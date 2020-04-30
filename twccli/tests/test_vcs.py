@@ -50,11 +50,11 @@ class TestVcsLifecyc:
         paras = ["mk", "vcs",
                 "--name",           self.key_name,
                 "--image-type-name",self.sol,
-                "--flavor-name",    self.flv,
+                "--product-type",   self.flv,
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
-                "--data-volume-type", "ssd-encrypt", 
+                "--data-volume-type", "ssd-encrypt",
                 "--data-volume-size", "1",
                 "-wait", "-json"
                 ]
