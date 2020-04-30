@@ -19,6 +19,19 @@ export PYTHONIOENCODING=UTF-8
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
 1. Release Notes :point_down:
+ 
+
+### v0.5.8 Release Note
+
+![img](https://media.giphy.com/media/l3V0oNVYGk3Sx9N60/giphy.gif)
+
+**change**
+- orginal `-itype` in `ls vcs` and `mk vcs` change to using `-ptype` and `--product-type`.
+
+**fix bug**
+- error in `rm vcs -secg` and `ls vcs -img` with filtering.
+- error in `cp cos -upload` , `cp cos -download` and `rm cos` bucket.
+
 
 ### v0.5.7 Release Note
 ![img](https://media.giphy.com/media/dQpUkK59l5Imxsh8jN/giphy.gif)
