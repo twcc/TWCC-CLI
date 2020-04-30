@@ -289,8 +289,7 @@ class VcsSite(CpuService):
         return dict([(x['id'], x) for x in flv.list()])
 
     @staticmethod
-    def getAvblImg(self, sol_name=None):
-        ans = VcsSite.getSolList()
+    def getAvblImg(sol_name=None):
         avbl_imgs = [{"solution": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04']},
                      {"solution": u"centos", "image": [
                          u'CentOS-7-x86_64-1901']}
@@ -299,7 +298,9 @@ class VcsSite(CpuService):
         if isNone(sol_name) or len(sol_name) == 0:
             return avbl_imgs
         else:
-            return avbl_imgs[sol_name]
+            for x in avbl_imgs:
+                if x['solution'] == sol_name[0]:
+                    return x
 
     def getExtraProp(self, sol_id):
         extra_prop = self._do_list_solution(sol_id)
