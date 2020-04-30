@@ -73,8 +73,6 @@ def download(source, directory, key, r):
         raise Exception("No such bucket name {} exists".format(source))
 
     if isNone(key):
-        print(key, isNone(key), directory, source)
-
         if os.path.isdir(directory) and not r:
             raise Exception(
                     "{} is path, need to set recursive to True".format(directory))
