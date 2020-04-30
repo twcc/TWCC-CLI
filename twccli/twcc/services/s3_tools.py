@@ -268,6 +268,7 @@ class S3():
             :return: True if bucket is deleted, else False
         """
         try:
+
             if recursive == True:
                 retKeys = self.list_object(bucket_name)
                 if retKeys != None:
@@ -275,7 +276,7 @@ class S3():
                         self.del_object(bucket_name=bucket_name,
                                         file_name=i['Key'])
 
-                res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
             print("Successfully delete bucket :", bucket_name)
         except ClientError as e:
             if e.response['Error']['Code'] == 'BucketNotEmpty':

@@ -48,6 +48,11 @@ class TestCosLifecyc:
 
         assert flag
 
+    def _del_bucket_no_r(self, bkt):
+        cmd_list = "rm cos -n {} -f".format(bkt)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+
     def _del_bucket(self, bkt):
         cmd_list = "rm cos -n {} -r -f".format(bkt)
         print(cmd_list)
@@ -365,3 +370,9 @@ class TestCosLifecyc:
 
         self._del_bucket(bk_isu146)
         self._remove_dir(isu146_downDir, isu146_upDir)
+
+    def test_issue_147(self):
+        bk_isu147 = "bk147{}".format(str(uuid.uuid1()).split("-")[0])
+        self._loadSession()
+        self._create_bucket(bk_isu147)
+        self._del_bucket_no_r(bk_isu147)
