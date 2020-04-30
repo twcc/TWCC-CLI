@@ -21,7 +21,7 @@ export PYTHONIOENCODING=UTF-8
 1. Release Notes :point_down:
  
 
-### v0.5.8 Release Note
+### v0.5.9 Release Note
 
 ![img](https://media.giphy.com/media/l3V0oNVYGk3Sx9N60/giphy.gif)
 
