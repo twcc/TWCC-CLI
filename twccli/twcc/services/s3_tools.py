@@ -154,17 +154,14 @@ class S3():
                 out, err = p.communicate()
 
                 for singleFilePath in out.decode('utf-8').split("\n"):
-                    print('sdf')
                     if os.path.isdir(singleFilePath) == False and len(singleFilePath) > 0:
                         if os.path.isabs(path) == False:
                             singleFilePath = singleFilePath.replace("./", "")
                             localPath = os.path.abspath(
                                 os.path.dirname(path))+'/' + singleFilePath
-                            print('localPath={}', localPath)
                             remotePath = os.path.dirname(
                                 path)+'/'+singleFilePath
                             remotePath = remotePath.replace("./", "")
-                            print('remotePath={}', remotePath)   
                         else:
                             localPath = singleFilePath
                             remotePath = singleFilePath.replace(
@@ -178,7 +175,7 @@ class S3():
                             return False
 
             else:
-                print("No such path")
+                raise Exception("Path: {} is not founded. ".format(path))
         else:
             try:
                 response = self.s3_cli.upload_file(file_name, bucket_name, key)
@@ -223,7 +220,7 @@ class S3():
                     # download to the correct path
                     self.s3_cli.download_file(bucket_name, i['Key'], ff_name)
             else:
-                print("No such path")
+                raise Exception("Path: {} is not founded. ".format(path))
         else:
             try:
                 if not file_name.endswith('/'):

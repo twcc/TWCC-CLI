@@ -64,14 +64,14 @@ def download(source, directory, key, r):
     if not s3.check_4_bucket(source):
         raise Exception("No such bucket name {} exists".format(source))
 
-    if os.path.isdir(directory) and key == None:
+    if isNone(key):
+        print(key, isNone(key), directory, source)
 
-        if r != True:
+        if os.path.isdir(directory) and not r:
             raise Exception(
-                "{} is path, need to set recursive to True".format(directory))
-        else:
-            # download whole bucket
-            s3.download_bucket(bucket_name=source, path=directory, r=r)
+                    "{} is path, need to set recursive to True".format(directory))
+        # download whole bucket
+        s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
 
         if key.find('.') > 0:
