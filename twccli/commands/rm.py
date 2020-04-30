@@ -119,6 +119,7 @@ def del_keypair(ids_or_names, isForce=False):
             else:
                 raise ValueError("Keypair: {}, not found.".format(key_name))
 
+
 def del_snap(ids_or_names, isForce=False, isAll=False):
     """Delete security group by site id
 
@@ -131,18 +132,21 @@ def del_snap(ids_or_names, isForce=False, isAll=False):
     :param isAll: Operates as tenant admin
     :type isAll: bool
     """
-    if len(ids_or_names)>0:
+    if len(ids_or_names) > 0:
         snap = VcsImage()
         all_snaps = snap.list(isAll=isAll)
         if isNone(all_snaps):
             return None
         for snap_id in ids_or_names:
-            the_snap = [ x for x in all_snaps if x['id']==int(snap_id) and x['status']=='ACTIVE']
-            if len(the_snap)>0:
+            the_snap = [x for x in all_snaps if x['id'] ==
+                        int(snap_id) and x['status'] == 'ACTIVE']
+            if len(the_snap) > 0:
                 the_snap = the_snap[0]
-                txt = "You about to delete snapshot \n- id: {}\n- created by: {}\n- created time: {}".format(snap_id, the_snap['user']['username'], timezone2local(the_snap['create_time']))
+                txt = "You about to delete snapshot \n- id: {}\n- created by: {}\n- created time: {}".format(
+                    snap_id, the_snap['user']['username'], timezone2local(the_snap['create_time']))
                 if getConfirm("Snapshots", snap_id, isForce, txt):
                     snap.deleteById(snap_id)
+
 
 def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
     """Delete security group by site id
@@ -185,7 +189,7 @@ def cli():
 
 @click.command(help="Remove your key in VCS ")
 @click.option('-f', '--force', 'force',
-              is_flag=True, show_default=True, default = False,
+              is_flag=True, show_default=True, default=False,
               help='Force to delete any resource at your own cost.')
 @click.option('-n', '--name', 'name', default=None,
               help="Enter name for your resource name")
@@ -214,7 +218,7 @@ def key(ctx, name, ids_or_names, force):
 
 @click.command(help="'Delete' Operations for VCS (Virtual Compute Service) resources.")
 @click.option('-f', '--force', 'force',
-              is_flag=True, show_default=True, default = False,
+              is_flag=True, show_default=True, default=False,
               help='Force to delete any resource at your own cost.')
 @click.option('-n', '--name', 'name',
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
@@ -265,7 +269,7 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 
 @click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")
 @click.option('-f', '--force', 'force',
-              is_flag=True, show_default=True, default = False,
+              is_flag=True, show_default=True, default=False,
               help='Force delete the objects.')
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
@@ -290,17 +294,13 @@ def cos(name, force, ids_or_names, is_recursive):
 
     if len(ids_or_names) > 0:
         del_object(ids_or_names, name, force)
-    else:   
+    else:
         del_bucket(name, is_recursive, force)
-   
-        
-    
-        
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
 @click.option('-f', '--force', 'force',
-              is_flag=True, show_default=True, default = False,
+              is_flag=True, show_default=True, default=False,
               help='Force delete the container.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the container.')
@@ -314,12 +314,13 @@ def ccs(site_id, force, ids_or_names):
         result = True
         for id in ids_or_names:
             if resource_id_validater(id) == False:
-                result = False 
-        
+                result = False
+
         if result:
             del_ccs(ids_or_names, force)
         else:
             print("site id must be integer")
+
 
 cli.add_command(vcs)
 cli.add_command(cos)

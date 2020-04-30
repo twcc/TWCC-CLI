@@ -44,6 +44,10 @@ def upload(source, directory, key, r):
 
 
 def downloadDir(source, directory, downdir):
+
+    if os.path.basename(directory) == '':
+        directory = directory[:-1]
+
     s3 = S3()
     s3.list_dir(source, directory, downdir)
 
@@ -60,6 +64,10 @@ def download(source, directory, key, r):
     :param r: Recursively copy entire directories.
     :type r: bool
     """
+
+    if os.path.basename(directory) == '':
+        directory = directory[:-1]
+
     s3 = S3()
     if not s3.check_4_bucket(source):
         raise Exception("No such bucket name {} exists".format(source))
