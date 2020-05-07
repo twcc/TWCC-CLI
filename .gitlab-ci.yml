@@ -20,7 +20,6 @@ python27:
     - tox -e py27
   only:
     - merge_requests
-    - 149-cicd-blocker
 
 python37:
   stage: test
