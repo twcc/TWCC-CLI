@@ -41,3 +41,5 @@ def test_minor_major():
             assert len(__TWCC_CLI_STAGE__)>0
         if os.environ['TWCC_CICD_STAGE'] == "MAJOR":
             assert len(__TWCC_CLI_STAGE__)==0
+
+    assert Ture == False # always fail if not pass

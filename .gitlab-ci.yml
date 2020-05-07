@@ -13,6 +13,8 @@ before_script:
 python27:
   stage: test
   image: python:2.7
+  variables:
+    TWCC_CICD_STAGE: 'minior'
   script: 
     - pip install tox
     - tox -e py27
@@ -23,26 +25,29 @@ python27:
 python37:
   stage: test
   image: python:3.7
+  variables:
+    TWCC_CICD_STAGE: 'minior'
   script: 
     - pip install tox
     - tox -e py37
   only:
-    - merge_requests
+    - dev
 
 python36:
   stage: test
   image: python:3.6
+  variables:
+    TWCC_CICD_STAGE: 'MAJOR'
   script: 
     - pip install tox
     - tox -e py36
   only:
-    - merge_requests
     - master
-
 
 manual minor version deploy to PYPI:
   stage: deploy
   variables:
+    TWCC_CICD_STAGE: 'minior'
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
