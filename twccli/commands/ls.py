@@ -194,7 +194,7 @@ def list_files(ids_or_names, is_table):
 
         if is_table and not isNone(files):
             table_layout("COS objects {}".format(
-                bucket_name), files, isPrint=True)
+                bucket_name), files, isWrap=False, max_len=30,isPrint=True)
         else:
             jpp(files)
 
