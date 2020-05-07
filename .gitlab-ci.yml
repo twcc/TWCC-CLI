@@ -16,6 +16,7 @@ python27:
   variables:
     TWCC_CICD_STAGE: 'minior'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py27
   only:
@@ -27,6 +28,7 @@ python37:
   variables:
     TWCC_CICD_STAGE: 'minior'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py37
   only:
@@ -38,6 +40,7 @@ python36:
   variables:
     TWCC_CICD_STAGE: 'MAJOR'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py36
   only:
