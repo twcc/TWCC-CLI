@@ -36,8 +36,8 @@ def test_res_name_validator():
 def test_minor_major():
     import os
     assert 'TWCC_CICD_STAGE' in os.environ
-    if os.environ['TWCC_CICD_STAGE'] in set(['minior', 'MAJOR']):
-        if os.environ['TWCC_CICD_STAGE'] == "minior":
+    if os.environ['TWCC_CICD_STAGE'] in set(['minor', 'MAJOR']):
+        if os.environ['TWCC_CICD_STAGE'] == "minor":
             assert len(__TWCC_CLI_STAGE__)>0
         if os.environ['TWCC_CICD_STAGE'] == "MAJOR":
             assert len(__TWCC_CLI_STAGE__)==0
