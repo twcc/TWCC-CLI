@@ -19,7 +19,7 @@ def list_vcs_img(sol_name, is_table):
     ans = VcsSite.getAvblImg(sol_name)
     if is_table:
         table_layout("Abvl. VCS images", ans, [
-                     "solution", "image"], isPrint=True, isWrap=False)
+                     "product-type", "image"], isPrint=True, isWrap=False)
     else:
         jpp(ans)
 
@@ -27,7 +27,7 @@ def list_vcs_img(sol_name, is_table):
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
     if is_table:
-        print("Avbl. VCS solutions: {}".format(", ".join(ans)))
+        print("Avbl. VCS Product Types: {}".format(", ".join(ans)))
     else:
         jpp(ans)
 
@@ -194,7 +194,7 @@ def list_files(ids_or_names, is_table):
 
         if is_table and not isNone(files):
             table_layout("COS objects {}".format(
-                bucket_name), files, isPrint=True)
+                bucket_name), files, isWrap=False, max_len=30,isPrint=True)
         else:
             jpp(files)
 
@@ -242,9 +242,9 @@ def cli():
               help="List VCS available product types (hardware configuration).")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
-@click.option('-itype', '--image-type-name', 'res_property',
+@click.option('-ptype', '--product-type', 'res_property',
               default=None, flag_value='solution',
-              help="List VCS image types.")
+              help="List VCS product types.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
@@ -410,7 +410,7 @@ def ccs(res_property, name, site_ids_or_names, is_table, is_all, show_ports):
 
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
-        print("Avalible solutions for CCS: {}".format(", ".join(avbl_sols)))
+        print("Avalible product types for CCS: {}".format(", ".join(avbl_sols)))
 
     if not res_property:
         if show_ports:
