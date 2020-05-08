@@ -40,7 +40,9 @@ python36:
   variables:
     TWCC_CICD_STAGE: 'MAJOR'
   script: 
-    - echo $TWCC_CICD_STAGE
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "1"/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install tox
     - tox -e py36
   only:
