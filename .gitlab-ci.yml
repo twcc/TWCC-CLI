@@ -13,7 +13,10 @@ before_script:
 python27:
   stage: test
   image: python:2.7
+  variables:
+    TWCC_CICD_STAGE: 'minor'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py27
   only:
@@ -22,22 +25,26 @@ python27:
 python37:
   stage: test
   image: python:3.7
+  variables:
+    TWCC_CICD_STAGE: 'minor'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py37
   only:
-    - merge_requests
+    - dev
 
 python36:
   stage: test
   image: python:3.6
+  variables:
+    TWCC_CICD_STAGE: 'MAJOR'
   script: 
+    - echo $TWCC_CICD_STAGE
     - pip install tox
     - tox -e py36
   only:
-    - merge_requests
     - master
-
 
 manual minor version deploy to PYPI:
   stage: deploy
