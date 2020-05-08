@@ -20,6 +20,10 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
  
+### v0.5.10 Release Note
+![img](https://media.giphy.com/media/xTiTntKyFNFbCNuqkw/giphy.gif)
+**change**
+- VCS images showing table shows "product-type" now!
 
 ### v0.5.9 Release Note
 
