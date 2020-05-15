@@ -39,5 +39,3 @@ def test_minor_major():
     if os.environ['TWCC_CICD_STAGE'] in set(['minor', 'MAJOR']):
         if os.environ['TWCC_CICD_STAGE'] == "minor":
             assert len(__TWCC_CLI_STAGE__)>0
-        if os.environ['TWCC_CICD_STAGE'] == "MAJOR":
-            assert len(__TWCC_CLI_STAGE__)==0
