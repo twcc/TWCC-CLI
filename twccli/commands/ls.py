@@ -7,22 +7,13 @@ import datetime
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
 from twccli.twcc.services.compute import getServerId, getSecGroupList
+from twccli.twcc.services.compute_util import list_vcs
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.base import acls, users, image_commit
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
-
-
-def list_vcs_img(sol_name, is_table):
-    ans = VcsSite.getAvblImg(sol_name)
-    if is_table:
-        table_layout("Abvl. VCS images", ans, [
-                     "product-type", "image"], isPrint=True, isWrap=False)
-    else:
-        jpp(ans)
-
 
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
@@ -282,38 +273,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
-        vcs = VcsSite()
-        ans = []
-
-        if len(site_ids_or_names) > 0:
-            cols = ['id', 'name', 'public_ip', 'private_ip',
-                    'private_network', 'create_time', 'status']
-            if len(site_ids_or_names) == 1:
-                site_id = site_ids_or_names[0]
-
-                ans = [vcs.queryById(site_id)]
-
-                srvid = getServerId(site_id)
-                if isNone(srvid):
-                    return None
-                srv = VcsServer().queryById(srvid)
-                if len(srv) > 0 and len(srv[u'private_nets']) > 0:
-                    srv_net = srv[u'private_nets'][0]
-                    ans[0]['private_network'] = srv_net[u'name']
-                    ans[0]['private_ip'] = srv_net[u'ip']
-                else:
-                    ans[0]['private_network'] = ""
-                    ans[0]['private_ip'] = ""
-        else:
-            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
-            ans = vcs.list(is_all)
-
-        if len(ans) > 0:
-            if is_table:
-                table_layout("VCS VMs" if not len(site_ids_or_names) == 1 else "VCS Info.: {}".format(
-                    site_id), ans, cols, isPrint=True)
-            else:
-                jpp(ans)
+        list_vcs(site_ids_or_names, is_table, is_all=is_all)
 
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
