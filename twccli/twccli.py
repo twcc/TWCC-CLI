@@ -52,10 +52,11 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 @pass_environment
 def cli(ctx, ):
     """
-        Welcome to TWCC, TaiWan Compute Cloud.
+        Welcome to TWCC, TaiWan Computing Cloud.
 
         https://github.com/TW-NCHC/TWCC-CLI
-
+        version: v0.5
+        
         -- You Succeed, We Succeed!! --
     """
     pass

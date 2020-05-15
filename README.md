@@ -19,6 +19,36 @@ export PYTHONIOENCODING=UTF-8
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
 1. Release Notes :point_down:
+
+### v0.5.11 Release Note
+![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)
+**change**
+- In v0.5.10, we use `--product-type` in wrong place, that has been correct.
+- We change `cp cos` command structures, new command  descriptions as following:
+```bash=
+> twccli cp cos --help
+Usage: twccli cp cos [OPTIONS]
+
+  ‘Upload/Download’ COS (Cloud Object Storage) files.
+
+Options:
+  -upload                   Upload files or folders to the bucket.
+  -download                 Download files from the bucket or download the
+                            entire bucket.
+  -src, --source TEXT       Path of the source directory.
+  -okey, --object-key TEXT  File in Cloud.
+  -fn, --file-name TEXT     Files for uploading from local site.
+  -bkt, --bucket-name TEXT  Upload files or folders to the bucket.
+  --help                    Show this message and exit.
+
+```
+
+**discuss**
+- We are trying to laverage [Ansible](https://www.ansible.com/) for deloying any services. 
+Do you have any suggestions to this? 
+Welcome to [leave comments](https://github.com/TW-NCHC/TWCC-CLI/issues/new!!
+
+
  
 ### v0.5.10 Release Note
 ![img](https://media.giphy.com/media/xTiTntKyFNFbCNuqkw/giphy.gif)
