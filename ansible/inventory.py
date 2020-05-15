@@ -43,6 +43,7 @@ class TwccInventory(object):
         res = { "group":{'hosts':[],
                          'vars':{
                             'ansible_ssh_user': 'ubuntu',
+                            'ansible_python_interpreter': '/usr/bin/python3.5',
                             }},
                 "_meta":{'hostvars':{}} }
 
