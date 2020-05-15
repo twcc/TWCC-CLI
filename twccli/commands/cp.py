@@ -111,12 +111,10 @@ def cli():
     pass
 
 
-@click.command(help="‘Upload/Download’ COS (Cloud Object Storage) files.")
-@click.option('-upload', 'op', flag_value='upload',
-              help='Upload files or folders to the bucket.')
-@click.option('-download', 'op', flag_value='download',
-              help='Download files from the bucket or download the entire bucket.')
-@click.option('-src', '--source', 'source', default="./",
+@click.command(help="‘Upload/Download’ COS (Cloud Object Service) files.")
+@click.option('-sync', '--synchronized', 'sync',
+              help='to-cos/from-cos')
+@click.option('-dir', '--directory', 'dir', default='./',
               help='Path of the source directory.')
 @click.option('-okey', '--object-key', 'key',
               help='File in Cloud.')
