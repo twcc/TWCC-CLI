@@ -267,7 +267,7 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
             print("resource id is required.")
 
 
-@click.command(help="'Delete' Operations for COS (Cloud Object Service) resources.")
+@click.command(help="'Delete' Operations for COS (Cloud Object Storage) resources.")
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default=False,
               help='Force delete the objects.')

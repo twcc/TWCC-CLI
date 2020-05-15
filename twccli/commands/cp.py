@@ -72,14 +72,12 @@ def download(bkt, localDownloadDir, key, r):
     if not s3.check_4_bucket(bkt):
         raise Exception("No such bucket name {} exists".format(bkt))
 
-    if os.path.isdir(localDownloadDir) and key == None:
-
-        if r != True:
+    if isNone(key):
+        if os.path.isdir(directory) and not r:
             raise Exception(
-                "{} is path, need to set recursive to True".format(localDownloadDir))
-        else:
-            # download whole bucket
-            s3.download_bucket(bucket_name=bkt, path=localDownloadDir, r=r)
+                    "{} is path, need to set recursive to True".format(directory))
+        # download whole bucket
+        s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
 
         if key.find('.') > 0:
@@ -113,10 +111,12 @@ def cli():
     pass
 
 
-@click.command(help="‘Upload/Download’ COS (Cloud Object Service) files.")
-@click.option('-sync', '--synchronized', 'sync',
-              help='to-cos/from-cos')
-@click.option('-dir', '--directory', 'dir', default='./',
+@click.command(help="‘Upload/Download’ COS (Cloud Object Storage) files.")
+@click.option('-upload', 'op', flag_value='upload',
+              help='Upload files or folders to the bucket.')
+@click.option('-download', 'op', flag_value='download',
+              help='Download files from the bucket or download the entire bucket.')
+@click.option('-src', '--source', 'source', default="./",
               help='Path of the source directory.')
 @click.option('-okey', '--object-key', 'key',
               help='File in Cloud.')

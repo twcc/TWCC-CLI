@@ -319,7 +319,7 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
 
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of the bucket.")
-@click.command(help="Create your COS (Cloud Object Service) buckets.")
+@click.command(help="Create your COS (Cloud Object Storage) buckets.")
 def cos(name):
     """Command line for create cos
 
