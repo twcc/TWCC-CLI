@@ -290,8 +290,8 @@ class VcsSite(CpuService):
 
     @staticmethod
     def getAvblImg(sol_name=None):
-        avbl_imgs = [{"product-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04']},
-                     {"product-type": u"centos", "image": [
+        avbl_imgs = [{"image-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04']},
+                     {"image-type": u"centos", "image": [
                          u'CentOS-7-x86_64-1901']}
                      ]
         res = []
@@ -299,7 +299,7 @@ class VcsSite(CpuService):
             return avbl_imgs
         else:
             for x in avbl_imgs:
-                if x['product-type'] == sol_name[0]:
+                if x['image-type'] == sol_name[0]:
                     return x
 
     def getExtraProp(self, sol_id):
