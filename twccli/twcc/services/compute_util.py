@@ -1,4 +1,4 @@
-from twccli.twcc.services.compute import VcsSite
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 
 def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
