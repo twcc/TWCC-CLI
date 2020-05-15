@@ -41,7 +41,7 @@ python36:
     TWCC_CICD_STAGE: 'MAJOR'
   script: 
     - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "1"/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
     - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install tox
     - tox -e py36
@@ -62,12 +62,15 @@ manual minor version deploy to PYPI:
   when: manual
   allow_failure: false
 
-manual MAJOR version deploy to PYPI:
+manual MAJOR version:
   stage: deploy
   variables:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload --verbose dist/*
@@ -87,10 +90,13 @@ manual deploy to GITHUB:
     - git config --global user.email "1803001@narlabs.org.tw"
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - git add twccli/version.py
     - git commit -m "TWCC-CLI weekly release"
     - git push
   only:
-    - github_cd
     - master
   when: manual
   allow_failure: false

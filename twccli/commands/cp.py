@@ -9,9 +9,9 @@ from twccli.twcc.util import isNone
 def upload(source, directory, key, r):
     """Attempt to upload file or directory to bucket
 
-    :param source: source file path
+    :param source: local download path
     :type source: string
-    :param directory: destination file path
+    :param directory: bucket name
     :type directory: string
     :param key: file name for upload file
     :type key: string
@@ -52,25 +52,25 @@ def downloadDir(source, directory, downdir):
     s3.list_dir(source, directory, downdir)
 
 
-def download(source, directory, key, r):
+def download(bkt, localDownloadDir, key, r):
     """Download file or directory from bucket
 
-    :param source: Source storage name
-    :type source: string
-    :param directory: Download to the specific path
-    :type directory: string
+    :param bkt: bucket name
+    :type bkt: string
+    :param localDownloadDir: Download to the specific path
+    :type localDownloadDir: string
     :param key: The name of the key to upload to.
     :type key: string
     :param r: Recursively copy entire directories.
     :type r: bool
     """
 
-    if os.path.basename(directory) == '':
-        directory = directory[:-1]
+    if os.path.basename(localDownloadDir) == '':
+        localDownloadDir = localDownloadDir[:-1]
 
     s3 = S3()
-    if not s3.check_4_bucket(source):
-        raise Exception("No such bucket name {} exists".format(source))
+    if not s3.check_4_bucket(bkt):
+        raise Exception("No such bucket name {} exists".format(bkt))
 
     if isNone(key):
         if os.path.isdir(directory) and not r:
@@ -82,26 +82,26 @@ def download(source, directory, key, r):
 
         if key.find('.') > 0:
             # download single file
-            s3.download_file(bucket_name=source, path=directory, key=key)
+            s3.download_file(bucket_name=bkt, path=localDownloadDir, key=key)
             return
 
         if key.endswith('*'):
-            files = s3.list_object(source)
+            files = s3.list_object(bkt)
             prefix_folder = '/'.join(key.split('/')[:-1])
             desire_files = s3.list_files_v2(
                 bucket_name=source, delimiter='', prefix=prefix_folder)
             for desire_file in desire_files:
                 if not desire_file.endswith('/'):
-                    new_directory = directory + desire_file
+                    new_directory = localDownloadDir + desire_file
                     s3.download_bucket(file_name=new_directory,
-                                       bucket_name=source, key=desire_file)
+                                       bucket_name=bkt, key=desire_file)
         else:
 
-            if directory.endswith('/'):
-                directory = directory + key
+            if localDownloadDir.endswith('/'):
+                localDownloadDir = localDownloadDir + key
 
-            s3.download_bucket(file_name=directory,
-                               bucket_name=source, key=key)
+            s3.download_bucket(file_name=localDownloadDir,
+                               bucket_name=bkt, key=key)
 
 # end original code ===============================================
 
@@ -112,50 +112,52 @@ def cli():
 
 
 @click.command(help="‘Upload/Download’ COS (Cloud Object Service) files.")
-@click.option('-upload', 'op', flag_value='upload',
-              help='Upload files or folders to the bucket.')
-@click.option('-download', 'op', flag_value='download',
-              help='Download files from the bucket or download the entire bucket.')
-@click.option('-src', '--source', 'source', default="./",
+@click.option('-sync', '--synchronized', 'sync',
+              help='to-cos/from-cos')
+@click.option('-dir', '--directory', 'dir', default='./',
               help='Path of the source directory.')
-@click.option('-dest', '--destination', 'directory', required=True,
-              help='Path of the destination directory.')
-@click.option('-fn', '--file-name', 'key',
-              help=' Name of the file.')
-@click.option('-downdir', '--download-directory', 'downdir',
-              help=' the directory which you want to download in cloud.')
-@click.option('-r', '--recursively', 'recursive',
-              is_flag=True,
-              help='Recursively copy entire directories.')
-def cos(op, source, directory, key, recursive, downdir):
+@click.option('-okey', '--object-key', 'key',
+              help='File in Cloud.')
+@click.option('-fn', '--file-name', 'file',
+              help='Files for uploading from local site.')
+@click.option('-bkt', '--bucket-name', 'bkt',
+              help='Upload files or folders to the bucket.')
+def cos(sync, dir, key, file, bkt):
     """Command line for upload/download
-    :param source: Source storage name
-    :type source: string
-    :param upload: Upload files or folders to bucket
-    :type upload: string
-    :param directory: Download to the specific path
-    :type directory: string
-    :param key: The name of the key to upload to.
+    :param bkt: Bucket Name.
+    :type bkt: string
+    :param dir: Directory in local site
+    :type dir: string
+    :param key: Download to the specific path
     :type key: string
-    :param r: Recursively copy entire directories.
-    :type r: bool
+    :param file: Files for uploading from local site
+    :type file: string
     """
-    if isNone(op):
-        print("please enter operation : upload/download")
-    else:
-        if op == 'upload':
-            if isNone(key):
-                # upload single file
-                if isNone(source):
-                    print('please enter file name or source directory')
-                    return
+    # cp cos -bkt b_name -dir local_dir key key fn filename -sync to-cos/from-cos
+    r = False
 
-            upload(source, directory, key, r=recursive)
-        if op == 'download':
-            if isNone(downdir):
-                download(source, directory, key, r=recursive)
-            else:
-                downloadDir(source, directory, downdir)
+    if sync == 'from-cos':
+        if key.find('.') > 0:
+            r = False
+        else:
+            r = True
+    else:
+        if isNone(file):
+            r = True
+
+    if sync == 'to-cos':
+        upload(dir, bkt, file, r)
+        return
+
+    if sync == 'from-cos':
+        if key.find('.') > 0:
+            download(bkt=bkt, localDownloadDir=dir, key=key, r=r)
+        else:
+            downloadDir(bkt, dir, key)
+        return
+
+    print('[Wrong Sync type]: please enter synchronized type : `to-cos` or `from-cos`')
+    return
 
 
 cli.add_command(cos)

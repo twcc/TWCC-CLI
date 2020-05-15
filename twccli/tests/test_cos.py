@@ -186,27 +186,26 @@ class TestCosLifecyc:
         p.communicate()
 
     def _upload_single_file_by_fn(self, src, bk, fn):
-
-        cmd_list = "cp cos -upload -src {} -dest {} -fn {}".format(src, bk, fn)
+        cmd_list = "cp cos -bkt {} -dir {} -fn {} -sync to-cos".format(bk, src, fn)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
     def _upload_single_file(self, bk, file):
 
-        cmd_list = "cp cos -upload -src {} -dest {}".format(file, bk)
+        cmd_list = "cp cos -bkt {} -fn {} -sync to-cos".format(bk, file)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
-    def _download_single_file(self, bk, file, downdir):
+    def _download_single_file(self, bk, key, downdir):
 
-        cmd_list = "cp cos -download -src {} -dest {} -filename {}".format(
-            bk, downdir, file)
+        cmd_list = "cp cos -bkt {} -dir {} -okey {} -sync from-cos".format(
+            bk, downdir, key)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
     def _download_specific_dir(self, bk, dest, downdir):
 
-        cmd_list = "cp cos -download -src {} -dest {} -downdir {} -r".format(
+        cmd_list = "cp cos -bkt {} -dir {} -okey {} -sync from-cos".format(
             bk, dest, downdir)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
