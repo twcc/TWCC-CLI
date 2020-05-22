@@ -97,6 +97,44 @@ class S3():
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
 
+    def put_obj_acl(self, key , bkt, is_public):
+        acl_string ='private'
+        if is_public:
+            acl_string ='public-read'
+
+        res =self.s3_cli.put_object_acl(ACL=acl_string,
+               Bucket=bkt,
+               Key = key)
+
+    def is_key_public(self, key, bkt):
+        date = ''
+        publicFlag = 'N'
+        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=key)
+        # get public flag ===================
+        for grants in res['Grants']:
+            for grantee in grants['Grantee']:
+                if grantee == "URI":
+                    if grants['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers':
+                        publicFlag = 'Y'
+
+        # get date ===========================
+        for metadata in res['ResponseMetadata']:
+            date = res['ResponseMetadata']['HTTPHeaders']['date']
+
+        # combine return json string ====
+        ret = []
+        ret.append({"okey": key,
+                            "time": date,
+                            "is_public": publicFlag})
+
+        return ret
+    def object_acl(self,bucket, key):
+
+        #object_acl = self.s3res.ObjectAcl(bucket, key)
+        #response = object_acl.put(ACL='public-read')
+        res = self.s3_cli.get_object_acl( Bucket=bucket, Key=key)
+
+        #{'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
@@ -127,13 +165,7 @@ class S3():
             return tmp
         return None
 
-    def upload_file(self, bucket_name=None, key=None, source=None):
-        if os.path.isabs(source) == False:
-            source = source.replace("./", "")
-            remotePath = os.path.abspath(source)+'/' + key
-        else:
-            remotePath = source + '/'+key
-
+    def upload_file(self, bucket_name=None, key=None):
         try:
             self.s3_cli.upload_file(
                 remotePath, bucket_name, key)
