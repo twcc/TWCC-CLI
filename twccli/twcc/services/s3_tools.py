@@ -15,7 +15,6 @@ from twccli.twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
 import subprocess
-import json
 
 
 class S3():
@@ -43,18 +42,12 @@ class S3():
                                      endpoint_url='https://' + self.endpoint_url,
                                      verify=False)
 
-        sess = boto3.Session(
-                                     aws_access_key_id=self.access_key,
-                                     aws_secret_access_key=self.secret_key)
-        self.s3res = sess.resource('s3')
-
     def list_bucket(self):
         """ Listing all the bucket for S3 directory
 
             :return            : List all S3 buckets
         """
         response = self.s3_cli.list_buckets()
-
         res = []
         to_zone = tz.tzlocal()
 

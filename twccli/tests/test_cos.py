@@ -11,7 +11,7 @@ import pytest
 import uuid
 import subprocess
 import random
-import requests
+
 
 class TestCosLifecyc:
 
@@ -33,7 +33,6 @@ class TestCosLifecyc:
         cmd_list = "mk cos -n {}".format(bk)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
-
 
     def _list_bucket_after_create(self):
         cmd_list = "ls cos -json"
@@ -73,7 +72,7 @@ class TestCosLifecyc:
         assert flag
 
     def _upload_files(self):
-        cmd_list = "cp cos -dir -bkt {} -sync to-cos".format(
+        cmd_list = "cp cos -upload -src {} -dest {} -r".format(
             self.upload_dir, self.bk_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
@@ -102,12 +101,12 @@ class TestCosLifecyc:
         p.communicate()
 
     def _upload_files(self, bk, dir):
-        cmd_list = "cp cos -dir {} -bkt {} -sync to-cos".format(dir, bk)
+        cmd_list = "cp cos -upload -src {} -dest {} -r".format(dir, bk)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
     def _download_files(self, bk, dir):
-        cmd_list = "cp cos -bkt {} -dir {} -sync from-cos".format(bk, dir)
+        cmd_list = "cp cos -download -src {} -dest {} -r".format(bk, dir)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
@@ -149,7 +148,7 @@ class TestCosLifecyc:
                 else:
                     print('no {}'.format(scanPath))
 
-
+        assert False
 
     def _mk_download_dir(self, downDir):
         cmd = ["mkdir", downDir]
@@ -191,12 +190,11 @@ class TestCosLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
-    def _upload_single_file(self, bk, src,file):
+    def _upload_single_file(self, bk, file):
 
-        cmd_list = "cp cos -bkt {} -dir {} -fn {} -sync to-cos".format(bk, src,file)
+        cmd_list = "cp cos -bkt {} -fn {} -sync to-cos".format(bk, file)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
-
 
     def _download_single_file(self, bk, key, downdir):
 
@@ -223,15 +221,6 @@ class TestCosLifecyc:
         for cmd in cmd_list:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             p.communicate()
-
-    def _request(self, url):
-        r = requests.get(url)
-
-
-    def _set_obj_public(self, bk, key):
-        cmd_list = "mk cos -n {} -okey {} -public".format(bk, key)
-        out = self.__run(cmd_list.split(u" "))
-
 
     def test_issue_104(self):
         rand = random.randint(0, 1000)
@@ -277,7 +266,7 @@ class TestCosLifecyc:
         self._create_bucket(bk_isu103)
         self._create_upload_file(isu103_file)
         self._create_download_dir(isu103_downDir)
-        self._upload_single_file(bk_isu103, './',isu103_file)
+        self._upload_single_file(bk_isu103, isu103_file)
         self._download_single_file(bk_isu103, isu103_file, isu103_downDir)
         self._del_bucket(bk_isu103)
         self._remove_dir(isu103_upDir, isu103_downDir)
@@ -386,19 +375,3 @@ class TestCosLifecyc:
         self._loadSession()
         self._create_bucket(bk_isu147)
         self._del_bucket_no_r(bk_isu147)
-       
-    def test_public(self):
-        bk_testPublic = "bk{}".format(str(uuid.uuid1()).split("-")[0])
-        test_public_fn = "test_public.txt"
-        targetPath = "testpulibc_down_{}".format(str(uuid.uuid1()))
-        url = "https://s3.twcc.ai/{}/{}".format( bk_testPublic,test_public_fn)
-        self._loadSession()
-        self._create_bucket(bk_testPublic)
-        self._create_upload_file("./"+test_public_fn)
-        self._upload_single_file( bk_testPublic,"./", test_public_fn)
-        self._set_obj_public(bk_testPublic, test_public_fn)
-        self._request(url)
-
-        self._del_bucket(bk_testPublic)
-        self._remove_file("1.txt")
-        self._remove_file(test_public_fn)
