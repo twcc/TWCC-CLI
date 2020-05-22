@@ -15,7 +15,6 @@ from twccli.twcc.util import sizeof_fmt, pp, isNone
 from dateutil import tz
 from datetime import datetime
 import subprocess
-import json
 
 
 class S3():
@@ -43,18 +42,12 @@ class S3():
                                      endpoint_url='https://' + self.endpoint_url,
                                      verify=False)
 
-        sess = boto3.Session(
-                                     aws_access_key_id=self.access_key,
-                                     aws_secret_access_key=self.secret_key)
-        self.s3res = sess.resource('s3')
-
     def list_bucket(self):
         """ Listing all the bucket for S3 directory
 
             :return            : List all S3 buckets
         """
         response = self.s3_cli.list_buckets()
-
         res = []
         to_zone = tz.tzlocal()
 
@@ -104,44 +97,6 @@ class S3():
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
 
-    def put_obj_acl(self, key , bkt, is_public):
-        acl_string ='private'
-        if is_public:
-            acl_string ='public-read'
-
-        res =self.s3_cli.put_object_acl(ACL=acl_string,
-               Bucket=bkt, 
-               Key = key)
-
-    def is_key_public(self, key, bkt):
-        date = ''
-        publicFlag = 'N'
-        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=key)
-        # get public flag ===================
-        for grants in res['Grants']:
-            for grantee in grants['Grantee']:
-                if grantee == "URI":
-                    if grants['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers':
-                        publicFlag = 'Y'
-
-        # get date ===========================
-        for metadata in res['ResponseMetadata']:
-            date = res['ResponseMetadata']['HTTPHeaders']['date']
-
-        # combine return json string ====
-        ret = []
-        ret.append({"okey": key,
-                            "time": date,
-                            "is_public": publicFlag})
-
-        return ret
-    def object_acl(self,bucket, key):
-         
-        #object_acl = self.s3res.ObjectAcl(bucket, key)
-        #response = object_acl.put(ACL='public-read')
-        res = self.s3_cli.get_object_acl( Bucket=bucket, Key=key)
- 
-        #{'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
