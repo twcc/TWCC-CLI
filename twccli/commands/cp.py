@@ -24,7 +24,10 @@ def upload(source, directory, key, r):
 
     s3 = S3()
     # Check for source type
+    print('SSSSSSSSSSSSS')
+    print(key)
     if isNone(key) == False:
+        print('upload file')
         s3.upload_file(key=key, bucket_name=directory, source=source)
         return
 
@@ -44,7 +47,7 @@ def upload(source, directory, key, r):
 
 
 def downloadDir(source, directory, downdir):
-
+ 
     if os.path.basename(directory) == '':
         directory = directory[:-1]
 
@@ -69,6 +72,7 @@ def download(bkt, localDownloadDir, key, r):
         localDownloadDir = localDownloadDir[:-1]
 
     s3 = S3()
+
     if not s3.check_4_bucket(bkt):
         raise Exception("No such bucket name {} exists".format(bkt))
 
@@ -77,14 +81,15 @@ def download(bkt, localDownloadDir, key, r):
             raise Exception(
                     "{} is path, need to set recursive to True".format(directory))
         # download whole bucket
+
         s3.download_bucket(bucket_name=source, path=directory, r=r)
     else:
 
-        if key.find('.') > 0:
+        if key.find('.') > 0 or key.find('/') < 0 :
             # download single file
             s3.download_file(bucket_name=bkt, path=localDownloadDir, key=key)
             return
-
+        
         if key.endswith('*'):
             files = s3.list_object(bkt)
             prefix_folder = '/'.join(key.split('/')[:-1])
@@ -96,7 +101,6 @@ def download(bkt, localDownloadDir, key, r):
                     s3.download_bucket(file_name=new_directory,
                                        bucket_name=bkt, key=desire_file)
         else:
-
             if localDownloadDir.endswith('/'):
                 localDownloadDir = localDownloadDir + key
 
@@ -111,12 +115,12 @@ def cli():
     pass
 
 
-@click.command(help="‘Upload/Download’ COS (Cloud Object Service) files.")
+@click.command(help="‘Upload/Download’ COS (Cloud Object Storage) files.")
 @click.option('-sync', '--synchronized', 'sync',
               help='to-cos/from-cos')
 @click.option('-dir', '--directory', 'dir', default='./',
               help='Path of the source directory.')
-@click.option('-okey', '--object-key', 'key',
+@click.option('-okey', '--cos-key', 'key',
               help='File in Cloud.')
 @click.option('-fn', '--file-name', 'file',
               help='Files for uploading from local site.')
@@ -150,7 +154,7 @@ def cos(sync, dir, key, file, bkt):
         return
 
     if sync == 'from-cos':
-        if key.find('.') > 0:
+        if key.find('.') > 0 or key.find('/') < 0:
             download(bkt=bkt, localDownloadDir=dir, key=key, r=r)
         else:
             downloadDir(bkt, dir, key)
