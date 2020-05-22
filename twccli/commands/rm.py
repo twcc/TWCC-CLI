@@ -26,7 +26,6 @@ def del_bucket(name, is_recursive, isForce=False):
         s3 = S3()
         for bucket_name in name.split(','):
             s3.del_bucket(bucket_name, is_recursive)
-            print("Bucket name '{}' is deleted".format(bucket_name))
 
 
 def del_object(ids_or_names, bucket_name, isForce=False):
