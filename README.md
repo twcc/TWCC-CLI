@@ -20,6 +20,12 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+```
+Sorry! In order to provide better user experience, the TWCC CLI new version launch of this week will delay a week.
+
+by twcc-cli-team on May 22
+```
+
 ### v0.5.11 Release Note
 ![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)
 **change**
