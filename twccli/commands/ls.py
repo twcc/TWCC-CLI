@@ -15,6 +15,11 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
+def is_key_public(key, bkt):
+    s3 = S3()
+    retStr = s3.is_key_public(key, bkt)
+    table_layout("Okey Detail", retStr, ['okey', 'time', 'is_public'], isPrint=True, isWrap=False)
+    
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
     if is_table:
@@ -314,22 +319,36 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 @click.command(help="'List' details of your COS (Cloud Object Storage) buckets.")
 @click.option('-n', '--name', 'name', default=None, type=str,
               help="Name of the Bucket.")
+@click.option('-okey', '--cos-key', 'key', default=None, type=str,
+              help="COS object key name.")
+@click.option('-bkt', '--bucket', 'bkt', default=None, type=str,
+              help="Bucket name.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-def cos(name, is_table, ids_or_names):
+def cos(name, is_table, ids_or_names, bkt, key):
     """Command line for List COS
        Functions:
        1. list bucket
        2. list files in specific folder in bucket
     """
-    ids_or_names = mk_names(name, ids_or_names)
-    if len(ids_or_names) == 0:
-        list_buckets(is_table)
-    else:
-        list_files(ids_or_names, is_table)
 
+    if isNone(key) & isNone(bkt):
+        ids_or_names = mk_names(name, ids_or_names)
+        if len(ids_or_names) == 0:
+            list_buckets(is_table)
+        else:
+            list_files(ids_or_names, is_table)
+    else:
+        if isNone(key)== False & isNone(bkt) == False:
+            is_key_public(key, bkt)
+            return
+        else:
+            print("'COS Key' and Url are required.")
+
+
+    
 # end object ==================================================
 @click.command(help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p', '--port', 'show_ports', is_flag=True,

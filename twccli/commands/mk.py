@@ -114,7 +114,7 @@ def create_vcs(name, sol="", img_name="", network="",
         required['x-extra-property-volume-size'] = str(data_vol_size)
         if not data_vol in extra_props['x-extra-property-volume-type'].keys():
             raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
-                                                                            ", ".join(extra_props['x-extra-property-volume-type'].keys())))
+                                                                                     ", ".join(extra_props['x-extra-property-volume-type'].keys())))
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
@@ -142,6 +142,9 @@ def doSiteReady(site_id, site_type='cntr'):
         time.sleep(5)
     return site_id
 
+def put_obj_acl(key , bkt, is_public):
+    s3 = S3()
+    s3.put_obj_acl(key , bkt, is_public)
 
 def create_bucket(bucket_name):
     """Create bucket by name
@@ -205,6 +208,8 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 # end original function ==================================================
 
 # Create groups for command
+
+
 @click.group(help="Create (allocate) your TWCC resources.")
 def cli():
     pass
@@ -319,15 +324,22 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
 
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of the bucket.")
+@click.option('-okey', '--object-key', 'key', type=str,
+              help="COS key")
+@click.option('-public / -private', '--set-public-access / --set-private-only', 'is_public',
+              is_flag=True, default=True, show_default=True,
+              help="Set object to be public access by cos key.")            
 @click.command(help="Create your COS (Cloud Object Storage) buckets.")
-def cos(name):
+def cos(name, key, is_public):
     """Command line for create cos
 
     :param name: Enter name for your resources.
     :type name: string
     """
-    create_bucket(name)
-
+    if isNone(key) == False:
+        put_obj_acl(key , name, is_public)
+    else:
+        create_bucket(name)
 
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
