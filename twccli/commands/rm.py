@@ -14,8 +14,8 @@ from twccli.twcc.util import isNone, timezone2local, resource_id_validater
 def del_bucket(name, is_recursive, isForce=False):
     """Delete bucket
 
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
+    :param name: name for deleting bucket.
+    :type name: string
     :param is_recursive: is recursive or not
     :type is_recursive: bool
     :param isForce: Force to delete any resources at your own cost.
@@ -29,21 +29,20 @@ def del_bucket(name, is_recursive, isForce=False):
             print("Bucket name '{}' is deleted".format(bucket_name))
 
 
-def del_object(ids_or_names, bucket_name, isForce=False):
+def del_object(okey, bucket_name, isForce=False):
     """Delete Objects by bucket name
 
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
+    :param okey: name for deleting object.
+    :type okey: string
     :param bucket_name: bucket name
     :type bucket_name: string
     :param isForce: Force to delete any resources at your own cost.
     :type isForce: bool
     """
-    txt = "Deleting objects in bucket name: {}".format(bucket_name)
-    if getConfirm("COS Delete Buckets", ",".join(ids_or_names), isForce, ext_txt=txt):
-        for obj_key in ids_or_names:
-            S3().del_object(bucket_name=bucket_name, file_name=obj_key)
-            print("Deleted bject name: {}.".format(obj_key))
+    txt = "Deleting objects: {} \n in bucket name: {}".format(okey, bucket_name)
+    if getConfirm("COS Delete Object ", okey, isForce, ext_txt=txt):
+        S3().del_object(bucket_name=bucket_name, file_name=okey)
+        print("Deleted bject name: {}.".format(okey))
 
 
 def del_vcs(ids_or_names, isForce=False):
@@ -274,26 +273,27 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
               help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
-@click.option('-n', '--name', 'name',
+@click.option('-bkt', '--bucket_name', 'name',
               help='Name of the bucket.')
-@click.argument('ids_or_names', nargs=-1)
-def cos(name, force, ids_or_names, is_recursive):
+@click.option('-okey', '--cos_key', 'okey',
+              help='Name of the bucket.')
+def cos(name, force, okey, is_recursive):
     """Command Line for COS deleting buckets
 
     :param name: Bucket name for deleting object.
     :type name: string
-    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
-    :type is_recursive: bool
     :param force: Force to delete any resources at your own cost.
     :type force: bool
-    :param force: ids_or_names
-    :type force: string or tuple
+    :param okey: the COS key which you want to operate
+    :type okey: string
+    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
+    :type is_recursive: bool
     """
-    if not len(ids_or_names) > 0 and isNone(name):
+    if isNone(name):
         print('please enter name')
 
-    if len(ids_or_names) > 0:
-        del_object(ids_or_names, name, force)
+    if len(name) > 0:
+        del_object(okey, name, force)
     else:
         del_bucket(name, is_recursive, force)
 
