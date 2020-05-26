@@ -9,6 +9,7 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
 from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
+from botocore.exceptions import ClientError
 
 
 def del_bucket(name, is_recursive, isForce=False):
@@ -25,8 +26,14 @@ def del_bucket(name, is_recursive, isForce=False):
     if getConfirm("COS Delete Buckets", name, isForce, ext_txt=txt):
         s3 = S3()
         for bucket_name in name.split(','):
-            s3.del_bucket(bucket_name, is_recursive)
-            print("Bucket name '{}' is deleted".format(bucket_name))
+            try:
+                s3.del_bucket(bucket_name, is_recursive)
+                print("Bucket name '{}' is deleted".format(bucket_name))
+            except ClientError as e:
+                print(e)
+                error_msg = "Note: Use `-r` to delete files in bucket recursively."
+                print(error_msg)
+
 
 
 def del_object(okey, bucket_name, isForce=False):
@@ -42,7 +49,6 @@ def del_object(okey, bucket_name, isForce=False):
     txt = "Deleting objects: {} \n in bucket name: {}".format(okey, bucket_name)
     if getConfirm("COS Delete Object ", okey, isForce, ext_txt=txt):
         S3().del_object(bucket_name=bucket_name, file_name=okey)
-        print("Deleted bject name: {}.".format(okey))
 
 
 def del_vcs(ids_or_names, isForce=False):
@@ -276,7 +282,7 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 @click.option('-bkt', '--bucket_name', 'name',
               help='Name of the bucket.')
 @click.option('-okey', '--cos_key', 'okey',
-              help='Name of the bucket.')
+              help='Name of the object for deleting.')
 def cos(name, force, okey, is_recursive):
     """Command Line for COS deleting buckets
 
@@ -292,10 +298,10 @@ def cos(name, force, okey, is_recursive):
     if isNone(name):
         print('please enter name')
 
-    if len(name) > 0:
-        del_object(okey, name, force)
-    else:
+    if isNone(okey):
         del_bucket(name, is_recursive, force)
+    else:
+        del_object(okey, name, force)
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")
