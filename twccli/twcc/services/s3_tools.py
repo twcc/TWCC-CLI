@@ -305,25 +305,14 @@ class S3():
             :param recursive: recursive or no
             :return: True if bucket is deleted, else False
         """
-        try:
-
-            if recursive == True:
-                retKeys = self.list_object(bucket_name)
-                if retKeys != None:
-                    for i in self.list_object(bucket_name):
-                        self.del_object(bucket_name=bucket_name,
-                                        file_name=i['Key'])
-
-            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
-            print("Successfully delete bucket :", bucket_name)
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'BucketNotEmpty':
-                error_msg = "{} still has files inside it.".format(
-                    e.response['Error']['BucketName'])
-                print(error_msg)
-            else:
-                print(e.response)
-        return True
+        if recursive == True:
+            retKeys = self.list_object(bucket_name)
+            if retKeys != None:
+                for i in self.list_object(bucket_name):
+                    self.del_object(bucket_name=bucket_name,
+                                    file_name=i['Key'])
+        res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+        print("Successfully delete bucket :", bucket_name)
 
     def del_object(self, bucket_name, file_name):
         """ Delete a file from S3
@@ -332,13 +321,8 @@ class S3():
             :param file_name  : Unique string name
             :return           : True if object is deleted, else False
         """
-        try:
-            res = self.s3_cli.delete_object(Bucket=bucket_name,
-                                            Key=file_name)
-            print("Successfully delete object :", file_name)
-        except ClientError as e:
-            print(e.response)
-        return True
+        res = self.s3_cli.delete_object(Bucket=bucket_name,
+                                        Key=file_name)
 
     # def test_table(self, table_data):
     #     """ Testing showing table
