@@ -7,15 +7,16 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
-from prompt_toolkit.shortcuts import yes_no_dialog
+from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
+from botocore.exceptions import ClientError
 
 
 def del_bucket(name, is_recursive, isForce=False):
     """Delete bucket
 
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
+    :param name: name for deleting bucket.
+    :type name: string
     :param is_recursive: is recursive or not
     :type is_recursive: bool
     :param isForce: Force to delete any resources at your own cost.
@@ -25,64 +26,29 @@ def del_bucket(name, is_recursive, isForce=False):
     if getConfirm("COS Delete Buckets", name, isForce, ext_txt=txt):
         s3 = S3()
         for bucket_name in name.split(','):
-            s3.del_bucket(bucket_name, is_recursive)
-            print("Bucket name '{}' is deleted".format(bucket_name))
+            try:
+                s3.del_bucket(bucket_name, is_recursive)
+                print("Bucket name '{}' is deleted".format(bucket_name))
+            except ClientError as e:
+                print(e)
+                error_msg = "Note: Use `-r` to delete files in bucket recursively."
+                print(error_msg)
 
 
-def del_object(ids_or_names, bucket_name, isForce=False):
+
+def del_object(okey, bucket_name, isForce=False):
     """Delete Objects by bucket name
 
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
+    :param okey: name for deleting object.
+    :type okey: string
     :param bucket_name: bucket name
     :type bucket_name: string
     :param isForce: Force to delete any resources at your own cost.
     :type isForce: bool
     """
-    txt = "Deleting objects in bucket name: {}".format(bucket_name)
-    if getConfirm("COS Delete Buckets", ",".join(ids_or_names), isForce, ext_txt=txt):
-        for obj_key in ids_or_names:
-            S3().del_object(bucket_name=bucket_name, file_name=obj_key)
-            print("Deleted bject name: {}.".format(obj_key))
-
-
-def del_vcs(ids_or_names, isForce=False):
-    """delete a vcs
-
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
-    :param isForce: Force to delete any resources at your own cost.
-    :type isForce: bool
-    """
-    if getConfirm("VCS", ",".join(ids_or_names), isForce):
-        vsite = VcsSite()
-        if len(ids_or_names) > 0:
-            for ele in ids_or_names:
-                vsite.delete(ele)
-                print("VCS resources {} deleted.".format(ele))
-
-
-def getConfirm(res_name, entity_name, isForce, ext_txt=""):
-    """Popup confirm dialog for double confirming to make sure if user really want to delete or not
-
-    :param res_name: name for deleting object.
-    :type res_name: string
-    :param force: Force to delete any resources at your own cost.
-    :type force: bool
-    :param ext_txt: extra text
-    :type ext_txt: string
-    """
-    if isForce:
-        return isForce
-    import sys
-    str_title = u'Confirm delete {}:[{}]'.format(res_name, entity_name)
-    str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
-        ext_txt)
-    # if py3
-    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-        return yes_no_dialog(title=str_title, text=str_text)
-    else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
+    txt = "Deleting objects: {} \n in bucket name: {}".format(okey, bucket_name)
+    if getConfirm("COS Delete Object ", okey, isForce, ext_txt=txt):
+        S3().del_object(bucket_name=bucket_name, file_name=okey)
 
 
 def del_ccs(ids_or_names, isForce=False):
@@ -274,28 +240,29 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
 @click.option('-r', '--recursively', 'is_recursive',
               is_flag=True, show_default=True, default=False,
               help='Recursively delete all objects in the bucket. NOTE: Use with caution.')
-@click.option('-n', '--name', 'name',
+@click.option('-bkt', '--bucket_name', 'name',
               help='Name of the bucket.')
-@click.argument('ids_or_names', nargs=-1)
-def cos(name, force, ids_or_names, is_recursive):
+@click.option('-okey', '--cos_key', 'okey',
+              help='Name of the object for deleting.')
+def cos(name, force, okey, is_recursive):
     """Command Line for COS deleting buckets
 
     :param name: Bucket name for deleting object.
     :type name: string
-    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
-    :type is_recursive: bool
     :param force: Force to delete any resources at your own cost.
     :type force: bool
-    :param force: ids_or_names
-    :type force: string or tuple
+    :param okey: the COS key which you want to operate
+    :type okey: string
+    :param is_recursive: Recursively delete all objects in COS. NOTE: Use this with caution.
+    :type is_recursive: bool
     """
-    if not len(ids_or_names) > 0 and isNone(name):
+    if isNone(name):
         print('please enter name')
 
-    if len(ids_or_names) > 0:
-        del_object(ids_or_names, name, force)
-    else:
+    if isNone(okey):
         del_bucket(name, is_recursive, force)
+    else:
+        del_object(okey, name, force)
 
 
 @click.command(help="'Delete' Operations for CCS (Container Compute Service) resources.")

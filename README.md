@@ -8,6 +8,11 @@
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
 **NOTICE**
+If you want to use ansible, please set $ANSIBLE_LIBRARY to your environment.
+```
+export ANSIBLE_LIBRARY=
+```
+
 Remeber to set locale in environment
 ```
 export LANG=C.UTF-8
@@ -20,14 +25,22 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
-```
-Sorry! In order to provide better user experience, the TWCC CLI new version launch of this week will delay a week.
+### v0.5.12 Release Note
+![img](https://media.giphy.com/media/26tk134Ku0nTdKmuA/giphy.gif)
 
-by twcc-cli-team on May 22
-```
+**feature**
+- We design TWCC_VCS module for ansible.
+
+
+**issue**
+- We fix #7 
+
+**fix bug**
+- fix COS command line problems.
 
 ### v0.5.11 Release Note
 ![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)
+
 **change**
 - In v0.5.10, we use `--product-type` in wrong place, that has been correct.
 - We change `cp cos` command structures, new command  descriptions as following:
@@ -58,6 +71,7 @@ Welcome to [leave comments](https://github.com/TW-NCHC/TWCC-CLI/issues/new!!
  
 ### v0.5.10 Release Note
 ![img](https://media.giphy.com/media/xTiTntKyFNFbCNuqkw/giphy.gif)
+
 **change**
 - VCS images showing table shows "product-type" now!
 

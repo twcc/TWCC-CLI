@@ -23,7 +23,7 @@ class S3():
         """
         # The setting for connect to s3 bucket
         self.service_name = 's3'
-        self.endpoint_url = "s3.twcc.ai"
+        self.endpoint_url = "cos.twcc.ai"
         self.new_files = []
         self.new_bucket = []
         self.twcc = ServiceOperation()
@@ -97,6 +97,44 @@ class S3():
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
 
+    def put_obj_acl(self, key , bkt, is_public):
+        acl_string ='private'
+        if is_public:
+            acl_string ='public-read'
+
+        res =self.s3_cli.put_object_acl(ACL=acl_string,
+               Bucket=bkt,
+               Key = key)
+
+    def is_key_public(self, key, bkt):
+        date = ''
+        publicFlag = 'N'
+        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=key)
+        # get public flag ===================
+        for grants in res['Grants']:
+            for grantee in grants['Grantee']:
+                if grantee == "URI":
+                    if grants['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers':
+                        publicFlag = 'Y'
+
+        # get date ===========================
+        for metadata in res['ResponseMetadata']:
+            date = res['ResponseMetadata']['HTTPHeaders']['date']
+
+        # combine return json string ====
+        ret = []
+        ret.append({"okey": key,
+                            "time": date,
+                            "is_public": publicFlag})
+
+        return ret
+    def object_acl(self,bucket, key):
+
+        #object_acl = self.s3res.ObjectAcl(bucket, key)
+        #response = object_acl.put(ACL='public-read')
+        res = self.s3_cli.get_object_acl( Bucket=bucket, Key=key)
+
+        #{'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
@@ -127,13 +165,7 @@ class S3():
             return tmp
         return None
 
-    def upload_file(self, bucket_name=None, key=None, source=None):
-        if os.path.isabs(source) == False:
-            source = source.replace("./", "")
-            remotePath = os.path.abspath(source)+'/' + key
-        else:
-            remotePath = source + '/'+key
-
+    def upload_file(self, bucket_name=None, key=None):
         try:
             self.s3_cli.upload_file(
                 remotePath, bucket_name, key)
@@ -273,25 +305,14 @@ class S3():
             :param recursive: recursive or no
             :return: True if bucket is deleted, else False
         """
-        try:
-
-            if recursive == True:
-                retKeys = self.list_object(bucket_name)
-                if retKeys != None:
-                    for i in self.list_object(bucket_name):
-                        self.del_object(bucket_name=bucket_name,
-                                        file_name=i['Key'])
-
-            res = self.s3_cli.delete_bucket(Bucket=bucket_name)
-            print("Successfully delete bucket :", bucket_name)
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'BucketNotEmpty':
-                error_msg = "{} still has files inside it.".format(
-                    e.response['Error']['BucketName'])
-                print(error_msg)
-            else:
-                print(e.response)
-        return True
+        if recursive == True:
+            retKeys = self.list_object(bucket_name)
+            if retKeys != None:
+                for i in self.list_object(bucket_name):
+                    self.del_object(bucket_name=bucket_name,
+                                    file_name=i['Key'])
+        res = self.s3_cli.delete_bucket(Bucket=bucket_name)
+        print("Successfully delete bucket :", bucket_name)
 
     def del_object(self, bucket_name, file_name):
         """ Delete a file from S3
@@ -300,13 +321,8 @@ class S3():
             :param file_name  : Unique string name
             :return           : True if object is deleted, else False
         """
-        try:
-            res = self.s3_cli.delete_object(Bucket=bucket_name,
-                                            Key=file_name)
-            print("Successfully delete object :", file_name)
-        except ClientError as e:
-            print(e.response)
-        return True
+        res = self.s3_cli.delete_object(Bucket=bucket_name,
+                                        Key=file_name)
 
     # def test_table(self, table_data):
     #     """ Testing showing table

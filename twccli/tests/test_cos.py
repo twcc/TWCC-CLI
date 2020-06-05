@@ -30,7 +30,7 @@ class TestCosLifecyc:
         return result.output
 
     def _create_bucket(self, bk):
-        cmd_list = "mk cos -n {}".format(bk)
+        cmd_list = "mk cos -bkt {}".format(bk)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
@@ -49,12 +49,12 @@ class TestCosLifecyc:
         assert flag
 
     def _del_bucket_no_r(self, bkt):
-        cmd_list = "rm cos -n {} -f".format(bkt)
+        cmd_list = "rm cos -bkt {} -f".format(bkt)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
     def _del_bucket(self, bkt):
-        cmd_list = "rm cos -n {} -r -f".format(bkt)
+        cmd_list = "rm cos -bkt {} -r -f".format(bkt)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
