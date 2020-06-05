@@ -8,6 +8,11 @@
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
 **NOTICE**
+If you want to use ansible, please set $ANSIBLE_LIBRARY to your environment.
+```
+export ANSIBLE_LIBRARY=
+```
+
 Remeber to set locale in environment
 ```
 export LANG=C.UTF-8
