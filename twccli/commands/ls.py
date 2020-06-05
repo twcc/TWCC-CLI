@@ -7,7 +7,7 @@ import datetime
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
 from twccli.twcc.services.compute import getServerId, getSecGroupList
-from twccli.twcc.services.compute_util import list_vcs
+from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.base import acls, users, image_commit
