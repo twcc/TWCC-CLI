@@ -277,7 +277,6 @@ class Session2(object):
         sessionData["_meta"]['cli_version'] = __version__
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
-        print(s3keys)
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
 
