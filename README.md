@@ -8,6 +8,11 @@
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
 **NOTICE**
+If you want to use ansible, please set $ANSIBLE_LIBRARY to your environment.
+```
+export ANSIBLE_LIBRARY=
+```
+
 Remeber to set locale in environment
 ```
 export LANG=C.UTF-8
@@ -19,6 +24,20 @@ export PYTHONIOENCODING=UTF-8
 1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
 1. Release Notes :point_down:
+
+### v0.5.12 Release Note
+![img](https://media.giphy.com/media/26tk134Ku0nTdKmuA/giphy.gif)
+
+**feature**
+- We design TWCC_VCS module for ansible.
+
+
+**issue**
+- We fix #7 
+
+**fix bug**
+- fix COS command line problems.
+
 
 ### v0.5.11 Release Note
 ![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)

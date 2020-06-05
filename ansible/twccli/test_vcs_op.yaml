@@ -1,0 +1,19 @@
+- name: test my new module
+  hosts: localhost
+  tasks:
+  - name: created db server
+    vcs_op:
+      name: database
+      state: stopped
+      keypair: fychao
+    register: db_info
+  - name: created web server
+    vcs_op:
+      name: webserver
+      state: stopped
+      keypair: fychao
+      floating_ip: true
+    register: web_info
+  - name: dump test output
+    debug:
+      msg: '{{ db_info }}, {{ web_info }}'

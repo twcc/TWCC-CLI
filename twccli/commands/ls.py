@@ -7,7 +7,7 @@ import datetime
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
 from twccli.twcc.services.compute import getServerId, getSecGroupList
-from twccli.twcc.services.compute_util import list_vcs
+from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.base import acls, users, image_commit
@@ -312,7 +312,7 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
 
 # end vcs ==================================================
 @click.command(help="'List' details of your COS (Cloud Object Storage) buckets.")
-@click.option('-n', '--name', 'name', default=None, type=str,
+@click.option('-bkt', '--bucket_name', 'name', default=None, type=str,
               help="Name of the Bucket.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
