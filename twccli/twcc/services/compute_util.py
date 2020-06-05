@@ -1,4 +1,5 @@
 import time
+from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
