@@ -30,7 +30,7 @@ class TestCosLifecyc:
         return result.output
 
     def _create_bucket(self, bk):
-        cmd_list = "mk cos -n {}".format(bk)
+        cmd_list = "mk cos -bkt {}".format(bk)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
 
