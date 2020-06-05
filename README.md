@@ -25,6 +25,20 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.12 Release Note
+![img](https://media.giphy.com/media/26tk134Ku0nTdKmuA/giphy.gif)
+
+**feature**
+- We design TWCC_VCS module for ansible.
+
+
+**issue**
+- We fix #7 
+
+**fix bug**
+- fix COS command line problems.
+
+
 ### v0.5.11 Release Note
 ![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)
 **change**
