@@ -11,6 +11,7 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
+from twccli.twcc.services.compute_util import doSiteReady, create_vcs
 
 
 def create_commit(site_id, tag, isAll=False):
@@ -22,126 +23,6 @@ def create_commit(site_id, tag, isAll=False):
             '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
-
-
-def create_vcs(name, sol="", img_name="", network="",
-               keypair="", flavor="", sys_vol="",
-               data_vol="", data_vol_size=0, fip=""):
-    """Create vcs
-    create vcs by set solution, image name, flavor
-    create vcs by default value
-
-    :param sys_vol: Chose system volume disk type
-    :type sys_vol: string
-    :param data_vol: Volume type of the data volume.
-    :type data_vol: int
-    :param data_vol_size: Size of the data volume in (GB).
-    :type data_vol_size: int
-    :param flavor: Choose hardware configuration
-    :type flavor: string
-    :param img_name: Enter image name.Enter image name
-    :type img_name: string
-    :param network: Enter network name
-    :type network: string
-    :param sol: Enter TWCC solution name
-    :type sol: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
-    :param name: Enter name
-    :type name: string
-    """
-
-    vcs = VcsSite()
-    exists_sol = vcs.getSolList(mtype='dict', reverse=True)
-
-    if isNone(sol):
-        raise ValueError("Please provide solution name. ie:{}".format(
-            ", ".join(exists_sol.keys())))
-    if not sol.lower() in exists_sol.keys():
-        raise ValueError(
-            "Solution name: {} not found or not given.".format(sol))
-
-    required = {}
-    # check for all param
-    if isNone(name):
-        raise ValueError("Missing parameter: `-n`.")
-
-    if not name_validator(name):
-        raise ValueError(
-            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(name))
-
-    extra_props = vcs.getExtraProp(exists_sol[sol])
-
-    # x-extra-property-image
-    if isNone(img_name):
-        img_name = extra_props['x-extra-property-image'][0]
-    required['x-extra-property-image'] = img_name
-
-    # x-extra-property-private-network
-    if isNone(network):
-        network = 'default_network'
-    required['x-extra-property-private-network'] = network
-
-    # x-extra-property-keypair
-    if isNone(keypair):
-        raise ValueError("Missing parameter: `-key`.")
-    if not keypair in set(extra_props['x-extra-property-keypair']):
-        raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
-                                                                         ", ".join(extra_props['x-extra-property-keypair'])))
-    required['x-extra-property-keypair'] = keypair
-
-    # x-extra-property-floating-ip
-    required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
-
-    # x-extra-property-flavor
-    if not flavor in extra_props['x-extra-property-flavor'].keys():
-        raise ValueError("Flavor: {} is not validated. Avbl: {}".format(flavor,
-                                                                        ", ".join(extra_props['x-extra-property-flavor'].keys())))
-    required['x-extra-property-flavor'] = extra_props['x-extra-property-flavor'][flavor]
-
-    # x-extra-property-system-volume-type
-    sys_vol = sys_vol.lower()
-    if not sys_vol in extra_props['x-extra-property-system-volume-type'].keys():
-        raise ValueError("System Vlume Type: {} is not validated. Avbl: {}".format(sys_vol,
-                                                                                   ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
-    required['x-extra-property-system-volume-type'] = extra_props['x-extra-property-system-volume-type'][sys_vol]
-
-    # x-extra-property-availability-zone
-    required['x-extra-property-availability-zone'] = "nova"
-
-    # data vol section
-    if data_vol_size > 0:
-        required['x-extra-property-volume-size'] = str(data_vol_size)
-        if not data_vol in extra_props['x-extra-property-volume-type'].keys():
-            raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
-                                                                            ", ".join(extra_props['x-extra-property-volume-type'].keys())))
-        required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
-
-    return vcs.create(name, exists_sol[sol], required)
-
-
-def doSiteReady(site_id, site_type='cntr'):
-    """Check if site is created or not
-
-    :param site_id: Enter site id
-    :type site_id: string
-    :param site_type: Enter site type
-    :type site_type: string
-    """
-    if site_type == 'cntr':
-        b = Sites()
-    elif site_type == 'vcs':
-        b = VcsSite()
-    else:
-        ValueError("Error")
-
-    wait_ready = False
-    while not wait_ready:
-        if b.isReady(site_id):
-            wait_ready = True
-        time.sleep(5)
-    return site_id
-
 
 def create_bucket(bucket_name):
     """Create bucket by name

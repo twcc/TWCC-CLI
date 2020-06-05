@@ -7,7 +7,7 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
-from prompt_toolkit.shortcuts import yes_no_dialog
+from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
 from botocore.exceptions import ClientError
 
@@ -49,45 +49,6 @@ def del_object(okey, bucket_name, isForce=False):
     txt = "Deleting objects: {} \n in bucket name: {}".format(okey, bucket_name)
     if getConfirm("COS Delete Object ", okey, isForce, ext_txt=txt):
         S3().del_object(bucket_name=bucket_name, file_name=okey)
-
-
-def del_vcs(ids_or_names, isForce=False):
-    """delete a vcs
-
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
-    :param isForce: Force to delete any resources at your own cost.
-    :type isForce: bool
-    """
-    if getConfirm("VCS", ",".join(ids_or_names), isForce):
-        vsite = VcsSite()
-        if len(ids_or_names) > 0:
-            for ele in ids_or_names:
-                vsite.delete(ele)
-                print("VCS resources {} deleted.".format(ele))
-
-
-def getConfirm(res_name, entity_name, isForce, ext_txt=""):
-    """Popup confirm dialog for double confirming to make sure if user really want to delete or not
-
-    :param res_name: name for deleting object.
-    :type res_name: string
-    :param force: Force to delete any resources at your own cost.
-    :type force: bool
-    :param ext_txt: extra text
-    :type ext_txt: string
-    """
-    if isForce:
-        return isForce
-    import sys
-    str_title = u'Confirm delete {}:[{}]'.format(res_name, entity_name)
-    str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
-        ext_txt)
-    # if py3
-    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-        return yes_no_dialog(title=str_title, text=str_text)
-    else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
 
 
 def del_ccs(ids_or_names, isForce=False):

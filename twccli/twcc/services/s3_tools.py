@@ -23,7 +23,7 @@ class S3():
         """
         # The setting for connect to s3 bucket
         self.service_name = 's3'
-        self.endpoint_url = "s3.twcc.ai"
+        self.endpoint_url = "cos.twcc.ai"
         self.new_files = []
         self.new_bucket = []
         self.twcc = ServiceOperation()
