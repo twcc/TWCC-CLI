@@ -54,7 +54,7 @@ reqs = [
         'colorclass',
         'idna',
         'jmespath',
-        'prompt-toolkit>=2.0',
+        'prompt-toolkit==2.0.10',
         'Pygments',
         'python-dateutil',
         'PyYAML',

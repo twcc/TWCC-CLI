@@ -337,8 +337,9 @@ class VcsSite(CpuService):
                 res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
-                res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                                                          "ssd": "block_storage-ssd"}  # no local disk
+                res["x-extra-property-{}".format(ele)] = {"local": "local_disk"} # current setting
+                #res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
+                #                                          "ssd": "block_storage-ssd"}  # no local disk
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
