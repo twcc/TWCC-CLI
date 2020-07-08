@@ -114,7 +114,7 @@ def cli():
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="SSD", type=str,
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
 @click.option('-dvol-type', '--data-volume-type', 'data_vol', default="SSD", type=str,
