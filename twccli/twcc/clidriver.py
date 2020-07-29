@@ -172,7 +172,10 @@ class ServiceOperation:
 
         self.ctype = ctype
 
-        return_header = {'X-API-HOST': site_sn,
+        from twccli.version import __version__
+        return_header = {
+                         'User-Agent': 'TWCC-CLI v%s'%(__version__),
+                         'X-API-HOST': site_sn,
                          'x-api-key': api_key,
                          'Content-Type': self.ctype}
 
