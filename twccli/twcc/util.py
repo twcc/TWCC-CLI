@@ -263,3 +263,6 @@ def name_validator(name):
     if re.match("^[a-z][a-z-_0-9]{5,15}$", name):
         return True
     return False
+
+def mkCcsHostName(ip_addr):
+    return "%s.ccs.twcc.ai"%("-".join(ip_addr.split(".")))
