@@ -1,5 +1,6 @@
 - name: test my new module
   hosts: localhost
+  gather_facts: False
   tasks:
   - name: created db server
     vcs_op:

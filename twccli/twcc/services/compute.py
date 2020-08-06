@@ -244,6 +244,25 @@ class GpuSite(GpuService):
         self.url_dic = {"sites": site_id, 'container/action': ""}
         self.update(unbindAttr)
 
+    def getLog(self, site_id):
+        detail = self.getDetail(site_id)
+        pod_name = detail['Pod'][0]['name']
+        cntr_name = detail['Pod'][0]['container'][0]['name']
+        self.ext_get = {"pod_name": pod_name, "container_name":cntr_name}
+        self.url_dic = {"sites": site_id, 'container/logs': ""}
+        self.http_verb = 'get'
+        self.res_type = 'json'
+        return self._do_api()
+
+    def getJpnbToken(self, site_id):
+        log_txt = self.getLog(site_id)
+        re_comp = re.findall(r'https:\/\/(?P<ccs_host_name>.+):8888\/\?token=', "\n".join(log_txt), re.M)
+        if len(re_comp) > 0:
+            import hashlib
+            return hashlib.md5(re_comp[0].decode()).hexdigest()
+
+
+
 
 class VcsSite(CpuService):
     def __init__(self):

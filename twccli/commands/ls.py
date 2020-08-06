@@ -4,7 +4,8 @@ import click
 import json
 import re
 import datetime
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names
+from twccli.twcc.session import Session2
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
@@ -70,21 +71,28 @@ def list_vcs_flavor(is_table=True):
         jpp(wanted_ans)
 
 
-def list_port(site_id, is_table=True):
+def list_port(site_id, is_table=True, is_print=True):
     """List port by site id, print information in table/json format
 
     :param site_id: list of site id
     :type site_id: string or tuple
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
+    :param is_print: do proint or not
+    :type is_print: bool
     """
     b = GpuSite()
     ans = b.getConnInfo(site_id, ssh_info=False)
     if is_table:
         table_layout("Port info. for {}".format(site_id), ans, isPrint=True)
     else:
-        jpp(ans)
+        if is_print:
+            jpp(ans)
+        else:
+            return ans
 
+def list_addr(site_id):
+    return mkCcsHostName(GpuSite().getDetail(site_id)["Service"][0]["annotations"]["allocated-public-ip"])
 
 def list_commit():
     """List copy image by site id
@@ -229,8 +237,6 @@ def cli():
               help="ID of the instance.")
 @click.option('-all',  '--show-all', 'is_all', is_flag=True, type=bool,
               help="List all the instances in the project.")
-@click.option('-ptype', '--product-type', 'res_property', flag_value='flavor',
-              help="List VCS available product types (hardware configuration).")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='View all image files. Provid solution name for filtering.')
 @click.option('-itype', '--image-type', 'res_property',
@@ -240,6 +246,8 @@ def cli():
               help="List your keypairs in TWCC VCS. Equals to `ls key`")
 @click.option('-net', '--network', 'res_property', flag_value='Network',
               help="List existing network in TWCC VCS.")
+@click.option('-ptype', '--product-type', 'res_property', flag_value='flavor',
+              help="List VCS available product types (hardware configuration).")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
 @click.option('-snap', '--snapshots', 'res_property', flag_value='Snapshot',
@@ -342,6 +350,12 @@ def cos(name, is_table, ids_or_names):
               help='List the submitted requests of duplicating containers.')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
               help='List CCS available GPU environments.')
+@click.option('-gjpnb', '--get-jupter-notebook', 'get_info',
+              default=None, flag_value='jpnb',
+              help="Get entry points for Jupter Note Service. `-s` is required!")
+@click.option('-gssh', '--get-ssh-info', 'get_info',
+              default=None, flag_value='ssh',
+              help="Get entry points for Security Shell service. `-s` is required!")
 @click.option('-img', '--image', 'res_property', flag_value='image',
               help='List all CCS image name.')
 @click.option('-itype', '--image-type-name', 'res_property',
@@ -351,7 +365,10 @@ def cos(name, is_table, ids_or_names):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
-def ccs(res_property, name, site_ids_or_names, is_table, is_all, show_ports):
+@click.pass_context
+def ccs(ctx, res_property, name,
+        site_ids_or_names, is_table,
+        is_all, show_ports, get_info):
     """Command line for List Container
        Functions:
        1. list container
@@ -373,12 +390,27 @@ def ccs(res_property, name, site_ids_or_names, is_table, is_all, show_ports):
         print("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
 
     if not res_property:
+        site_ids_or_names = mk_names(name, site_ids_or_names)
         if show_ports:
-            site_ids_or_names = mk_names(name, site_ids_or_names)
             if len(site_ids_or_names) == 1:
                 list_port(site_ids_or_names[0], is_table)
             else:
                 raise ValueError("Need only one resource id.")
+        elif not isNone(get_info):
+            if get_info == "ssh":
+                ports = list_port(site_ids_or_names[0], False, False)
+                ssh_port = [ x["port"] for x in ports if x["target_port"] == 22 ][0]
+                hostname = list_addr(site_ids_or_names[0])
+                username = Session2._whoami()['username']
+                click.echo("%s@%s -p %s"%(username, hostname, ssh_port))
+            elif get_info == "jpnb":
+                b = GpuSite()
+                access_token = b.getJpnbToken(site_ids_or_names[0])
+                ports = list_port(site_ids_or_names[0], False, False)
+                ssh_port = [ x["port"] for x in ports if x["target_port"] == 8888 ][0]
+                hostname = list_addr(site_ids_or_names[0])
+                click.echo("https://%s:%s?token=%s"%(hostname, ssh_port, access_token))
+
         else:
             list_cntr(site_ids_or_names, is_table, is_all)
 
