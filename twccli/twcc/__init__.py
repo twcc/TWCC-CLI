@@ -12,12 +12,12 @@ if sys.version_info[0] == 2:
 #
 # Get our data path to be added to botocore's search path
 #
-if "HOME" in os.environ:
-    _TWCC_data_path_ = os.path.join(os.environ['HOME'], '.twcc_data')
-else:
-    _TWCC_data_path_ = "/tmp"
 
-os.environ['TWCC_DATA_PATH'] = _TWCC_data_path_
+if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
+    pass
+else:
+    os.environ['TWCC_DATA_PATH'] = os.path.join(os.environ['HOME'], '.twcc_data')
+
 
 GupSiteBlockSet = set([182, 29, 35, 120])
 

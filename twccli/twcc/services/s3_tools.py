@@ -167,8 +167,7 @@ class S3():
 
     def upload_file(self, bucket_name=None, key=None):
         try:
-            self.s3_cli.upload_file(
-                remotePath, bucket_name, key)
+            self.s3_cli.upload_file(remotePath, bucket_name, key)
         except ClientError as e:
             print(e)
             return False
