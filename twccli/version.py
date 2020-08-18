@@ -2,7 +2,7 @@ import os
 
 __TWCC_CLI_MAJOR__ = "0"
 __TWCC_CLI_MINOR__ = "5"
-__TWCC_CLI_BATCH__ = "12.2"
+__TWCC_CLI_BATCH__ = "12.3"
 __TWCC_CLI_STAGE__ = ""
 if len(__TWCC_CLI_STAGE__)==0:
     __version__ = "{}.{}.{}".format(
