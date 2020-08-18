@@ -11,7 +11,7 @@ from twccli.version import __version__
 
 class Session2(object):
     # static varibles
-    PackageYaml = "{}/yaml/NCHC_API-Test_env.yaml".format(
+    PackageYaml = "{}/yaml/TWCC_API.yaml".format(
         os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))))
 
