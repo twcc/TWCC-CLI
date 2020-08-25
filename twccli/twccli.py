@@ -35,6 +35,7 @@ class TWCCLI(click.MultiCommand):
         return rv
 
     def get_command(self, ctx, name):
+        from io import open
         ns = {}
         fn = os.path.join(plugin_folder, name + '.py')
         with open(fn) as f:
@@ -56,7 +57,7 @@ def cli(ctx, ):
 
         https://github.com/TW-NCHC/TWCC-CLI
         version: v0.5
-        
+
         -- You Succeed, We Succeed!! --
     """
     pass
