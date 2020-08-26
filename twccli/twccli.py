@@ -62,12 +62,12 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 @click.command(cls=TWCCLI)
 @pass_environment
 def cli(ctx, ):
-    print(__version__)
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
         https://github.com/TW-NCHC/TWCC-CLI
-        version: v0.5
+
+        version: v0.5.x
 
         -- You Succeed, We Succeed!! --
     """
