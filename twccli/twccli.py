@@ -35,12 +35,22 @@ class TWCCLI(click.MultiCommand):
         return rv
 
     def get_command(self, ctx, name):
-        from io import open
         ns = {}
         fn = os.path.join(plugin_folder, name + '.py')
-        with open(fn) as f:
-            code = compile(f.read(), fn, 'exec')
-            eval(code, ns, ns)
+
+        import six
+        if six.PY2:
+            # FileNotFoundError is only available since Python 3.3
+            FileNotFoundError = IOError
+            from io import open
+
+        try:
+            with open(fn, 'rb') as f:
+                txt = f.read()
+        except FileNotFoundError:
+            print('Oops.')
+        code = compile(txt, fn, 'exec')
+        eval(code, ns, ns)
         return ns['cli']
 
 
@@ -52,6 +62,7 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 @click.command(cls=TWCCLI)
 @pass_environment
 def cli(ctx, ):
+    print(__version__)
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
@@ -60,6 +71,7 @@ def cli(ctx, ):
 
         -- You Succeed, We Succeed!! --
     """
+
     pass
 
 
