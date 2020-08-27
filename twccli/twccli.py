@@ -38,10 +38,11 @@ class TWCCLI(click.MultiCommand):
         ns = {}
         fn = os.path.join(plugin_folder, name + '.py')
 
-        if sys.version_info < (3, 7):
+        import six
+        if six.PY2 == True:
             # FileNotFoundError is only available since Python 3.3
             FileNotFoundError = IOError
-            from io import open
+        from io import open
 
         try:
             with open(fn, 'rb') as f:
