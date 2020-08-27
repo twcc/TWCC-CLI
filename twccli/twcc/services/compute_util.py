@@ -38,19 +38,19 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
             site_id = ids_or_names[0]
             ans = [vcs.queryById(site_id)]
             srvid = getServerId(site_id)
-            if isNone(srvid):
-                return None
-            srv = VcsServer().queryById(srvid)
-            if len(srv) > 0 and (u'private_nets' in srv and len(srv[u'private_nets']) > 0):
-                srv_net = srv[u'private_nets'][0]
-                ans[0]['private_network'] = srv_net[u'name']
-                ans[0]['private_ip'] = srv_net[u'ip']
-            else:
-                ans[0]['private_network'] = ""
-                ans[0]['private_ip'] = ""
+            if not isNone(srvid):
+                srv = VcsServer().queryById(srvid)
+                if len(srv) > 0 and (u'private_nets' in srv and len(srv[u'private_nets']) > 0):
+                    srv_net = srv[u'private_nets'][0]
+                    ans[0]['private_network'] = srv_net[u'name']
+                    ans[0]['private_ip'] = srv_net[u'ip']
+                else:
+                    ans[0]['private_network'] = ""
+                    ans[0]['private_ip'] = ""
     else:
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         ans = vcs.list(is_all)
+
     if len(ans) > 0:
         if not is_print:
             return ans
