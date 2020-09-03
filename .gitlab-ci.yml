@@ -50,6 +50,7 @@ python36:
 
 manual minor version deploy to PYPI:
   stage: deploy
+  image: python:3.7
   variables:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
