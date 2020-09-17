@@ -350,9 +350,9 @@ def cos(name, is_table, ids_or_names):
               help='List the submitted requests of duplicating containers.')
 @click.option('-gpu', '--gpus-flavor', 'res_property', flag_value='flavor',
               help='List CCS available GPU environments.')
-@click.option('-gjpnb', '--get-jupter-notebook', 'get_info',
+@click.option('-gjpnb', '--get-jupyter-notebook', 'get_info',
               default=None, flag_value='jpnb',
-              help="Get entry points for Jupter Note Service. `-s` is required!")
+              help="Get entry points for Jupyter Note Service. `-s` is required!")
 @click.option('-gssh', '--get-ssh-info', 'get_info',
               default=None, flag_value='ssh',
               help="Get entry points for Security Shell service. `-s` is required!")
