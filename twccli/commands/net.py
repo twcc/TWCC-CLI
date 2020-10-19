@@ -88,6 +88,8 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
             port_min, port_max = [int(port) for port in port_list]
             if port_min < 0 or port_max < 0:
                 raise ValueError('port range must bigger than 0')
+            elif port_min > port_max:
+                raise ValueError('port_range_min must be <= port_range_max')
         else:
             raise ValueError('port range set error')
         

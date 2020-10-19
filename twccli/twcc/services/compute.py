@@ -437,8 +437,8 @@ class VcsSecurityGroup(CpuService):
                          "direction": direction,
                          "protocol": protocol,
                          "remote_ip_prefix": cidr,
-                         "port_range_max": port_min,
-                         "port_range_min": port_max}
+                         "port_range_max": port_max,
+                         "port_range_min": port_min}
         self._do_api()
 
     def deleteRule(self, rule_id):
