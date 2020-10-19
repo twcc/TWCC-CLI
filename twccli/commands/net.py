@@ -72,15 +72,25 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     :type isIngress: bool
     """
     if type(portrange) == str:
+        avbl_proto = ['tcp', 'udp', 'icmp']
+
+        secg_list = getSecGroupList(siteId)
+        secg_id = secg_list['id']
+        from netaddr import IPNetwork
+        IPNetwork(cidr)
+
+        if not protocol in avbl_proto:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
+
         port_list = portrange.split('-')
         if len(port_list) == 2:
             port_min, port_max = [int(port) for port in port_list]
             if port_min < 0 or port_max < 0:
-                return 'port range must bigger than 0'
+                raise ValueError('port range must bigger than 0')
         else:
-            return 'port range set error'
-        secg_list = getSecGroupList(siteId)
-        secg_id = secg_list['id']
+            raise ValueError('port range set error')
+        
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                             "ingress" if isIngress else "egress")
