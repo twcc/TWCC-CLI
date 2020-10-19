@@ -49,7 +49,7 @@ def ccs(siteId, port, isAttach):
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
-@click.option('-prange', '--portrange', 'port-range', type=str,
+@click.option('-prange', '--portrange', 'portrange', type=str,
               help='Port number from min-port to max-port, use '-' as delimiter, ie: 3000-3010.')
 @click.option('-proto', '--protocol', 'protocol', type=str,
               help='Manage VCS security groups protocol.',
