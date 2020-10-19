@@ -49,12 +49,15 @@ def ccs(siteId, port, isAttach):
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
+@click.option('-prange', '--portrange', 'port-range', type=str,
+              help='Port number from min-port to max-port, use '-' as delimiter, ie: 3000-3010.')
 @click.option('-proto', '--protocol', 'protocol', type=str,
               help='Manage VCS security groups protocol.',
               default='tcp', show_default=True)
-def vcs(siteId, port, cidr, protocol, isIngress, fip):
+def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     """Command line for network function of vcs
-
+    :param portrange: Port range number for your VCS environment
+    :type portrange: string
     :param fip: Configure your VCS environment with or without floating IP
     :type fip: bool
     :param port: Port number for your VCS environment
@@ -68,12 +71,22 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip):
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
+    if type(portrange) == str:
+        port_list = portrange.split('-')[0]
+        if len(port_list) == 2:
+            port_min, port_max = [int(port) for port in portrange.split('-')[0]]
+            if port_min < 0 or port_max < 0:
+                return 'port range must bigger than 0'
+        else:
+            return 'port range set error'
+        secg = VcsSecurityGroup()
+        secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
+                            "ingress" if isIngress else "egress")
     if isNone(port):
         if fip:  # @todo need to add check
             VcsServerNet().associateIP(siteId)
         else:
             VcsServerNet().deAssociateIP(siteId)
-
     else:
         avbl_proto = ['tcp', 'udp', 'icmp']
 
@@ -85,10 +98,15 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip):
         if not protocol in avbl_proto:
             raise ValueError(
                 "Protocol is not valid. available: {}.".format(avbl_proto))
-
         secg = VcsSecurityGroup()
-        secg.addSecurityGroup(secg_id, port, cidr, protocol,
-                              "ingress" if isIngress else "egress")
+        if type(portrange) == str:
+            port_min, port_max = [int(port) for port in portrange.split('-')[0]]
+            if not port in range(port_min,port_max):
+                secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
+                                  "ingress" if isIngress else "egress")
+        else:
+            secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
+                                "ingress" if isIngress else "egress")
 
 
 @click.group(help="NETwork related operations.")
