@@ -72,13 +72,15 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     :type isIngress: bool
     """
     if type(portrange) == str:
-        port_list = portrange.split('-')[0]
+        port_list = portrange.split('-')
         if len(port_list) == 2:
-            port_min, port_max = [int(port) for port in portrange.split('-')[0]]
+            port_min, port_max = [int(port) for port in port_list]
             if port_min < 0 or port_max < 0:
                 return 'port range must bigger than 0'
         else:
             return 'port range set error'
+        secg_list = getSecGroupList(siteId)
+        secg_id = secg_list['id']
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                             "ingress" if isIngress else "egress")
