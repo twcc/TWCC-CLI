@@ -2,6 +2,7 @@ from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, Vcs
 from twccli.twcc.util import isNone
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 import click
+import re
 
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
@@ -71,7 +72,9 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
-    if type(portrange) == str:
+    if not isNone(portrange):
+        if re.findall('[^0-9-]',portrange):
+            raise ValueError('port range should be digital-digital')
         avbl_proto = ['tcp', 'udp', 'icmp']
 
         secg_list = getSecGroupList(siteId)
@@ -113,8 +116,8 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
             raise ValueError(
                 "Protocol is not valid. available: {}.".format(avbl_proto))
         secg = VcsSecurityGroup()
-        if type(portrange) == str:
-            port_min, port_max = [int(port) for port in portrange.split('-')[0]]
+        if not isNone(portrange):
+            port_min, port_max = [int(port) for port in portrange.split('-')]
             if not port in range(port_min,port_max):
                 secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
                                   "ingress" if isIngress else "egress")
