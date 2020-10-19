@@ -80,7 +80,7 @@ class TestVcsPort:
         self._loadSession()
         self._create_key()
         self._create_vcs()
-        self._add_secg()
+        self._add_secg_range()
         self._list_secg()
         self._del_secg()
         self._del_vcs()
