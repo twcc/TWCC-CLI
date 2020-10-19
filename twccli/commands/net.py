@@ -50,7 +50,7 @@ def ccs(siteId, port, isAttach):
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
 @click.option('-prange', '--portrange', 'portrange', type=str,
-              help='Port number from min-port to max-port, use '-' as delimiter, ie: 3000-3010.')
+              help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.')
 @click.option('-proto', '--protocol', 'protocol', type=str,
               help='Manage VCS security groups protocol.',
               default='tcp', show_default=True)
