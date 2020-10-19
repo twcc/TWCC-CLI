@@ -19,6 +19,13 @@ class TestVcsPort:
         self.pcode = os.environ['TWCC_PROJ_CODE']
     def _loadSession(self):
         self.runner = CliRunner()
+    def __run(self, cmd_list):
+        result = self.runner.invoke(cli, cmd_list)
+
+        print(result.output)
+        print(result)
+        assert result.exit_code == 0
+        return result.output
     def _create_key(self):
         cmd_list = "mk key --name {}".format(self.key_name)
         print(cmd_list)
