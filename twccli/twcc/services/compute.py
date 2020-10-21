@@ -431,7 +431,7 @@ class VcsSecurityGroup(CpuService):
                             'server': server_id}
             return self._do_api()
 
-    def addSecurityGroup(self, secg_id, port_num,
+    def addSecurityGroup(self, secg_id, port_min, port_max,
                          cidr, protocol, direction):
 
         self.http_verb = "patch"
@@ -440,8 +440,8 @@ class VcsSecurityGroup(CpuService):
                          "direction": direction,
                          "protocol": protocol,
                          "remote_ip_prefix": cidr,
-                         "port_range_max": port_num,
-                         "port_range_min": port_num}
+                         "port_range_max": port_max,
+                         "port_range_min": port_min}
         self._do_api()
 
     def deleteRule(self, rule_id):
