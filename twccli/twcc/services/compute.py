@@ -259,7 +259,10 @@ class GpuSite(GpuService):
         re_comp = re.findall(r'https:\/\/(?P<ccs_host_name>.+):8888\/\?token=', "\n".join(log_txt), re.M)
         if len(re_comp) > 0:
             import hashlib
-            return hashlib.md5(re_comp[0].decode()).hexdigest()
+            if type(re_comp[0]) == str:
+                return hashlib.md5(re_comp[0].encode('utf8')).hexdigest()
+            else:
+                return hashlib.md5(re_comp[0].decode()).hexdigest()
 
 
 
