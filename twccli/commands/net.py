@@ -36,7 +36,7 @@ def ccs(siteId, port, isAttach):
 
 
 @click.command(help='Manage VCS (Virtual Compute Service) security groups.')
-@click.option('-p', '--port', 'port', type=int, required=True,
+@click.option('-p', '--port', 'port', type=int,
               help='Port number.')
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
@@ -50,7 +50,7 @@ def ccs(siteId, port, isAttach):
 @click.option('-in/-out', '--ingress/--egress', 'isIngress',
               is_flag=True, default=True,  show_default=True,
               help='Applying security group directions.')
-@click.option('-prange', '--portrange', 'portrange', type=str,
+@click.option('-prange', '--port-range', 'portrange', type=str,
               help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.')
 @click.option('-proto', '--protocol', 'protocol', type=str,
               help='Manage VCS security groups protocol.',
@@ -72,6 +72,12 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
+
+    if isNone(portrange) and isNone(port):
+        raise ValueError("Error! Argument --protocol or --port-range required!")
+    if not isNone(portrange) and not isNone(port):
+        raise ValueError("Error! Can not use --protocol and --port-range together!")
+
     if not isNone(portrange):
         if re.findall('[^0-9-]',portrange):
             raise ValueError('port range should be digital-digital')
