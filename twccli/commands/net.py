@@ -36,7 +36,7 @@ def ccs(siteId, port, isAttach):
 
 
 @click.command(help='Manage VCS (Virtual Compute Service) security groups.')
-@click.option('-p', '--port', 'port', type=int,
+@click.option('-p', '--port', 'port', type=int, required=True,
               help='Port number.')
 @click.option('-s', '--site-id', 'siteId', type=int,
               required=True,
@@ -95,7 +95,7 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
                 raise ValueError('port_range_min must be <= port_range_max')
         else:
             raise ValueError('port range set error')
-        
+
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                             "ingress" if isIngress else "egress")
