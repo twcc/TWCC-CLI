@@ -1,18 +1,28 @@
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
 from twccli.twcc.util import isNone
 from twccli.twcc.services.compute import getServerId, getSecGroupList
+from twccli.twcc.services.compute_util import list_vcs
 import click
 import re
 
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
-@click.option('-p', '--port', 'port', type=int,
+@click.option('-p',
+              '--port',
+              'port',
+              type=int,
               required=True,
               help='Port number.')
-@click.option('-s', '--site-id', 'siteId', type=int,
+@click.option('-s',
+              '--site-id',
+              'siteId',
+              type=int,
               required=True,
               help='ID of the container.')
-@click.option('-open/-close', '--open-port/--close-port', 'isAttach', is_flag=True,
+@click.option('-open/-close',
+              '--open-port/--close-port',
+              'isAttach',
+              is_flag=True,
               show_default=True,
               help='opens/close container ports.')
 def ccs(siteId, port, isAttach):
@@ -36,25 +46,49 @@ def ccs(siteId, port, isAttach):
 
 
 @click.command(help='Manage VCS (Virtual Compute Service) security groups.')
-@click.option('-p', '--port', 'port', type=int,
-              help='Port number.')
-@click.option('-s', '--site-id', 'siteId', type=int,
+@click.option('-p', '--port', 'port', type=int, help='Port number.')
+@click.option('-s',
+              '--site-id',
+              'siteId',
+              type=int,
               required=True,
               help='ID of the container.')
-@click.option('-cidr', '--cidr-network', 'cidr', type=str,
+@click.option('-cidr',
+              '--cidr-network',
+              'cidr',
+              type=str,
               help='Network range for security group.',
-              default='192.168.0.1/24', show_default=True)
-@click.option('-fip / -nofip', '--floating-ip / --no-floating-ip', 'fip',
-              is_flag=True, default=True,  show_default=False,
+              default='192.168.0.1/24',
+              show_default=True)
+@click.option('-fip / -nofip',
+              '--floating-ip / --no-floating-ip',
+              'fip',
+              is_flag=True,
+              default=True,
+              show_default=False,
               help='Configure your instance with or without a floating IP.')
-@click.option('-in/-out', '--ingress/--egress', 'isIngress',
-              is_flag=True, default=True,  show_default=True,
+@click.option('-in/-out',
+              '--ingress/--egress',
+              'isIngress',
+              is_flag=True,
+              default=True,
+              show_default=True,
               help='Applying security group directions.')
-@click.option('-prange', '--port-range', 'portrange', type=str,
-              help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.')
-@click.option('-proto', '--protocol', 'protocol', type=str,
+@click.option(
+    '-prange',
+    '--port-range',
+    'portrange',
+    type=str,
+    help=
+    'Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.'
+)
+@click.option('-proto',
+              '--protocol',
+              'protocol',
+              type=str,
               help='Manage VCS security groups protocol.',
-              default='tcp', show_default=True)
+              default='tcp',
+              show_default=True)
 def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
@@ -72,26 +106,42 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
+    avbl_proto = ['tcp', 'udp', 'icmp']
+    if not protocol in avbl_proto:
+        raise ValueError(
+            "Protocol is not valid. available: {}.".format(avbl_proto))
 
+    # case 1: floating ip operations
+    sites = list_vcs([siteId], False, is_print=False)
+    if not len(sites) == 1:
+        raise ValueError("Error: VCS id: {} is not found.".format(siteId))
+
+    site_info = sites[0]
+
+    if len(site_info['public_ip']) > 0 and fip == False:
+        VcsServerNet().deAssociateIP(siteId)
+
+    if len(site_info['public_ip']) == 0 and fip == True:
+        VcsServerNet().associateIP(siteId)
+
+    # case 2: port setting
     if isNone(portrange) and isNone(port):
-        raise ValueError("Error! Argument --protocol or --port-range required!")
+        raise ValueError(
+            "Error! Argument --protocol or --port-range required!")
+
     if not isNone(portrange) and not isNone(port):
-        raise ValueError("Error! Can not use --protocol and --port-range together!")
+        raise ValueError(
+            "Error! Can not use --protocol and --port-range together!")
+
+    from netaddr import IPNetwork
+    IPNetwork(cidr)
 
     if not isNone(portrange):
-        if re.findall('[^0-9-]',portrange):
+        if re.findall('[^0-9-]', portrange):
             raise ValueError('port range should be digital-digital')
-        avbl_proto = ['tcp', 'udp', 'icmp']
 
         secg_list = getSecGroupList(siteId)
         secg_id = secg_list['id']
-        from netaddr import IPNetwork
-        IPNetwork(cidr)
-
-        if not protocol in avbl_proto:
-            raise ValueError(
-                "Protocol is not valid. available: {}.".format(avbl_proto))
-
         port_list = portrange.split('-')
         if len(port_list) == 2:
             port_min, port_max = [int(port) for port in port_list]
@@ -104,32 +154,14 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
 
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
-                            "ingress" if isIngress else "egress")
-    if isNone(port):
-        if fip:  # @todo need to add check
-            VcsServerNet().associateIP(siteId)
-        else:
-            VcsServerNet().deAssociateIP(siteId)
-    else:
-        avbl_proto = ['tcp', 'udp', 'icmp']
-
+                              "ingress" if isIngress else "egress")
+    elif not isNone(port):
         secg_list = getSecGroupList(siteId)
         secg_id = secg_list['id']
-        from netaddr import IPNetwork
-        IPNetwork(cidr)
 
-        if not protocol in avbl_proto:
-            raise ValueError(
-                "Protocol is not valid. available: {}.".format(avbl_proto))
         secg = VcsSecurityGroup()
-        if not isNone(portrange):
-            port_min, port_max = [int(port) for port in portrange.split('-')]
-            if not port in range(port_min,port_max):
-                secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
-                                  "ingress" if isIngress else "egress")
-        else:
-            secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
-                                "ingress" if isIngress else "egress")
+        secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
+                              "ingress" if isIngress else "egress")
 
 
 @click.group(help="NETwork related operations.")
