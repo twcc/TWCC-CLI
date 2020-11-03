@@ -383,7 +383,7 @@ class TestCosLifecyc:
         self._del_bucket_no_r(bk_isu147)
 
     def test_issue_178(self):
-        bk_isu178 = 'bk1784996a8a2'#"bk178{}".format(str(uuid.uuid1()).split("-")[0])
+        bk_isu178 = "bk_isu178_{}".format(str(uuid.uuid1()).split("-")[0])
         isu178_upload_folder = 'isu178_upload_folder'
         isu178_download_folder = 'isu178_download_folder'
         self._loadSession()
