@@ -393,6 +393,8 @@ class TestCosLifecyc:
         [self._create_upload_file('{}/{}'.format(isu178_upload_folder,'isu178_'+str(i))) for i in range(1001)]
         self._op_folder(bk_isu178,isu178_upload_folder,'to-cos')
         self._op_folder(bk_isu178,isu178_download_folder,'from-cos')
+        self._remove_dir(isu178_download_folder, isu178_upload_folder)
+        self._del_bucket(bk_isu178)
         if self._check_isu178_upload_files(os.path.join(isu178_download_folder,isu178_upload_folder),'1001'):
             assert True 
         else:
