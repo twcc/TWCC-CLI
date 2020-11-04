@@ -41,6 +41,7 @@ class TWCCLI(click.MultiCommand):
         import six
         if six.PY2 == True:
             # FileNotFoundError is only available since Python 3.3
+            # https://stackoverflow.com/a/21368457
             FileNotFoundError = IOError
         from io import open
 
