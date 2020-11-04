@@ -69,6 +69,7 @@ def cos(sync, tdir, okey, tfile, bkt):
             objs =  list_objects(bucket_name=bkt)['Contents']
             for obj in objs:
                 okey = obj['Key']
+                if okey[-1] == '/': continue
                 absfn = join(abspath(tdir), okey)
                 download(bkt, dest_fn=absfn, cos_key=okey)
 
