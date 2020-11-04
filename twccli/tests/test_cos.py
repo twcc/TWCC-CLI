@@ -104,6 +104,10 @@ class TestCosLifecyc:
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(dir, bk)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
+    def _op_folder(self, bk, dir, op):
+        cmd_list = "cp cos -bkt {} -dir {} -sync {}".format(bk, dir, op)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
 
     def _download_files(self, bk, dir):
         cmd_list = "cp cos -download -src {} -dest {} -r".format(bk, dir)
@@ -114,7 +118,9 @@ class TestCosLifecyc:
         dir = self.isu85_Dir.replace("./", "")
         cmd = ["rm", "-rf", self.isu85_Dir]
         subprocess.run(cmd)
-
+    def _check_isu178_upload_files(self, download_path, check_res):
+        response = subprocess.check_output('ls {} | wc -l'.format(download_path), shell=True).decode('utf8').strip()
+        return True if response == check_res else False
     def _check_isu85_upload_files(self):
         '''
         localList = []
@@ -375,3 +381,24 @@ class TestCosLifecyc:
         self._loadSession()
         self._create_bucket(bk_isu147)
         self._del_bucket_no_r(bk_isu147)
+
+    def test_issue_178(self):
+        bk_isu178 = "bk178_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu178_upload_folder = 'isu178_upload_folder'
+        isu178_download_folder = 'isu178_download_folder'
+        self._loadSession()
+        self._create_bucket(bk_isu178)
+        self._create_download_dir(isu178_upload_folder)
+        self._create_download_dir(isu178_download_folder)
+        [self._create_upload_file('{}/{}'.format(isu178_upload_folder,'isu178_'+str(i))) for i in range(1001)]
+        self._op_folder(bk_isu178,isu178_upload_folder,'to-cos')
+        self._op_folder(bk_isu178,isu178_download_folder,'from-cos')
+        
+        if self._check_isu178_upload_files('./'+os.path.join(isu178_download_folder,isu178_upload_folder),'1001'):
+            assert True 
+        else:
+            assert False
+        self._remove_dir(isu178_download_folder, isu178_upload_folder)
+        self._del_bucket(bk_isu178)
+
+        

@@ -20,7 +20,20 @@ def download(bkt_name, dest_fn=None, cos_key=None):
     twcc_s3.s3_cli.download_file(bkt_name, cos_key, dest_fn)
 
 def list_objects(bucket_name):
-    return S3().s3_cli.list_objects_v2(Bucket=bucket_name, MaxKeys=2^31-1)
+    NextMarker = ''
+    first_page = {}
+    while True:
+        res = S3().s3_cli.list_objects(Bucket=bucket_name,Marker=NextMarker)
+        if NextMarker == '':
+            first_page.update(res)
+        else:
+            first_page['Contents'].extend(res['Contents'])
+        if 'NextMarker' in res:
+            NextMarker = res['NextMarker']
+        else:
+            break
+    return first_page
+    # return S3().s3_cli.list_objects_v2(Bucket=bucket_name, MaxKeys=2^31-1)
 
 
 
