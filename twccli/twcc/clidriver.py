@@ -295,7 +295,7 @@ class ServiceOperation:
         for ptn in url_parts.keys():
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
         # need to migrate /v3/
-        if url_parts[
+        if 'PLATFORM' in url_parts and url_parts[
                 'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
                     'FUNCTION'] == 'sites':
             t_url = t_url.replace("/v2/", "/v3/")
