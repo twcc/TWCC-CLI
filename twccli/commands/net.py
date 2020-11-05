@@ -125,10 +125,6 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         VcsServerNet().associateIP(siteId)
 
     # case 2: port setting
-    if not isNone(portrange) and not isNone(port):
-        raise ValueError(
-            "Error! Can not use --protocol and --port-range together!")
-
     from netaddr import IPNetwork
     IPNetwork(cidr)
 
@@ -151,7 +147,7 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                               "ingress" if isIngress else "egress")
-    elif not isNone(port):
+    if not isNone(port):
         secg_list = getSecGroupList(siteId)
         secg_id = secg_list['id']
 
