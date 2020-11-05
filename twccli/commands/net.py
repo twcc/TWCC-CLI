@@ -125,10 +125,6 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         VcsServerNet().associateIP(siteId)
 
     # case 2: port setting
-    if isNone(portrange) and isNone(port):
-        raise ValueError(
-            "Error! Argument --protocol or --port-range required!")
-
     if not isNone(portrange) and not isNone(port):
         raise ValueError(
             "Error! Can not use --protocol and --port-range together!")
