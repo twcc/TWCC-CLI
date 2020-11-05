@@ -115,14 +115,16 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
     sites = list_vcs([siteId], False, is_print=False)
     if not len(sites) == 1:
         raise ValueError("Error: VCS id: {} is not found.".format(siteId))
-
     site_info = sites[0]
 
+    errorFlg = True
     if len(site_info['public_ip']) > 0 and fip == False:
         VcsServerNet().deAssociateIP(siteId)
+        errorFlg = False
 
     if len(site_info['public_ip']) == 0 and fip == True:
         VcsServerNet().associateIP(siteId)
+        errorFlg = False
 
     # case 2: port setting
     from netaddr import IPNetwork
@@ -147,6 +149,7 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                               "ingress" if isIngress else "egress")
+        errorFlg = False
     if not isNone(port):
         secg_list = getSecGroupList(siteId)
         secg_id = secg_list['id']
@@ -154,6 +157,10 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         secg = VcsSecurityGroup()
         secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
                               "ingress" if isIngress else "egress")
+        errorFlg = False
+        
+    if errorFlg:
+        raise ValueError("Error! Nothing to do! Check `--help` for detail.")
 
 
 @click.group(help="NETwork related operations.")
