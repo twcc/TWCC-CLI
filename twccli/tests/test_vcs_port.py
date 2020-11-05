@@ -68,7 +68,7 @@ class TestVcsPort:
         cmd_list = "net vcs -secg -prange {} -p {} -s {}".format(self.ext_port_range,
                 self.ext_port, self.vcs_id)
         print(cmd_list)
-        out = self.__runError(cmd_list.split(" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _add_secg_without_range_and_port(self):
         cmd_list = "net vcs -secg -s {}".format(self.vcs_id)
