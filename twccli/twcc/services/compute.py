@@ -278,6 +278,7 @@ class VcsSite(CpuService):
     def list(self, isAll=False):
         if isAll:
             self.ext_get = {'project': self._project_id,
+                            "sol_categ": "os",
                             "all_users": 1}
         else:
             self.ext_get = {'project': self._project_id}
