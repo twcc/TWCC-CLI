@@ -129,7 +129,7 @@ class GpuSite(GpuService):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)
             if latest_first:
-                return sorted(res['image'], reverse=True)
+                return sorted(list(set(res['image'])), reverse=True)
             else:
                 return res['image']
         else:
