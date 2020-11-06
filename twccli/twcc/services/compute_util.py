@@ -66,7 +66,7 @@ def list_vcs_img(sol_name, is_table):
     ans = VcsSite.getAvblImg(sol_name)
     if is_table:
         table_layout("Abvl. VCS images", ans, [
-                     "product-type", "image"], isPrint=True, isWrap=False)
+                     "image-type", "image"], isPrint=True, isWrap=False)
     else:
         jpp(ans)
 
