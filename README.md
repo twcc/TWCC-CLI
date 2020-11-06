@@ -25,6 +25,21 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.13 Release Note
+![img](https://media.giphy.com/media/q6RoNkLlFNjaw/giphy.gif)
+
+**feature**
+- We release a sample AI/ML pipeline task, here. Join us for understand how to use by attending TWCC classes, https://www.nchc.org.tw/Active/ActiveView/414?mid=47&page=1
+- Users can create TWCC-VCS with default ubuntu 20.04
+- Users can set a specified range of port for secuity group at one time.
+- Multi users profile compatible.
+
+
+**fix bug**
+- fix typo error 
+- fix download error for none-file folder bucket
+- `ls ccs -json` shows empty table when ccs empty
+
 ### v0.5.12 Release Note
 ![img](https://media.giphy.com/media/26tk134Ku0nTdKmuA/giphy.gif)
 

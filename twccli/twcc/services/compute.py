@@ -129,7 +129,7 @@ class GpuSite(GpuService):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)
             if latest_first:
-                return sorted(res['image'], reverse=True)
+                return sorted(list(set(res['image'])), reverse=True)
             else:
                 return res['image']
         else:
@@ -259,7 +259,10 @@ class GpuSite(GpuService):
         re_comp = re.findall(r'https:\/\/(?P<ccs_host_name>.+):8888\/\?token=', "\n".join(log_txt), re.M)
         if len(re_comp) > 0:
             import hashlib
-            return hashlib.md5(re_comp[0].decode()).hexdigest()
+            if type(re_comp[0]) == str:
+                return hashlib.md5(re_comp[0].encode('utf8')).hexdigest()
+            else:
+                return hashlib.md5(re_comp[0].decode()).hexdigest()
 
 
 
@@ -275,6 +278,7 @@ class VcsSite(CpuService):
     def list(self, isAll=False):
         if isAll:
             self.ext_get = {'project': self._project_id,
+                            "sol_categ": "os",
                             "all_users": 1}
         else:
             self.ext_get = {'project': self._project_id}
@@ -309,7 +313,7 @@ class VcsSite(CpuService):
 
     @staticmethod
     def getAvblImg(sol_name=None):
-        avbl_imgs = [{"image-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04']},
+        avbl_imgs = [{"image-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04', u'Ubuntu 20.04']},
                      {"image-type": u"centos", "image": [
                          u'CentOS-7-x86_64-1901']}
                      ]
@@ -428,7 +432,7 @@ class VcsSecurityGroup(CpuService):
                             'server': server_id}
             return self._do_api()
 
-    def addSecurityGroup(self, secg_id, port_num,
+    def addSecurityGroup(self, secg_id, port_min, port_max,
                          cidr, protocol, direction):
 
         self.http_verb = "patch"
@@ -437,8 +441,8 @@ class VcsSecurityGroup(CpuService):
                          "direction": direction,
                          "protocol": protocol,
                          "remote_ip_prefix": cidr,
-                         "port_range_max": port_num,
-                         "port_range_min": port_num}
+                         "port_range_max": port_max,
+                         "port_range_min": port_min}
         self._do_api()
 
     def deleteRule(self, rule_id):

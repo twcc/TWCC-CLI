@@ -66,7 +66,7 @@ def list_vcs_img(sol_name, is_table):
     ans = VcsSite.getAvblImg(sol_name)
     if is_table:
         table_layout("Abvl. VCS images", ans, [
-                     "product-type", "image"], isPrint=True, isWrap=False)
+                     "image-type", "image"], isPrint=True, isWrap=False)
     else:
         jpp(ans)
 
@@ -120,8 +120,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
 
     # x-extra-property-image
     if isNone(img_name):
-        img_name = extra_props['x-extra-property-image'][0]
-    required['x-extra-property-image'] = img_name
+        img_name = "Ubuntu 20.04"
+    required['x-extra-property-image'] = img_name.capitalize()
 
     # x-extra-property-private-network
     if isNone(network):
