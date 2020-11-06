@@ -72,7 +72,7 @@ long_desc = open("README.md", 'r').read()
 setup(
     name='TWCC-CLI',
     author="TWCC SREr",
-    author_email="isupport@narlabs.org.tw",
+    author_email="isupport@twcc.ai",
     description="TWCC-CLI is a toolkit for operating TWCC resources.",
     long_description=long_desc,
     long_description_content_type="text/markdown",

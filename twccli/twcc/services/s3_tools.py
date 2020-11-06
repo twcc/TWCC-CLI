@@ -141,29 +141,42 @@ class S3():
             :param bucket_name : Unique string name
             :return            : List all object inside of S3 bucket.
         """
-        res = self.s3_cli.list_objects(Bucket=bucket_name)
-
+        res_list = []
+        NextMarker = ''
+        while True:
+            res = self.s3_cli.list_objects(Bucket=bucket_name,Marker=NextMarker)
+            res_list.append(res)
+            if 'NextMarker' in res:
+                NextMarker = res['NextMarker']
+            else:
+                break
+        
+        # res = self.s3_cli.list_objects(Bucket=bucket_name)
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
         to_zone = tz.tzlocal()
-        if 'Contents' in res.keys():
-            for ele in res['Contents']:
-                if isNone(ele):
-                    return []
-                res = {}
-                for key in ele:
-                    if not key in not_show:
-                        if key == "Size":
-                            res[key] = sizeof_fmt(ele[key])
-                        elif key == "LastModified":
-                            res[key] = ele[key].astimezone(
-                                to_zone).strftime("%m/%d/%Y %H:%M:%S")
-                        else:
-                            res[key] = ele[key]
-                tmp.append(res)
-
+        for res in res_list:
+            if not 'Contents' in res:
+                continue
+            else:
+                for ele in res['Contents']:
+                    if isNone(ele):
+                        continue#return []
+                    data = {}
+                    for key in ele:
+                        if not key in not_show:
+                            if key == "Size":
+                                data[key] = sizeof_fmt(ele[key])
+                            elif key == "LastModified":
+                                data[key] = ele[key].astimezone(
+                                    to_zone).strftime("%m/%d/%Y %H:%M:%S")
+                            else:
+                                data[key] = ele[key]
+                    tmp.append(data)
+        if tmp:
             return tmp
-        return None
+        else:
+            return None
 
     def upload_file(self, bucket_name=None, key=None):
         try:
