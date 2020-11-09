@@ -59,8 +59,8 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
              'Thanks for using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
              '-- You Succeed, We Succeed!! --')
 
-
-@click.command(cls=TWCCLI)
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS,cls=TWCCLI)
 @pass_environment
 def cli(ctx, ):
     """

@@ -100,8 +100,8 @@ def version(ctx):
     from twccli.version import __version__
     ctx.log("This version is {}".format(__version__))
 
-
-@click.group(help="Configure the TWCC CLI.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="Configure the TWCC CLI.")
 def cli():
     pass
 

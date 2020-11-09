@@ -148,7 +148,8 @@ def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
                     secg.deleteRule(rule['id'])
 
 # Create groups for command
-@click.group(help="Delete your TWCC resources.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="Delete your TWCC resources.")
 def cli():
     pass
 
