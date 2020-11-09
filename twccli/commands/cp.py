@@ -40,7 +40,8 @@ def list_objects(bucket_name):
 # end original code ===============================================
 
 # Create groups for command
-@click.group(help="Upload / Download files")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="Upload / Download files")
 def cli():
     pass
 

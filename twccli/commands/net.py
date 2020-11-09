@@ -163,7 +163,8 @@ def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
         raise ValueError("Error! Nothing to do! Check `--help` for detail.")
 
 
-@click.group(help="NETwork related operations.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="NETwork related operations.")
 def cli():
     pass
 

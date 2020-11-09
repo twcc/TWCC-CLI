@@ -255,7 +255,8 @@ def list_secg(ids_or_names, is_table=True):
 
 
 # Create groups for command
-@click.group(help="LiSt your TWCC resources.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="LiSt your TWCC resources.")
 def cli():
     pass
 
