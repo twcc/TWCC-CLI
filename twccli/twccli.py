@@ -2,9 +2,15 @@
 import click
 import os
 import sys
+from loguru import logger
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
+logger.remove()
+logger.add(sys.stderr, level="DEBUG")
+logger.add("twcc.log", format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
+           rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
+
 
 class Environment(object):
     def __init__(self):
@@ -21,6 +27,12 @@ class Environment(object):
         if self.verbose:
             self.log(msg, *args)
 
+    def vlogger_info(self, msg):
+        if self.verbose:
+            return logger.info(msg)
+
+    def get_verbose(self):
+        return self.verbose
 
 pass_environment = click.make_pass_decorator(Environment, ensure=True)
 
@@ -60,9 +72,12 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
              '-- You Succeed, We Succeed!! --')
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command(context_settings=CONTEXT_SETTINGS,cls=TWCCLI)
+
+
+@click.command(context_settings=CONTEXT_SETTINGS, cls=TWCCLI)
+@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @pass_environment
-def cli(ctx, ):
+def cli(env, verbose):
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
@@ -72,7 +87,7 @@ def cli(ctx, ):
 
         -- You Succeed, We Succeed!! --
     """
-
+    env.verbose = verbose
     pass
 
 

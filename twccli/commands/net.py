@@ -2,9 +2,10 @@ from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, Vcs
 from twccli.twcc.util import isNone
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
+from twccli.twccli import pass_environment
 import click
 import re
-
+from loguru import logger
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
 @click.option('-p',
@@ -25,7 +26,8 @@ import re
               is_flag=True,
               show_default=True,
               help='opens/close container ports.')
-def ccs(siteId, port, isAttach):
+@pass_environment
+def ccs(env, siteId, port, isAttach):
     """Command line for network function of ccs
     Functions:
     expose/unbind port
@@ -89,7 +91,8 @@ def ccs(siteId, port, isAttach):
               help='Manage VCS security groups protocol.',
               default='tcp',
               show_default=True)
-def vcs(siteId, port, cidr, protocol, isIngress, fip, portrange):
+@pass_environment
+def vcs(env, siteId, port, cidr, protocol, isIngress, fip, portrange):
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
     :type portrange: string

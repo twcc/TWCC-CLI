@@ -2,9 +2,11 @@
 from __future__ import print_function
 import os
 import click
+from loguru import logger
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain
+from twccli.twccli import pass_environment
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import isNone, mkdir_p
 
@@ -57,7 +59,8 @@ def cli():
               help='Files for uploading from local site.')
 @click.option('-bkt', '--bucket-name', 'bkt',
               help='Upload files or folders to the bucket.')
-def cos(sync, tdir, okey, tfile, bkt):
+@pass_environment
+def cos(env, sync, tdir, okey, tfile, bkt):
     # cp cos -bkt b_name -dir local_dir key key fn filename -sync to-cos/from-cos
 
     if not sync in set(['from-cos', 'to-cos']):

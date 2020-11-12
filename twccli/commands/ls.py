@@ -4,6 +4,7 @@ import click
 import json
 import re
 import datetime
+from loguru import logger
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
@@ -15,7 +16,7 @@ from twccli.twcc.services.base import acls, users, image_commit
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
-
+from twccli.twccli import pass_environment
 
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
@@ -269,7 +270,7 @@ def cli():
               default=None,
               type=str,
               help="Name of the instance.")
-@click.option('-s', '--site-id', 'name', type=str, help="ID of the instance.")
+@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
 @click.option('-all',
               '--show-all',
               'is_all',
@@ -321,8 +322,10 @@ def cli():
               show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
+@logger.catch
+def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
     """Command line for List VCS
     Function list :
     1. list port
@@ -345,9 +348,9 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
     :type is_all: bool
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
+    click.echo(site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, is_all=is_all)
-
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
@@ -405,7 +408,8 @@ def vcs(ctx, res_property, site_ids_or_names, name, is_table, is_all):
               show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-def cos(name, is_table, ids_or_names):
+@pass_environment
+def cos(env, name, is_table, ids_or_names):
     """Command line for List COS
        Functions:
        1. list bucket
@@ -479,8 +483,9 @@ def cos(name, is_table, ids_or_names):
               show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def ccs(ctx, res_property, name, site_ids_or_names, is_table, is_all,
+def ccs(ctx, env, res_property, name, site_ids_or_names, is_table, is_all,
         show_ports, get_info):
     """Command line for List Container
        Functions:
@@ -548,8 +553,9 @@ def ccs(ctx, res_property, name, site_ids_or_names, is_table, is_all,
               show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def key(ctx, name, is_table, ids_or_names):
+def key(ctx, env, name, is_table, ids_or_names):
     """Command line for List Key
     """
     ids_or_names = mk_names(name, ids_or_names)
