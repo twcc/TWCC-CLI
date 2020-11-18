@@ -3,7 +3,6 @@ from __future__ import print_function
 import click
 import time
 from datetime import datetime
-from loguru import logger
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
 from twccli.twcc.services.solutions import solutions

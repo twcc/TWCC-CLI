@@ -5,7 +5,6 @@ from twccli.twcc.services.compute_util import list_vcs
 from twccli.twccli import pass_environment
 import click
 import re
-from loguru import logger
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
 @click.option('-p',

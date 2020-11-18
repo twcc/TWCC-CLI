@@ -2,7 +2,6 @@
 from __future__ import print_function
 import click
 import re
-from loguru import logger
 from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isFile
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2

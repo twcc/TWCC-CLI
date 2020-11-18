@@ -2,7 +2,6 @@
 from __future__ import print_function
 import os
 import click
-from loguru import logger
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain

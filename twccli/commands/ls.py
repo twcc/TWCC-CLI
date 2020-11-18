@@ -4,7 +4,7 @@ import click
 import json
 import re
 import datetime
-from loguru import logger
+# from loguru import logger
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
@@ -17,6 +17,44 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twccli import pass_environment
+from twccli.twccli import exception, logger
+from click.core import Group
+
+
+def CatchAllExceptions(cls, handler):
+
+    class Cls(Group):
+
+        _original_args = None
+        def make_context(self, info_name, args, parent=None, **extra):
+            # grab the original command line arguments
+            self._original_args = ' '.join(args)
+            try:
+                return super(Cls, self).make_context(
+                    info_name, args, parent=parent, **extra)
+            except Exception as exc:
+                # call the handler
+                handler(self, info_name, exc)
+
+                # let the user see the original error
+                raise
+
+        def invoke(self, ctx):
+            try:
+                return super(Cls, self).invoke(ctx)
+            except Exception as exc:
+                # call the handler
+                handler(self, ctx.info_name, exc)
+                # let the user see the original error
+                raise
+    return Cls
+
+
+def handle_exception(cmd, info_name, exc):
+    # send error info to rollbar, etc, here
+    click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
+    click.echo(':: Raised error: {}'.format(exc))
+
 
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
@@ -145,7 +183,8 @@ def list_all_img(solution_name, is_table=True):
         })
 
     if is_table:
-        table_layout("img", output, ['sol_name', 'sol_id', 'images'], isPrint=True)
+        table_layout("img", output, ['sol_name',
+                                     'sol_id', 'images'], isPrint=True)
     else:
         jpp(output)
 
@@ -257,7 +296,10 @@ def list_secg(ids_or_names, is_table=True):
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS,help="LiSt your TWCC resources.")
+
+
+# @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
+@click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
     pass
 
@@ -324,7 +366,8 @@ def cli():
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-@logger.catch
+# @logger.catch
+# @exception(logger)
 def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
     """Command line for List VCS
     Function list :
@@ -347,8 +390,11 @@ def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
     """
+    logger.debug('aa')
+    logger.info('aa')
+    logger.warning('aa')
+    logger.error('aa')
     site_ids_or_names = mk_names(name, site_ids_or_names)
-    click.echo(site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, is_all=is_all)
     if res_property == 'Snapshot':
@@ -424,8 +470,7 @@ def cos(env, name, is_table, ids_or_names):
 
 # end object ==================================================
 @click.command(
-    help=
-    "'List' the details of your CCS (Container Computer Service) containers.")
+    help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p',
               '--port',
               'show_ports',
