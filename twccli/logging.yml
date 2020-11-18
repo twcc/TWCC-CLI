@@ -1,0 +1,27 @@
+version: 1
+formatters:
+  brief:
+    format: '%(message)s'
+  default:
+    format: '%(asctime)s | 【%(levelname)-7s】 |  %(name)s - %(filename)s:%(lineno)d - %(message)s'
+            #'%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%m-%d %H:%M:%S'
+handlers:
+  console: 
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
+    stream: ext://sys.stdout
+  file:
+    class : logging.handlers.TimedRotatingFileHandler
+    formatter: default
+    filename: twcc.log
+    when: midnight
+    backupCount: 3
+loggers:
+  root:
+    level: DEBUG
+    handlers: [console]
+  command:
+    level: DEBUG
+    handlers: [console,file]
