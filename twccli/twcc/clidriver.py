@@ -303,6 +303,6 @@ class ServiceOperation:
 def isV3(fun_str):
     if fun_str == "sites":
         return True
-    if set(fun_str.split("/")).intersection(set(['images', 'save'])):
+    if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
         return True
     return False
