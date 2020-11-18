@@ -68,7 +68,9 @@ reqs = [
         'urllib3',
         'wcwidth']
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
-    reqs.append(loguru)
+    reqs.append('loguru')
+else:
+    reqs.append('coloredlogs')
 long_desc = open("README.md", 'r').read()
 setup(
     name='TWCC-CLI',

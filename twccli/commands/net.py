@@ -2,7 +2,7 @@ from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, Vcs
 from twccli.twcc.util import isNone
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
-from twccli.twccli import pass_environment
+from twccli.twccli import pass_environment, logger
 import click
 import re
 

@@ -9,7 +9,7 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
-from twccli.twccli import pass_environment
+from twccli.twccli import pass_environment, logger
 from botocore.exceptions import ClientError
 
 

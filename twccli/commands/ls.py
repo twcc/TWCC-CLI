@@ -4,7 +4,6 @@ import click
 import json
 import re
 import datetime
-# from loguru import logger
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
@@ -16,8 +15,7 @@ from twccli.twcc.services.base import acls, users, image_commit
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
-from twccli.twccli import pass_environment
-from twccli.twccli import exception, logger
+from twccli.twccli import pass_environment, logger
 from click.core import Group
 
 
@@ -390,10 +388,7 @@ def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
     """
-    logger.debug('aa')
     logger.info('aa')
-    logger.warning('aa')
-    logger.error('aa')
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, is_all=is_all)

@@ -7,9 +7,6 @@ plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
-import logging,coloredlogs
-
-
 
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
@@ -20,6 +17,7 @@ if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
 else:
     import yaml
     import logging
+    import coloredlogs
     import logging.config
     with open('twccli/logging.yml', 'r') as f:
         config = yaml.load(f,Loader=yaml.FullLoader)

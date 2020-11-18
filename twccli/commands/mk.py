@@ -12,7 +12,7 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 from twccli.twcc.services.compute_util import doSiteReady, create_vcs
-from twccli.twccli import pass_environment
+from twccli.twccli import pass_environment, logger
 
 def create_commit(site_id, tag, isAll=False):
     ccs = Sites()

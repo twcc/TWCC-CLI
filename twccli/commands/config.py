@@ -6,6 +6,7 @@ from twccli.twcc.util import validate, isNone
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment
 from twccli.twcc.util import *
+from twccli.twccli import logger
 
 lang_encoding = """
 export LANG=C.UTF-8

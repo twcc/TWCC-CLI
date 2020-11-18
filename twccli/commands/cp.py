@@ -5,7 +5,7 @@ import click
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain
-from twccli.twccli import pass_environment
+from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import isNone, mkdir_p
 
