@@ -296,7 +296,13 @@ class ServiceOperation:
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
-                    'FUNCTION'] == 'sites':
+                'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
             t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
+
+def isV3(fun_str):
+    if fun_str == "sites":
+        return True
+    if set(fun_str.split("/")).intersection(set(['images', 'save'])):
+        return True
+    return False
