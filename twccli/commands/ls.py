@@ -388,7 +388,6 @@ def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
     :param is_all: List all the containers in the project. (Tenant Administrators only)
     :type is_all: bool
     """
-    logger.info('aa')
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, is_all=is_all)
