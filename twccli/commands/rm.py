@@ -8,8 +8,10 @@ from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
+from twccli.twcc.services.network import Networks
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
 from botocore.exceptions import ClientError
+
 
 
 def del_bucket(name, is_recursive, isForce=False):
@@ -85,7 +87,15 @@ def del_keypair(ids_or_names, isForce=False):
             else:
                 raise ValueError("Keypair: {}, not found.".format(key_name))
 
-
+def del_vnet(ids_or_names, isForce=False, isAll=False):
+    net = Networks()
+    ans = [net.queryById(x) for x in ids_or_names]
+    for the_net in ans:
+        txt = "You about to delete virtual network \n- id: {}\n- created by: {}\n- created time: {}".format(
+                    the_net['id'], the_net['user']['username'], timezone2local(the_net['create_time']))
+        if getConfirm("Virtal Network", ",".join(ids_or_names), isForce,ext_txt=txt):
+            net.delete(the_net['id'])
+    
 def del_snap(ids_or_names, isForce=False, isAll=False):
     """Delete security group by site id
 
@@ -191,6 +201,8 @@ def key(ctx, name, ids_or_names, force):
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the VCS.')
+@click.option('-vnet', '--virtual_network_id', 'res_property', flag_value='Virtual_Network',type=str,
+              help="ID of the virtual Network")
 @click.option('-snap-id', '--snapshot-id', 'name',
               help='ID of snapshot.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
@@ -225,7 +237,8 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
         del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
     if res_property == "Snapshot":
         del_snap(mk_names(name, ids_or_names), force, is_all)
-
+    if res_property == "Virtual_Network":
+        del_vnet(mk_names(name, ids_or_names), force, is_all)
     if isNone(res_property):
         ids_or_names = mk_names(site_id, ids_or_names)
         if len(ids_or_names) > 0:

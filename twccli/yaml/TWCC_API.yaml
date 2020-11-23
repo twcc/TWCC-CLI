@@ -104,6 +104,8 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'post'
+        - 'delete'
     -
       name: "projects"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"

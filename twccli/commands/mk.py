@@ -11,6 +11,7 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
+from twccli.twcc.services.network import Networks
 from twccli.twcc.services.compute_util import doSiteReady, create_vcs
 
 
@@ -98,23 +99,29 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
+@click.option('-gw', '--getway', 'getway',  type=str,
+              help="Virtual Network Getway")
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
-@click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
-              show_default=True,
-              help="The product types (hardware configuration).")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Name of the image.")
-@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
-              help="Name of the image type.")
 @click.option('-key', '--keypair', 'keypair',
               help="Name of the key pair for access your instance.")
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Name of the network.")
+@click.option('-cidr', '--cidr', 'cidr',  type=str,
+              help="Classless Inter-Domain Routing")
+@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
+              help="Name of the image type.")
+@click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
+              show_default=True,
+              help="The product types (hardware configuration).")
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
+@click.option('-vnet', '--virtual_network', 'virtual_network', is_flag=True, default=False,
+              help="Create a virtual Network `-n,-cidr,-gw` are required!")
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
@@ -134,6 +141,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
+        virtual_network,getway,cidr,
         flavor, img_name, wait, network, snapshot, sol, fip, is_table):
     """Command line for create VCS
 
@@ -177,7 +185,10 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
             if name == 'twccli':
                 name += datetime.now().strftime("%d%m%H%M")
             return img.createSnapshot(sid, name, desc_str)
-
+    elif virtual_network:
+        net = Networks()
+        # TODO varify getway and cidr @Leo
+        net.create(name,getway,cidr)
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor.split(".")[1])

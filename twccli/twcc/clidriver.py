@@ -183,7 +183,6 @@ class ServiceOperation:
                 t_url_tmp.append("{0}={1}".format(param_key,
                                                   url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
-
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
