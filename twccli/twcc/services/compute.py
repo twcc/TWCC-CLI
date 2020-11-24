@@ -407,6 +407,10 @@ class VcsSite(CpuService):
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
+    
+    def isStopped(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "NotReady"
 
 
 class VcsServerNet(CpuService):

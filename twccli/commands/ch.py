@@ -29,15 +29,18 @@ def cli():
               default=True,
               show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-wait', '--wait', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your instance to be provisioned.')
 @click.argument('site_ids_or_names', nargs=-1)
 @click.pass_context
-def vcs(ctx, vcs_status, site_ids_or_names, name, is_table):
+def vcs(ctx, vcs_status, site_ids_or_names, name, wait, is_table):
     """Command line for Change VCS
     Function list :
     1. Change VCS status
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
-    change_vcs(site_ids_or_names,str(vcs_status).lower(),is_table,is_table)
+    change_vcs(site_ids_or_names,str(vcs_status).lower(),is_table,wait)
     # if vcs_status == 'ready':
         
     # elif vcs_status == 'ready':

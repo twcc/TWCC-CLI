@@ -166,7 +166,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
-def change_vcs(ids_or_names,status,is_table,is_print=True):
+def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
     vcs = VcsSite()
     ans = []
     
@@ -186,9 +186,13 @@ def change_vcs(ids_or_names,status,is_table,is_print=True):
             elif status == 'ready':
                 vcs.start(site_id)
     else:
-        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
-        ans = vcs.list(is_all)
-
+        raise ValueError
+    if wait and status == 'stop':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteStopped(site_id)
+    if wait and status == 'ready':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteReady(site_id, site_type='vcs')
     if len(ans) > 0:
         ans = []
         for i,site_id in enumerate(ids_or_names):        
@@ -215,7 +219,14 @@ def del_vcs(ids_or_names, isForce=False):
             for ele in ids_or_names:
                 vsite.delete(ele)
                 print("VCS resources {} deleted.".format(ele))
-
+def doSiteStopped(site_id):
+    b = VcsSite()
+    wait_ready = False
+    while not wait_ready:
+        if b.isStopped(site_id):
+            wait_ready = True
+        time.sleep(5)
+    return site_id
 
 def doSiteReady(site_id, site_type='cntr'):
     """Check if site is created or not
