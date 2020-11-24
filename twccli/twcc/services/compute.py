@@ -284,6 +284,18 @@ class VcsSite(CpuService):
             self.ext_get = {'project': self._project_id}
 
         return self._do_api()
+        
+    def stop(self, site_id):
+        self.data_dic = {"status": "shelve"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
+    def start(self, site_id):
+        self.data_dic = {"status": "unshelve"} 
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
@@ -395,6 +407,10 @@ class VcsSite(CpuService):
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
+    
+    def isStopped(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "NotReady"
 
 
 class VcsServerNet(CpuService):

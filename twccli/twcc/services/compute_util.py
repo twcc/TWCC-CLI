@@ -1,8 +1,10 @@
+import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
+
 
 def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
@@ -21,7 +23,7 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
         ext_txt)
     # if py3
-    if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
+    if sys.version_info[0] > 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
         return yes_no_dialog(title=str_title, text=str_text).run()
@@ -164,7 +166,45 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
+def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
+    vcs = VcsSite()
+    ans = []
+    
+    if len(ids_or_names) > 0:
+        cols = ['id', 'name', 'public_ip', 'private_ip',
+                'private_network', 'create_time', 'status']
+        
+        for i,site_id in enumerate(ids_or_names):        
+            ans.extend([vcs.queryById(site_id)])
+            srvid = getServerId(site_id)
+            if status == 'stop':
+                # Free public IP
+                if not isNone(srvid):
+                    if re.findall('[0-9.]+',ans[i]['public_ip']):
+                        VcsServerNet().deAssociateIP(site_id)
+                vcs.stop(site_id)
+            elif status == 'ready':
+                vcs.start(site_id)
+    else:
+        raise ValueError
+    if wait and status == 'stop':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteStopped(site_id)
+    if wait and status == 'ready':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteReady(site_id, site_type='vcs')
+    if len(ans) > 0:
+        ans = []
+        for i,site_id in enumerate(ids_or_names):        
+            ans.extend([vcs.queryById(site_id)])
+        if not is_print:
+            return ans
 
+        if is_table:
+            table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
+                site_id), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 def del_vcs(ids_or_names, isForce=False):
     """delete a vcs
 
@@ -179,7 +219,14 @@ def del_vcs(ids_or_names, isForce=False):
             for ele in ids_or_names:
                 vsite.delete(ele)
                 print("VCS resources {} deleted.".format(ele))
-
+def doSiteStopped(site_id):
+    b = VcsSite()
+    wait_ready = False
+    while not wait_ready:
+        if b.isStopped(site_id):
+            wait_ready = True
+        time.sleep(5)
+    return site_id
 
 def doSiteReady(site_id, site_type='cntr'):
     """Check if site is created or not

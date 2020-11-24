@@ -168,14 +168,13 @@ class ServiceOperation:
             raise ValueError("Function for:'{0}' is not valid".format(func))
         if not http in set(self.valid_http_verb[func]):
             raise ValueError("http verb:'{0}' is not valid".format(http))
-
+        
         t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
                                  ctype=ctype)
-
         if not isNone(url_ext_get):
             t_url += "?"
             t_url_tmp = []
@@ -260,7 +259,6 @@ class ServiceOperation:
         url_ptn = self.url_ptn[func]
         url_str = self.url_format[func]
         url_parts = {}
-
         # check if this site_sn is valid
         if not type(site_sn) == type(None):
             self.api_pf = site_sn
@@ -296,6 +294,10 @@ class ServiceOperation:
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
                 'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
+            t_url = t_url.replace("/v2/", "/v3/")
+        if 'PLATFORM' in url_parts and url_parts[
+                'PLATFORM'] == "openstack-taichung-default-2" and 'sites' in url_parts[
+                    'FUNCTION'] and 'action' in url_parts['FUNCTION']:
             t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
 
