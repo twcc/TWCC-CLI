@@ -19,19 +19,22 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 def list_volume(site_ids_or_names, is_all, is_table):
     vol = Volumes()
     ans = []
-    cols = ['id', 'name', 'size', 'create_time', 'status'] #,'volume_type'
+    cols = ['id', 'name', 'size', 'create_time', 'status','mountpoint'] #,'volume_type'
     if len(site_ids_or_names) > 0:
         for vol_id in site_ids_or_names:
             ans.append(vol.list(vol_id))
         for the_vol in ans:
             if len(the_vol['name']) > 15:
-                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
+                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'           
+            if len(the_vol['mountpoint']) == 1:
+                the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         ans = vol.list(isAll=is_all)
         for the_vol in ans:
             if len(the_vol['name']) > 15:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
-        
+            if len(the_vol['mountpoint']) == 1:
+                the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
             table_layout("Volume Result",
@@ -601,7 +604,7 @@ def key(ctx, name, is_table, ids_or_names):
     else:
         jpp(ans)
 
-@click.option('-id', '--vol_id', 'name', type=int,
+@click.option('-id', '--vol-id', 'name', type=int,
               help="Index of the volume.")
 @click.option('-all',
               '--show-all',

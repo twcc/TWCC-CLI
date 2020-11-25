@@ -58,6 +58,7 @@ avalible_funcs:
       url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'put'
         - 'post'
         - 'delete'
     -
