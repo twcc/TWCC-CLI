@@ -4,7 +4,7 @@ import click
 import time
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
@@ -23,6 +23,23 @@ def create_commit(site_id, tag, isAll=False):
             '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
+
+def create_volume(vol_name, size, is_table):
+    """Create volume by name
+
+    :param vol_name: Enter volume name
+    :type vol_name: string
+    """
+    if not name_validator(vol_name):
+        raise ValueError(
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
+    vol = Volumes()
+    ans = vol.create(vol_name, size)
+    if is_table:
+        cols = ["id", "name", "size", "volume_type"]
+        table_layout("Volumes", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 def create_bucket(bucket_name):
     """Create bucket by name
@@ -297,11 +314,29 @@ def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
         else:
             jpp(ans)
 
+@click.option('-n', '--vol_name', 'name', default="twccli", type=str,
+              help="Name of the volume.")
+@click.option('-sz', '--size', 'size', default=100, type=int, show_default=True,
+              help="Size of the volume.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your BSS.")
+def bss(name,size,is_table):
+    """Command line for create bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param size: Enter size for your resources.
+    :type size: int
+    """
+    create_volume(name,size,is_table)
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
+cli.add_command(bss)
 
 
 def main():

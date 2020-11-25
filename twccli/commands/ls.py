@@ -6,7 +6,7 @@ import re
 import datetime
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -16,7 +16,31 @@ from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
-
+def list_volume(site_ids_or_names, is_all, is_table):
+    vol = Volumes()
+    ans = []
+    cols = ['id', 'name', 'size', 'create_time', 'status'] #,'volume_type'
+    if len(site_ids_or_names) > 0:
+        for vol_id in site_ids_or_names:
+            ans.append(vol.list(vol_id))
+        for the_vol in ans:
+            if len(the_vol['name']) > 15:
+                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
+    else:
+        ans = vol.list(isAll=is_all)
+        for the_vol in ans:
+            if len(the_vol['name']) > 15:
+                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
+        
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Volume Result",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
     if is_table:
@@ -577,12 +601,35 @@ def key(ctx, name, is_table, ids_or_names):
     else:
         jpp(ans)
 
+@click.option('-id', '--vol_id', 'name', type=int,
+              help="Index of the volume.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the volumes.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your BSS.")
+@click.pass_context
+def bss(ctx, name, ids_or_names, is_all, is_table):
+    """Command line for list bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(name, ids_or_names)
+    list_volume(ids_or_names, is_all, is_table)
+    
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-
+cli.add_command(bss)
 
 def main():
     cli()
