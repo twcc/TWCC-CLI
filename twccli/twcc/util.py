@@ -236,7 +236,7 @@ class SpinCursor(threading.Thread):
 def mk_names(name, ids_or_names):
     if not isNone(name):
         ids_or_names += (name,)
-    return ids_or_names
+    return tuple(set(ids_or_names))
 
 
 def sizeof_fmt(num, suffix='B'):
