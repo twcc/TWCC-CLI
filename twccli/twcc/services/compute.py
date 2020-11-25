@@ -545,6 +545,17 @@ class Volumes(CpuService):
         self.url_dic = {"volumes": sys_vol_id}
         return self._do_api()
     
+    def update(self, sys_vol_id, vol_status, srvid, size, wait):
+        self.http_verb = 'put'
+        self.url_dic = {"volumes": sys_vol_id, "action":""}
+        if vol_status in ['attach','detach']:
+            self.data_dic = {"status": vol_status, "server": srvid}
+        elif vol_status == "extend":
+            self.data_dic = {"status": vol_status, "server": 0, "size":size}
+        else:
+            raise ValueError
+        return self._do_api()
+
     def list(self, sys_vol_id=None, isAll=False):
         if isNone(sys_vol_id):
             self.http_verb = 'get'
