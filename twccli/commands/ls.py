@@ -597,7 +597,7 @@ def key(ctx, name, is_table, ids_or_names):
     else:
         jpp(ans)
 
-@click.option('-v', '--vol_id', 'name', type=int,
+@click.option('-id', '--vol_id', 'name', type=int,
               help="Index of the volume.")
 @click.option('-all',
               '--show-all',
