@@ -188,12 +188,7 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
     elif virtual_network:
         net = Networks()
         # TODO varify getway and cidr @Leo
-        ans = net.create(name,getway,cidr)
-        if is_table:
-            cols = ["id", "name", "status"]
-            table_layout("Virtal Network", ans, cols, isPrint=True)
-        else:
-            jpp(ans)
+        net.create(name,getway,cidr)
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor.split(".")[1])

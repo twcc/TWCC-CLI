@@ -14,7 +14,6 @@ import uuid
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        self.vnet_name = "twccli_vent{}".format(str(uuid.uuid1()).split("-")[0])
         (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 20.04", "local")
         self.ext_port = "81"
         self.apikey = os.environ['TWCC_API_KEY']
@@ -30,20 +29,11 @@ class TestVcsLifecyc:
         print(result)
         assert result.exit_code == 0
         return result.output
-    def _create_vnet(self):
-        cmd_list = "mk vcs -vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.254 -json".format(self.vnet_name)
-        print(cmd_list)
-        self.create_out = self.__run(cmd_list.split(u" "))
-        self.vnet_id = json.loads(self.create_out)['id']
+
     def _create_key(self):
         cmd_list = "mk key --name {}".format(self.key_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
-
-    def _list_vnet(self):
-        cmd_list = "ls vcs -net -s {} -json".format(self.vnet_id)
-        self.list_out = self.__run(cmd_list.split(" "))
-        print(self.list_out)
 
     def _list_key(self):
         cmd_list = "ls key -n {} -json".format(self.key_name)
@@ -113,13 +103,12 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
         print(out)
 
+
     def test_lifecycle(self):
         self._loadParams()
         self._loadSession()
-        self._create_vnet()
         self._create_key()
         self._list_key()
-        self._list_vnet()
         self._create_vcs()
         self._list_vcs()
         self._stop_vcs()
@@ -127,6 +116,5 @@ class TestVcsLifecyc:
         self._add_secg()
         self._list_secg()
         self._del_secg()
-        self._del_vnet()
         self._del_vcs()
         self._delete_key()
