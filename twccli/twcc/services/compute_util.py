@@ -1,7 +1,7 @@
 import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 
@@ -166,6 +166,33 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
+def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_print=True):
+    if len(ids_or_names) > 0:
+        vol = Volumes()
+        ans = []
+        for vol_id in ids_or_names:
+            srvid = getServerId(site_id) if not isNone(site_id) else None
+            this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
+            # if detach with wrong site_id, return b'', but with correct site_id, return b'' ...
+            if vol_status in ['attach','extend'] and 'detail' in this_ans:
+                is_table = False
+                ans.append(this_ans)
+        if not ans:    
+            for vol_id in ids_or_names:
+                ans.append(vol.list(vol_id))
+            for the_vol in ans:
+                if len(the_vol['mountpoint']) == 1:
+                    the_vol['mountpoint'] = the_vol['mountpoint'][0]
+    else:
+        raise ValueError
+    cols = ['id', 'name', 'size', 'create_time', 'status','mountpoint']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
+                site_id), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
+
 def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
     vcs = VcsSite()
     ans = []

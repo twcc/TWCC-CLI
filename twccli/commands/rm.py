@@ -324,7 +324,7 @@ def ccs(site_id, force, ids_or_names):
         else:
             print("site id must be integer")
 
-@click.option('-id', '--vol_id', 'name',
+@click.option('-id', '--vol-id', 'name',
               help="Index of the volume.")
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default=False,

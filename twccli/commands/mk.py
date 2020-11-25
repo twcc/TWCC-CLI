@@ -327,21 +327,21 @@ def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
 
 @click.option('-n', '--vol_name', 'name', default="twccli", type=str,
               help="Name of the volume.")
-@click.option('-sz', '--size', 'size', default=100, type=int, show_default=True,
+@click.option('-sz', '--vol-size', default=100, type=int, show_default=True,
               help="Size of the volume.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your BSS.")
-def bss(name,size,is_table):
+def bss(name, vol_size, is_table):
     """Command line for create bss
 
     :param name: Enter name for your resources.
     :type name: string
-    :param size: Enter size for your resources.
-    :type size: int
+    :param vol_size: Enter size for your resources.
+    :type vol_size: int
     """
-    create_volume(name,size,is_table)
+    create_volume(name,vol_size,is_table)
 
 cli.add_command(vcs)
 cli.add_command(cos)
