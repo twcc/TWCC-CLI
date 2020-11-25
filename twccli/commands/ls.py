@@ -63,20 +63,23 @@ def list_vcs_sol(is_table):
 
 
 def list_snapshot(site_ids_or_names, is_all, is_table, desc):
-    if len(site_ids_or_names) == 1:
-        sid = site_ids_or_names[0]
-        img = VcsImage()
-        srv_id = getServerId(sid)
-        ans = img.list(srv_id)
-        if isNone(ans):
-            return None
-        ans['site_id'] = sid
-        cols = ['id', 'site_id', 'name', 'status', 'create_time']
+    ans = []
+    if not len(site_ids_or_names) == 0:
+        for i, sid in enumerate(site_ids_or_names):
+            # sid = site_ids_or_names[0]
+            img = VcsImage()
+            srv_id = getServerId(sid)
+            this_ans = img.list(srv_id)
+            if isNone(this_ans):
+                continue
+            this_ans['site_id'] = sid
+            ans.extend([this_ans])
+            cols = ['id', 'site_id', 'name', 'status', 'create_time']
     else:
         img = VcsImage()
         ans = img.list(isAll=is_all)
         cols = ['id', 'name', 'status', 'create_time']
-
+    
     if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result",
@@ -207,6 +210,7 @@ def list_cntr(site_ids_or_names, is_table, isAll):
         for ele in site_ids_or_names:
             # site_id = int(ele)
             my_GpuSite.append(a.queryById(ele))
+    my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
         if isAll:
             col_name.append('user')

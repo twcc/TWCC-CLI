@@ -1,5 +1,5 @@
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
-from twccli.twcc.util import isNone
+from twccli.twcc.util import isNone,mk_names
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
 from twccli.twccli import pass_environment, logger
@@ -114,55 +114,57 @@ def vcs(env, siteId, port, cidr, protocol, isIngress, fip, portrange):
             "Protocol is not valid. available: {}.".format(avbl_proto))
 
     # case 1: floating ip operations
-    sites = list_vcs([siteId], False, is_print=False)
-    if not len(sites) == 1:
+    site_ids = mk_names(siteId, site_ids)
+    sites = list_vcs(site_ids, False, is_print=False)
+    if len(sites) == 0:
         raise ValueError("Error: VCS id: {} is not found.".format(siteId))
-    site_info = sites[0]
+    for i, site_info in enumerate(sites):
+        # site_info = sites[0]
 
-    errorFlg = True
-    if len(site_info['public_ip']) > 0 and fip == False:
-        VcsServerNet().deAssociateIP(siteId)
-        errorFlg = False
+        errorFlg = True
+        if len(site_info['public_ip']) > 0 and fip == False:
+            VcsServerNet().deAssociateIP(site_ids[i])
+            errorFlg = False
 
-    if len(site_info['public_ip']) == 0 and fip == True:
-        VcsServerNet().associateIP(siteId)
-        errorFlg = False
+        if len(site_info['public_ip']) == 0 and fip == True:
+            VcsServerNet().associateIP(site_ids[i])
+            errorFlg = False
 
-    # case 2: port setting
-    from netaddr import IPNetwork
-    IPNetwork(cidr)
+        # case 2: port setting
+        from netaddr import IPNetwork
+        IPNetwork(cidr)
 
-    if not isNone(portrange):
-        if re.findall('[^0-9-]', portrange):
-            raise ValueError('port range should be digital-digital')
+        if not isNone(portrange):
+            if re.findall('[^0-9-]', portrange):
+                raise ValueError('port range should be digital-digital')
 
-        secg_list = getSecGroupList(siteId)
-        secg_id = secg_list['id']
-        port_list = portrange.split('-')
-        if len(port_list) == 2:
-            port_min, port_max = [int(port) for port in port_list]
-            if port_min < 0 or port_max < 0:
-                raise ValueError('port range must bigger than 0')
-            elif port_min > port_max:
-                raise ValueError('port_range_min must be <= port_range_max')
-        else:
-            raise ValueError('port range set error')
+            secg_list = getSecGroupList(site_ids[i])
+            secg_id = secg_list['id']
+            port_list = portrange.split('-')
+            if len(port_list) == 2:
+                port_min, port_max = [int(port) for port in port_list]
+                if port_min < 0 or port_max < 0:
+                    raise ValueError('port range must bigger than 0')
+                elif port_min > port_max:
+                    raise ValueError('port_range_min must be <= port_range_max')
+            else:
+                raise ValueError('port range set error')
 
-        secg = VcsSecurityGroup()
-        secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
-                              "ingress" if isIngress else "egress")
-        errorFlg = False
-    if not isNone(port):
-        secg_list = getSecGroupList(siteId)
-        secg_id = secg_list['id']
+            secg = VcsSecurityGroup()
+            secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
+                                "ingress" if isIngress else "egress")
+            errorFlg = False
+        if not isNone(port):
+            secg_list = getSecGroupList(site_ids[i])
+            secg_id = secg_list['id']
 
-        secg = VcsSecurityGroup()
-        secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
-                              "ingress" if isIngress else "egress")
-        errorFlg = False
-        
-    if errorFlg:
-        raise ValueError("Error! Nothing to do! Check `--help` for detail.")
+            secg = VcsSecurityGroup()
+            secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
+                                "ingress" if isIngress else "egress")
+            errorFlg = False
+            
+        if errorFlg:
+            raise ValueError("Error! Nothing to do! Check `--help` for detail.")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
