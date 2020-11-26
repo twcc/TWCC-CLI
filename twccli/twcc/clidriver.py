@@ -295,10 +295,6 @@ class ServiceOperation:
         if 'PLATFORM' in url_parts and url_parts[
                 'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
             t_url = t_url.replace("/v2/", "/v3/")
-        if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and 'sites' in url_parts[
-                    'FUNCTION'] and 'action' in url_parts['FUNCTION']:
-            t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
 
 def isV3(fun_str):
