@@ -2,22 +2,71 @@
 from __future__ import print_function
 import os
 import click
+import threading
+import math 
+import sys
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import isNone, mkdir_p
+from botocore.exceptions import ClientError
+class ProgressPercentage(object):
+    def __init__(self, filename, filesize):
+        self._filename = filename
+        self._size = filesize
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+        
+        # sys.stdout.write('\n')
+    def __call__(self, bytes_amount):
+        def convertSize(size):
+            if (size == 0):
+                return '0B'
+            size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+            i = int(math.floor(math.log(size,1024)))
+            p = math.pow(1024,i)
+            s = round(size/p,2)
+            return '%.2f %s' % (s,size_name[i])
+
+        # To simplify, assume this is hooked up to a single filename
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            done = int(50 * self._seen_so_far / self._size)
+            percentage = (self._seen_so_far / self._size) * 100
+            sys.stdout.write(
+                "\r[%s%s] %s  %s / %s  (%.2f%%) " % ('=' * done, ' ' * (50-done),
+                    self._filename, convertSize(self._seen_so_far), convertSize(self._size),
+                    percentage))
+            sys.stdout.flush()
 
 def upload(bkt_name, local_dir=None, filename=None):
     twcc_s3 = S3()
     absfn = abspath(filename) if isNone(local_dir) else join(abspath(local_dir), filename)
     okey = relpath(filename) if isNone(local_dir) else join(relpath(local_dir), filename)
-    twcc_s3.s3_cli.upload_file(absfn, bkt_name, okey)
-
+    # twcc_s3.s3_cli.upload_file(absfn, bkt_name, okey)
+    try:
+        response = twcc_s3.s3_cli.upload_file(absfn, bkt_name, okey,
+            Callback=ProgressPercentage(okey, os.stat(absfn).st_size))
+        sys.stdout.write('\n')
+    except ClientError as e:
+        print(str(e))
+        raise ClientError
 def download(bkt_name, dest_fn=None, cos_key=None):
     twcc_s3 = S3()
     mkdir_p(dirname(abspath(dest_fn)))
-    twcc_s3.s3_cli.download_file(bkt_name, cos_key, dest_fn)
+    # twcc_s3.s3_cli.download_file(bkt_name, cos_key, dest_fn)
+    try:
+        response = twcc_s3.s3_cli.download_file(
+            Bucket=bkt_name, 
+            Key=cos_key, 
+            Filename=cos_key,
+            Callback=ProgressPercentage(cos_key, (twcc_s3.s3_cli.head_object(Bucket=bkt_name, Key=cos_key))["ContentLength"])
+            )
+        sys.stdout.write('\n')
+    except ClientError as e:
+        print(str(e))
+        raise ClientError
 
 def list_objects(bucket_name):
     NextMarker = ''
