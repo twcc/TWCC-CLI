@@ -6,7 +6,7 @@ import re
 import datetime
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -53,7 +53,34 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
 
-
+def list_volume(site_ids_or_names, is_all, is_table):
+    vol = Volumes()
+    ans = []
+    cols = ['id', 'name', 'size', 'create_time', 'status','mountpoint'] #,'volume_type'
+    if len(site_ids_or_names) > 0:
+        for vol_id in site_ids_or_names:
+            ans.append(vol.list(vol_id))
+        for the_vol in ans:
+            if len(the_vol['name']) > 15:
+                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'           
+            if len(the_vol['mountpoint']) == 1:
+                the_vol['mountpoint'] = the_vol['mountpoint'][0]
+    else:
+        ans = vol.list(isAll=is_all)
+        for the_vol in ans:
+            if len(the_vol['name']) > 15:
+                the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
+            if len(the_vol['mountpoint']) == 1:
+                the_vol['mountpoint'] = the_vol['mountpoint'][0]
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Volume Result",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 def list_vcs_sol(is_table):
     ans = VcsSite.getSolList(mtype='list', name_only=True)
     if is_table:
@@ -63,20 +90,23 @@ def list_vcs_sol(is_table):
 
 
 def list_snapshot(site_ids_or_names, is_all, is_table, desc):
-    if len(site_ids_or_names) == 1:
-        sid = site_ids_or_names[0]
-        img = VcsImage()
-        srv_id = getServerId(sid)
-        ans = img.list(srv_id)
-        if isNone(ans):
-            return None
-        ans['site_id'] = sid
-        cols = ['id', 'site_id', 'name', 'status', 'create_time']
+    ans = []
+    if not len(site_ids_or_names) == 0:
+        for i, sid in enumerate(site_ids_or_names):
+            # sid = site_ids_or_names[0]
+            img = VcsImage()
+            srv_id = getServerId(sid)
+            this_ans = img.list(srv_id)
+            if isNone(this_ans):
+                continue
+            this_ans['site_id'] = sid
+            ans.extend([this_ans])
+            cols = ['id', 'site_id', 'name', 'status', 'create_time']
     else:
         img = VcsImage()
         ans = img.list(isAll=is_all)
         cols = ['id', 'name', 'status', 'create_time']
-
+    
     if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result",
@@ -207,6 +237,7 @@ def list_cntr(site_ids_or_names, is_table, isAll):
         for ele in site_ids_or_names:
             # site_id = int(ele)
             my_GpuSite.append(a.queryById(ele))
+    my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
         if isAll:
             col_name.append('user')
@@ -618,12 +649,35 @@ def key(ctx, env, name, is_table, ids_or_names):
     else:
         jpp(ans)
 
+@click.option('-id', '--vol-id', 'name', type=int,
+              help="Index of the volume.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the volumes.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your BSS.")
+@click.pass_context
+def bss(ctx, name, ids_or_names, is_all, is_table):
+    """Command line for list bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(name, ids_or_names)
+    list_volume(ids_or_names, is_all, is_table)
+    
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-
+cli.add_command(bss)
 
 def main():
     cli()

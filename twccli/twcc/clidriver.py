@@ -168,14 +168,13 @@ class ServiceOperation:
             raise ValueError("Function for:'{0}' is not valid".format(func))
         if not http in set(self.valid_http_verb[func]):
             raise ValueError("http verb:'{0}' is not valid".format(http))
-
+        
         t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
                                  ctype=ctype)
-
         if not isNone(url_ext_get):
             t_url += "?"
             t_url_tmp = []
@@ -183,7 +182,6 @@ class ServiceOperation:
                 t_url_tmp.append("{0}={1}".format(param_key,
                                                   url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
-
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
@@ -261,7 +259,6 @@ class ServiceOperation:
         url_ptn = self.url_ptn[func]
         url_str = self.url_format[func]
         url_parts = {}
-
         # check if this site_sn is valid
         if not type(site_sn) == type(None):
             self.api_pf = site_sn
@@ -296,7 +293,17 @@ class ServiceOperation:
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
-                    'FUNCTION'] == 'sites':
+                'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
+            t_url = t_url.replace("/v2/", "/v3/")
+        if 'PLATFORM' in url_parts and url_parts[
+                'PLATFORM'] == "openstack-taichung-default-2" and 'sites' in url_parts[
+                    'FUNCTION'] and 'action' in url_parts['FUNCTION']:
             t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
+
+def isV3(fun_str):
+    if fun_str == "sites":
+        return True
+    if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
+        return True
+    return False

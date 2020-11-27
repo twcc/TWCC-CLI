@@ -284,6 +284,18 @@ class VcsSite(CpuService):
             self.ext_get = {'project': self._project_id}
 
         return self._do_api()
+        
+    def stop(self, site_id):
+        self.data_dic = {"status": "shelve"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
+    def start(self, site_id):
+        self.data_dic = {"status": "unshelve"} 
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
@@ -395,6 +407,10 @@ class VcsSite(CpuService):
     def isReady(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready"
+    
+    def isStopped(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "NotReady"
 
 
 class VcsServerNet(CpuService):
@@ -512,6 +528,53 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+
+class Volumes(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "volumes"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, name, size, desc="", volume_type="hdd"):
+        self.http_verb = 'post'
+        self.data_dic = {'project': self._project_id, "name": name, "size":size, "desc":desc,"volume_type":volume_type}
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"volumes": sys_vol_id}
+        return self._do_api()
+    
+    def update(self, sys_vol_id, vol_status, srvid, size, wait):
+        self.http_verb = 'put'
+        self.url_dic = {"volumes": sys_vol_id, "action":""}
+        if vol_status in ['attach','detach']:
+            self.data_dic = {"status": vol_status, "server": srvid}
+        elif vol_status == "extend":
+            self.data_dic = {"status": vol_status, "server": 0, "size":size}
+        else:
+            raise ValueError
+        return self._do_api()
+
+    def list(self, sys_vol_id=None, isAll=False):
+        if isNone(sys_vol_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isAll:
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes= self._do_api()
+                my_username = sess = Session2().twcc_username
+                return [x for x in all_volumes if x["user"]['username'] == my_username]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"volumes": sys_vol_id}
+            return self._do_api()
+        
+        
 
 
 def getServerId(site_id):

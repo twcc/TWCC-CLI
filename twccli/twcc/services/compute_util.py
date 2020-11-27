@@ -1,8 +1,10 @@
+import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
+
 
 def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
@@ -21,7 +23,7 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
         ext_txt)
     # if py3
-    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
+    if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
         return yes_no_dialog(title=str_title, text=str_text).run()
@@ -34,19 +36,19 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
     if len(ids_or_names) > 0:
         cols = ['id', 'name', 'public_ip', 'private_ip',
                 'private_network', 'create_time', 'status']
-        if len(ids_or_names) == 1:
-            site_id = ids_or_names[0]
-            ans = [vcs.queryById(site_id)]
+        for i, site_id in enumerate(ids_or_names):
+            site_id = ids_or_names[i]
+            ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
             if not isNone(srvid):
                 srv = VcsServer().queryById(srvid)
                 if len(srv) > 0 and (u'private_nets' in srv and len(srv[u'private_nets']) > 0):
                     srv_net = srv[u'private_nets'][0]
-                    ans[0]['private_network'] = srv_net[u'name']
-                    ans[0]['private_ip'] = srv_net[u'ip']
+                    ans[i]['private_network'] = srv_net[u'name']
+                    ans[i]['private_ip'] = srv_net[u'ip']
                 else:
-                    ans[0]['private_network'] = ""
-                    ans[0]['private_ip'] = ""
+                    ans[i]['private_network'] = ""
+                    ans[i]['private_ip'] = ""
     else:
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         ans = vcs.list(is_all)
@@ -164,7 +166,72 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
+def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_print=True):
+    if len(ids_or_names) > 0:
+        vol = Volumes()
+        ans = []
+        for vol_id in ids_or_names:
+            srvid = getServerId(site_id) if not isNone(site_id) else None
+            this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
+            # if detach with wrong site_id, return b'', but with correct site_id, return b'' ...
+            if vol_status in ['attach','extend'] and 'detail' in this_ans:
+                is_table = False
+                ans.append(this_ans)
+        if not ans:    
+            for vol_id in ids_or_names:
+                ans.append(vol.list(vol_id))
+            for the_vol in ans:
+                if len(the_vol['mountpoint']) == 1:
+                    the_vol['mountpoint'] = the_vol['mountpoint'][0]
+    else:
+        raise ValueError
+    cols = ['id', 'name', 'size', 'create_time', 'status','mountpoint']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
+                site_id), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 
+def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
+    vcs = VcsSite()
+    ans = []
+    
+    if len(ids_or_names) > 0:
+        cols = ['id', 'name', 'public_ip', 'private_ip',
+                'private_network', 'create_time', 'status']
+        
+        for i,site_id in enumerate(ids_or_names):        
+            ans.extend([vcs.queryById(site_id)])
+            srvid = getServerId(site_id)
+            if status == 'stop':
+                # Free public IP
+                if not isNone(srvid):
+                    if re.findall('[0-9.]+',ans[i]['public_ip']):
+                        VcsServerNet().deAssociateIP(site_id)
+                vcs.stop(site_id)
+            elif status == 'ready':
+                vcs.start(site_id)
+    else:
+        raise ValueError
+    if wait and status == 'stop':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteStopped(site_id)
+    if wait and status == 'ready':
+        for i,site_id in enumerate(ids_or_names): 
+            doSiteReady(site_id, site_type='vcs')
+    if len(ans) > 0:
+        ans = []
+        for i,site_id in enumerate(ids_or_names):        
+            ans.extend([vcs.queryById(site_id)])
+        if not is_print:
+            return ans
+
+        if is_table:
+            table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
+                site_id), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
 def del_vcs(ids_or_names, isForce=False):
     """delete a vcs
 
@@ -179,7 +246,14 @@ def del_vcs(ids_or_names, isForce=False):
             for ele in ids_or_names:
                 vsite.delete(ele)
                 print("VCS resources {} deleted.".format(ele))
-
+def doSiteStopped(site_id):
+    b = VcsSite()
+    wait_ready = False
+    while not wait_ready:
+        if b.isStopped(site_id):
+            wait_ready = True
+        time.sleep(5)
+    return site_id
 
 def doSiteReady(site_id, site_type='cntr'):
     """Check if site is created or not

@@ -67,6 +67,14 @@ class TestVcsLifecyc:
         print(self.list_out)
         self.list_out = self.__run(cmd_list.split(" "))
 
+    def _stop_vcs(self):
+        cmd_list = "ch vcs -s {} -sts Stop -wait".format(self.vcs_id)
+        out = self.__run(cmd_list.split(" "))
+
+    def _start_vcs(self):
+        cmd_list = "ch vcs -s {} -sts Ready -wait".format(self.vcs_id)
+        out = self.__run(cmd_list.split(" "))
+
     def _del_vcs(self):
         cmd_list = "rm vcs --force {}".format(self.vcs_id)
         print(cmd_list)
@@ -103,6 +111,8 @@ class TestVcsLifecyc:
         self._list_key()
         self._create_vcs()
         self._list_vcs()
+        self._stop_vcs()
+        self._start_vcs()
         self._add_secg()
         self._list_secg()
         self._del_secg()

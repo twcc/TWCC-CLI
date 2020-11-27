@@ -55,9 +55,12 @@ avalible_funcs:
         - 'get'
     -
       name: "volumes"
-      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'put'
+        - 'post'
+        - 'delete'
     -
       name: "api_key"
       url_type: "/{FUNCTION}/"
@@ -104,6 +107,8 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'post'
+        - 'delete'
     -
       name: "projects"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
