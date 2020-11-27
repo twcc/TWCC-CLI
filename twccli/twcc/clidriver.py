@@ -182,7 +182,6 @@ class ServiceOperation:
                 t_url_tmp.append("{0}={1}".format(param_key,
                                                   url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
-        print(t_url, t_header, data_dict, http)
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
@@ -293,7 +292,6 @@ class ServiceOperation:
         for ptn in url_parts.keys():
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
         # need to migrate /v3/
-        print(url_parts)
         if 'PLATFORM' in url_parts and url_parts[
                 'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
             t_url = t_url.replace("/v2/", "/v3/")
