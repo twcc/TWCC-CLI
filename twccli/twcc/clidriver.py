@@ -298,7 +298,7 @@ class ServiceOperation:
         return self.host_url + t_url
 
 def isV3(fun_str):
-    if fun_str == "sites":
+    if "sites" in fun_str:
         return True
     if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
         return True
