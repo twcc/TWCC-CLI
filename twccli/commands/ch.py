@@ -4,6 +4,7 @@ import click
 import json
 # , pp, jpp, table_layout, SpinCursor, isNone,
 from twccli.twcc.util import mk_names
+from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.compute_util import change_vcs, change_volume
 
 # Create groups for command
