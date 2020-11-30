@@ -11,8 +11,11 @@ if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']
     log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
 else:
     log_dir = "{}/log".format(os.path.join(os.environ['HOME'], '.twcc_data'))
-if not os.path.isdir(log_dir):
-    os.mkdir(log_dir)
+try:
+    if not os.path.isdir(log_dir):
+        os.mkdir(log_dir)
+else:
+    log_dir = os.environ['HOME']
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
