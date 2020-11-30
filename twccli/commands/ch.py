@@ -30,8 +30,9 @@ def cli():
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
 @click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def vcs(ctx, vcs_status, site_ids_or_names, name, wait, is_table):
+def vcs(ctx, env, vcs_status, site_ids_or_names, name, wait, is_table):
     """Command line for Change VCS
     Function list :
     1. Change VCS status
@@ -47,12 +48,6 @@ def vcs(ctx, vcs_status, site_ids_or_names, name, wait, is_table):
               help="Extend size of the volume. Must be greater than current size")              
 @click.option('-sts', '--vol-status', type=click.Choice(['attach', 'detach', 'extend'], case_sensitive=False),
               help="Status of the volume.")
-@click.option('-all',
-              '--show-all',
-              'is_all',
-              is_flag=True,
-              type=bool,
-              help="List all the volumes.")
 @click.option('-wait', '--wait', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
@@ -61,8 +56,9 @@ def vcs(ctx, vcs_status, site_ids_or_names, name, wait, is_table):
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="Update status of your BSS.")
+@pass_environment
 @click.pass_context
-def bss(ctx, name, ids_or_names, vol_status, vol_size, site_id, wait, is_all, is_table):
+def bss(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_all, is_table):
     """Command line for list bss
 
     :param name: Enter name for your resources.

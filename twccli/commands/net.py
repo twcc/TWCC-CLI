@@ -91,7 +91,8 @@ def ccs(env, siteId, port, isAttach):
               default='tcp',
               show_default=True)
 @click.argument('site_ids', nargs=-1)
-def vcs(site_ids,siteId, port, cidr, protocol, isIngress, fip, portrange):
+@pass_environment
+def vcs(env, site_ids,siteId, port, cidr, protocol, isIngress, fip, portrange):
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
     :type portrange: string
