@@ -11,8 +11,9 @@ os.environ['LC_ALL'] = 'C.UTF-8'
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
+    log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
     logger.add(sys.stderr, level="DEBUG")
-    logger.add("twcc.log", format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
+    logger.add(os.path.join(log_dir,"twcc.log"), format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
             rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
 else:
     import yaml
@@ -21,7 +22,9 @@ else:
     import logging.config
     with open('twccli/logging.yml', 'r') as f:
         config = yaml.load(f,Loader=yaml.FullLoader)
-    
+    log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
+    log_file_name = config['handlers']['file']['filename']
+    config['handlers']['file']['filename'] = os.path.join(log_dir,log_file_name)
     logging.config.dictConfig(config)
     logger = logging.getLogger('command')
     coloredlogs.install(level = config['loggers']['command']['level'], fmt=config['formatters']['default']['format'],logger=logger)

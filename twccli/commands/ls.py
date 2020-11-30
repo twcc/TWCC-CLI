@@ -61,16 +61,16 @@ def list_volume(site_ids_or_names, is_all, is_table):
         for vol_id in site_ids_or_names:
             ans.append(vol.list(vol_id))
         for the_vol in ans:
-            if len(the_vol['name']) > 15:
+            if 'name' in the_vol and len(the_vol['name']) > 15:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'           
-            if len(the_vol['mountpoint']) == 1:
+            if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         ans = vol.list(isAll=is_all)
         for the_vol in ans:
-            if len(the_vol['name']) > 15:
+            if 'name' in the_vol and len(the_vol['name']) > 15:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
-            if len(the_vol['mountpoint']) == 1:
+            if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
@@ -341,7 +341,7 @@ def cli():
               default=None,
               type=str,
               help="Name of the instance.")
-@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
+@click.option('-s', '--site-id', 'name', type=str, help="ID of the instance.")
 @click.option('-all',
               '--show-all',
               'is_all',
