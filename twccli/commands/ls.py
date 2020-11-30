@@ -393,11 +393,11 @@ def cli():
               show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
-@pass_environment
-@click.pass_context
+@pass_environment 
+# @click.pass_context ctx,
 # @logger.catch
 # @exception(logger)
-def vcs(ctx, env, res_property, site_ids_or_names, name, is_table, is_all):
+def vcs(env, res_property, site_ids_or_names, name, is_table, is_all):
     """Command line for List VCS
     Function list :
     1. list port
@@ -554,8 +554,8 @@ def cos(env, name, is_table, ids_or_names):
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
-@click.pass_context
-def ccs(ctx, env, res_property, name, site_ids_or_names, is_table, is_all,
+# @click.pass_context ctx, 
+def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
         show_ports, get_info):
     """Command line for List Container
        Functions:
@@ -624,8 +624,8 @@ def ccs(ctx, env, res_property, name, site_ids_or_names, is_table, is_all,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
-@click.pass_context
-def key(ctx, env, name, is_table, ids_or_names):
+# @click.pass_context ctx,
+def key( env, name, is_table, ids_or_names):
     """Command line for List Key
     """
     ids_or_names = mk_names(name, ids_or_names)

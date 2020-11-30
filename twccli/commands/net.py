@@ -92,7 +92,7 @@ def ccs(env, siteId, port, isAttach):
               show_default=True)
 @click.argument('site_ids', nargs=-1)
 @pass_environment
-def vcs(env, site_ids,siteId, port, cidr, protocol, isIngress, fip, portrange):
+def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
     :type portrange: string
@@ -113,7 +113,6 @@ def vcs(env, site_ids,siteId, port, cidr, protocol, isIngress, fip, portrange):
     if not protocol in avbl_proto:
         raise ValueError(
             "Protocol is not valid. available: {}.".format(avbl_proto))
-
     # case 1: floating ip operations
     site_ids = mk_names(siteId, site_ids)
     sites = list_vcs(site_ids, False, is_print=False)
