@@ -14,7 +14,7 @@ else:
 try:
     if not os.path.isdir(log_dir):
         os.mkdir(log_dir)
-else:
+except:
     log_dir = os.environ['HOME']
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
