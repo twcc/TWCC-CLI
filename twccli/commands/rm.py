@@ -10,6 +10,7 @@ from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, get
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
+from twccli.twccli import pass_environment, logger
 from botocore.exceptions import ClientError
 
 
@@ -193,8 +194,9 @@ def cli():
 @click.option('-n', '--name', 'name', default=None,
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def key(ctx, name, ids_or_names, force):
+def key(ctx, env,  name, ids_or_names, force):
     """Removing key operation
 
     :param name: Enter name for your resource name
@@ -236,7 +238,8 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
-def vcs(res_property, name, force, is_all, site_id, ids_or_names):
+@pass_environment
+def vcs(env, res_property, name, force, is_all, site_id, ids_or_names):
     """Command line for VCS removing
         Function :
         1. Keypair
@@ -280,7 +283,8 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
               help='Name of the bucket.')
 @click.option('-okey', '--cos_key', 'okey',
               help='Name of the object for deleting.')
-def cos(name, force, okey, is_recursive):
+@pass_environment
+def cos(env, name, force, okey, is_recursive):
     """Command Line for COS deleting buckets
 
     :param name: Bucket name for deleting object.
@@ -308,7 +312,8 @@ def cos(name, force, okey, is_recursive):
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the container.')
 @click.argument('ids_or_names', nargs=-1)
-def ccs(site_id, force, ids_or_names):
+@pass_environment
+def ccs(env, site_id, force, ids_or_names):
     ids_or_names = mk_names(site_id, ids_or_names)
     if len(ids_or_names) == 0:
         raise ValueError("Resource id is required.")

@@ -13,7 +13,7 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.compute_util import doSiteReady, create_vcs
-
+from twccli.twccli import pass_environment, logger
 
 def create_commit(site_id, tag, isAll=False):
     ccs = Sites()
@@ -155,8 +155,9 @@ def cli():
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
 @click.argument('ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
         virtual_network,getway,cidr,
         flavor, img_name, wait, network, snapshot, sol, fip, is_table):
@@ -230,7 +231,8 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
 @click.option('-bkt', '--bucket_name', 'name', default="twccli", type=str,
               help="Name of the bucket.")
 @click.command(help="Create your COS (Cloud Object Storage) buckets.")
-def cos(name):
+@pass_environment
+def cos(env, name):
     """Command line for create cos
 
     :param name: Enter name for your resources.
@@ -242,7 +244,8 @@ def cos(name):
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of your instance.")
-def key(name):
+@pass_environment
+def key(env, name):
     """Command line for create key
 
     :param name: Enter name for your resources.
@@ -292,7 +295,8 @@ def key(name):
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
-def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
+@pass_environment
+def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
     """Command line for create ccs
 
     :param name: Enter name for your resources.

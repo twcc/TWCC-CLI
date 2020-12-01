@@ -6,6 +6,7 @@ import json
 import yaml
 import datetime
 import logging
+from twccli.twccli import pass_environment, logger
 import os
 from .session import Session2
 from .util import parsePtn, isNone, isDebug, pp
@@ -24,8 +25,8 @@ class ServiceOperation:
         self.header_extra = {}
 
         self._debug = isDebug()
-        if self._debug:
-            self._setDebug()
+        # if self._debug:
+        #     self._setDebug()
 
     def _load(self):
         # raw_input("in clidriver "+self.api_key)
@@ -140,9 +141,9 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
         if self._debug:
-            self._i(t_api)
-            self._i(t_headers)
-            self._i("--- URL: %s, Status: %s, (%.3f sec) ---" %
+            logger.info(t_api)
+            logger.info(t_headers)
+            logger.info("--- URL: %s, Status: %s, (%.3f sec) ---" %
                     (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
 
@@ -245,10 +246,11 @@ class ServiceOperation:
         self._i = logging.info
         self._d = logging.debug
         self._w = logging.warning
+        
 
     def show(self):
-        self._i("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
-        self._i("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
     def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None):
 

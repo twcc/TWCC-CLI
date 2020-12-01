@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 from distutils.util import convert_path
-
+import sys
 try:
     # pip >=20
     from pip._internal.network.session import PipSession
@@ -67,7 +67,10 @@ reqs = [
         'tqdm',
         'urllib3',
         'wcwidth']
-
+if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+    reqs.append('loguru')
+else:
+    reqs.append('coloredlogs')
 long_desc = open("README.md", 'r').read()
 setup(
     name='TWCC-CLI',
