@@ -16,6 +16,7 @@ class TestVcsLifecyc:
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
         (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 20.04", "local")
         self.ext_port = "81"
+        self.ext_port_range = "3000-3010"
         self.apikey = os.environ['TWCC_API_KEY']
         self.pcode = os.environ['TWCC_PROJ_CODE']
 
@@ -23,12 +24,18 @@ class TestVcsLifecyc:
         self.runner = CliRunner()
 
     def __run(self, cmd_list):
+        return self.__exec_run(cmd_list, 0)
+
+    def __exec_run(self, cmd_list, expected=0):
         result = self.runner.invoke(cli, cmd_list)
 
         print(result.output)
         print(result)
-        assert result.exit_code == 0
+        assert result.exit_code == expected
         return result.output
+
+    def __runError(self, cmd_list):
+        return self.__exec_run(cmd_list, 1)
 
     def _create_key(self):
         cmd_list = "mk key --name {}".format(self.key_name)
@@ -64,15 +71,17 @@ class TestVcsLifecyc:
 
     def _list_vcs(self):
         cmd_list = "ls vcs -json {}".format(self.vcs_id)
-        print(self.list_out)
         self.list_out = self.__run(cmd_list.split(" "))
+        print(self.list_out)
 
     def _stop_vcs(self):
         cmd_list = "ch vcs -s {} -sts Stop -wait".format(self.vcs_id)
+        print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _start_vcs(self):
         cmd_list = "ch vcs -s {} -sts Ready -wait".format(self.vcs_id)
+        print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _del_vcs(self):
@@ -81,9 +90,25 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg(self):
-        cmd_list = "net vcs -secg -p {} -s {}".format(self.ext_port, self.vcs_id)
+        cmd_list = "net vcs -p {} -s {}".format(self.ext_port, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
+
+    def _add_secg_range(self):
+        cmd_list = "net vcs -prange {} -s {}".format(self.ext_port_range, self.vcs_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+
+    def _add_secg_range_and_port(self):
+        cmd_list = "net vcs -prange {} -p {} -s {}".format(self.ext_port_range,
+                self.ext_port, self.vcs_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+
+    def _add_secg_without_range_and_port(self):
+        cmd_list = "net vcs -s {}".format(self.vcs_id)
+        print(cmd_list)
+        out = self.__runError(cmd_list.split(" "))
 
     def _list_secg(self):
         cmd_list = "ls vcs -secg -json {}".format(self.vcs_id)
@@ -110,6 +135,9 @@ class TestVcsLifecyc:
         self._create_key()
         self._list_key()
         self._create_vcs()
+        self._add_secg_range()
+        self._add_secg_range_and_port()
+        self._add_secg_without_range_and_port()
         self._list_vcs()
         self._stop_vcs()
         self._start_vcs()

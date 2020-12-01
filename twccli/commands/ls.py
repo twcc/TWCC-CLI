@@ -61,14 +61,20 @@ def list_volume(site_ids_or_names, is_all, is_table):
         for vol_id in site_ids_or_names:
             ans.append(vol.list(vol_id))
         for the_vol in ans:
-            if 'name' in the_vol and len(the_vol['name']) > 15:
+            if 'detail' in the_vol:
+                is_table = False
+                continue
+            if len(the_vol['name']) > 15:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'           
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         ans = vol.list(isAll=is_all)
         for the_vol in ans:
-            if 'name' in the_vol and len(the_vol['name']) > 15:
+            if 'detail' in the_vol:
+                is_table = False
+                continue
+            if len(the_vol['name']) > 15:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')[:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
