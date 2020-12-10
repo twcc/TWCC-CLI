@@ -123,7 +123,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     # x-extra-property-image
     if isNone(img_name):
         img_name = "Ubuntu 20.04"
-    required['x-extra-property-image'] = img_name.capitalize()
+    required['x-extra-property-image'] = img_name
 
     # x-extra-property-private-network
     if isNone(network):
