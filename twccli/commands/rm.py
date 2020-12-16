@@ -225,8 +225,6 @@ def key(ctx, env,  name, ids_or_names, force):
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the VCS.')
-@click.option('-vnet', '--virtual_network_id', 'res_property', flag_value='Virtual_Network',type=str,
-              help="ID of the virtual Network")
 @click.option('-snap-id', '--snapshot-id', 'name',
               help='ID of snapshot.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
@@ -262,8 +260,6 @@ def vcs(env, res_property, name, force, is_all, site_id, ids_or_names):
         del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
     if res_property == "Snapshot":
         del_snap(mk_names(name, ids_or_names), force, is_all)
-    if res_property == "Virtual_Network":
-        del_vnet(mk_names(name, ids_or_names), force, is_all)
     if isNone(res_property):
         ids_or_names = mk_names(site_id, ids_or_names)
         if len(ids_or_names) > 0:
@@ -329,6 +325,24 @@ def ccs(env, site_id, force, ids_or_names):
         else:
             print("site id must be integer")
 
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.option('-id', '--virtual_network_id', 'vnetid', default="twccli", type=str,
+              help="ID of the virtual Network.")
+@click.command(help="Create your Virtual Network.")
+@click.argument('ids_or_names', nargs=-1)
+@pass_environment
+def vnet(env, ids_or_names, vnetid, force):
+    """Command line for create virtual network
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param vol_size: Enter size for your resources.
+    :type vol_size: int
+    """
+    del_vnet(mk_names(vnetid, ids_or_names), force)
+
 @click.option('-id', '--vol-id', 'name',
               help="Index of the volume.")
 @click.option('-f', '--force', 'force',
@@ -351,6 +365,7 @@ cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
 cli.add_command(bss)
+cli.add_command(vnet)
 
 
 def main():

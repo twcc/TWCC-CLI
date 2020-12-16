@@ -116,8 +116,6 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
-@click.option('-gw', '--getway', 'getway',  type=str,
-              help="Virtual Network Getway")
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
@@ -127,8 +125,6 @@ def cli():
               help="Name of the key pair for access your instance.")
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Name of the network.")
-@click.option('-cidr', '--cidr', 'cidr',  type=str,
-              help="Classless Inter-Domain Routing")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
               help="Name of the image type.")
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
@@ -137,8 +133,7 @@ def cli():
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
-@click.option('-vnet', '--virtual_network', 'virtual_network', is_flag=True, default=False,
-              help="Create a virtual Network `-n,-cidr,-gw` are required!")
+
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
@@ -203,10 +198,6 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             if name == 'twccli':
                 name += datetime.now().strftime("%d%m%H%M")
             return img.createSnapshot(sid, name, desc_str)
-    elif virtual_network:
-        net = Networks()
-        # TODO varify getway and cidr @Leo
-        net.create(name,getway,cidr)
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor.split(".")[1])
@@ -329,6 +320,40 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
         else:
             jpp(ans)
 
+@click.option('-n', '--vnet_name', 'name', default="twccli", type=str,
+              help="Name of the virtual network.")
+@click.option('-gw', '--getway', 'getway',  type=str,
+              help="Virtual Network Getway")
+@click.option('-cidr', '--cidr', 'cidr',  type=str,
+              help="Classless Inter-Domain Routing")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your Virtual Network.")
+@pass_environment
+def vnet(env, name, getway, cidr, is_table):
+    """Command line for create virtual network
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param vol_size: Enter size for your resources.
+    :type vol_size: int
+    """
+    net = Networks()
+    # TODO varify getway and cidr @Leo
+    import re
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',getway):
+        raise ValueError("Getway format error")
+    if not '/' in cidr:
+        raise ValueError("CIDR format error")
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',cidr.split('/')[0]):
+        raise ValueError("CIDR format error")
+    ans = net.create(name,getway,cidr)
+    if is_table:
+        cols = ["id", "name", "cidr","status"]
+        table_layout("VCS Networks", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 @click.option('-n', '--vol_name', 'name', default="twccli", type=str,
               help="Name of the volume.")
 @click.option('-sz', '--vol-size', default=100, type=int, show_default=True,
@@ -352,6 +377,7 @@ cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
 cli.add_command(bss)
+cli.add_command(vnet)
 
 
 def main():
