@@ -336,8 +336,6 @@ def vnet(env, name, getway, cidr, is_table):
 
     :param name: Enter name for your resources.
     :type name: string
-    :param vol_size: Enter size for your resources.
-    :type vol_size: int
     """
     net = Networks()
     # TODO varify getway and cidr @Leo
