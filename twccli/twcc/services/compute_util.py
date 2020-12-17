@@ -2,6 +2,7 @@ import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes
+from twccli.twcc.services.network import Networks
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 
@@ -267,6 +268,8 @@ def doSiteReady(site_id, site_type='cntr'):
         b = Sites()
     elif site_type == 'vcs':
         b = VcsSite()
+    elif site_type == 'vnet':
+        b = Networks()
     else:
         ValueError("Error")
 

@@ -326,12 +326,15 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
               help="Virtual Network Getway")
 @click.option('-cidr', '--cidr', 'cidr',  type=str,
               help="Classless Inter-Domain Routing")
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your virtual network to be builded.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your Virtual Network.")
 @pass_environment
-def vnet(env, name, getway, cidr, is_table):
+def vnet(env, name, getway, cidr, is_table, wait):
     """Command line for create virtual network
 
     :param name: Enter name for your resources.
@@ -347,6 +350,9 @@ def vnet(env, name, getway, cidr, is_table):
     if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',cidr.split('/')[0]):
         raise ValueError("CIDR format error")
     ans = net.create(name,getway,cidr)
+    if wait:
+        doSiteReady(ans['id'], site_type='vnet')
+        ans = net.queryById(ans['id'])
     if is_table:
         cols = ["id", "name", "cidr","status"]
         table_layout("VCS Networks", ans, cols, isPrint=True)

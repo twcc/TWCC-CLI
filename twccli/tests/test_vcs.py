@@ -54,7 +54,7 @@ class TestVcsLifecyc:
         print(out)
     def _create_vnet(self):
         vnet_name = 'twccli_{}'.format(str(uuid.uuid1()).split("-")[0])
-        cmd_list = "mk vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.1".format(vnet_name)
+        cmd_list = "mk vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.1 -json -wait".format(vnet_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         self.vnet_id = json.loads(out)['id']
@@ -128,7 +128,7 @@ class TestVcsLifecyc:
         raise Exception("Error, can not find port {}".format(self.ext_port))
 
     def _del_vnet(self):
-        cmd_list = "rm vcs -vent -id {} -force".format(self.vnet_id)
+        cmd_list = "rm vnet -id {} --force".format(self.vnet_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
