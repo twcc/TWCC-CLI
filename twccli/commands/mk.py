@@ -4,7 +4,7 @@ import click
 import time
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
@@ -24,6 +24,23 @@ def create_commit(site_id, tag, isAll=False):
             '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
+
+def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table):
+    """Create load balance by name
+
+    :param vlb_name: Enter volume name
+    :type vlb_name: string
+    """
+    if not name_validator(vlb_name):
+        raise ValueError(
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
+    vlb = LoadBalancers()
+    ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
+    if is_table:
+        cols = ["id", "name", "size", "volume_type"]
+        table_layout("Volumes", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 def create_volume(vol_name, size, is_table):
     """Create volume by name
@@ -347,11 +364,57 @@ def bss(name, vol_size, is_table):
     """
     create_volume(name,vol_size,is_table)
 
+@click.option('-d', '--load_balance_description', 'vlb_desc', type=str,
+              help="Description of the load balance.")
+@click.option('-m', '--lb_method', required=True, type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
+              help="Method of the load balancer.")
+@click.option('-n', '--load_balance_name', 'vlb_name', default="twccli_lb", type=str,
+              help="Name of the load balance.")
+@click.option('-lt', '--listener_type','listener_types',  type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
+              help="The type of the listener of balancer.")
+@click.option('-lp', '--listener_port','listener_ports',  multiple=True,
+              help="The port of the listener of balancer.")
+@click.option('-vnn', '--virtual_network_name', 'vnet_name', required=True, type=str,
+              help="Virtual Network id")
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your container to be provisioned.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your Load Balancer.")
+def vlb(vlb_name, vnet_name, lb_method, listener_types, listener_ports, vlb_desc, is_table, wait):
+    """Command line for create load balancer
+
+    :param name: Enter name for your resources.
+    :type name: string
+    
+    """
+    if not len(listener_ports) == len(listener_types):
+        raise ValueError('the number of listener setting is not correct')
+    net = Networks()
+    nets = net.list()
+    net_name2id = {}
+    [net_name2id.setdefault(net['name'],net['id']) for net in nets]
+    if not vnet_name in net_name2id:
+        raise ValueError('the virtual network name not exist')
+
+    listeners = []
+    listener_index = 0
+    listener_types_mapping = {'APP_LB':'HTTP','NETWORK_LB':'TCP'}
+    protocol = ''
+    for listener_type,listener_port in zip(listener_types,listener_ports):
+        listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port, 'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
+        listener_index += 1
+    pools = [{'method': lb_method, 'protocol': "HTTP", 'name': "pool-0"}]
+    create_load_balance(vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table)
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
 cli.add_command(bss)
+cli.add_command(vlb)
 
 
 def main():

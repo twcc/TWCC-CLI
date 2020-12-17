@@ -528,6 +528,29 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+class LoadBalancers(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "loadbalancers"
+        self._csite_ = Session2._getClusterName("VCS")
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+        self.http_verb = 'post'
+        self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
+        return self._do_api()
+
+    def list(self, vlb_id=None, isAll=False):
+        if isNone(vlb_id):
+            if isAll:
+                self.ext_get = {'project': self._project_id,
+                                "all_users": 1}
+            else:
+                self.ext_get = {'project': self._project_id}
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"loadbalancers": vlb_id}
+
+        return self._do_api()
 
 class Volumes(CpuService):
     def __init__(self, debug=False):

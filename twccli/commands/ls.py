@@ -6,7 +6,7 @@ import re
 import datetime
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -52,6 +52,37 @@ def handle_exception(cmd, info_name, exc):
     # send error info to rollbar, etc, here
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
+
+def list_load_balances(site_ids_or_names, is_all, is_table):
+    vlb = LoadBalancers()
+    ans = []
+    
+    if len(site_ids_or_names) > 0:
+        cols = ['id', 'name',  'create_time','status','vip','pools_method','members_IP,status','listeners_protocol,port,status','private_net_name'] #,'volume_type'
+        for vlb_id in site_ids_or_names:
+            ans.append(vlb.list(vlb_id))
+    else:
+        cols = ['id', 'name',  'create_time', 'private_net_name','status','pools_method'] #,'volume_type'
+        ans = vlb.list(isAll=is_all)
+    for this_ans in ans:
+        this_ans['private_net_name'] = this_ans['private_net']['name']
+        this_ans['pools_method'] = ','.join([this_ans_pool['method'] for this_ans_pool in this_ans['pools']])
+    if len(site_ids_or_names) > 0:
+        for this_ans in ans:
+            for this_ans_pool in this_ans['pools']:
+                this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
+            
+            this_ans['listeners_protocol,port,status'] = ['{},{},{}'.format(this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
+    print(ans)
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Load Balancers Result",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 
 def list_volume(site_ids_or_names, is_all, is_table):
     vol = Volumes()
@@ -677,13 +708,37 @@ def bss(ctx, name, ids_or_names, is_all, is_table):
     """
     ids_or_names = mk_names(name, ids_or_names)
     list_volume(ids_or_names, is_all, is_table)
-    
+
+@click.option('-id', '--vlb-id', 'vlb_id', type=int,
+              help="Index of the volume.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the load balancers.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your Load Balancers.")
+@click.pass_context
+def vlb(ctx, vlb_id, ids_or_names, is_all, is_table):
+    """Command line for list bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(vlb_id, ids_or_names)
+    list_load_balances(ids_or_names, is_all, is_table)
+
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
 cli.add_command(bss)
+cli.add_command(vlb)
 
 def main():
     cli()
