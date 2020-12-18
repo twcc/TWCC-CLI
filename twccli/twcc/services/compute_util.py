@@ -1,7 +1,7 @@
 import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 
@@ -166,6 +166,42 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
+
+                
+def change_loadbalancer(vlb_id,members,lb_method,is_table):
+    # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
+    
+    vlb = LoadBalancers()
+    vlb_ans = vlb.list(vlb_id)
+    member_list = []
+    for member in members:
+        member_list.append({'ip':member.split(':')[0], 'port':member.split(':')[1], 'weight':1})
+    before_pools = vlb_ans['pools']
+    pools_id = before_pools[0]['id']
+    pools_name = before_pools[0]['name']
+    pools_protocol = before_pools[0]['protocol']
+    lb_method = lb_method if not lb_method==None else before_pools[0]['method']
+    pools = [{'name':pools_name,'method':lb_method,'protocol':pools_protocol,'members':member_list}]
+    vlb_ans_listeners = vlb_ans['listeners']
+    for listener in vlb_ans_listeners:
+        listener['pool_name'] = pools_name
+        del listener['default_tls_container_ref']
+        del listener['sni_container_refs']
+    ans=vlb.update(vlb_id, vlb_ans_listeners, pools)
+    # for this_ans_pool in ans['pools']:
+    #     this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
+    # this_ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(this_ans_listeners['name'],this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
+    
+    cols = ['id', 'name',  'create_time','status','vip','pools_method','members_IP,status','listeners_name,protocol,port,status','private_net_name']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Load Balancers Info.:" , ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
+
 def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_print=True):
     if len(ids_or_names) > 0:
         vol = Volumes()
@@ -267,6 +303,8 @@ def doSiteReady(site_id, site_type='cntr'):
         b = Sites()
     elif site_type == 'vcs':
         b = VcsSite()
+    elif site_type == 'vlb':
+        b = LoadBalancers()
     else:
         ValueError("Error")
 

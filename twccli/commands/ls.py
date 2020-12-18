@@ -58,11 +58,11 @@ def list_load_balances(site_ids_or_names, is_all, is_table):
     ans = []
     
     if len(site_ids_or_names) > 0:
-        cols = ['id', 'name',  'create_time','status','vip','pools_method','members_IP,status','listeners_protocol,port,status','private_net_name'] #,'volume_type'
+        cols = ['id', 'name',  'create_time','status','vip','pools_method','members_IP,status','listeners_name,protocol,port,status','private_net_name']
         for vlb_id in site_ids_or_names:
             ans.append(vlb.list(vlb_id))
     else:
-        cols = ['id', 'name',  'create_time', 'private_net_name','status','pools_method'] #,'volume_type'
+        cols = ['id', 'name',  'create_time', 'private_net_name','status','pools_method']
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
         this_ans['private_net_name'] = this_ans['private_net']['name']
@@ -72,8 +72,8 @@ def list_load_balances(site_ids_or_names, is_all, is_table):
             for this_ans_pool in this_ans['pools']:
                 this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
             
-            this_ans['listeners_protocol,port,status'] = ['{},{},{}'.format(this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
-    print(ans)
+            this_ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(this_ans_listeners['name'],this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
+    # print(ans)
     if len(ans) > 0:
         if is_table:
             table_layout("Load Balancers Result",

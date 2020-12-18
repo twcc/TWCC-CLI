@@ -537,6 +537,16 @@ class LoadBalancers(CpuService):
         self.http_verb = 'post'
         self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
         return self._do_api()
+    
+    def update(self, vlb_id, listeners, pools):
+        self.http_verb = 'patch'
+        self.url_dic = {"loadbalancers": vlb_id}
+        self.data_dic = {'pools':pools, 'listeners':listeners}
+        return self._do_api()
+
+    def isReady(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "ACTIVE"
 
     def list(self, vlb_id=None, isAll=False):
         if isNone(vlb_id):
@@ -552,6 +562,10 @@ class LoadBalancers(CpuService):
 
         return self._do_api()
 
+    def deleteById(self, vlb_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"loadbalancers": vlb_id}
+        return self._do_api()
 class Volumes(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)

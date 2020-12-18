@@ -25,7 +25,7 @@ def create_commit(site_id, tag, isAll=False):
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
 
-def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table):
+def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
     """Create load balance by name
 
     :param vlb_name: Enter volume name
@@ -36,8 +36,11 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table)
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
     vlb = LoadBalancers()
     ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
+    if wait:
+        doSiteReady(ans['id'], site_type='vlb')
+        ans = vlb.list(ans['id'])
     if is_table:
-        cols = ["id", "name", "size", "volume_type"]
+        cols = ['id', 'name',  'create_time', 'private_net_name','status','pools_method']
         table_layout("Volumes", ans, cols, isPrint=True)
     else:
         jpp(ans)
@@ -364,17 +367,17 @@ def bss(name, vol_size, is_table):
     """
     create_volume(name,vol_size,is_table)
 
-@click.option('-d', '--load_balance_description', 'vlb_desc', type=str,
+@click.option('-d', '--load_balance_description', 'vlb_desc',default="",show_default=True, type=str,
               help="Description of the load balance.")
-@click.option('-m', '--lb_method', required=True, type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
-              help="Method of the load balancer.")
 @click.option('-n', '--load_balance_name', 'vlb_name', default="twccli_lb", type=str,
               help="Name of the load balance.")
-@click.option('-lt', '--listener_type','listener_types',  type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
+@click.option('-lm', '--lb_method','lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),multiple=True,
+              help="Method of the load balancer.")
+@click.option('-lt', '--listener_type','listener_types',   default=["APP_LB"],show_default=True, type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
               help="The type of the listener of balancer.")
-@click.option('-lp', '--listener_port','listener_ports',  multiple=True,
+@click.option('-lp', '--listener_port','listener_ports',  default=["80"],show_default=True, multiple=True,
               help="The port of the listener of balancer.")
-@click.option('-vnn', '--virtual_network_name', 'vnet_name', required=True, type=str,
+@click.option('-vnn', '--virtual_network_name', 'vnet_name', default="default_network",show_default=True , required=True, type=str,
               help="Virtual Network id")
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
@@ -383,7 +386,7 @@ def bss(name, vol_size, is_table):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your Load Balancer.")
-def vlb(vlb_name, vnet_name, lb_method, listener_types, listener_ports, vlb_desc, is_table, wait):
+def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, is_table, wait):
     """Command line for create load balancer
 
     :param name: Enter name for your resources.
@@ -406,8 +409,12 @@ def vlb(vlb_name, vnet_name, lb_method, listener_types, listener_ports, vlb_desc
     for listener_type,listener_port in zip(listener_types,listener_ports):
         listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port, 'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
         listener_index += 1
-    pools = [{'method': lb_method, 'protocol': "HTTP", 'name': "pool-0"}]
-    create_load_balance(vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table)
+    pools = []
+    if len(lb_methods) > 1:
+        raise ValueError('not support yet')
+    for i, lb_method in enumerate(lb_methods):
+        pools.append({'method': lb_method, 'protocol': "HTTP", 'name': "pool-{}".format(i)})
+    create_load_balance(vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
 
 cli.add_command(vcs)
 cli.add_command(cos)

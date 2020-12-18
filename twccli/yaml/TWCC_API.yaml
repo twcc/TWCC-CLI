@@ -55,6 +55,7 @@ avalible_funcs:
         - 'get'
         - 'post'
         - 'delete'
+        - 'patch'
     -
       name: "snapshots"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
