@@ -389,8 +389,20 @@ def bss(name, vol_size, is_table):
 def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, is_table, wait):
     """Command line for create load balancer
 
-    :param name: Enter name for your resources.
-    :type name: string
+    :param vlb_name: Enter name for your load balancer.
+    :type vlb_name: string
+    :param vnet_name: Enter virtual network name for your load balancer.
+    :type vnet_name: string
+    :param lb_methods: Enter mehtod for your load balancer.
+    :type lb_methods: string
+    :param listener_types: Enter listener type for your load balancer.
+    :type listener_types: string
+    :param listener_ports: Enter listener port for your load balancer.
+    :type listener_ports: string
+    :param vlb_desc: Enter descript for your load balancer.
+    :type vlb_desc: string
+    :param wait: Wait until resources are provisioned.
+    :type wait: bool
     
     """
     if not len(listener_ports) == len(listener_types):

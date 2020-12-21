@@ -52,6 +52,23 @@ class TestVcsLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
+    def _create_vlb(self):
+        cmd_list = "mk vlb --load_balance_name {} -wait -json".format('twccli_vlb')
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+        print(out)
+        self.vlb_id = json.loads(out)['id']
+
+    def _add_member_vlb(self):
+        cmd_list = "ch vlb --member {} {} -id {}".format('192.168.10.10:8080','192.168.11.11:9090',self.vlb_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+
+    def _delete_vlb(self):
+        cmd_list = "rm vlb -id {} --force".format(self.vlb_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+        print(out)
 
     def _create_vcs(self):
         paras = ["mk", "vcs",
@@ -127,7 +144,16 @@ class TestVcsLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
+    
 
+    def test_vlb(self):
+        self._loadParams()
+        self._loadSession()
+        self._create_vlb()
+        self._add_member_vlb()
+        import time
+        time.sleep(120)
+        self._delete_vlb()
 
     def test_lifecycle(self):
         self._loadParams()

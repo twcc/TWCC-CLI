@@ -112,22 +112,27 @@ def bss(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
 @click.argument('more_members', nargs=-1)
 @click.command(help="Update status of your vlb.")
 @pass_environment
-def vlb(env, vlb_id, more_members, lb_method, member, wait, is_table): #listener_name
+def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table): #listener_name
     """Command line for list vlb
 
-    :param name: Enter name for your volume.
-    :type name: string
-    :param ids_or_names: list of site id
-    :type ids_or_names: string or tuple
+    :param vlb_id: Enter id for your load balancer.
+    :type vlb_id: string
+    :param member: Enter member for your load balancer.
+    :type member: string
+    :param more_members: more than one member
+    :type more_members: string
+    :param lb_methods: Enter mehtod for your load balancer.
+    :type lb_methods: string
     :param wait: Wait until resources are provisioned
     :type wait: bool
     :param is_table: Set this flag table view or json view
     :type is_table: bool
+
+    example: 'twccli ch vlb -m 1.1.1.1:80  2.2.2.2:50'
     """
-    'twccli ch vlb -m 1.1.1.1:80  2.2.2.2:50'
+    
     members = mk_names(member, more_members)
     change_loadbalancer(vlb_id,members,lb_method,is_table)
-
 
 cli.add_command(vcs)
 cli.add_command(bss)

@@ -167,8 +167,7 @@ def del_load_balancer(ids_or_names, isForce=False):
     :type force: bool
     :param site_id: resources for vcs id
     :type site_id: int
-    :param isAll: Operates as tenant admin
-    :type isAll: bool
+    
     """
     vlb = LoadBalancers()
     for vlb_id in ids_or_names:
@@ -381,8 +380,8 @@ def bss(ctx, name, ids_or_names, force):
 def vlb(ctx, vlb_id, ids_or_names, force):
     """Command line for delete vlb
 
-    :param name: Enter name for your resources.
-    :type name: string
+    :param vlb_id: Enter name for your load balancer.
+    :type vlb_id: string
     """
     ids_or_names = mk_names(vlb_id, ids_or_names)
     del_load_balancer(ids_or_names, force)
