@@ -137,7 +137,7 @@ def cli():
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
-@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="hdd", type=str,
+@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the data volume.")
 @click.option('-dvol-size', '--data-volume-size', 'data_vol_size', type=int,

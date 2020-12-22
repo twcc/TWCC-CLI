@@ -356,7 +356,7 @@ class VcsSite(CpuService):
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
 
-        data_vol_type = {   "hdd": "hdd" } # only support this 2020/12/22
+        data_vol_type = {"hdd": "hdd"} # only support this 2020/12/22
             #"ssd": "ssd",
             # "hdd-encrypt": "LUKS-hdd", # no open yet
             #"ssd-encrypt": "LUKS-ssd"}
