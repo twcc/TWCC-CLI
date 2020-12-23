@@ -210,7 +210,10 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
 
         if wait:
             doSiteReady(ans['id'], site_type='vcs')
-
+            vcs = VcsSite()
+            ans = vcs.queryById(ans['id'])
+            ans["solution"] = sol
+            ans["flavor"] = flavor
         if is_table:
             cols = ["id", "name", "status"]
             table_layout("VCS Site", ans, cols, isPrint=True)
@@ -311,7 +314,8 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
         ans = create_cntr(name, gpu, sol, img_name)
         if wait:
             doSiteReady(ans['id'])
-
+            b = Sites(debug=False)
+            ans = b.queryById(ans['id'])
         if is_table:
             cols = ["id", "name", "status"]
             table_layout("CCS Site:{}".format(

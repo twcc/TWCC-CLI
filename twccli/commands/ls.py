@@ -374,7 +374,7 @@ def cli():
               '--network',
               'res_property',
               flag_value='Network',
-              help="List existing network in TWCC VCS.")
+              help="Using 'ls vnet' next version, List existing network in TWCC VCS.")
 @click.option('-ptype',
               '--product-type',
               'res_property',
