@@ -356,10 +356,10 @@ class VcsSite(CpuService):
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
 
-        data_vol_type = {  # "hdd": "hdd", # not open yet
-            "ssd": "ssd",
+        data_vol_type = {"hdd": "hdd"} # only support this 2020/12/22
+            #"ssd": "ssd",
             # "hdd-encrypt": "LUKS-hdd", # no open yet
-            "ssd-encrypt": "LUKS-ssd"}
+            #"ssd-encrypt": "LUKS-ssd"}
 
         extra_prop["volume-type"] = data_vol_type
         extra_prop["volume-size"] = 0

@@ -52,7 +52,12 @@ class TestVcsLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
-
+    def _create_vnet(self):
+        vnet_name = 'twccli_{}'.format(str(uuid.uuid1()).split("-")[0])
+        cmd_list = "mk vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.1 -json -wait".format(vnet_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+        self.vnet_id = json.loads(out)['id']
     def _create_vcs(self):
         paras = ["mk", "vcs",
                 "--name",           self.key_name,
@@ -61,7 +66,7 @@ class TestVcsLifecyc:
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
-                "--data-volume-type", "ssd-encrypt",
+                "--data-volume-type", "hdd",
                 "--data-volume-size", "1",
                 "-wait", "-json"
                 ]
@@ -122,13 +127,23 @@ class TestVcsLifecyc:
                     return True
         raise Exception("Error, can not find port {}".format(self.ext_port))
 
+    def _del_vnet(self):
+        cmd_list = "rm vnet -id {} --force".format(self.vnet_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+        print(out)
     def _del_secg(self):
         cmd_list = "rm vcs -secg --force {} --site-id {}".format(self.secg_id, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
 
-
+    def test_virtual_network(self):
+        self._loadParams()
+        self._loadSession()
+        self._create_vnet()
+        self._del_vnet()
+        
     def test_lifecycle(self):
         self._loadParams()
         self._loadSession()

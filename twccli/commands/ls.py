@@ -374,7 +374,7 @@ def cli():
               '--network',
               'res_property',
               flag_value='Network',
-              help="List existing network in TWCC VCS.")
+              help="Using 'ls vnet' next version, List existing network in TWCC VCS.")
 @click.option('-ptype',
               '--product-type',
               'res_property',
@@ -677,13 +677,49 @@ def bss(ctx, name, ids_or_names, is_all, is_table):
     """
     ids_or_names = mk_names(name, ids_or_names)
     list_volume(ids_or_names, is_all, is_table)
-    
+
+@click.option('-id', '--virtual_network_id', 'vnetid', type=int,
+              help="Index of the volume.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the volumes.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your Virtual Network.")
+@click.pass_context
+def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
+    """Command line for list virtual network
+
+    :param vnetid: Enter name for your resources.
+    :type vnetid: string
+    """
+    ids_or_names = mk_names(vnetid, ids_or_names)
+    net = Networks()
+    if len(ids_or_names) > 0:
+        ans = [net.queryById(x) for x in ids_or_names]
+        cols = [
+            "id", "name", "cidr", "create_time", "gateway", "nameservers",
+            "status", "user"
+        ]
+    else:
+        ans = net.list()
+        cols = ["id", "name", "cidr", "create_time", "status"]
+    if is_table:
+        table_layout("VCS Networks", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
 cli.add_command(bss)
+cli.add_command(vnet)
 
 def main():
     cli()
