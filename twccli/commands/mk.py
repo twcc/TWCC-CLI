@@ -154,7 +154,6 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        virtual_network,getway,cidr,
         flavor, img_name, wait, network, snapshot, sol, fip, is_table):
     """Command line for create VCS
 
