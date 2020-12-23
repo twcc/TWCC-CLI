@@ -28,20 +28,24 @@ def create_commit(site_id, tag, isAll=False):
 def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
     """Create load balance by name
 
-    :param vlb_name: Enter volume name
+    :param vlb_name: Enter Load Balancer name
     :type vlb_name: string
     """
     if not name_validator(vlb_name):
         raise ValueError(
-            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vlb_name))
     vlb = LoadBalancers()
+    allvlb = vlb.list()
+    if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
+        raise ValueError(
+            "Name '{0}' is duplicate.".format(vlb_name))
     ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
     if wait:
         doSiteReady(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
     if is_table:
-        cols = ['id', 'name',  'create_time', 'private_net_name','status','pools_method']
-        table_layout("Volumes", ans, cols, isPrint=True)
+        cols = ['id', 'name',  'create_time', 'status']
+        table_layout("Load Balancer", ans, cols, isPrint=True)
     else:
         jpp(ans)
 
