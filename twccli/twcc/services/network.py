@@ -17,6 +17,11 @@ class Networks(CpuService):
         self.http_verb = 'post'
         self.data_dic = {'project': self._project_id,'name':name, 'gateway':getway,'cidr':cidr,"with_router":True }
         return self._do_api()
+
+    def isReady(self, vnet_id):
+        vnet_info = self.queryById(vnet_id)
+        return vnet_info['status'] == "ACTIVE"
+
     def delete(self,vnet_id):
         self.http_verb = 'delete'
         self.url_dic = {'networks':vnet_id}
