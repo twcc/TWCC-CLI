@@ -95,7 +95,7 @@ class TestVcsLifecyc:
         self.vcs_id = json.loads(out)['id']
 
     def _list_vcs(self):
-        cmd_list = "ls vcs -json {}".format(self.vcs_id)
+        cmd_list = "ls vcs -json -s {}".format(self.vcs_id)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
 
