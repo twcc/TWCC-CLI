@@ -1,7 +1,7 @@
 import re
 import time
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -72,6 +72,7 @@ def list_vcs_img(sol_name, is_table):
                      "image-type", "image"], isPrint=True, isWrap=False)
     else:
         jpp(ans)
+
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
@@ -163,11 +164,51 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-size'] = str(data_vol_size)
         if not data_vol in extra_props['x-extra-property-volume-type'].keys():
             raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
-                                                                            ", ".join(extra_props['x-extra-property-volume-type'].keys())))
+                                                                                     ", ".join(extra_props['x-extra-property-volume-type'].keys())))
         required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
 
     return vcs.create(name, exists_sol[sol], required)
-def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_print=True):
+
+
+def change_loadbalancer(vlb_id, members, lb_method, is_table):
+    # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
+
+    vlb = LoadBalancers()
+    vlb_ans = vlb.list(vlb_id)
+    member_list = []
+    for member in members:
+        member_list.append(
+            {'ip': member.split(':')[0], 'port': member.split(':')[1], 'weight': 1})
+    before_pools = vlb_ans['pools']
+    pools_id = before_pools[0]['id']
+    pools_name = before_pools[0]['name']
+    pools_protocol = before_pools[0]['protocol']
+    lb_method = lb_method if not lb_method == None else before_pools[0]['method']
+    pools = [{'name': pools_name, 'method': lb_method,
+              'protocol': pools_protocol, 'members': member_list}]
+    vlb_ans_listeners = vlb_ans['listeners']
+    for listener in vlb_ans_listeners:
+        listener['pool_name'] = pools_name
+        del listener['default_tls_container_ref']
+        del listener['sni_container_refs']
+    ans = vlb.update(vlb_id, vlb_ans_listeners, pools)
+    # for this_ans_pool in ans['pools']:
+    #     this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
+    # this_ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(this_ans_listeners['name'],this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
+
+    cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
+            'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Load Balancers Info.:", ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
+
+
+def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_print=True):
     if len(ids_or_names) > 0:
         vol = Volumes()
         ans = []
@@ -175,10 +216,10 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_pri
             srvid = getServerId(site_id) if not isNone(site_id) else None
             this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
             # if detach with wrong site_id, return b'', but with correct site_id, return b'' ...
-            if vol_status in ['attach','extend'] and 'detail' in this_ans:
+            if vol_status in ['attach', 'extend'] and 'detail' in this_ans:
                 is_table = False
                 ans.append(this_ans)
-        if not ans:    
+        if not ans:
             for vol_id in ids_or_names:
                 ans.append(vol.list(vol_id))
             for the_vol in ans:
@@ -186,7 +227,7 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_pri
                     the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         raise ValueError
-    cols = ['id', 'name', 'size', 'create_time', 'status','mountpoint']
+    cols = ['id', 'name', 'size', 'create_time', 'status', 'mountpoint']
     if len(ans) > 0:
         if is_table:
             table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
@@ -194,21 +235,21 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait,is_pri
         else:
             jpp(ans)
 
-def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
+
+def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
     vcs = VcsSite()
     ans = []
-    
+
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'private_ip',
-                'private_network', 'create_time', 'status']
-        
-        for i,site_id in enumerate(ids_or_names):        
+        cols = ['id', 'name', 'public_ip','create_time', 'status']
+
+        for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
             if status == 'stop':
                 # Free public IP
                 if not isNone(srvid):
-                    if re.findall('[0-9.]+',ans[i]['public_ip']):
+                    if re.findall('[0-9.]+', ans[i]['public_ip']):
                         VcsServerNet().deAssociateIP(site_id)
                 vcs.stop(site_id)
             elif status == 'ready':
@@ -216,23 +257,24 @@ def change_vcs(ids_or_names,status,is_table,wait,is_print=True):
     else:
         raise ValueError
     if wait and status == 'stop':
-        for i,site_id in enumerate(ids_or_names): 
+        for i, site_id in enumerate(ids_or_names):
             doSiteStopped(site_id)
     if wait and status == 'ready':
-        for i,site_id in enumerate(ids_or_names): 
+        for i, site_id in enumerate(ids_or_names):
             doSiteReady(site_id, site_type='vcs')
     if len(ans) > 0:
         ans = []
-        for i,site_id in enumerate(ids_or_names):        
+        for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
         if not is_print:
             return ans
-
         if is_table:
             table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
                 site_id), ans, cols, isPrint=True)
         else:
             jpp(ans)
+
+
 def del_vcs(ids_or_names, isForce=False):
     """delete a vcs
 
@@ -247,6 +289,8 @@ def del_vcs(ids_or_names, isForce=False):
             for ele in ids_or_names:
                 vsite.delete(ele)
                 print("VCS resources {} deleted.".format(ele))
+
+
 def doSiteStopped(site_id):
     b = VcsSite()
     wait_ready = False
@@ -255,6 +299,7 @@ def doSiteStopped(site_id):
             wait_ready = True
         time.sleep(5)
     return site_id
+
 
 def doSiteReady(site_id, site_type='cntr'):
     """Check if site is created or not
@@ -270,6 +315,8 @@ def doSiteReady(site_id, site_type='cntr'):
         b = VcsSite()
     elif site_type == 'vnet':
         b = Networks()
+    elif site_type == 'vlb':
+        b = LoadBalancers()
     else:
         ValueError("Error")
 

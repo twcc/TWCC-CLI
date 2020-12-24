@@ -356,6 +356,7 @@ class VcsSite(CpuService):
 
         name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
 
+
         data_vol_type = {"hdd": "hdd"} # only support this 2020/12/22
             #"ssd": "ssd",
             # "hdd-encrypt": "LUKS-hdd", # no open yet
@@ -528,7 +529,44 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+class LoadBalancers(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "loadbalancers"
+        self._csite_ = Session2._getClusterName("VCS")
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+        self.http_verb = 'post'
+        self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
+        return self._do_api()
+    
+    def update(self, vlb_id, listeners, pools):
+        self.http_verb = 'patch'
+        self.url_dic = {"loadbalancers": vlb_id}
+        self.data_dic = {'pools':pools, 'listeners':listeners}
+        return self._do_api()
 
+    def isReady(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "ACTIVE"
+
+    def list(self, vlb_id=None, isAll=False):
+        if isNone(vlb_id):
+            if isAll:
+                self.ext_get = {'project': self._project_id,
+                                "all_users": 1}
+            else:
+                self.ext_get = {'project': self._project_id}
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"loadbalancers": vlb_id}
+
+        return self._do_api()
+
+    def deleteById(self, vlb_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"loadbalancers": vlb_id}
+        return self._do_api()
 class Volumes(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)

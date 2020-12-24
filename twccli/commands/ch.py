@@ -5,7 +5,7 @@ import json
 # , pp, jpp, table_layout, SpinCursor, isNone,
 from twccli.twcc.util import mk_names
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_volume
+from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -95,9 +95,48 @@ def bss(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
         change_volume(ids_or_names, vol_status,
                       site_id, is_table, vol_size, wait)
 
+@click.option('-m', '--member', type=str,
+              help="Index of the volume.")
+@click.option('-id', '--vlb-id', 'vlb_id', type=str,
+              help="Index of the volume.")
+@click.option('-lm', '--lb_method', type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
+              help="Method of the load balancer.")
+# @click.option('-ln', '--listener-name', 'listener_name', type=str,multiple=True,
+#               help="listener name of the load balancer.")
+@click.option('-wait', '--wait', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your instance to be provisioned.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('more_members', nargs=-1)
+@click.command(help="Update status of your vlb.")
+@pass_environment
+def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table): #listener_name
+    """Command line for list vlb
+
+    :param vlb_id: Enter id for your load balancer.
+    :type vlb_id: string
+    :param member: Enter member for your load balancer.
+    :type member: string
+    :param more_members: more than one member
+    :type more_members: string
+    :param lb_methods: Enter mehtod for your load balancer.
+    :type lb_methods: string
+    :param wait: Wait until resources are provisioned
+    :type wait: bool
+    :param is_table: Set this flag table view or json view
+    :type is_table: bool
+
+    example: 'twccli ch vlb -m 1.1.1.1:80  2.2.2.2:50'
+    """
+    
+    members = mk_names(member, more_members)
+    change_loadbalancer(vlb_id,members,lb_method,is_table)
 
 cli.add_command(vcs)
 cli.add_command(bss)
+cli.add_command(vlb)
 
 
 def main():

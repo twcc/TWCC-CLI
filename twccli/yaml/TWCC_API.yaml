@@ -49,6 +49,14 @@ avalible_funcs:
       http_verb:
         - 'get'
     -
+      name: "loadbalancers"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+        - 'patch'
+    -
       name: "snapshots"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
