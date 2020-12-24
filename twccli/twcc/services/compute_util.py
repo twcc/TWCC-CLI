@@ -241,8 +241,7 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
     ans = []
 
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'private_ip',
-                'private_network', 'create_time', 'status']
+        cols = ['id', 'name', 'public_ip','create_time', 'status']
 
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
@@ -269,7 +268,6 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
             ans.extend([vcs.queryById(site_id)])
         if not is_print:
             return ans
-
         if is_table:
             table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
                 site_id), ans, cols, isPrint=True)
