@@ -53,7 +53,13 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
     else:
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         ans = vcs.list(is_all)
-
+    for each_vcs in ans:
+        if each_vcs['status']=="NotReady":
+            each_vcs['status']="Stopped"
+        if each_vcs['status']=="Shelving":
+            each_vcs['status']="Stopping"
+        if each_vcs['status']=="Unshelving":
+            each_vcs['status']="Starting"
     if len(ans) > 0:
         if not is_print:
             return ans
@@ -266,6 +272,13 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
         ans = []
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
+        for each_vcs in ans:
+            if each_vcs['status']=="NotReady":
+                each_vcs['status']="Stopped"
+            if each_vcs['status']=="Shelving":
+                each_vcs['status']="Stopping"
+            if each_vcs['status']=="Unshelving":
+                each_vcs['status']="Starting"
         if not is_print:
             return ans
         if is_table:
