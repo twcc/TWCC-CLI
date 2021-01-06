@@ -68,15 +68,15 @@ class GenericService(object):
         return self.twcc.try_alive()
 
     def _do_api(self):
-        if self._debug_:
-            pp(csite=self._csite_,
-                func=self._func_,
-                res_type=self.res_type)
+        # if self._debug_:
+        #     pp(csite=self._csite_,
+        #         func=self._func_,
+        #         res_type=self.res_type)
 
-            if not isNone(self.url_dic):
-                pp(url_dic=self.url_dic)
-            if not isNone(self.data_dic):
-                pp(data_dic=self.data_dic)
+        #     if not isNone(self.url_dic):
+        #         pp(url_dic=self.url_dic)
+        #     if not isNone(self.data_dic):
+        #         pp(data_dic=self.data_dic)
 
         res = self.twcc.doAPI(
             site_sn=self._csite_,
@@ -88,8 +88,8 @@ class GenericService(object):
             url_ext_get=self.ext_get,
             res_type=self.res_type)
 
-        if self._debug_:
-            pp(res=res)
+        # if self._debug_:
+        #     pp(res=res)
 
         return res
 
