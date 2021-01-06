@@ -214,6 +214,11 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         ans = []
         for vol_id in ids_or_names:
             srvid = getServerId(site_id) if not isNone(site_id) else None
+            this_ans = vol.list(vol_id)
+            if this_ans['volume_type'] =='ssd':
+                ans.append({"detail": "Invalid volume: SSD Volume could not to extend"})
+                is_table = False
+                continue
             this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
             # if detach with wrong site_id, return b'', but with correct site_id, return b'' ...
             if vol_status in ['attach', 'extend'] and 'detail' in this_ans:
@@ -227,7 +232,7 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
                     the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         raise ValueError
-    cols = ['id', 'name', 'size', 'create_time', 'status', 'mountpoint']
+    cols = ['id', 'name', 'size', 'create_time','volume_type' , 'status', 'mountpoint']
     if len(ans) > 0:
         if is_table:
             table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
