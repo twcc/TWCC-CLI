@@ -29,8 +29,8 @@ def whoami(ctx, verbose):
 
 
 @click.command(help='Configure the TWCC CLI.')
-@click.option("-v", "--verbose", is_flag=True,
-              help="Enable verbose mode.")
+@click.option('-ua', '--user-agent', 'user_agent',
+              help="Meta data to define cli doing for")
 @click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey',
@@ -38,7 +38,7 @@ def whoami(ctx, verbose):
 @click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
               help="Set bashrc parameters.")
 @pass_environment
-def init(ctx, apikey, proj_code, rc, verbose):
+def init(env, apikey, proj_code, rc, user_agent):
     """Constructor method
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
@@ -50,14 +50,14 @@ def init(ctx, apikey, proj_code, rc, verbose):
     :param rc_setting: Set bashrc parameters.
     :type rc_setting: bool
     """
-    ctx.verbose = verbose
     if not Session2._isValidSession():
         if isNone(apikey):
             if 'TWCC_API_KEY' in os.environ:
                 apikey = os.environ['TWCC_API_KEY']
         else:
             os.environ['TWCC_API_KEY'] = apikey
-
+        if not isNone(user_agent):
+            os.environ['User_Agent'] = user_agent
         if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:
             proj_code = os.environ['TWCC_PROJ_CODE']
 
@@ -67,13 +67,12 @@ def init(ctx, apikey, proj_code, rc, verbose):
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
                 'Please enter TWCC project code', type=str)
-
         if validate(apikey):
             proj_code = proj_code.upper()
-            ctx.vlog("Receiving Project Code: %s", (proj_code))
-            ctx.vlog("Receiving API Key: %s", (apikey))
-
-            Session2(twcc_api_key=apikey, twcc_project_code=proj_code)
+            if env.verbose:
+                logger.info("Receiving Project Code: {}".format(proj_code))
+                logger.info("Receiving API Key: {}".format(apikey))
+            Session2(twcc_api_key=apikey, twcc_project_code=proj_code, user_agent = user_agent)
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
@@ -88,7 +87,8 @@ def init(ctx, apikey, proj_code, rc, verbose):
         else:
             raise ValueError("API Key is not validated.")
     else:
-        ctx.log("load credential from {}".format(Session2()._getSessionFile()))
+        if env.verbose:
+            logger.info("load credential from {}".format(Session2()._getSessionFile()))
         print(Session2())
 
 @click.command(help='Show this version.')

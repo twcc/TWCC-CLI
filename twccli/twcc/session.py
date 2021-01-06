@@ -20,7 +20,8 @@ class Session2(object):
     def __init__(self, twcc_data_path=None,
                  twcc_api_key=None,
                  twcc_file_session=None,
-                 twcc_project_code=None):
+                 twcc_project_code=None,
+                 user_agent=None):
         """
         Session2 controls all TWCC API required information,
         incl. api_key, s3 keys, project code, parameters in user environment.
@@ -44,12 +45,25 @@ class Session2(object):
         self.twcc_file_resources = Session2._getResourceFile()
         self.twcc_proj_code = Session2._getDefaultProject(twcc_project_code)
         self.package_yaml = Session2.PackageYaml
-
+        self.user_agent = user_agent
         if self.isValidSession():
             self.isInitialized = True
             self.loadSession()
         else:
             self._initSession()
+            
+    def getUserAgent():
+        if 'User_Agent' in os.environ and len(os.environ['User_Agent'])>0:
+            return os.environ['User_Agent']
+        else:
+            yaml = Session2._isValidSession(isConfig=True)
+            if type(yaml) == bool:
+                return None
+            else:
+                if 'user_agent' in yaml['_meta']:
+                    return yaml['_meta']['user_agent']
+                else:
+                    return None
 
     def _initSession(self):
 
@@ -275,6 +289,9 @@ class Session2(object):
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
+        user_agent = Session2.getUserAgent()
+        if not isNone(user_agent):
+            sessionData["_meta"]['user_agent'] = user_agent
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']

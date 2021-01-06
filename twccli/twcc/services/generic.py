@@ -18,7 +18,7 @@ class GenericService(object):
         self._res_type_ = "json"
         self._debug_ = isDebug()
         self._api_key_ = Session2._getApiKey(api_key)
-
+        self._user_agent = Session2.getUserAgent()
         self.twcc = ServiceOperation(api_key=api_key)
 
         self.twcc._debug = isDebug()
@@ -81,6 +81,7 @@ class GenericService(object):
         res = self.twcc.doAPI(
             site_sn=self._csite_,
             api_key=self._api_key_,
+            user_agent = self._user_agent,
             func=self._func_.lower(),
             url_dict=self.url_dic if not isNone(self.url_dic) else None,
             data_dict=self.data_dic if not isNone(self.data_dic) else None,
