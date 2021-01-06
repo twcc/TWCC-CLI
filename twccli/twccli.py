@@ -19,7 +19,7 @@ except:
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
+    
     logger.add(os.path.join(log_dir, "twcc.log"), format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
                rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
 else:
@@ -129,8 +129,9 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS, cls=TWCCLI)
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
+@click.option("-sv", "--show_and_verbose", is_flag=True, help="Enables verbose mode and show in console.")
 @pass_environment
-def cli(env, verbose):
+def cli(env, verbose, show_and_verbose):
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
@@ -141,6 +142,9 @@ def cli(env, verbose):
         -- You Succeed, We Succeed!! --
     """
     env.verbose = verbose
+    if show_and_verbose:
+        env.verbose = True
+        logger.add(sys.stderr, level="DEBUG")
     pass
 
 

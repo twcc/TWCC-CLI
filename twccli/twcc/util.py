@@ -6,6 +6,7 @@ import time
 import pytz
 import datetime
 import unicodedata
+from twccli.twccli import pass_environment
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
@@ -27,9 +28,9 @@ def jpp(inobj):
     print(json.dumps(inobj, ensure_ascii=False,
                      sort_keys=True, indent=4, separators=(',', ': ')))
 
-
-def isDebug():
-    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" else False
+@pass_environment
+def isDebug(env):
+    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" or env.verbose else False
 
 
 def strShorten(mstr, max_len=6):
