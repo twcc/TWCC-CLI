@@ -18,7 +18,7 @@ class GenericService(object):
         self._res_type_ = "json"
         self._debug_ = isDebug()
         self._api_key_ = Session2._getApiKey(api_key)
-        self._user_agent = Session2.getUserAgent()
+        self._user_agent = Session2._getUserAgent()
         self.twcc = ServiceOperation(api_key=api_key)
 
         self.twcc._debug = isDebug()
