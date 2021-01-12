@@ -165,14 +165,15 @@ class TestVcsLifecyc:
         self._create_vnet()
         self._del_vnet()
         
-    def test_vlb(self):
-        self._loadParams()
-        self._loadSession()
-        self._create_vlb()
-        self._add_member_vlb()
-        import time
-        time.sleep(120)
-        self._delete_vlb()
+    # def test_vlb(self):
+    #     self._loadParams()
+    #     self._loadSession()
+    #     # 2021 3rd week, vlb connot create
+    #     self._create_vlb()
+    #     self._add_member_vlb()
+    #     import time
+    #     time.sleep(120)
+    #     self._delete_vlb()
 
     def test_lifecycle(self):
         self._loadParams()
