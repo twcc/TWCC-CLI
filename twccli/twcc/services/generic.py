@@ -71,8 +71,8 @@ class GenericService(object):
     def _do_api(self):
         if self._debug_:
             logger_info = {'csite':self._csite_,'func':self._func_,'res_type':self.res_type}
-            if not isNone(self.url_dic): logger_info.update({url_dic:self.url_dic})
-            if not isNone(self.data_dic): logger_info.update({data_dic:self.data_dic})
+            if not isNone(self.url_dic): logger_info.update({'url_dic':self.url_dic})
+            if not isNone(self.data_dic): logger_info.update({'data_dic':self.data_dic})
             logger.info(logger_info)
         #     pp(csite=self._csite_,
         #         func=self._func_,
