@@ -152,6 +152,7 @@ class ServiceOperation:
               api_host=None,
               key_tag=None,
               api_key=None,
+              user_agent=None,
               ctype="application/json",
               func=None,
               url_dict=None,
@@ -175,6 +176,7 @@ class ServiceOperation:
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
+                                 user_agent = user_agent,
                                  ctype=ctype)
         if not isNone(url_ext_get):
             t_url += "?"
@@ -198,6 +200,7 @@ class ServiceOperation:
                  key_tag=None,
                  api_host=None,
                  api_key=None,
+                 user_agent=None,
                  ctype="application/json"):
 
         self.api_host = api_host
@@ -205,8 +208,12 @@ class ServiceOperation:
         self.ctype = ctype
 
         from twccli.version import __version__
+        if not user_agent == None:
+            this_user_agent = user_agent
+        else:
+            this_user_agent = 'TWCC-CLI v%s' % (__version__)
         return_header = {
-            'User-Agent': 'TWCC-CLI v%s' % (__version__),
+            'User-Agent': this_user_agent,
             'X-API-HOST': site_sn,
             'x-api-key': api_key,
             'Content-Type': self.ctype
