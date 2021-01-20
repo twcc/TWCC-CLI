@@ -620,9 +620,11 @@ def getServerId(site_id):
     sites = vcs.queryById(site_id)
     if not 'id' in sites:
         raise ValueError("Site ID: {} is not found.".format(site_id))
-    if len(sites['servers']) == 1:
+    if len(sites['servers']) >= 1:
         server_id = sites['servers'][0]
         return server_id
+    else:
+        raise ValueError("Site ID: {} , servers not found.".format(site_id))
 
 
 def getSecGroupList(site_id):
