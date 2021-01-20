@@ -624,7 +624,8 @@ def getServerId(site_id):
         server_id = sites['servers'][0]
         return server_id
     else:
-        raise ValueError("Site ID: {} , servers not found.".format(site_id))
+        return None
+        #raise ValueError("Site ID: {} , servers not found.".format(site_id))
 
 
 def getSecGroupList(site_id):
