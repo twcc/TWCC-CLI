@@ -5,6 +5,7 @@ import yaml
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, isNone, isDebug
 from twccli.twcc.clidriver import ServiceOperation
+from twccli.twccli import logger
 
 # change to new-style-class https://goo.gl/AYgxqp
 
@@ -18,7 +19,7 @@ class GenericService(object):
         self._res_type_ = "json"
         self._debug_ = isDebug()
         self._api_key_ = Session2._getApiKey(api_key)
-
+        self._user_agent = Session2._getUserAgent()
         self.twcc = ServiceOperation(api_key=api_key)
 
         self.twcc._debug = isDebug()
@@ -69,18 +70,23 @@ class GenericService(object):
 
     def _do_api(self):
         if self._debug_:
-            pp(csite=self._csite_,
-                func=self._func_,
-                res_type=self.res_type)
+            logger_info = {'csite':self._csite_,'func':self._func_,'res_type':self.res_type}
+            if not isNone(self.url_dic): logger_info.update({'url_dic':self.url_dic})
+            if not isNone(self.data_dic): logger_info.update({'data_dic':self.data_dic})
+            logger.info(logger_info)
+        #     pp(csite=self._csite_,
+        #         func=self._func_,
+        #         res_type=self.res_type)
 
-            if not isNone(self.url_dic):
-                pp(url_dic=self.url_dic)
-            if not isNone(self.data_dic):
-                pp(data_dic=self.data_dic)
+        #     if not isNone(self.url_dic):
+        #         pp(url_dic=self.url_dic)
+        #     if not isNone(self.data_dic):
+        #         pp(data_dic=self.data_dic)
 
         res = self.twcc.doAPI(
             site_sn=self._csite_,
             api_key=self._api_key_,
+            user_agent = self._user_agent,
             func=self._func_.lower(),
             url_dict=self.url_dic if not isNone(self.url_dic) else None,
             data_dict=self.data_dic if not isNone(self.data_dic) else None,
@@ -89,7 +95,8 @@ class GenericService(object):
             res_type=self.res_type)
 
         if self._debug_:
-            pp(res=res)
+            logger.info({'res':res})
+        #     pp(res=res)
 
         return res
 
