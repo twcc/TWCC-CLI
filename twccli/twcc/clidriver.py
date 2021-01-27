@@ -170,8 +170,11 @@ class ServiceOperation:
             raise ValueError("Function for:'{0}' is not valid".format(func))
         if not http in set(self.valid_http_verb[func]):
             raise ValueError("http verb:'{0}' is not valid".format(http))
-        
-        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
+
+        mkAPIUrl_v3 = False
+        if http == 'get':
+            mkAPIUrl_v3 = True
+        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict, is_v3=mkAPIUrl_v3)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
@@ -259,7 +262,7 @@ class ServiceOperation:
         logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
         logger.info("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
-    def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None):
+    def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None, is_v3=True):
 
         # check if this function valid
         if not self.isFunValid(func):
@@ -300,10 +303,13 @@ class ServiceOperation:
         t_url = url_str
         for ptn in url_parts.keys():
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
+
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and isV3(url_parts['FUNCTION']):
-            t_url = t_url.replace("/v2/", "/v3/")
+                'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
+                    'FUNCTION'] == 'sites':
+            if is_v3:
+                t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
 
 def isV3(fun_str):
