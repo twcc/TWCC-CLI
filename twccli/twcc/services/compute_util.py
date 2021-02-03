@@ -272,7 +272,7 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
             doSiteStopped(site_id)
     if wait and status == 'ready':
         for i, site_id in enumerate(ids_or_names):
-            doSiteReady(site_id, site_type='vcs')
+            doSiteStable(site_id, site_type='vcs')
     if len(ans) > 0:
         ans = []
         for i, site_id in enumerate(ids_or_names):
@@ -319,7 +319,7 @@ def doSiteStopped(site_id):
     return site_id
 
 
-def doSiteReady(site_id, site_type='cntr'):
+def doSiteStable(site_id, site_type='cntr'):
     """Check if site is created or not
 
     :param site_id: Enter site id
@@ -340,7 +340,7 @@ def doSiteReady(site_id, site_type='cntr'):
 
     wait_ready = False
     while not wait_ready:
-        if b.isReady(site_id):
+        if b.isStable(site_id):
             wait_ready = True
         time.sleep(5)
     return site_id

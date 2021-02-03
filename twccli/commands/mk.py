@@ -12,7 +12,7 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 from twccli.twcc.services.network import Networks
-from twccli.twcc.services.compute_util import doSiteReady, create_vcs
+from twccli.twcc.services.compute_util import doSiteStable, create_vcs
 from twccli.twccli import pass_environment, logger
 
 def create_commit(site_id, tag, isAll=False):
@@ -41,7 +41,7 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
             "Name '{0}' is duplicate.".format(vlb_name))
     ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
     if wait:
-        doSiteReady(ans['id'], site_type='vlb')
+        doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
@@ -233,7 +233,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         ans["flavor"] = flavor
 
         if wait:
-            doSiteReady(ans['id'], site_type='vcs')
+            doSiteStable(ans['id'], site_type='vcs')
             vcs = VcsSite()
             ans = vcs.queryById(ans['id'])
             ans["solution"] = sol
@@ -337,7 +337,7 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
     else:
         ans = create_cntr(name, gpu, sol, img_name)
         if wait:
-            doSiteReady(ans['id'])
+            doSiteStable(ans['id'])
             b = Sites(debug=False)
             ans = b.queryById(ans['id'])
         if is_table:
@@ -378,7 +378,7 @@ def vnet(env, name, getway, cidr, is_table, wait):
         raise ValueError("CIDR format error")
     ans = net.create(name,getway,cidr)
     if wait:
-        doSiteReady(ans['id'], site_type='vnet')
+        doSiteStable(ans['id'], site_type='vnet')
         ans = net.queryById(ans['id'])
     if is_table:
         cols = ["id", "name", "cidr","status"]

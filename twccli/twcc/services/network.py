@@ -18,7 +18,7 @@ class Networks(CpuService):
         self.data_dic = {'project': self._project_id,'name':name, 'gateway':getway,'cidr':cidr,"with_router":True }
         return self._do_api()
 
-    def isReady(self, vnet_id):
+    def isStable(self, vnet_id):
         vnet_info = self.queryById(vnet_id)
         return vnet_info['status'] == "ACTIVE"
 

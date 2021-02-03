@@ -213,9 +213,9 @@ class GpuSite(GpuService):
 
             return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
 
     def getDetail(self, site_id):
         self.url_dic = {"sites": site_id, 'container': ""}
@@ -405,9 +405,9 @@ class VcsSite(CpuService):
                          "solution": sol_id}
         return self._do_api()
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
     
     def isStopped(self, site_id):
         site_info = self.queryById(site_id)
@@ -545,7 +545,7 @@ class LoadBalancers(CpuService):
         self.data_dic = {'pools':pools, 'listeners':listeners}
         return self._do_api()
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "ACTIVE"
 
