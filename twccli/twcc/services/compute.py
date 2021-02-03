@@ -300,7 +300,7 @@ class VcsSite(CpuService):
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
-                    (177, "centos"), ]
+                    (177, "centos"), (4044, "dedi"), ]
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
