@@ -19,6 +19,8 @@ class TestVcsLifecyc:
         self.ext_port_range = "3000-3010"
         self.apikey = os.environ['TWCC_API_KEY']
         self.pcode = os.environ['TWCC_PROJ_CODE']
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__))),'a') as f:
+            f.write('  - !!python/tuple [4044,dedi]\n')
 
     def _loadSession(self):
         self.runner = CliRunner()
