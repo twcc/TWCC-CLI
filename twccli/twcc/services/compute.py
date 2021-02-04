@@ -2,6 +2,8 @@
 from __future__ import print_function
 import re
 import json
+import os
+import yaml
 from twccli.twcc.session import Session2
 from twccli.twcc.services.generic import GpuService, CpuService
 from twccli.twcc.services.solutions import solutions
@@ -300,7 +302,11 @@ class VcsSite(CpuService):
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
-                    (177, "centos"), (4044, "dedi"), ]
+                    (177, "centos"), ]
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        if 'extra_sol' in config and not isNone(config['extra_sol']):
+            sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
