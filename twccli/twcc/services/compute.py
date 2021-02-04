@@ -2,6 +2,8 @@
 from __future__ import print_function
 import re
 import json
+import os
+import yaml
 from twccli.twcc.session import Session2
 from twccli.twcc.services.generic import GpuService, CpuService
 from twccli.twcc.services.solutions import solutions
@@ -213,9 +215,9 @@ class GpuSite(GpuService):
 
             return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
 
     def getDetail(self, site_id):
         self.url_dic = {"sites": site_id, 'container': ""}
@@ -301,6 +303,10 @@ class VcsSite(CpuService):
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"), ]
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        if 'extra_sol' in config and not isNone(config['extra_sol']):
+            sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -405,9 +411,9 @@ class VcsSite(CpuService):
                          "solution": sol_id}
         return self._do_api()
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
     
     def isStopped(self, site_id):
         site_info = self.queryById(site_id)
@@ -545,7 +551,7 @@ class LoadBalancers(CpuService):
         self.data_dic = {'pools':pools, 'listeners':listeners}
         return self._do_api()
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "ACTIVE"
 
