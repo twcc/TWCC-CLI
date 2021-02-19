@@ -54,8 +54,6 @@ class TestVcsLifecyc:
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
-                "--data-volume-type", "ssd-encrypt",
-                "--data-volume-size", "1",
                 "-wait", "-json"
                 ]
         print(" ".join(paras))
