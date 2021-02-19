@@ -286,7 +286,7 @@ class VcsSite(CpuService):
             self.ext_get = {'project': self._project_id}
 
         return self._do_api()
-        
+
     def stop(self, site_id):
         self.data_dic = {"status": "shelve"}
         self.url_dic = {'sites': site_id, 'action': ""}
@@ -294,7 +294,7 @@ class VcsSite(CpuService):
         return self._do_api()
 
     def start(self, site_id):
-        self.data_dic = {"status": "unshelve"} 
+        self.data_dic = {"status": "unshelve"}
         self.url_dic = {'sites': site_id, 'action': ""}
         self.http_verb = 'put'
         return self._do_api()
@@ -303,10 +303,15 @@ class VcsSite(CpuService):
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"), ]
-        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-        if 'extra_sol' in config and not isNone(config['extra_sol']):
-            sol_list.extend(config['extra_sol'])
+        import os.path
+        from os import path
+        backdoor_fn = '{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+        if path.exists(backdoor_fn):
+            with open(backdoor_fn,'r') as f:
+                config = yaml.load(f, Loader=yaml.FullLoader)
+            if 'extra_sol' in config and not isNone(config['extra_sol']):
+                sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -414,7 +419,7 @@ class VcsSite(CpuService):
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready" or site_info['status'] == "Error"
-    
+
     def isStopped(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "NotReady"
@@ -544,7 +549,7 @@ class LoadBalancers(CpuService):
         self.http_verb = 'post'
         self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
         return self._do_api()
-    
+
     def update(self, vlb_id, listeners, pools):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
@@ -588,7 +593,7 @@ class Volumes(CpuService):
         self.http_verb = 'delete'
         self.url_dic = {"volumes": sys_vol_id}
         return self._do_api()
-    
+
     def update(self, sys_vol_id, vol_status, srvid, size, wait):
         self.http_verb = 'put'
         self.url_dic = {"volumes": sys_vol_id, "action":""}
@@ -617,8 +622,8 @@ class Volumes(CpuService):
             self.res_type = 'json'
             self.url_dic = {"volumes": sys_vol_id}
             return self._do_api()
-        
-        
+
+
 
 
 def getServerId(site_id):
