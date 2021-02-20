@@ -62,12 +62,12 @@ def list_s3():
     print(b.getAvblS3())
 
 
-def doSiteReady(site_id):
+def doSiteStable(site_id):
     b = sites(debug=False)
     wait_ready = False
     while not wait_ready:
         print("Waiting for container to be Ready.")
-        if b.isReady(site_id):
+        if b.isStable(site_id):
             wait_ready = True
         time.sleep(5)
     return site_id
@@ -115,7 +115,7 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img, isWait):
         print("Site id: {0} is created.".format(res['id']))
 
     if isWait:
-        doSiteReady(res['id'])
+        doSiteStable(res['id'])
     return int(res['id'])
 
 

@@ -5,7 +5,7 @@
 # Copyright: (c) 2018, Terry Jones <terry.jones@example.org>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 import re
-from twccli.twcc.services.compute_util import list_vcs, create_vcs, del_vcs, doSiteReady
+from twccli.twcc.services.compute_util import list_vcs, create_vcs, del_vcs, doSiteStable
 from twccli.twcc.services.compute import VcsServerNet
 
 def_state_map = {"Ready": "started",
@@ -141,7 +141,7 @@ def run_module():
                             keypair = module.params['keypair'],
                             sol = "ubuntu", flavor = 'v.xsuper', sys_vol = 'ssd')
                     if 'id' in ans:
-                        doSiteReady(ans['id'], site_type='vcs')
+                        doSiteStable(ans['id'], site_type='vcs')
                     result['changed'] = True
                     processed_vcs.append(str(ans['id']))
 

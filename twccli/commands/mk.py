@@ -4,15 +4,16 @@ import click
 import time
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
-from twccli.twcc.services.compute_util import doSiteReady, create_vcs
-
+from twccli.twcc.services.network import Networks
+from twccli.twcc.services.compute_util import doSiteStable, create_vcs
+from twccli.twccli import pass_environment, logger
 
 def create_commit(site_id, tag, isAll=False):
     ccs = Sites()
@@ -23,6 +24,47 @@ def create_commit(site_id, tag, isAll=False):
             '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
+
+def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
+    """Create load balance by name
+
+    :param vlb_name: Enter Load Balancer name
+    :type vlb_name: string
+    """
+    if not name_validator(vlb_name):
+        raise ValueError(
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vlb_name))
+    vlb = LoadBalancers()
+    allvlb = vlb.list()
+    if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
+        raise ValueError(
+            "Name '{0}' is duplicate.".format(vlb_name))
+    ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
+    if wait:
+        doSiteStable(ans['id'], site_type='vlb')
+        ans = vlb.list(ans['id'])
+    if is_table:
+        cols = ['id', 'name',  'create_time', 'status']
+        table_layout("Load Balancer", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
+
+def create_volume(vol_name, size, is_table):
+    """Create volume by name
+
+    :param vol_name: Enter volume name
+    :type vol_name: string
+    """
+    if not name_validator(vol_name):
+        raise ValueError(
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
+    vol = Volumes()
+    ans = vol.create(vol_name, size)
+    if is_table:
+        cols = ["id", "name", "size", "volume_type"]
+        table_layout("Volumes", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 def create_bucket(bucket_name):
     """Create bucket by name
@@ -86,7 +128,8 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 # end original function ==================================================
 
 # Create groups for command
-@click.group(help="Create (allocate) your TWCC resources.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="Create (allocate) your TWCC resources.")
 def cli():
     pass
 
@@ -100,24 +143,25 @@ def cli():
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
-@click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
-              show_default=True,
-              help="The product types (hardware configuration).")
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
               help="Name of the image.")
-@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
-              help="Name of the image type.")
 @click.option('-key', '--keypair', 'keypair',
               help="Name of the key pair for access your instance.")
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Name of the network.")
+@click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
+              help="Name of the image type.")
+@click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
+              show_default=True,
+              help="The product types (hardware configuration).")
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
+
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
-@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="SSD", type=str,
+@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the data volume.")
 @click.option('-dvol-size', '--data-volume-size', 'data_vol_size', type=int,
@@ -130,8 +174,9 @@ def cli():
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
 @click.argument('ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
         flavor, img_name, wait, network, snapshot, sol, fip, is_table):
     """Command line for create VCS
@@ -176,7 +221,6 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
             if name == 'twccli':
                 name += datetime.now().strftime("%d%m%H%M")
             return img.createSnapshot(sid, name, desc_str)
-
     else:
         if name == 'twccli':
             name = "{}_{}".format(name, flavor.split(".")[1])
@@ -189,8 +233,11 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
         ans["flavor"] = flavor
 
         if wait:
-            doSiteReady(ans['id'], site_type='vcs')
-
+            doSiteStable(ans['id'], site_type='vcs')
+            vcs = VcsSite()
+            ans = vcs.queryById(ans['id'])
+            ans["solution"] = sol
+            ans["flavor"] = flavor
         if is_table:
             cols = ["id", "name", "status"]
             table_layout("VCS Site", ans, cols, isPrint=True)
@@ -201,7 +248,8 @@ def vcs(ctx, keypair, name, ids_or_names, site_id, sys_vol,
 @click.option('-bkt', '--bucket_name', 'name', default="twccli", type=str,
               help="Name of the bucket.")
 @click.command(help="Create your COS (Cloud Object Storage) buckets.")
-def cos(name):
+@pass_environment
+def cos(env, name):
     """Command line for create cos
 
     :param name: Enter name for your resources.
@@ -213,7 +261,8 @@ def cos(name):
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of your instance.")
-def key(name):
+@pass_environment
+def key(env, name):
     """Command line for create key
 
     :param name: Enter name for your resources.
@@ -263,7 +312,8 @@ def key(name):
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
-def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
+@pass_environment
+def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
     """Command line for create ccs
 
     :param name: Enter name for your resources.
@@ -287,8 +337,9 @@ def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
     else:
         ans = create_cntr(name, gpu, sol, img_name)
         if wait:
-            doSiteReady(ans['id'])
-
+            doSiteStable(ans['id'])
+            b = Sites(debug=False)
+            ans = b.queryById(ans['id'])
         if is_table:
             cols = ["id", "name", "status"]
             table_layout("CCS Site:{}".format(
@@ -296,11 +347,131 @@ def ccs(name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
         else:
             jpp(ans)
 
+@click.option('-n', '--vnet_name', 'name', default="twccli", type=str,
+              help="Name of the virtual network.")
+@click.option('-gw', '--getway', 'getway',  type=str,
+              help="Virtual Network Getway")
+@click.option('-cidr', '--cidr', 'cidr',  type=str,
+              help="Classless Inter-Domain Routing")
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your virtual network to be builded.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your Virtual Network.")
+@pass_environment
+def vnet(env, name, getway, cidr, is_table, wait):
+    """Command line for create virtual network
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    net = Networks()
+    # TODO varify getway and cidr @Leo
+    import re
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',getway):
+        raise ValueError("Getway format error")
+    if not '/' in cidr:
+        raise ValueError("CIDR format error")
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',cidr.split('/')[0]):
+        raise ValueError("CIDR format error")
+    ans = net.create(name,getway,cidr)
+    if wait:
+        doSiteStable(ans['id'], site_type='vnet')
+        ans = net.queryById(ans['id'])
+    if is_table:
+        cols = ["id", "name", "cidr","status"]
+        table_layout("VCS Networks", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
+@click.option('-n', '--vol_name', 'name', default="twccli", type=str,
+              help="Name of the volume.")
+@click.option('-sz', '--vol-size', default=100, type=int, show_default=True,
+              help="Size of the volume.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your BSS.")
+def bss(name, vol_size, is_table):
+    """Command line for create bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param vol_size: Enter size for your resources.
+    :type vol_size: int
+    """
+    create_volume(name,vol_size,is_table)
+
+@click.option('-d', '--load_balance_description', 'vlb_desc',default="",show_default=True, type=str,
+              help="Description of the load balance.")
+@click.option('-n', '--load_balance_name', 'vlb_name', default="twccli_lb", type=str,
+              help="Name of the load balance.")
+@click.option('-lm', '--lb_method','lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),multiple=True,
+              help="Method of the load balancer.")
+@click.option('-lt', '--listener_type','listener_types',   default=["APP_LB"],show_default=True, type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
+              help="The type of the listener of balancer.")
+@click.option('-lp', '--listener_port','listener_ports',  default=["80"],show_default=True, multiple=True,
+              help="The port of the listener of balancer.")
+@click.option('-vnn', '--virtual_network_name', 'vnet_name', default="default_network",show_default=True , required=True, type=str,
+              help="Virtual Network id")
+@click.option('-wait', '--wait-ready', 'wait',
+              is_flag=True, default=False, flag_value=True,
+              help='Wait until your container to be provisioned.')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your Load Balancer.")
+def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, is_table, wait):
+    """Command line for create load balancer
+
+    :param vlb_name: Enter name for your load balancer.
+    :type vlb_name: string
+    :param vnet_name: Enter virtual network name for your load balancer.
+    :type vnet_name: string
+    :param lb_methods: Enter mehtod for your load balancer.
+    :type lb_methods: string
+    :param listener_types: Enter listener type for your load balancer.
+    :type listener_types: string
+    :param listener_ports: Enter listener port for your load balancer.
+    :type listener_ports: string
+    :param vlb_desc: Enter descript for your load balancer.
+    :type vlb_desc: string
+    :param wait: Wait until resources are provisioned.
+    :type wait: bool
+    
+    """
+    if not len(listener_ports) == len(listener_types):
+        raise ValueError('the number of listener setting is not correct')
+    net = Networks()
+    nets = net.list()
+    net_name2id = {}
+    [net_name2id.setdefault(net['name'],net['id']) for net in nets]
+    if not vnet_name in net_name2id:
+        raise ValueError('the virtual network name not exist')
+
+    listeners = []
+    listener_index = 0
+    listener_types_mapping = {'APP_LB':'HTTP','NETWORK_LB':'TCP'}
+    protocol = ''
+    for listener_type,listener_port in zip(listener_types,listener_ports):
+        listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port, 'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
+        listener_index += 1
+    pools = []
+    if len(lb_methods) > 1:
+        raise ValueError('not support yet')
+    for i, lb_method in enumerate(lb_methods):
+        pools.append({'method': lb_method, 'protocol': "HTTP", 'name': "pool-{}".format(i)})
+    create_load_balance(vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
+cli.add_command(bss)
+cli.add_command(vnet)
+cli.add_command(vlb)
+
 
 
 def main():
