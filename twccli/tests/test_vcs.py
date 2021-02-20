@@ -14,7 +14,7 @@ import uuid
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "'Ubuntu 20.04'", "local")
+        (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "ubuntu", "Ubuntu 20.04", "local")
         self.ext_port = "81"
         self.apikey = os.environ['TWCC_API_KEY']
         self.pcode = os.environ['TWCC_PROJ_CODE']
@@ -56,8 +56,10 @@ class TestVcsLifecyc:
                 "--system-volume-type", self.sys_vol,
                 "-wait", "-json"
                 ]
-        print(" ".join(paras))
+        print("Using Params: %s"%" ".join(paras))
         out = self.__run(paras)
+        print(out)
+        print(json.loads(out))
         self.vcs_id = json.loads(out)['id']
 
     def _list_vcs(self):
