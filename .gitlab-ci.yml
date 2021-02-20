@@ -7,8 +7,8 @@ stages:
 before_script:
     - python -V
     - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
-    - curl -O https://bootstrap.pypa.io/get-pip.py
-    - python get-pip.py
+#    - curl -O https://bootstrap.pypa.io/get-pip.py
+#    - python get-pip.py
 
 python27:
   stage: test
@@ -50,6 +50,7 @@ python36:
 
 manual minor version deploy to PYPI:
   stage: deploy
+  image: python:3.7
   variables:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD

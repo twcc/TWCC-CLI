@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 from distutils.util import convert_path
-
+import sys
 try:
     # pip >=20
     from pip._internal.network.session import PipSession
@@ -67,12 +67,15 @@ reqs = [
         'tqdm',
         'urllib3',
         'wcwidth']
-
+if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+    reqs.append('loguru')
+else:
+    reqs.append('coloredlogs')
 long_desc = open("README.md", 'r').read()
 setup(
     name='TWCC-CLI',
     author="TWCC SREr",
-    author_email="isupport@narlabs.org.tw",
+    author_email="isupport@twcc.ai",
     description="TWCC-CLI is a toolkit for operating TWCC resources.",
     long_description=long_desc,
     long_description_content_type="text/markdown",

@@ -104,6 +104,10 @@ class TestCosLifecyc:
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(dir, bk)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
+    def _op_folder(self, bk, dir, op):
+        cmd_list = "cp cos -bkt {} -dir {} -sync {}".format(bk, dir, op)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
 
     def _download_files(self, bk, dir):
         cmd_list = "cp cos -download -src {} -dest {} -r".format(bk, dir)
@@ -114,7 +118,9 @@ class TestCosLifecyc:
         dir = self.isu85_Dir.replace("./", "")
         cmd = ["rm", "-rf", self.isu85_Dir]
         subprocess.run(cmd)
-
+    def _check_isu178_upload_files(self, download_path, check_res):
+        response = subprocess.check_output('ls {} | wc -l'.format(download_path), shell=True).decode('utf8').strip()
+        return True if response == check_res else False
     def _check_isu85_upload_files(self):
         '''
         localList = []
@@ -222,7 +228,7 @@ class TestCosLifecyc:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             p.communicate()
 
-    def test_issue_104(self):
+    def _issue_104(self):
         rand = random.randint(0, 1000)
         bk_isu104 = "bk_isu104_{}".format(str(rand))
         isu104_upDir = "./isu104_up_{}".format(str(rand))
@@ -240,7 +246,7 @@ class TestCosLifecyc:
         self._remove_dir(downdir, "")
         self._del_bucket(bk_isu104)
 
-    def test_issue_80(self):
+    def _issue_80(self):
         rand = random.randint(0, 1000)
         bk_isu80 = "bk_isu80_{}".format(str(rand))
         isu80_upDir = "./isu80_up_{}".format(str(rand))
@@ -256,7 +262,7 @@ class TestCosLifecyc:
         self._remove_dir(isu80_upDir, isu80_downDir)
         self._del_bucket(bk_isu80)
 
-    def test_issue_103(self):
+    def _issue_103(self):
         rand = random.randint(0, 1000)
         bk_isu103 = "bk_isu103_{}".format(str(rand))
         isu103_upDir = "./isu103_up_{}".format(str(rand))
@@ -272,7 +278,7 @@ class TestCosLifecyc:
         self._remove_dir(isu103_upDir, isu103_downDir)
         self._remove_upload_file(isu103_file)
 
-    def test_issue_85(self):
+    def _issue_85(self):
         rand = random.randint(0, 1000)
         bk_isu85 = "bk_isu85_{}".format(str(rand))
         isu85_Dir = "./isu85_{}".format(str(rand))
@@ -285,7 +291,7 @@ class TestCosLifecyc:
         self._del_bucket(bk_isu85)
         self._remove_dir(isu85_Dir, "")
 
-    def test_issue_78(self):
+    def _issue_78(self):
         rand = random.randint(0, 1000)
         bk_isu78 = "bk_isu78_{}".format(str(rand))
         isu78_Dir = "./isu78_{}".format(str(rand))
@@ -298,7 +304,7 @@ class TestCosLifecyc:
         self._del_bucket(bk_isu78)
         self._remove_dir(isu78_Dir, "")
 
-    def test_issue_115(self):
+    def _issue_115(self):
         rand = random.randint(0, 1000)
         bk_isu105 = "bk_isu105_{}".format(str(rand))
         isu105_Dir = "./isu105_{}/".format(str(rand))
@@ -310,7 +316,7 @@ class TestCosLifecyc:
         self._del_bucket(bk_isu105)
         self._remove_dir(isu105_Dir, "")
 
-    def test_issue_132(self):
+    def _issue_132(self):
 
         bk_isu132rel = "bk132rel{}".format(str(uuid.uuid1()).split("-")[0])
         bk_isu132abs = "bk132abs{}".format(str(uuid.uuid1()).split("-")[0])
@@ -354,7 +360,7 @@ class TestCosLifecyc:
         self._remove_file("./"+isu132_onlyfn)
         self._remove_dir(isu132_relDir, "")
 
-    def test_issue_146(self):
+    def _issue_146(self):
         bk_isu146 = "bk146{}".format(str(uuid.uuid1()).split("-")[0])
         isu146_upDir = "./isu146_{}/".format(str(uuid.uuid1()).split("-")[0])
         isu146_downDir = "./isu146down_{}/".format(
@@ -370,8 +376,29 @@ class TestCosLifecyc:
         self._del_bucket(bk_isu146)
         self._remove_dir(isu146_downDir, isu146_upDir)
 
-    def test_issue_147(self):
+    def _issue_147(self):
         bk_isu147 = "bk147{}".format(str(uuid.uuid1()).split("-")[0])
         self._loadSession()
         self._create_bucket(bk_isu147)
         self._del_bucket_no_r(bk_isu147)
+
+    def _issue_178(self):
+        bk_isu178 = "bk178_{}".format(str(uuid.uuid1()).split("-")[0])
+        isu178_upload_folder = 'isu178_upload_folder'
+        isu178_download_folder = 'isu178_download_folder'
+        self._loadSession()
+        self._create_bucket(bk_isu178)
+        self._create_download_dir(isu178_upload_folder)
+        self._create_download_dir(isu178_download_folder)
+        [self._create_upload_file('{}/{}'.format(isu178_upload_folder,'isu178_'+str(i))) for i in range(1001)]
+        self._op_folder(bk_isu178,isu178_upload_folder,'to-cos')
+        self._op_folder(bk_isu178,isu178_download_folder,'from-cos')
+        
+        if self._check_isu178_upload_files('./'+os.path.join(isu178_download_folder,isu178_upload_folder),'1001'):
+            assert True 
+        else:
+            assert False
+        self._remove_dir(isu178_download_folder, isu178_upload_folder)
+        self._del_bucket(bk_isu178)
+
+        
