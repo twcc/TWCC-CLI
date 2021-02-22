@@ -161,12 +161,12 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
         print(out)
 
-    def test_virtual_network(self):
+    def _virtual_network(self):  # 先移掉 by Aug
         self._loadParams()
         self._loadSession()
         self._create_vnet()
         self._del_vnet()
-        
+
     # def test_vlb(self):
     #     self._loadParams()
     #     self._loadSession()

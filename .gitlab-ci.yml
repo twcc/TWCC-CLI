@@ -101,4 +101,3 @@ manual deploy to GITHUB:
     - master
   when: manual
   allow_failure: false
-
