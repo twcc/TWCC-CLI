@@ -223,7 +223,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             return img.createSnapshot(sid, name, desc_str)
     else:
         if name == 'twccli':
-            name = "{}_{}".format(name, flavor.split(".")[1])
+            name = "{}{}".format(name, flavor.replace(".", ''))
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
@@ -439,7 +439,7 @@ def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_des
     :type vlb_desc: string
     :param wait: Wait until resources are provisioned.
     :type wait: bool
-    
+
     """
     if not len(listener_ports) == len(listener_types):
         raise ValueError('the number of listener setting is not correct')
