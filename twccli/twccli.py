@@ -2,7 +2,6 @@
 import click
 import os
 import sys
-from deprecated import deprecated
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'

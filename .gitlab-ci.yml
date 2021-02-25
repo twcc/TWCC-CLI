@@ -30,6 +30,7 @@ python37:
   script: 
     - echo $TWCC_CICD_STAGE
     - pip install tox
+    - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
     - dev
