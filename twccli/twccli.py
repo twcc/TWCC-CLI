@@ -146,16 +146,29 @@ def cli(env, verbose, show_and_verbose):
         logger.add(sys.stderr, level="DEBUG")
     pass
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+    def disable(self):
+        self.HEADER = ''
+        self.OKBLUE = ''
+        self.OKGREEN = ''
+        self.WARNING = ''
+        self.FAIL = ''
+        self.ENDC = ''
 def check_if_py2():
     if sys.version_info[0] < 3:
-        import twccli
-        from twccli.twcc.util import bcolors
         from os import environ
         if environ.get('TWCC_SHOW_DEPRECATED') is not None:
-            twccli.__show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
-        if twccli.__show_deprecated__:
+            __show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
+        if __show_deprecated__:
             print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
-                twccli.__PACKAGE_NAME__ + " will not support Python 2.7 after 1st Jul., 21'.\n" + twccli.__PACKAGE_NAME__ + " 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
+                "TWCC-CLI will not support Python 2.7 after 1st Jul., 21'.\nTWCC-CLI 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
 
 
 if __name__ == '__main__':
