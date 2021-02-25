@@ -183,7 +183,7 @@ def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
     wanted_ans = []
     for x in ans:
-        if re.search(r'^v..+super$', ans[x]['desc']):
+        if re.search(r'^v\..+super$', ans[x]['desc']):
             wanted_ans.append({
                 "flavor name": ans[x]['desc'],
                 "spec": ans[x]['spec']
