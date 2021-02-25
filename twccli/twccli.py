@@ -156,7 +156,7 @@ def check_if_py2():
             twccli.__show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
         if twccli.__show_deprecated__:
             print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
-                twccli.__PACKAGE_NAME__ + " will not support Python 2.7 after 1st Jul., 21'.\n" + twccli.__PACKAGE_NAME__ + " 工具即將在中華民國110年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
+                twccli.__PACKAGE_NAME__ + " will not support Python 2.7 after 1st Jul., 21'.\n" + twccli.__PACKAGE_NAME__ + " 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
 
 
 if __name__ == '__main__':
