@@ -2,6 +2,7 @@
 import click
 import os
 import sys
+from deprecated import deprecated
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
@@ -19,7 +20,6 @@ except:
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
-    
     logger.add(os.path.join(log_dir, "twcc.log"), format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
                rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
 else:
@@ -37,7 +37,6 @@ else:
     coloredlogs.install(level=config['loggers']['command']['level'],
                         fmt=config['formatters']['default']['format'], logger=logger)
     # coloredlogs.install(logger=logger)
-
 
 class Environment(object):
     def __init__(self):
@@ -97,7 +96,7 @@ class TWCCLI(click.MultiCommand):
 
 def exception(logger):
     """
-    A decorator that wraps the passed in function and logs 
+    A decorator that wraps the passed in function and logs
     exceptions should one occur
 
     @param logger: The logging object
@@ -142,10 +141,22 @@ def cli(env, verbose, show_and_verbose):
         -- You Succeed, We Succeed!! --
     """
     env.verbose = verbose
+    check_if_py2()
     if show_and_verbose:
         env.verbose = True
         logger.add(sys.stderr, level="DEBUG")
     pass
+
+def check_if_py2():
+    if sys.version_info[0] <= 3:
+        import twccli
+        from twccli.twcc.util import bcolors
+        from os import environ
+        if environ.get('TWCC_SHOW_DEPRECATED') is not None:
+            twccli.__show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
+        if twccli.__show_deprecated__:
+            print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
+                twccli.__PACKAGE_NAME__ + " will not support Python 2.7 after 1st Jul., 21'.\n" + twccli.__PACKAGE_NAME__ + " 工具即將在中華民國110年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
 
 
 if __name__ == '__main__':
