@@ -147,7 +147,7 @@ def cli(env, verbose, show_and_verbose):
     pass
 
 def check_if_py2():
-    if sys.version_info[0] <= 3:
+    if sys.version_info[0] < 3:
         import twccli
         from twccli.twcc.util import bcolors
         from os import environ
