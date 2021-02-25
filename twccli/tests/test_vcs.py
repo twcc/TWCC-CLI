@@ -79,8 +79,8 @@ class TestVcsLifecyc:
         print(out)
 
     def _create_vcs(self):
-        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__))),'a') as f:
-            f.write('  - !!python/tuple [4044,dedi]\n')
+        #with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__))),'a') as f:
+        #    f.write('  - !!python/tuple [4044,dedi]\n')
         paras = ["mk", "vcs",
                 "--name",           self.key_name,
                 "--image-type-name",self.sol,
@@ -187,8 +187,8 @@ class TestVcsLifecyc:
         self._add_secg_range_and_port()
         self._add_secg_without_range_and_port()
         self._list_vcs()
-        self._stop_vcs()
-        self._start_vcs()
+        #self._stop_vcs()
+        #self._start_vcs()
         self._add_secg()
         self._list_secg()
         self._del_secg()

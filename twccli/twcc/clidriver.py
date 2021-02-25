@@ -256,7 +256,7 @@ class ServiceOperation:
         self._i = logging.info
         self._d = logging.debug
         self._w = logging.warning
-        
+
 
     def show(self):
         logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)

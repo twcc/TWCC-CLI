@@ -286,7 +286,7 @@ class VcsSite(CpuService):
             self.ext_get = {'project': self._project_id}
 
         return self._do_api()
-        
+
     def stop(self, site_id):
         self.data_dic = {"status": "shelve"}
         self.url_dic = {'sites': site_id, 'action': ""}
@@ -294,7 +294,7 @@ class VcsSite(CpuService):
         return self._do_api()
 
     def start(self, site_id):
-        self.data_dic = {"status": "unshelve"} 
+        self.data_dic = {"status": "unshelve"}
         self.url_dic = {'sites': site_id, 'action': ""}
         self.http_verb = 'put'
         return self._do_api()
@@ -360,16 +360,7 @@ class VcsSite(CpuService):
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
 
-        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
-
-
-        data_vol_type = {"hdd": "hdd"} # only support this 2020/12/22
-            #"ssd": "ssd",
-            # "hdd-encrypt": "LUKS-hdd", # no open yet
-            #"ssd-encrypt": "LUKS-ssd"}
-
-        extra_prop["volume-type"] = data_vol_type
-        extra_prop["volume-size"] = 0
+        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
 
         res = {}
         for ele in extra_prop:
@@ -380,8 +371,6 @@ class VcsSite(CpuService):
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
                 res["x-extra-property-{}".format(ele)] = {"local": "local_disk"} # current setting
-                #res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                #                                          "ssd": "block_storage-ssd"}  # no local disk
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
@@ -414,7 +403,7 @@ class VcsSite(CpuService):
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready" or site_info['status'] == "Error"
-    
+
     def isStopped(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "NotReady"
@@ -544,7 +533,7 @@ class LoadBalancers(CpuService):
         self.http_verb = 'post'
         self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
         return self._do_api()
-    
+
     def update(self, vlb_id, listeners, pools):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
@@ -588,7 +577,7 @@ class Volumes(CpuService):
         self.http_verb = 'delete'
         self.url_dic = {"volumes": sys_vol_id}
         return self._do_api()
-    
+
     def update(self, sys_vol_id, vol_status, srvid, size, wait):
         self.http_verb = 'put'
         self.url_dic = {"volumes": sys_vol_id, "action":""}
@@ -617,8 +606,8 @@ class Volumes(CpuService):
             self.res_type = 'json'
             self.url_dic = {"volumes": sys_vol_id}
             return self._do_api()
-        
-        
+
+
 
 
 def getServerId(site_id):
