@@ -164,6 +164,7 @@ class bcolors:
 def check_if_py2():
     if sys.version_info[0] < 3:
         from os import environ
+        __show_deprecated__ = False
         if environ.get('TWCC_SHOW_DEPRECATED') is not None:
             __show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
         if __show_deprecated__:
