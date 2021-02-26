@@ -6,6 +6,7 @@ import json
 import yaml
 import datetime
 import logging
+from twccli.twccli import pass_environment, logger
 import os
 from .session import Session2
 from .util import parsePtn, isNone, isDebug, pp
@@ -24,8 +25,8 @@ class ServiceOperation:
         self.header_extra = {}
 
         self._debug = isDebug()
-        if self._debug:
-            self._setDebug()
+        # if self._debug:
+        #     self._setDebug()
 
     def _load(self):
         # raw_input("in clidriver "+self.api_key)
@@ -140,9 +141,9 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
         if self._debug:
-            self._i(t_api)
-            self._i(t_headers)
-            self._i("--- URL: %s, Status: %s, (%.3f sec) ---" %
+            logger.info(t_api)
+            logger.info(t_headers)
+            logger.info("--- URL: %s, Status: %s, (%.3f sec) ---" %
                     (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
 
@@ -151,6 +152,7 @@ class ServiceOperation:
               api_host=None,
               key_tag=None,
               api_key=None,
+              user_agent=None,
               ctype="application/json",
               func=None,
               url_dict=None,
@@ -169,13 +171,16 @@ class ServiceOperation:
         if not http in set(self.valid_http_verb[func]):
             raise ValueError("http verb:'{0}' is not valid".format(http))
 
-        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict)
+        mkAPIUrl_v3 = False
+        if http == 'get':
+            mkAPIUrl_v3 = True
+        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict, is_v3=mkAPIUrl_v3)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
+                                 user_agent = user_agent,
                                  ctype=ctype)
-
         if not isNone(url_ext_get):
             t_url += "?"
             t_url_tmp = []
@@ -183,7 +188,6 @@ class ServiceOperation:
                 t_url_tmp.append("{0}={1}".format(param_key,
                                                   url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
-
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
         if res_type in self.res_type_valid:
             if res_type == 'json':
@@ -199,6 +203,7 @@ class ServiceOperation:
                  key_tag=None,
                  api_host=None,
                  api_key=None,
+                 user_agent=None,
                  ctype="application/json"):
 
         self.api_host = api_host
@@ -206,8 +211,12 @@ class ServiceOperation:
         self.ctype = ctype
 
         from twccli.version import __version__
+        if not user_agent == None:
+            this_user_agent = user_agent
+        else:
+            this_user_agent = 'TWCC-CLI v%s' % (__version__)
         return_header = {
-            'User-Agent': 'TWCC-CLI v%s' % (__version__),
+            'User-Agent': this_user_agent,
             'X-API-HOST': site_sn,
             'x-api-key': api_key,
             'Content-Type': self.ctype
@@ -247,12 +256,14 @@ class ServiceOperation:
         self._i = logging.info
         self._d = logging.debug
         self._w = logging.warning
+        
+
 
     def show(self):
-        self._i("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
-        self._i("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
 
-    def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None):
+    def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None, is_v3=True):
 
         # check if this function valid
         if not self.isFunValid(func):
@@ -261,7 +272,6 @@ class ServiceOperation:
         url_ptn = self.url_ptn[func]
         url_str = self.url_format[func]
         url_parts = {}
-
         # check if this site_sn is valid
         if not type(site_sn) == type(None):
             self.api_pf = site_sn
@@ -294,9 +304,20 @@ class ServiceOperation:
         t_url = url_str
         for ptn in url_parts.keys():
             t_url = t_url.replace(url_ptn[ptn], url_parts[ptn])
+
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
                 'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
                     'FUNCTION'] == 'sites':
-            t_url = t_url.replace("/v2/", "/v3/")
+            if is_v3:
+                t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
+
+def isV3(fun_str):
+    if  fun_str == "sites":
+        return True
+    if "sites" in fun_str and "action" in fun_str:
+        return True
+    if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
+        return True
+    return False

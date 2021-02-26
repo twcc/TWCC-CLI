@@ -2,6 +2,8 @@
 from __future__ import print_function
 import re
 import json
+import os
+import yaml
 from twccli.twcc.session import Session2
 from twccli.twcc.services.generic import GpuService, CpuService
 from twccli.twcc.services.solutions import solutions
@@ -213,9 +215,9 @@ class GpuSite(GpuService):
 
             return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
 
     def getDetail(self, site_id):
         self.url_dic = {"sites": site_id, 'container': ""}
@@ -285,10 +287,26 @@ class VcsSite(CpuService):
 
         return self._do_api()
 
+    def stop(self, site_id):
+        self.data_dic = {"status": "shelve"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
+    def start(self, site_id):
+        self.data_dic = {"status": "unshelve"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"), ]
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        if 'extra_sol' in config and not isNone(config['extra_sol']):
+            sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -342,15 +360,7 @@ class VcsSite(CpuService):
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
 
-        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
-
-        data_vol_type = {  # "hdd": "hdd", # not open yet
-            "ssd": "ssd",
-            # "hdd-encrypt": "LUKS-hdd", # no open yet
-            "ssd-encrypt": "LUKS-ssd"}
-
-        extra_prop["volume-type"] = data_vol_type
-        extra_prop["volume-size"] = 0
+        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
 
         res = {}
         for ele in extra_prop:
@@ -361,8 +371,6 @@ class VcsSite(CpuService):
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
                 res["x-extra-property-{}".format(ele)] = {"local": "local_disk"} # current setting
-                #res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                #                                          "ssd": "block_storage-ssd"}  # no local disk
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
@@ -392,9 +400,13 @@ class VcsSite(CpuService):
                          "solution": sol_id}
         return self._do_api()
 
-    def isReady(self, site_id):
+    def isStable(self, site_id):
         site_info = self.queryById(site_id)
-        return site_info['status'] == "Ready"
+        return site_info['status'] == "Ready" or site_info['status'] == "Error"
+
+    def isStopped(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "NotReady"
 
 
 class VcsServerNet(CpuService):
@@ -512,6 +524,90 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+class LoadBalancers(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "loadbalancers"
+        self._csite_ = Session2._getClusterName("VCS")
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+        self.http_verb = 'post'
+        self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
+        return self._do_api()
+
+    def update(self, vlb_id, listeners, pools):
+        self.http_verb = 'patch'
+        self.url_dic = {"loadbalancers": vlb_id}
+        self.data_dic = {'pools':pools, 'listeners':listeners}
+        return self._do_api()
+
+    def isStable(self, site_id):
+        site_info = self.queryById(site_id)
+        return site_info['status'] == "ACTIVE"
+
+    def list(self, vlb_id=None, isAll=False):
+        if isNone(vlb_id):
+            if isAll:
+                self.ext_get = {'project': self._project_id,
+                                "all_users": 1}
+            else:
+                self.ext_get = {'project': self._project_id}
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"loadbalancers": vlb_id}
+
+        return self._do_api()
+
+    def deleteById(self, vlb_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"loadbalancers": vlb_id}
+        return self._do_api()
+class Volumes(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "volumes"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, name, size, desc="", volume_type="hdd"):
+        self.http_verb = 'post'
+        self.data_dic = {'project': self._project_id, "name": name, "size":size, "desc":desc,"volume_type":volume_type}
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"volumes": sys_vol_id}
+        return self._do_api()
+
+    def update(self, sys_vol_id, vol_status, srvid, size, wait):
+        self.http_verb = 'put'
+        self.url_dic = {"volumes": sys_vol_id, "action":""}
+        if vol_status in ['attach','detach']:
+            self.data_dic = {"status": vol_status, "server": srvid}
+        elif vol_status == "extend":
+            self.data_dic = {"status": vol_status, "server": 0, "size":size}
+        else:
+            raise ValueError
+        return self._do_api()
+
+    def list(self, sys_vol_id=None, isAll=False):
+        if isNone(sys_vol_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isAll:
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes= self._do_api()
+                my_username = sess = Session2().twcc_username
+                return [x for x in all_volumes if x["user"]['username'] == my_username]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"volumes": sys_vol_id}
+            return self._do_api()
+
+
 
 
 def getServerId(site_id):
@@ -519,9 +615,12 @@ def getServerId(site_id):
     sites = vcs.queryById(site_id)
     if not 'id' in sites:
         raise ValueError("Site ID: {} is not found.".format(site_id))
-    if len(sites['servers']) == 1:
+    if len(sites['servers']) >= 1:
         server_id = sites['servers'][0]
         return server_id
+    else:
+        return None
+        #raise ValueError("Site ID: {} , servers not found.".format(site_id))
 
 
 def getSecGroupList(site_id):

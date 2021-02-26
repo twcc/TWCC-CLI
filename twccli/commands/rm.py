@@ -6,10 +6,13 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isF
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
+from twccli.twcc.services.network import Networks
 from twccli.twcc.util import isNone, timezone2local, resource_id_validater
+from twccli.twccli import pass_environment, logger
 from botocore.exceptions import ClientError
+
 
 
 def del_bucket(name, is_recursive, isForce=False):
@@ -85,6 +88,14 @@ def del_keypair(ids_or_names, isForce=False):
             else:
                 raise ValueError("Keypair: {}, not found.".format(key_name))
 
+def del_vnet(ids_or_names, isForce=False, isAll=False):
+    net = Networks()
+    ans = [net.queryById(x) for x in ids_or_names]
+    for the_net in ans:
+        txt = "You about to delete virtual network \n- id: {}\n- created by: {}\n- created time: {}".format(
+                    the_net['id'], the_net['user']['username'], timezone2local(the_net['create_time']))
+        if getConfirm("Virtal Network", ",".join(ids_or_names), isForce,ext_txt=txt):
+            net.delete(the_net['id'])
 
 def del_snap(ids_or_names, isForce=False, isAll=False):
     """Delete security group by site id
@@ -147,8 +158,54 @@ def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
                               ext_txt="Resource id: {}\nSecurity Group Rule id: {}".format(ele['id'], rule['id'])):
                     secg.deleteRule(rule['id'])
 
+def del_load_balancer(ids_or_names, isForce=False):
+    """Delete volume by volume id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param site_id: resources for vcs id
+    :type site_id: int
+
+    """
+    vlb = LoadBalancers()
+    for vlb_id in ids_or_names:
+        ans = vlb.list(vlb_id)
+        txt = "You about to delete load balancer \n- id: {}\n- created by: {}\n- created time: {}".format(
+            vlb_id, ans['user']['display_name'], timezone2local(ans['create_time']))
+        if getConfirm("Load Balancer", vlb_id, isForce, txt):
+            vlb.deleteById(vlb_id)
+            print("Successfully remove {}".format(vlb_id))
+        else:
+            print("No delete operations.")
+
+
+def del_volume(ids_or_names, isForce=False):
+    """Delete volume by volume id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    :param site_id: resources for vcs id
+    :type site_id: int
+    :param isAll: Operates as tenant admin
+    :type isAll: bool
+    """
+    if getConfirm(u"Delete Volumes", ", ".join(ids_or_names), isForce):
+        vol = Volumes()
+        for vol_id in ids_or_names:
+            ans = vol.deleteById(vol_id)
+            print("Successfully remove {}".format(vol_id))
+    else:
+        print("No delete operations.")
+
+
+
 # Create groups for command
-@click.group(help="Delete your TWCC resources.")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(context_settings=CONTEXT_SETTINGS,help="Delete your TWCC resources.")
 def cli():
     pass
 
@@ -160,8 +217,9 @@ def cli():
 @click.option('-n', '--name', 'name', default=None,
               help="Enter name for your resource name")
 @click.argument('ids_or_names', nargs=-1)
+@pass_environment
 @click.pass_context
-def key(ctx, name, ids_or_names, force):
+def key(ctx, env,  name, ids_or_names, force):
     """Removing key operation
 
     :param name: Enter name for your resource name
@@ -201,7 +259,8 @@ def key(ctx, name, ids_or_names, force):
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
-def vcs(res_property, name, force, is_all, site_id, ids_or_names):
+@pass_environment
+def vcs(env, res_property, name, force, is_all, site_id, ids_or_names):
     """Command line for VCS removing
         Function :
         1. Keypair
@@ -224,7 +283,6 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
         del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
     if res_property == "Snapshot":
         del_snap(mk_names(name, ids_or_names), force, is_all)
-
     if isNone(res_property):
         ids_or_names = mk_names(site_id, ids_or_names)
         if len(ids_or_names) > 0:
@@ -244,7 +302,8 @@ def vcs(res_property, name, force, is_all, site_id, ids_or_names):
               help='Name of the bucket.')
 @click.option('-okey', '--cos_key', 'okey',
               help='Name of the object for deleting.')
-def cos(name, force, okey, is_recursive):
+@pass_environment
+def cos(env, name, force, okey, is_recursive):
     """Command Line for COS deleting buckets
 
     :param name: Bucket name for deleting object.
@@ -272,7 +331,8 @@ def cos(name, force, okey, is_recursive):
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the container.')
 @click.argument('ids_or_names', nargs=-1)
-def ccs(site_id, force, ids_or_names):
+@pass_environment
+def ccs(env, site_id, force, ids_or_names):
     ids_or_names = mk_names(site_id, ids_or_names)
     if len(ids_or_names) == 0:
         raise ValueError("Resource id is required.")
@@ -288,11 +348,66 @@ def ccs(site_id, force, ids_or_names):
         else:
             print("site id must be integer")
 
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.option('-id', '--virtual_network_id', 'vnetid', default="twccli", type=str,
+              help="ID of the virtual Network.")
+@click.command(help="Create your Virtual Network.")
+@click.argument('ids_or_names', nargs=-1)
+@pass_environment
+def vnet(env, ids_or_names, vnetid, force):
+    """Command line for create virtual network
+
+    :param name: Enter name for your resources.
+    :type name: string
+    :param vol_size: Enter size for your resources.
+    :type vol_size: int
+    """
+    del_vnet(mk_names(vnetid, ids_or_names), force)
+
+@click.option('-id', '--vol-id', 'name',
+              help="Index of the volume.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your BSS.")
+@click.pass_context
+def bss(ctx, name, ids_or_names, force):
+    """Command line for delete bss
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(name, ids_or_names)
+    del_volume(ids_or_names, force)
+
+@click.option('-id', '--vlb-id', 'vlb_id',
+              help="Index of the volume.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your Load Balancers.")
+@click.pass_context
+def vlb(ctx, vlb_id, ids_or_names, force):
+    """Command line for delete vlb
+
+    :param vlb_id: Enter name for your load balancer.
+    :type vlb_id: string
+    """
+    ids_or_names = mk_names(vlb_id, ids_or_names)
+    del_load_balancer(ids_or_names, force)
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
+cli.add_command(bss)
+cli.add_command(vnet)
+cli.add_command(vlb)
+
 
 
 def main():

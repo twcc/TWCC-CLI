@@ -25,6 +25,21 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.14 Release Note
+![img](https://media.giphy.com/media/c4AldScPlPi5uGFux2/giphy.gif)
+
+**Feature**
+
+- Users can operate volumn in [VCS](https://www.twcc.ai/doc?page=vm).
+- We let `-s` support multiple site-id.
+- New progress bar for [COS](https://www.twcc.ai/doc?page=object) operations.
+
+**Preview**
+- Users can operate [Vertual Network](https://www.twcc.ai/doc?page=virtual_network) (Tenant Administrator Only) and [Load Balancer](https://www.twcc.ai/doc?page=load_balancer).
+
+**Bug Fix**
+- fix unicode error, [BSS](https://www.twcc.ai/doc?page=volume) & [VCS](https://www.twcc.ai/doc?page=vm) status problems.
+
 ### v0.5.13 Release Note
 ![img](https://media.giphy.com/media/q6RoNkLlFNjaw/giphy.gif)
 
