@@ -168,10 +168,10 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     # data vol section
     if data_vol_size > 0:
         required['x-extra-property-volume-size'] = str(data_vol_size)
-        if not data_vol in extra_props['x-extra-property-volume-type'].keys():
+        if not data_vol in extra_props['x-extra-property-volume-type']:
             raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
-                                                                                     ", ".join(extra_props['x-extra-property-volume-type'].keys())))
-        required['x-extra-property-volume-type'] = extra_props['x-extra-property-volume-type'][data_vol]
+                                                                                     ", ".join(extra_props['x-extra-property-volume-type'])))
+        required['x-extra-property-volume-type'] = data_vol
 
     return vcs.create(name, exists_sol[sol], required)
 

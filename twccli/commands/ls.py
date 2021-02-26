@@ -95,7 +95,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
     vol = Volumes()
     ans = []
     cols = ['id', 'name', 'size', 'create_time', 'volume_type',
-            'status', 'mountpoint'] 
+            'status', 'mountpoint']
     if len(site_ids_or_names) > 0:
         for vol_id in site_ids_or_names:
             ans.append(vol.list(vol_id))
@@ -183,7 +183,7 @@ def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
     wanted_ans = []
     for x in ans:
-        if re.search(r'^v..+super$', ans[x]['desc']):
+        if re.search(r'^v\..+super$', ans[x]['desc']):
             wanted_ans.append({
                 "flavor name": ans[x]['desc'],
                 "spec": ans[x]['spec']

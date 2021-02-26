@@ -96,7 +96,7 @@ def del_vnet(ids_or_names, isForce=False, isAll=False):
                     the_net['id'], the_net['user']['username'], timezone2local(the_net['create_time']))
         if getConfirm("Virtal Network", ",".join(ids_or_names), isForce,ext_txt=txt):
             net.delete(the_net['id'])
-    
+
 def del_snap(ids_or_names, isForce=False, isAll=False):
     """Delete security group by site id
 
@@ -167,7 +167,7 @@ def del_load_balancer(ids_or_names, isForce=False):
     :type force: bool
     :param site_id: resources for vcs id
     :type site_id: int
-    
+
     """
     vlb = LoadBalancers()
     for vlb_id in ids_or_names:
@@ -179,7 +179,7 @@ def del_load_balancer(ids_or_names, isForce=False):
             print("Successfully remove {}".format(vlb_id))
         else:
             print("No delete operations.")
-    
+
 
 def del_volume(ids_or_names, isForce=False):
     """Delete volume by volume id
@@ -200,8 +200,8 @@ def del_volume(ids_or_names, isForce=False):
             print("Successfully remove {}".format(vol_id))
     else:
         print("No delete operations.")
-    
-    
+
+
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])

@@ -303,15 +303,10 @@ class VcsSite(CpuService):
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"), ]
-        import os.path
-        from os import path
-        backdoor_fn = '{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
-        if path.exists(backdoor_fn):
-            with open(backdoor_fn,'r') as f:
-                config = yaml.load(f, Loader=yaml.FullLoader)
-            if 'extra_sol' in config and not isNone(config['extra_sol']):
-                sol_list.extend(config['extra_sol'])
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        if 'extra_sol' in config and not isNone(config['extra_sol']):
+            sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -365,16 +360,7 @@ class VcsSite(CpuService):
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
 
-        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id])
-
-
-        data_vol_type = {"hdd": "hdd"} # only support this 2020/12/22
-            #"ssd": "ssd",
-            # "hdd-encrypt": "LUKS-hdd", # no open yet
-            #"ssd-encrypt": "LUKS-ssd"}
-
-        extra_prop["volume-type"] = data_vol_type
-        extra_prop["volume-size"] = 0
+        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
 
         res = {}
         for ele in extra_prop:
@@ -385,8 +371,6 @@ class VcsSite(CpuService):
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
                 res["x-extra-property-{}".format(ele)] = {"local": "local_disk"} # current setting
-                #res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd",
-                #                                          "ssd": "block_storage-ssd"}  # no local disk
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
