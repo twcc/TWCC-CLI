@@ -124,7 +124,6 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-
 @click.command(context_settings=CONTEXT_SETTINGS, cls=TWCCLI)
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @click.option("-sv", "--show_and_verbose", is_flag=True, help="Enables verbose mode and show in console.")
@@ -161,6 +160,7 @@ class bcolors:
         self.WARNING = ''
         self.FAIL = ''
         self.ENDC = ''
+
 def check_if_py2():
     if sys.version_info[0] < 3:
         from os import environ

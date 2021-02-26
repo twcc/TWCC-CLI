@@ -88,12 +88,12 @@ class TestVcsLifecyc:
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
                 "--system-volume-type", self.sys_vol,
-                "--data-volume-type", "hdd",
-                "--data-volume-size", "1",
                 "-wait", "-json"
                 ]
-        print(" ".join(paras))
+        print("Using Params: %s"%" ".join(paras))
         out = self.__run(paras)
+        print(out)
+        print(json.loads(out))
         self.vcs_id = json.loads(out)['id']
 
     def _list_vcs(self):
