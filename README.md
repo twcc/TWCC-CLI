@@ -1,7 +1,7 @@
 ###### tags: `twcc`, `twccli`
 
-[![CircleCI](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5.svg?style=shield)](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5)
 
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI/tree/v0.5.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI/tree/v0.5)
 
 # TWCC-CLI Project
 
