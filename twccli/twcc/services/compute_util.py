@@ -54,7 +54,8 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         ans = vcs.list(is_all)
     for each_vcs in ans:
-        each_vcs['create_time'] = timezone2local(each_vcs['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        if 'create_time' in each_vcs:
+            each_vcs['create_time'] = timezone2local(each_vcs['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         if each_vcs['status']=="NotReady":
             each_vcs['status']="Stopped"
         if each_vcs['status']=="Shelving":
