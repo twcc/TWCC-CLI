@@ -62,7 +62,7 @@ def create_volume(vol_name, size, is_table):
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
     vol = Volumes()
     ans = vol.create(vol_name, size)
-   if is_table:
+    if is_table:
         cols = ["id", "name", "size", "volume_type"]
         table_layout("Volumes", ans, cols, isPrint=True)
     else:
