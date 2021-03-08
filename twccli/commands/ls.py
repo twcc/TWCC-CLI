@@ -69,12 +69,18 @@ def list_load_balances(site_ids_or_names, is_all, is_table):
                 'private_net_name', 'status', 'pools_method']
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
+        if 'detail' in this_ans:
+            is_table = False
+            continue
         this_ans['private_net_name'] = this_ans['private_net']['name']
         this_ans['pools_method'] = ','.join(
             [this_ans_pool['method'] for this_ans_pool in this_ans['pools']])
         this_ans['create_time'] = timezone2local(this_ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(site_ids_or_names) > 0:
         for this_ans in ans:
+            if 'detail' in this_ans:
+                is_table = False
+                continue
             for this_ans_pool in this_ans['pools']:
                 this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'], this_ans_pool_members['port'],
                                                                      this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
@@ -121,7 +127,8 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     for each_vol in ans:
-        each_vol['create_time'] = timezone2local(each_vol['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        if 'create_time' in each_vol:
+            each_vol['create_time'] = timezone2local(each_vol['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Volume Result",
@@ -159,7 +166,8 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
         ans = img.list(isAll=is_all)
         cols = ['id', 'name', 'status', 'create_time']
     for each_snap in ans:
-        each_snap['create_time'] = timezone2local(each_snap['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        if 'create_time' in each_snap:
+            each_snap['create_time'] = timezone2local(each_snap['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result",
