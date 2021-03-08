@@ -6,6 +6,7 @@ import json
 from twccli.twcc.util import mk_names
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
+from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -13,6 +14,11 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help="Change your TWCC resources.")
 def cli():
+    keyring = Keypairs()
+    ans = keyring.list()
+    if ans == {'message': 'Your request is unauthorized. Key is expired.'}:
+        print(ans)
+        exit(1)
     pass
 
 

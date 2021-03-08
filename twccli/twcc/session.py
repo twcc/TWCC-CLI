@@ -253,6 +253,9 @@ class Session2(object):
         from twccli.twcc.services.base import Users
         twcc_api = Users(api_key=api_key)
         info = twcc_api.getInfo()
+        if info == {'message': 'Your request is unauthorized. Key is expired.'}:
+            print(info)
+            exit(1)
         if len(info) > 0:
             return info[0]
         else:
