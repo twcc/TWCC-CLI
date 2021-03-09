@@ -393,6 +393,11 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
 @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
+    keyring = Keypairs()
+    ans = keyring.list()
+    if 'message' in ans:
+        jpp(ans)
+        exit(1)
     pass
 
 
