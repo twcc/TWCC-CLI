@@ -55,18 +55,27 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Raised error: {}'.format(exc))
 
 
-def list_load_balances(site_ids_or_names, is_all, is_table):
+def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
     ans = []
-
     if len(site_ids_or_names) > 0:
-        cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
+        if column == '':
+            cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
                 'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         for vlb_id in site_ids_or_names:
             ans.append(vlb.list(vlb_id))
     else:
-        cols = ['id', 'name',  'create_time',
+        if column == '':
+            cols = ['id', 'name',  'create_time',
                 'private_net_name', 'status', 'pools_method']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
         if 'detail' in this_ans:
@@ -416,6 +425,11 @@ def cli():
               is_flag=True,
               type=bool,
               help="List all the instances in the project.")
+@click.option('-col',
+              '--column',
+              'column',
+              default = '',
+              help='User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name')
 @click.option('-img',
               '--image',
               'res_property',
@@ -465,7 +479,7 @@ def cli():
 # @click.pass_context ctx,
 # @logger.catch
 # @exception(logger)
-def vcs(env, res_property, site_ids_or_names, name, is_table, is_all):
+def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     """Command line for List VCS
     Function list :
     1. list port
@@ -489,7 +503,7 @@ def vcs(env, res_property, site_ids_or_names, name, is_table, is_all):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
-        list_vcs(site_ids_or_names, is_table, is_all=is_all)
+        list_vcs(site_ids_or_names, column, is_table, is_all=is_all)
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
@@ -787,13 +801,18 @@ def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
               is_flag=True,
               type=bool,
               help="List all the load balancers.")
+@click.option('-col',
+              '--column',
+              'column',
+              default = '',
+              help='User define table column. ex: twccli ls vlb -col pools[0].members')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your Load Balancers.")
 @click.pass_context
-def vlb(ctx, vlb_id, ids_or_names, is_all, is_table):
+def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     """Command line for list bss
 
     :param vlb_id: Enter id for your load balancer.
@@ -803,7 +822,7 @@ def vlb(ctx, vlb_id, ids_or_names, is_all, is_table):
 
     """
     ids_or_names = mk_names(vlb_id, ids_or_names)
-    list_load_balances(ids_or_names, is_all, is_table)
+    list_load_balances(ids_or_names, column, is_all, is_table)
 
 
 cli.add_command(vcs)

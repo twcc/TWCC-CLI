@@ -30,13 +30,18 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
         return yes_no_dialog(title=str_title, text=str_text).run()
 
 
-def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
+def list_vcs(ids_or_names, column, is_table, is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
 
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'private_ip',
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'private_ip',
                 'private_network', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -51,7 +56,12 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
                     ans[i]['private_network'] = ""
                     ans[i]['private_ip'] = ""
     else:
-        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         ans = vcs.list(is_all)
     for each_vcs in ans:
         if 'create_time' in each_vcs:
