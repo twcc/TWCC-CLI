@@ -30,7 +30,7 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
         return yes_no_dialog(title=str_title, text=str_text).run()
 
 
-def list_vcs(ids_or_names, column, is_table, is_all=False, is_print=True):
+def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
 
