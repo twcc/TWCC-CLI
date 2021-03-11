@@ -399,6 +399,11 @@ class VcsSite(CpuService):
                          "project": self._project_id,
                          "solution": sol_id}
         return self._do_api()
+    def patch_desc(self, site_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
 
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
@@ -616,7 +621,8 @@ def getServerId(site_id):
     if not 'id' in sites:
         raise ValueError("Site ID: {} is not found.".format(site_id))
     if len(sites['servers']) >= 1:
-        server_id = sites['servers'][0]
+        server_info = sites['servers'][0]
+        server_id = server_info['id']
         return server_id
     else:
         return None

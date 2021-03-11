@@ -249,7 +249,7 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
             jpp(ans)
 
 
-def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
+def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     vcs = VcsSite()
     ans = []
 
@@ -267,6 +267,10 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
                 vcs.stop(site_id)
             elif status == 'ready':
                 vcs.start(site_id)
+            else:
+                pass
+            if not desc == '':
+                vcs.patch_desc(site_id,desc)
     else:
         raise ValueError
     if wait and status == 'stop':

@@ -22,39 +22,40 @@ def cli():
     pass
 
 
-#@click.command(
-#    help="'Change' details of your VCS (Virtual Compute Service) instances.")
-#@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
-#@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop'], case_sensitive=False), help="Status of the instance.")
-#@click.option('-table / -json',
-#              '--table-view / --json-view',
-#              'is_table',
-#              is_flag=True,
-#              default=True,
-#              show_default=True,
-#              help="Show information in Table view or JSON view.")
-#@click.option('-wait', '--wait', 'wait',
-#              is_flag=True, default=False, flag_value=True,
-#              help='Wait until your instance to be provisioned.')
-#@click.argument('site_ids_or_names', nargs=-1)
-#@pass_environment
-#@click.pass_context
-#def vcs(ctx, env, vcs_status, site_ids_or_names, name, wait, is_table):
-#    """Command line for Change VCS
-#
-#    :param name: Enter name for your resources.
-#    :type name: string
-#    :param site_ids_or_names: list of site id
-#    :type site_ids_or_names: string or tuple
-#    :param vcs_status: Enter status for your resources.
-#    :type vcs_status: string
-#    :param wait: Wait until resources are provisioned
-#    :type wait: bool
-#    :param is_table: Set this flag table view or json view
-#    :type is_table: bool
-#    """
-#    site_ids_or_names = mk_names(name, site_ids_or_names)
-#    change_vcs(site_ids_or_names, str(vcs_status).lower(), is_table, wait)
+@click.command(
+   help="'Change' details of your VCS (Virtual Compute Service) instances.")
+@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
+@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop'], case_sensitive=False), default = '', help="Status of the instance.")
+@click.option('-d', '--site-desc', 'desc', type=str,default = '', help="Description of the instance.")
+@click.option('-table / -json',
+             '--table-view / --json-view',
+             'is_table',
+             is_flag=True,
+             default=True,
+             show_default=True,
+             help="Show information in Table view or JSON view.")
+@click.option('-wait', '--wait', 'wait',
+             is_flag=True, default=False, flag_value=True,
+             help='Wait until your instance to be provisioned.')
+@click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
+@click.pass_context
+def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
+   """Command line for Change VCS
+
+   :param name: Enter name for your resources.
+   :type name: string
+   :param site_ids_or_names: list of site id
+   :type site_ids_or_names: string or tuple
+   :param vcs_status: Enter status for your resources.
+   :type vcs_status: string
+   :param wait: Wait until resources are provisioned
+   :type wait: bool
+   :param is_table: Set this flag table view or json view
+   :type is_table: bool
+   """
+   site_ids_or_names = mk_names(name, site_ids_or_names)
+   change_vcs(site_ids_or_names, str(vcs_status).lower(), is_table, desc, wait)
 
 
 @click.option('-s', '--site-id', type=str, help="ID of the instance.")
@@ -140,7 +141,7 @@ def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table): #listener
     members = mk_names(member, more_members)
     change_loadbalancer(vlb_id,members,lb_method,is_table)
 
-#cli.add_command(vcs)
+cli.add_command(vcs)
 cli.add_command(bss)
 cli.add_command(vlb)
 
