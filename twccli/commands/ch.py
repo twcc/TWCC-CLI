@@ -6,6 +6,7 @@ import json
 from twccli.twcc.util import mk_names
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
+from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -13,6 +14,11 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help="Change your TWCC resources.")
 def cli():
+    keyring = Keypairs()
+    ans = keyring.list()
+    if ans == {'message': 'Your request is unauthorized. Key is expired.'}:
+        print(ans)
+        exit(1)
     pass
 
 
@@ -96,9 +102,9 @@ def bss(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
                       site_id, is_table, vol_size, wait)
 
 @click.option('-m', '--member', type=str,
-              help="Index of the volume.")
+              help="Change members of load balancer, ex: twccli ch vlb -id {$vlbid} -m 192.168.100.1:80 192.168.2.80")
 @click.option('-id', '--vlb-id', 'vlb_id', type=str,
-              help="Index of the volume.")
+              help="Index of the load balancer.")
 @click.option('-lm', '--lb_method', type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
               help="Method of the load balancer.")
 # @click.option('-ln', '--listener-name', 'listener_name', type=str,multiple=True,

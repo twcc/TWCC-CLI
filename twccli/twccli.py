@@ -26,7 +26,7 @@ else:
     import logging
     import coloredlogs
     import logging.config
-    with open('twccli/logging.yml', 'r') as f:
+    with open('twccli/yaml/logging.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
     log_file_name = config['handlers']['file']['filename']
     config['handlers']['file']['filename'] = os.path.join(

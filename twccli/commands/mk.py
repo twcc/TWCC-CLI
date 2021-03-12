@@ -8,7 +8,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Vo
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator, timezone2local
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 from twccli.twcc.services.network import Networks
@@ -43,6 +43,8 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
+    if 'create_time' in ans:
+        ans['create_time'] = timezone2local(ans['create_time'][:-8]+'Z').strftime("%Y-%m-%d %H:%M:%S")
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
@@ -131,6 +133,11 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="Create (allocate) your TWCC resources.")
 def cli():
+    keyring = Keypairs()
+    ans = keyring.list()
+    if 'message' in ans:
+        jpp(ans)
+        exit(1)
     pass
 
 

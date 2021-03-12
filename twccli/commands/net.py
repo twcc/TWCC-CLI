@@ -3,6 +3,7 @@ from twccli.twcc.util import isNone,mk_names
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
 from twccli.twccli import pass_environment, logger
+from twccli.twcc.services.base import Keypairs
 import click
 import re
 
@@ -170,6 +171,11 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="NETwork related operations.")
 def cli():
+    keyring = Keypairs()
+    ans = keyring.list()
+    if ans == {'message': 'Your request is unauthorized. Key is expired.'}:
+        print(ans)
+        exit(1)
     pass
 
 
