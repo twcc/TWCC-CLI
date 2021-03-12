@@ -265,7 +265,7 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
 
     if len(ids_or_names) > 0:
         cols = ['id', 'name', 'public_ip','create_time', 'status']
-
+        show_desc_flag = False
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
@@ -281,6 +281,9 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
                 pass
             if not desc == '':
                 vcs.patch_desc(site_id,desc)
+                show_desc_flag = True
+        if show_desc_flag:
+            cols.append('desc')
     else:
         raise ValueError
     if wait and status == 'stop':
