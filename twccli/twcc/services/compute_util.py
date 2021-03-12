@@ -3,7 +3,7 @@ import time
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator, timezone2local
 from prompt_toolkit.shortcuts import yes_no_dialog
 
 
@@ -54,6 +54,8 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         ans = vcs.list(is_all)
     for each_vcs in ans:
+        if 'create_time' in each_vcs:
+            each_vcs['create_time'] = timezone2local(each_vcs['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         if each_vcs['status']=="NotReady":
             each_vcs['status']="Stopped"
         if each_vcs['status']=="Shelving":
