@@ -30,13 +30,18 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
         return yes_no_dialog(title=str_title, text=str_text).run()
 
 
-def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
+def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
 
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'private_ip',
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'private_ip',
                 'private_network', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -51,7 +56,12 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
                     ans[i]['private_network'] = ""
                     ans[i]['private_ip'] = ""
     else:
-        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         ans = vcs.list(is_all)
     for each_vcs in ans:
         if 'create_time' in each_vcs:
@@ -249,13 +259,13 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
             jpp(ans)
 
 
-def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
+def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     vcs = VcsSite()
     ans = []
 
     if len(ids_or_names) > 0:
         cols = ['id', 'name', 'public_ip','create_time', 'status']
-
+        show_desc_flag = False
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
@@ -267,6 +277,13 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
                 vcs.stop(site_id)
             elif status == 'ready':
                 vcs.start(site_id)
+            else:
+                pass
+            if not desc == '':
+                vcs.patch_desc(site_id,desc)
+                show_desc_flag = True
+        if show_desc_flag:
+            cols.append('desc')
     else:
         raise ValueError
     if wait and status == 'stop':
