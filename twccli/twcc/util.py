@@ -158,6 +158,8 @@ def dic_seperator(d):
 
 
 def timezone2local(time_str):
+    if '.' in time_str:
+        time_str = time_str[:-8]+'Z'
     ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
     return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
 

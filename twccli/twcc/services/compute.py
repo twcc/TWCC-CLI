@@ -479,12 +479,14 @@ class VcsImage(CpuService):
 
     def list(self, srv_id=None, isAll=False):
         if not isNone(srv_id):
+            images = []
             self.ext_get = {'project': self._project_id}
-            ans = self._do_api()
-            for y in ans:
-                if not isNone(y['server']):
-                    if y['server']['id'] == srv_id:
-                        return y
+            all_images = self._do_api()
+            for one_image in all_images:
+                if not isNone(one_image['server']):
+                    if one_image['server']['id'] == srv_id:
+                        images.append(one_image)
+            return images
         else:
             self.ext_get = {'project': self._project_id,
                             'sol_categ': 'os'}

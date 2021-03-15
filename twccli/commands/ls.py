@@ -155,11 +155,11 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
             # sid = site_ids_or_names[0]
             img = VcsImage()
             srv_id = getServerId(sid)
-            this_ans = img.list(srv_id)
-            if isNone(this_ans):
+            images = img.list(srv_id)
+            if not images:
                 continue
-            this_ans['site_id'] = sid
-            ans.extend([this_ans])
+            [image.setdefault('site_id',sid) for image in images]
+            ans.extend(images)
             cols = ['id', 'site_id', 'name', 'status', 'create_time']
     else:
         img = VcsImage()
