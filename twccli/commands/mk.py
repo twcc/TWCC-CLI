@@ -414,9 +414,9 @@ def vnet(env, name, getway, cidr, is_table, wait):
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.command(help="Create your BSS.")
-def bss(name, vol_size, is_table):
-    """Command line for create bss
+@click.command(help="Create your VDS (Virtual Disk Service).")
+def vds(name, vol_size, is_table):
+    """Command line for create vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -490,7 +490,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 

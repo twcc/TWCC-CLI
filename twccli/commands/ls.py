@@ -744,10 +744,10 @@ def key(env, name, is_table, ids_or_names):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="List your BSS.")
+@click.command(help="List your VDS (Virtual Disk Service).")
 @click.pass_context
-def bss(ctx, name, ids_or_names, is_all, is_table):
-    """Command line for list bss
+def vds(ctx, name, ids_or_names, is_all, is_table):
+    """Command line for list vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -813,7 +813,7 @@ def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
 @click.command(help="List your Load Balancers.")
 @click.pass_context
 def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
-    """Command line for list bss
+    """Command line for list vds
 
     :param vlb_id: Enter id for your load balancer.
     :type vlb_id: string
@@ -829,7 +829,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 
