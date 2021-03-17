@@ -72,7 +72,6 @@ def list_load_balances(site_ids_or_names, is_all, is_table):
         this_ans['private_net_name'] = this_ans['private_net']['name']
         this_ans['pools_method'] = ','.join(
             [this_ans_pool['method'] for this_ans_pool in this_ans['pools']])
-        this_ans['create_time'] = timezone2local(this_ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(site_ids_or_names) > 0:
         for this_ans in ans:
             for this_ans_pool in this_ans['pools']:
@@ -120,8 +119,6 @@ def list_volume(site_ids_or_names, is_all, is_table):
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
-    for each_vol in ans:
-        each_vol['create_time'] = timezone2local(each_vol['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Volume Result",
@@ -158,8 +155,6 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
         img = VcsImage()
         ans = img.list(isAll=is_all)
         cols = ['id', 'name', 'status', 'create_time']
-    for each_snap in ans:
-        each_snap['create_time'] = timezone2local(each_snap['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result",
@@ -291,8 +286,6 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             my_GpuSite.append(a.queryById(ele))
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
-    for each_ccs in my_GpuSite:
-        each_ccs['create_time'] = timezone2local(each_ccs['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(my_GpuSite) > 0:
         if isAll:
             col_name.append('user')

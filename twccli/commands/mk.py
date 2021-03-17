@@ -43,8 +43,6 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
-    for each_vlb in ans:
-        each_vlb['create_time'] = timezone2local(each_vlb['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
@@ -62,8 +60,6 @@ def create_volume(vol_name, size, is_table):
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
     vol = Volumes()
     ans = vol.create(vol_name, size)
-    for each_vol in ans:
-        each_vol['create_time'] = timezone2local(each_vol['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if is_table:
         cols = ["id", "name", "size", "volume_type"]
         table_layout("Volumes", ans, cols, isPrint=True)
