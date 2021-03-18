@@ -556,14 +556,18 @@ class LoadBalancers(CpuService):
             if isAll:
                 self.ext_get = {'project': self._project_id,
                                 "all_users": 1}
+                return self._do_api()
             else:
                 self.ext_get = {'project': self._project_id}
+                all_vlbs= self._do_api()
+                my_username = Session2().twcc_username
+                return [x for x in all_vlbs if x["user"]['username'] == my_username]
+
         else:
             self.http_verb = 'get'
             self.res_type = 'json'
             self.url_dic = {"loadbalancers": vlb_id}
-
-        return self._do_api()
+            return self._do_api()
 
     def deleteById(self, vlb_id):
         self.http_verb = 'delete'
@@ -601,12 +605,13 @@ class Volumes(CpuService):
             self.http_verb = 'get'
             self.res_type = 'json'
             if isAll:
+                self.ext_get = {'project': self._project_id}
                 all_volumes = self._do_api()
                 return all_volumes
             else:
                 self.ext_get = {'project': self._project_id}
                 all_volumes= self._do_api()
-                my_username = sess = Session2().twcc_username
+                my_username = Session2().twcc_username
                 return [x for x in all_volumes if x["user"]['username'] == my_username]
         else:
             self.http_verb = 'get'
