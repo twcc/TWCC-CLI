@@ -72,11 +72,11 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="Update status of your BSS.")
+@click.command(help="Update status of your VDS (Virtual Disk Service).")
 @pass_environment
 @click.pass_context
-def bss(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_table):
-    """Command line for list bss
+def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_table):
+    """Command line for list vds
 
     :param name: Enter name for your volume.
     :type name: string
@@ -142,7 +142,7 @@ def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table): #listener
     change_loadbalancer(vlb_id,members,lb_method,is_table)
 
 cli.add_command(vcs)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vlb)
 
 

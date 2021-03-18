@@ -377,10 +377,10 @@ def vnet(env, ids_or_names, vnetid, force):
               is_flag=True, show_default=True, default=False,
               help='Force delete the container.')
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="Delete your BSS.")
+@click.command(help="Delete your VDS (Virtual Disk Service).")
 @click.pass_context
-def bss(ctx, name, ids_or_names, force):
-    """Command line for delete bss
+def vds(ctx, name, ids_or_names, force):
+    """Command line for delete vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -409,7 +409,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 
