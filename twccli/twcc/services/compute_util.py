@@ -216,6 +216,20 @@ def change_loadbalancer(vlb_id, members, lb_method, is_table):
 
     cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
             'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+    if 'detail' in ans:
+        is_table = False
+    else:
+        ans['private_net_name'] = ans['private_net']['name']
+        ans['pools_method'] = ','.join(
+            [ans_pool['method'] for ans_pool in ans['pools']])
+        ans['create_time'] = timezone2local(ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        for ans_pool in ans['pools']:
+            ans['members_IP,status'] = ['({}:{},{})'.format(ans_pool_members['ip'], ans_pool_members['port'],
+                                                                    ans_pool_members['status']) for ans_pool_members in ans_pool['members']]
+
+        ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(
+            ans_listeners['name'], ans_listeners['protocol'], ans_listeners['protocol_port'], ans_listeners['status']) for ans_listeners in ans['listeners']]
+        
     if len(ans) > 0:
         if is_table:
             table_layout("Load Balancers Info.:", ans,
