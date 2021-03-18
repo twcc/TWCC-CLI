@@ -43,8 +43,6 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
-    if 'create_time' in ans:
-        ans['create_time'] = timezone2local(ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
