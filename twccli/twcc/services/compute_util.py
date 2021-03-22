@@ -70,6 +70,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             each_vcs['status']="Stopping"
         if each_vcs['status']=="Unshelving":
             each_vcs['status']="Starting"
+    ans = sorted(ans, key=lambda k: k['create_time']) 
     if len(ans) > 0:
         if not is_print:
             return ans
