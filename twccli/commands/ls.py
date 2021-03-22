@@ -310,8 +310,12 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans['flavor'] = jmespath.search('Pod[0].flavor',ans_info)
-            ans['image'] =  jmespath.search('Pod[0].container[0].image',ans_info).split('/')[-1]
+            ans_flavor = jmespath.search('Pod[0].flavor',ans_info)
+            if not ans_flavor == None:
+                ans['flavor'] = ans_flavor
+            ans_image = jmespath.search('Pod[0].container[0].image',ans_info)
+            if not ans_image == None and '/' in ans_image:
+                ans['image'] =  ans_image.split('/')[-1]
             my_GpuSite.append(ans)
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     for each_ccs in my_GpuSite:
