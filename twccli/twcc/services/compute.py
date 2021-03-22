@@ -142,8 +142,8 @@ class GpuSite(GpuService):
         if isAll:
             self.ext_get = {'project': self._project_id,
                             "all_users": 1}
-        elif 'container' in self.url_dic and self.url_dic['container'] == "":
-            pass
+        # elif 'container' in self.url_dic and self.url_dic['container'] == "":
+        #     pass
         else:
             self.ext_get = {'project': self._project_id}
         return self._do_api()
