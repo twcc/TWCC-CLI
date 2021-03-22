@@ -42,7 +42,7 @@ class TestCntrLifecyc:
 
     def _list(self):
         assert type(int(self.site_id)) == type(1)
-        cmd_list = "-sv ls ccs -s {} ".format(self.site_id)
+        cmd_list = "ls ccs -s {} ".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))
 
     def _listDetail(self, isatt=True):
