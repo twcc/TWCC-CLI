@@ -4,6 +4,7 @@ import click
 import json
 import re
 import datetime
+import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers
@@ -296,10 +297,19 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     if len(site_ids_or_names) == 0:
         my_GpuSite = a.list(isAll=isAll)
     else:
+        col_name = ['id', 'name', 'create_time', 'status', 'flavor', 'image']
         my_GpuSite = []
         for ele in site_ids_or_names:
             # site_id = int(ele)
-            my_GpuSite.append(a.queryById(ele))
+            ans = a.queryById(ele)
+            ans_info = a.getDetail(ele)
+            ans_flavor = jmespath.search('Pod[0].flavor',ans_info)
+            if not ans_flavor == None:
+                ans['flavor'] = ans_flavor
+            ans_image = jmespath.search('Pod[0].container[0].image',ans_info)
+            if not ans_image == None and '/' in ans_image:
+                ans['image'] =  ans_image.split('/')[-1]
+            my_GpuSite.append(ans)
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
         if isAll:
