@@ -163,7 +163,7 @@ def cli():
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
 
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
 @click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
@@ -226,7 +226,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                     datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if name == 'twccli':
                     img_name = 'twccli'+datetime.now().strftime("%d%m%H%M")+str(index)
-                else: 
+                else:
                     img_name = name
                 ans = img.createSnapshot(sid, img_name, desc_str)
                 if "detail" in ans: is_table = False
