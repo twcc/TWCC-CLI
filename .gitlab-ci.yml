@@ -49,20 +49,6 @@ python36:
   only:
     - master
 
-manual minor version deploy to PYPI:
-  stage: deploy
-  image: python:3.7
-  variables:
-    TWINE_USERNAME: $PYPI_USERNAME
-    TWINE_PASSWORD: $PYPI_PASSWORD
-  script:
-    - pip install twine
-    - python setup.py sdist bdist_wheel
-    - twine upload --verbose dist/*
-  only:
-    - dev
-  when: manual
-  allow_failure: false
 
 manual MAJOR version:
   stage: deploy

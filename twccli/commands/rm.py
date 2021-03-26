@@ -93,7 +93,7 @@ def del_vnet(ids_or_names, isForce=False, isAll=False):
     ans = [net.queryById(x) for x in ids_or_names]
     for the_net in ans:
         txt = "You about to delete virtual network \n- id: {}\n- created by: {}\n- created time: {}".format(
-                    the_net['id'], the_net['user']['username'], timezone2local(the_net['create_time']))
+                    the_net['id'], the_net['user']['username'], the_net['create_time'])
         if getConfirm("Virtal Network", ",".join(ids_or_names), isForce,ext_txt=txt):
             net.delete(the_net['id'])
 
@@ -120,7 +120,7 @@ def del_snap(ids_or_names, isForce=False, isAll=False):
             if len(the_snap) > 0:
                 the_snap = the_snap[0]
                 txt = "You about to delete snapshot \n- id: {}\n- created by: {}\n- created time: {}".format(
-                    snap_id, the_snap['user']['username'], timezone2local(the_snap['create_time']))
+                    snap_id, the_snap['user']['username'], the_snap['create_time'])
                 if getConfirm("Snapshots", snap_id, isForce, txt):
                     snap.deleteById(snap_id)
 
@@ -173,7 +173,7 @@ def del_load_balancer(ids_or_names, isForce=False):
     for vlb_id in ids_or_names:
         ans = vlb.list(vlb_id)
         txt = "You about to delete load balancer \n- id: {}\n- created by: {}\n- created time: {}".format(
-            vlb_id, ans['user']['display_name'], timezone2local(ans['create_time']))
+            vlb_id, ans['user']['display_name'], ans['create_time'])
         if getConfirm("Load Balancer", vlb_id, isForce, txt):
             vlb.deleteById(vlb_id)
             print("Successfully remove {}".format(vlb_id))
@@ -377,10 +377,10 @@ def vnet(env, ids_or_names, vnetid, force):
               is_flag=True, show_default=True, default=False,
               help='Force delete the container.')
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="Delete your BSS.")
+@click.command(help="Delete your VDS (Virtual Disk Service).")
 @click.pass_context
-def bss(ctx, name, ids_or_names, force):
-    """Command line for delete bss
+def vds(ctx, name, ids_or_names, force):
+    """Command line for delete vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -409,7 +409,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 

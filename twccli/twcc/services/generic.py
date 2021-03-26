@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 import yaml
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, isNone, isDebug
+from twccli.twcc.util import pp, isNone, isDebug, timezone2local
 from twccli.twcc.clidriver import ServiceOperation
 from twccli.twccli import logger
 
@@ -97,7 +97,13 @@ class GenericService(object):
         if self._debug_:
             logger.info({'res':res})
         #     pp(res=res)
-
+        if type(res) == type([]):
+            for eachone in res:
+                if 'create_time' in eachone:
+                    eachone['create_time'] = timezone2local(eachone['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        elif type(res) == type({}):
+            if 'create_time' in res:
+                    res['create_time'] = timezone2local(res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         return res
 
     def create(self, mid):
