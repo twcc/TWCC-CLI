@@ -4,6 +4,7 @@ import click
 import json
 import re
 import datetime
+import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers
@@ -55,18 +56,27 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Raised error: {}'.format(exc))
 
 
-def list_load_balances(site_ids_or_names, is_all, is_table):
+def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
     ans = []
-
     if len(site_ids_or_names) > 0:
-        cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
+        if column == '':
+            cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
                 'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         for vlb_id in site_ids_or_names:
             ans.append(vlb.list(vlb_id))
     else:
-        cols = ['id', 'name',  'create_time',
+        if column == '':
+            cols = ['id', 'name',  'create_time',
                 'private_net_name', 'status', 'pools_method']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
         if 'detail' in this_ans:
@@ -75,7 +85,6 @@ def list_load_balances(site_ids_or_names, is_all, is_table):
         this_ans['private_net_name'] = this_ans['private_net']['name']
         this_ans['pools_method'] = ','.join(
             [this_ans_pool['method'] for this_ans_pool in this_ans['pools']])
-        this_ans['create_time'] = timezone2local(this_ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(site_ids_or_names) > 0:
         for this_ans in ans:
             if 'detail' in this_ans:
@@ -126,9 +135,6 @@ def list_volume(site_ids_or_names, is_all, is_table):
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
-    for each_vol in ans:
-        if 'create_time' in each_vol:
-            each_vol['create_time'] = timezone2local(each_vol['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Volume Result",
@@ -165,9 +171,6 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
         img = VcsImage()
         ans = img.list(isAll=is_all)
         cols = ['id', 'name', 'status', 'create_time']
-    for each_snap in ans:
-        if 'create_time' in each_snap:
-            each_snap['create_time'] = timezone2local(each_snap['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(ans) > 0:
         if is_table:
             table_layout("Snapshot Result",
@@ -294,13 +297,20 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     if len(site_ids_or_names) == 0:
         my_GpuSite = a.list(isAll=isAll)
     else:
+        col_name = ['id', 'name', 'create_time', 'status', 'flavor', 'image']
         my_GpuSite = []
         for ele in site_ids_or_names:
             # site_id = int(ele)
-            my_GpuSite.append(a.queryById(ele))
+            ans = a.queryById(ele)
+            ans_info = a.getDetail(ele)
+            ans_flavor = jmespath.search('Pod[0].flavor',ans_info)
+            if not ans_flavor == None:
+                ans['flavor'] = ans_flavor
+            ans_image = jmespath.search('Pod[0].container[0].image',ans_info)
+            if not ans_image == None and '/' in ans_image:
+                ans['image'] =  ans_image.split('/')[-1]
+            my_GpuSite.append(ans)
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
-    for each_ccs in my_GpuSite:
-        each_ccs['create_time'] = timezone2local(each_ccs['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if len(my_GpuSite) > 0:
         if isAll:
             col_name.append('user')
@@ -416,6 +426,11 @@ def cli():
               is_flag=True,
               type=bool,
               help="List all the instances in the project.")
+@click.option('-col',
+              '--column',
+              'column',
+              default = '',
+              help='User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name')
 @click.option('-img',
               '--image',
               'res_property',
@@ -465,7 +480,7 @@ def cli():
 # @click.pass_context ctx,
 # @logger.catch
 # @exception(logger)
-def vcs(env, res_property, site_ids_or_names, name, is_table, is_all):
+def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     """Command line for List VCS
     Function list :
     1. list port
@@ -489,7 +504,7 @@ def vcs(env, res_property, site_ids_or_names, name, is_table, is_all):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
-        list_vcs(site_ids_or_names, is_table, is_all=is_all)
+        list_vcs(site_ids_or_names, is_table, column = column, is_all=is_all)
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
@@ -730,10 +745,10 @@ def key(env, name, is_table, ids_or_names):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="List your BSS.")
+@click.command(help="List your VDS (Virtual Disk Service).")
 @click.pass_context
-def bss(ctx, name, ids_or_names, is_all, is_table):
-    """Command line for list bss
+def vds(ctx, name, ids_or_names, is_all, is_table):
+    """Command line for list vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -787,14 +802,19 @@ def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
               is_flag=True,
               type=bool,
               help="List all the load balancers.")
+@click.option('-col',
+              '--column',
+              'column',
+              default = '',
+              help='User define table column. ex: twccli ls vlb -col pools[0].members')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your Load Balancers.")
 @click.pass_context
-def vlb(ctx, vlb_id, ids_or_names, is_all, is_table):
-    """Command line for list bss
+def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
+    """Command line for list vds
 
     :param vlb_id: Enter id for your load balancer.
     :type vlb_id: string
@@ -803,14 +823,14 @@ def vlb(ctx, vlb_id, ids_or_names, is_all, is_table):
 
     """
     ids_or_names = mk_names(vlb_id, ids_or_names)
-    list_load_balances(ids_or_names, is_all, is_table)
+    list_load_balances(ids_or_names, column, is_all, is_table)
 
 
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 

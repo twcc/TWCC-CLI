@@ -4,6 +4,7 @@ import os
 import re
 import time
 import pytz
+import jmespath
 import datetime
 import unicodedata
 from twccli.twccli import pass_environment
@@ -79,9 +80,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             row = json_obj[0]
             caption_row = list(row.keys())
     heading_cap = set(['id', 'name'])
-
     intersect = set(caption_row).intersection(heading_cap)
-
     if len(intersect) > 0:
         new_caption = []
         for ele in sorted(intersect):
@@ -89,15 +88,26 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             caption_row.remove(ele)
         new_caption.extend(sorted(caption_row))
         caption_row = new_caption
-
     start_time = time.time()
 
     table_info = []
     table_info.append(
         [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
-
     for ele in json_obj:
-        table_info.append([ele[cap] for cap in caption_row if cap in ele])
+        row_data = []
+        for cap in caption_row:
+            try:
+                val = jmespath.search(cap, ele)
+            except jmespath.exceptions.ParseError:
+                if cap in ele: val = ele[cap]
+                else: val = ''
+            if val == None: val = ''
+            if val == 'Error' or val == "ERROR":
+                row_data.append(Color("{autored}%s{/autored}" % val))
+            else: row_data.append(val)
+        table_info.append(row_data)
+        # table_info.append([Color("{autored}%s{/autored}" % jmespath.search(cap, ele)) if jmespath.search(cap, ele) == 'Error' or jmespath.search(cap, ele) == 'ERROR' else jmespath.search(cap, ele) for cap in caption_row ]) #if cap in ele
+        # table_info.append([Color("{autored}%s{/autored}" % ele[cap]) if ele[cap] == 'Error' or ele[cap] == 'ERROR' else ele[cap] for cap in caption_row if cap in ele])
     table = AsciiTable(table_info, " {} ".format(title))
 
     for idy in range(len(table.table_data)):
@@ -160,7 +170,10 @@ def dic_seperator(d):
 def timezone2local(time_str):
     if '.' in time_str:
         time_str = time_str[:-8]+'Z'
-    ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+    if 'T' in time_str and 'Z' in time_str:
+        ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+    elif 'T' in time_str:
+        ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
     return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
 
 

@@ -43,8 +43,6 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
-    if 'create_time' in ans:
-        ans['create_time'] = timezone2local(ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
@@ -165,7 +163,7 @@ def cli():
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
 
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
 @click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
@@ -421,9 +419,9 @@ def vnet(env, name, getway, cidr, is_table, wait):
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.command(help="Create your BSS.")
-def bss(name, vol_size, is_table):
-    """Command line for create bss
+@click.command(help="Create your VDS (Virtual Disk Service).")
+def vds(name, vol_size, is_table):
+    """Command line for create vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -497,7 +495,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 
