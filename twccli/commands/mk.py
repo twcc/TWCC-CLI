@@ -141,7 +141,7 @@ def cli():
 
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
-@click.option('-n', '--name', 'name', default="twccli", type=str,
+@click.option('-n', '--name', 'name', default=["twccli"], type=str, multiple=True,
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
@@ -217,6 +217,11 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
+        if len(name) == 1 and name[0] == 'twccli':
+            pass
+        else:
+            if not len(name) == len(sids):
+                raise ValueError('the number of name should equals to sites')
         created_snap_list = []
         if not isNone(sids) or len(sids) > 0:
             for index,sid in enumerate(sids):
@@ -224,10 +229,10 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 img = VcsImage()
                 desc_str = "twccli created at {}".format(
                     datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                if name == 'twccli':
+                if len(name) == 1 and name[0] == 'twccli':
                     img_name = 'twccli'+datetime.now().strftime("%d%m%H%M")+str(index)
-                else:
-                    img_name = name
+                else: 
+                    img_name = name[index]
                 ans = img.createSnapshot(sid, img_name, desc_str)
                 if "detail" in ans: is_table = False
                 else:
@@ -241,6 +246,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         table_layout_title = "Snapshot Result"
 
     else:
+        if len(name) >= 1:
+            name = name[0]
         if name == 'twccli':
             name = "{}{}".format(name, flavor.replace(".", ''))
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
