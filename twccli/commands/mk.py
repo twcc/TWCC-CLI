@@ -40,9 +40,12 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
     ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
-    if wait:
-        doSiteStable(ans['id'], site_type='vlb')
-        ans = vlb.list(ans['id'])
+    if 'detail' in ans:
+        is_table = False
+    else:
+        if wait:
+            doSiteStable(ans['id'], site_type='vlb')
+            ans = vlb.list(ans['id'])
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
@@ -407,6 +410,8 @@ def vnet(env, name, getway, cidr, is_table, wait):
     if wait:
         doSiteStable(ans['id'], site_type='vnet')
         ans = net.queryById(ans['id'])
+    if 'detail' in ans:
+        is_table = False
     if is_table:
         cols = ["id", "name", "cidr","status"]
         table_layout("VCS Networks", ans, cols, isPrint=True)
