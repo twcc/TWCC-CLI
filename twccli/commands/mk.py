@@ -4,7 +4,7 @@ import click
 import time
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
@@ -40,11 +40,12 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
     ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
-    if wait:
-        doSiteStable(ans['id'], site_type='vlb')
-        ans = vlb.list(ans['id'])
-    if 'create_time' in ans:
-        ans['create_time'] = timezone2local(ans['create_time'][:-8]+'Z').strftime("%Y-%m-%d %H:%M:%S")
+    if 'detail' in ans:
+        is_table = False
+    else:
+        if wait:
+            doSiteStable(ans['id'], site_type='vlb')
+            ans = vlb.list(ans['id'])
     if is_table:
         cols = ['id', 'name',  'create_time', 'status']
         table_layout("Load Balancer", ans, cols, isPrint=True)
@@ -143,7 +144,7 @@ def cli():
 
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
-@click.option('-n', '--name', 'name', default="twccli", type=str,
+@click.option('-n', '--name', 'name', default=["twccli"], type=str, multiple=True,
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
@@ -165,7 +166,7 @@ def cli():
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
 
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="local", type=str,
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
 @click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
@@ -219,16 +220,37 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
+        if len(name) == 1 and name[0] == 'twccli':
+            pass
+        else:
+            if not len(name) == len(sids):
+                raise ValueError('the number of name should equals to sites')
+        created_snap_list = []
         if not isNone(sids) or len(sids) > 0:
-            sid = sids[0]
-            print("create snapshot for {}".format(sid))
-            img = VcsImage()
-            desc_str = "twccli created at {}".format(
-                datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            if name == 'twccli':
-                name += datetime.now().strftime("%d%m%H%M")
-            return img.createSnapshot(sid, name, desc_str)
+            for index,sid in enumerate(sids):
+                img_name = ''
+                img = VcsImage()
+                desc_str = "twccli created at {}".format(
+                    datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                if len(name) == 1 and name[0] == 'twccli':
+                    img_name = 'twccli'+datetime.now().strftime("%d%m%H%M")+str(index)
+                else: 
+                    img_name = name[index]
+                ans = img.createSnapshot(sid, img_name, desc_str)
+                if "detail" in ans: is_table = False
+                else:
+                    img = VcsImage()
+                    srv_id = getServerId(sid)
+                    searched_imgs = img.list(srv_id)
+                    ans = [eachimg for eachimg in searched_imgs if eachimg['name'] == img_name][0]
+                created_snap_list.append(ans)
+                time.sleep(1)
+        ans = created_snap_list
+        table_layout_title = "Snapshot Result"
+
     else:
+        if len(name) >= 1:
+            name = name[0]
         if name == 'twccli':
             name = "{}{}".format(name, flavor.replace(".", ''))
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
@@ -245,11 +267,12 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             ans = vcs.queryById(ans['id'])
             ans["solution"] = sol
             ans["flavor"] = flavor
-        if is_table:
-            cols = ["id", "name", "status"]
-            table_layout("VCS Site", ans, cols, isPrint=True)
-        else:
-            jpp(ans)
+        table_layout_title = "VCS Site"
+    if is_table:
+        cols = ["id", "name", "status"]
+        table_layout(table_layout_title, ans, cols, isPrint=True)
+    else:
+        jpp(ans)
 
 
 @click.option('-bkt', '--bucket_name', 'name', default="twccli", type=str,
@@ -387,6 +410,8 @@ def vnet(env, name, getway, cidr, is_table, wait):
     if wait:
         doSiteStable(ans['id'], site_type='vnet')
         ans = net.queryById(ans['id'])
+    if 'detail' in ans:
+        is_table = False
     if is_table:
         cols = ["id", "name", "cidr","status"]
         table_layout("VCS Networks", ans, cols, isPrint=True)
@@ -399,9 +424,9 @@ def vnet(env, name, getway, cidr, is_table, wait):
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.command(help="Create your BSS.")
-def bss(name, vol_size, is_table):
-    """Command line for create bss
+@click.command(help="Create your VDS (Virtual Disk Service).")
+def vds(name, vol_size, is_table):
+    """Command line for create vds
 
     :param name: Enter name for your resources.
     :type name: string
@@ -475,7 +500,7 @@ cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
 cli.add_command(key)
-cli.add_command(bss)
+cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 

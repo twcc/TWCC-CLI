@@ -25,6 +25,22 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.15 Release Note
+
+![img](https://media.giphy.com/media/VSRSd6I6OTw8ywt6Xt/giphy.gif)
+
+**Feature**
+- BSS(Block Storage Service) is officially renamed as VDS(Virtual Disk Service).
+- Users can list personal resource of VDS & [VLB](https://www.twcc.ai/doc?page=load_balancer).
+- Users can create multi listener over [VLB](https://www.twcc.ai/doc?page=load_balancer).
+- Users can change VCS descrption with `-d`.
+- Users can multiply name their SnapShot wile createing.
+
+**Bug Fix**
+- fix #9
+- fix timezone problem
+- fix error response for snapshot
+
 ### v0.5.14 Release Note
 ![img](https://media.giphy.com/media/c4AldScPlPi5uGFux2/giphy.gif)
 
