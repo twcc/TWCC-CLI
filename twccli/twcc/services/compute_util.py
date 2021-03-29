@@ -221,7 +221,6 @@ def change_loadbalancer(vlb_id, members, lb_method, is_table):
         ans['private_net_name'] = ans['private_net']['name']
         ans['pools_method'] = ','.join(
             [ans_pool['method'] for ans_pool in ans['pools']])
-        ans['create_time'] = timezone2local(ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         for ans_pool in ans['pools']:
             ans['members_IP,status'] = ['({}:{},{})'.format(ans_pool_members['ip'], ans_pool_members['port'],
                                                                     ans_pool_members['status']) for ans_pool_members in ans_pool['members']]
