@@ -95,7 +95,9 @@ def del_vnet(ids_or_names, isForce=False, isAll=False):
         txt = "You about to delete virtual network \n- id: {}\n- created by: {}\n- created time: {}".format(
                     the_net['id'], the_net['user']['username'], the_net['create_time'])
         if getConfirm("Virtal Network", ",".join(ids_or_names), isForce,ext_txt=txt):
-            net.delete(the_net['id'])
+            del_info = net.delete(the_net['id'])
+        if not del_info == b'':
+            print(del_info)
 
 def del_snap(ids_or_names, isForce=False, isAll=False):
     """Delete security group by site id
