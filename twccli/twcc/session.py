@@ -155,7 +155,7 @@ class Session2(object):
     def _getIsrvProjs(api_key=None):
         from twccli.twcc.services.base import projects
         twcc_proj = projects(api_key=api_key)
-        return twcc_proj.getProjects()
+        return twcc_proj.getProjects(isAll=True, is_table=False, is_print = False)
 
     def getIsrvProjs(self):
         return Session2._getIsrvProjs(api_key=self.twcc_api_key)
