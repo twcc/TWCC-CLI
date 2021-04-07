@@ -65,7 +65,7 @@ def resource_id_validater(id):
     return id.isdigit()
 
 
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False):
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False, captionInOrder=False):
     from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
@@ -80,14 +80,18 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             row = json_obj[0]
             caption_row = list(row.keys())
     heading_cap = set(['id', 'name'])
-    intersect = set(caption_row).intersection(heading_cap)
-    if len(intersect) > 0:
-        new_caption = []
-        for ele in sorted(intersect):
-            new_caption.append(ele)
-            caption_row.remove(ele)
-        new_caption.extend(sorted(caption_row))
-        caption_row = new_caption
+   
+    if captionInOrder == True:
+        pass
+    else:
+        intersect = set(caption_row).intersection(heading_cap)
+        if len(intersect) > 0:
+            new_caption = []
+            for ele in sorted(intersect):
+                new_caption.append(ele)
+                caption_row.remove(ele)
+            new_caption.extend(sorted(caption_row))
+            caption_row = new_caption
     start_time = time.time()
 
     table_info = []
@@ -106,8 +110,6 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
                 row_data.append(Color("{autored}%s{/autored}" % val))
             else: row_data.append(val)
         table_info.append(row_data)
-        # table_info.append([Color("{autored}%s{/autored}" % jmespath.search(cap, ele)) if jmespath.search(cap, ele) == 'Error' or jmespath.search(cap, ele) == 'ERROR' else jmespath.search(cap, ele) for cap in caption_row ]) #if cap in ele
-        # table_info.append([Color("{autored}%s{/autored}" % ele[cap]) if ele[cap] == 'Error' or ele[cap] == 'ERROR' else ele[cap] for cap in caption_row if cap in ele])
     table = AsciiTable(table_info, " {} ".format(title))
 
     for idy in range(len(table.table_data)):

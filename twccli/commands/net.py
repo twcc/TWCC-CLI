@@ -123,18 +123,18 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
         # site_info = sites[0]
 
         errorFlg = True
-        if len(site_info['public_ip']) > 0 and fip == False:
-            VcsServerNet().deAssociateIP(site_ids[i])
-            errorFlg = False
+        if not isNone(fip):
+            if len(site_info['public_ip']) > 0 and fip == False:
+                VcsServerNet().deAssociateIP(site_ids[i])
+                errorFlg = False
 
-        if len(site_info['public_ip']) == 0 and fip == True:
-            VcsServerNet().associateIP(site_ids[i])
-            errorFlg = False
+            if len(site_info['public_ip']) == 0 and fip == True:
+                VcsServerNet().associateIP(site_ids[i])
+                errorFlg = False
 
         # case 2: port setting
         from netaddr import IPNetwork
         IPNetwork(cidr)
-
         if not isNone(portrange):
             if re.findall('[^0-9-]', portrange):
                 raise ValueError('port range should be digital-digital')
@@ -143,7 +143,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             secg_id = secg_list['id']
             port_list = portrange.split('-')
             if len(port_list) == 2:
-                port_min, port_max = [int(port) for port in port_list]
+                port_min, port_max = [int(mport) for mport in port_list]
                 if port_min < 0 or port_max < 0:
                     raise ValueError('port range must bigger than 0')
                 elif port_min > port_max:
@@ -155,6 +155,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                                 "ingress" if isIngress else "egress")
             errorFlg = False
+
         if not isNone(port):
             secg_list = getSecGroupList(site_ids[i])
             secg_id = secg_list['id']

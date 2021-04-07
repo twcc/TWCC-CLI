@@ -386,7 +386,8 @@ def list_secg(ids_or_names, is_table=True):
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail,
-                         isPrint=True)
+                         caption_row = ['id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
+                         isPrint=True, captionInOrder=True)
         else:
             jpp(secg_detail)
         return True
