@@ -66,7 +66,7 @@ def ccs(env, siteId, port, isAttach):
               '--floating-ip / --no-floating-ip',
               'fip',
               is_flag=True,
-              default=True,
+              default=False,
               show_default=False,
               help='Configure your instance with or without a floating IP.')
 @click.option('-in/-out',
@@ -123,14 +123,13 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
         # site_info = sites[0]
 
         errorFlg = True
-        if not isNone(fip):
-            if len(site_info['public_ip']) > 0 and fip == False:
-                VcsServerNet().deAssociateIP(site_ids[i])
-                errorFlg = False
+        if len(site_info['public_ip']) > 0 and fip == False:
+            VcsServerNet().deAssociateIP(site_ids[i])
+            errorFlg = False
 
-            if len(site_info['public_ip']) == 0 and fip == True:
-                VcsServerNet().associateIP(site_ids[i])
-                errorFlg = False
+        if len(site_info['public_ip']) == 0 and fip == True:
+            VcsServerNet().associateIP(site_ids[i])
+            errorFlg = False
 
         # case 2: port setting
         from netaddr import IPNetwork
