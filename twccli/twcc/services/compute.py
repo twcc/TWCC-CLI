@@ -204,7 +204,7 @@ class GpuSite(GpuService):
         info_detail = self.getDetail(site_id)
         usr_name = Session2._whoami()['username']
 
-        info_port = [x for x in info_detail['Service'][0]['ports']]
+        info_port = [x for x in info_detail['Pod'][0]['container'][0]['ports']]
         if not ssh_info:
             # don't show node port
             ans = [dict([(y, x[y]) for y in x if not y == 'node_port'])
