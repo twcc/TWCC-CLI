@@ -220,7 +220,6 @@ class GpuSite(GpuService):
             info_service = [x['port'] for x in info_detail['Service']
                          [0]['ports'] if x['target_port'] == 22][0]
             info_pub_ip = info_detail['Service'][0]['public_ip'][0]
-
             return "{}@{} -p {}".format(usr_name, info_pub_ip, info_service)
 
     def isStable(self, site_id):
