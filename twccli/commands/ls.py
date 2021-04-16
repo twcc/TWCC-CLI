@@ -181,6 +181,14 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
             jpp(ans)
 
 
+def list_gpu_log(site_ids_or_names):
+    a = GpuSite()
+    site_log = {}
+    for site_id in site_ids_or_names:
+        log = a.getLog(site_id)
+        site_log[site_id] = log
+    jpp(site_log)
+
 def list_gpu_flavor(is_table=True):
     ans = GpuSite.getGpuList()
     formated_ans = [{"`-gpu` tag": x, "description": ans[x]} for x in ans]
@@ -622,6 +630,11 @@ def cos(env, name, is_table, ids_or_names):
               'res_property',
               flag_value='image',
               help='List all CCS image name.')
+@click.option('-log',
+              '--log',
+              'res_property',
+              flag_value='log',
+              help='List CCS log.')
 @click.option('-itype',
               '--image-type-name',
               'res_property',
@@ -659,6 +672,10 @@ def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
         print("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
+
+    if res_property == 'log':
+        site_ids_or_names = mk_names(name, site_ids_or_names)
+        list_gpu_log(site_ids_or_names)
 
     if not res_property:
         site_ids_or_names = mk_names(name, site_ids_or_names)
