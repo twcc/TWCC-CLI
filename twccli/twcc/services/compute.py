@@ -203,19 +203,25 @@ class GpuSite(GpuService):
 
         info_detail = self.getDetail(site_id)
         usr_name = Session2._whoami()['username']
-
-        info_port = [x for x in info_detail['Pod'][0]['container'][0]['ports']]
+        info_pod_port = [x for x in info_detail['Pod'][0]['container'][0]['ports']]
+        info_pod_port2name = {}
+        for each_pod_port in info_pod_port:
+            info_pod_port2name[each_pod_port['port']] = each_pod_port['name']
+        info_service = [x for x in info_detail['Service'][0]['ports']]
         if not ssh_info:
             # don't show node port
             ans = [dict([(y, x[y]) for y in x if not y == 'node_port'])
-                   for x in info_port]
+                   for x in info_service]
+            for eachans in ans:
+                if eachans['target_port'] in info_pod_port2name:
+                    eachans['name'] = info_pod_port2name[eachans['target_port']]
             return ans
         else:
-            info_port = [x['port'] for x in info_detail['Service']
+            info_service = [x['port'] for x in info_detail['Service']
                          [0]['ports'] if x['target_port'] == 22][0]
             info_pub_ip = info_detail['Service'][0]['public_ip'][0]
 
-            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
+            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_service)
 
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
