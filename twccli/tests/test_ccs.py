@@ -53,13 +53,13 @@ class TestCntrLifecyc:
         if isatt:
             flg = False
             for exp_port in out:
-                if exp_port['port'] == 3000:
+                if exp_port['target_port'] == 3000:
                     flg = True
             assert flg
         else:
             flg = True
             for exp_port in out:
-                if exp_port['port'] == 3000:
+                if exp_port['target_port'] == 3000:
                     flg = False
             assert flg
 
