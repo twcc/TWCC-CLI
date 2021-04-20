@@ -192,11 +192,11 @@ class ServiceOperation:
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 try:
-                    return res[0].json()
+                    return res[0].json(), t_url
                 except:
-                    return res[0].content
+                    return res[0].content, t_url
             elif res_type == 'txt':
-                return res[0].content
+                return res[0].content, t_url
 
     def mkHeader(self,
                  site_sn=None,

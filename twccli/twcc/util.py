@@ -2,11 +2,13 @@ import threading
 import sys
 import os
 import re
+import json
 import time
 import pytz
 import jmespath
 import datetime
 import unicodedata
+import requests as rq
 from twccli.twccli import pass_environment
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
@@ -148,6 +150,15 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     else:
         return table.table
 
+def send_ga(cid,uid,params):
+    measurement_id='G-6S0562GHKE'
+    api_secret='wNf5Se9QSP2YdvgIjfAHiw'
+    host = 'https://www.google-analytics.com'
+    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(measurement_id,api_secret)
+    payload = {"userId": uid,"client_id":cid, "non_personalized_ads":"false","events":[{"name":"cli_use","params":params}]}
+    headers = {'content-type': 'application/json'}
+    res = rq.post(host+uri,data=json.dumps(payload),headers=headers)
+    print(res.status_code)
 
 def dic_seperator(d):
     non_dic_cap_table = []

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
+import re
+import sys
 import yaml
+import traceback
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, isNone, isDebug, timezone2local
+from twccli.twcc.util import pp, isNone, isDebug, timezone2local, send_ga
 from twccli.twcc.clidriver import ServiceOperation
 from twccli.twccli import logger
 
@@ -67,7 +70,22 @@ class GenericService(object):
 
     def _isAlive(self):
         return self.twcc.try_alive()
-
+    def _send_ga(self,t_url):
+        twcc_file_session = Session2._getSessionFile()
+        
+        sessConf = yaml.load(open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
+        func_call_stack = []
+        for trace_line in traceback.format_stack():
+            funcs =  re.findall(r'in ([_A-Za-z]+)',trace_line)
+            if funcs:
+                func_call_stack.extend(funcs)
+        ua = self._user_agent
+        if self._user_agent == None:
+            ua = ''
+        ga_params = {'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'=>'.join(func_call_stack),"t_url":t_url,"p_version":sys.version.split(' ')[0]}
+        send_ga(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
+        # print(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
+        
     def _do_api(self):
         if self._debug_:
             logger_info = {'csite':self._csite_,'func':self._func_,'res_type':self.res_type}
@@ -83,7 +101,7 @@ class GenericService(object):
         #     if not isNone(self.data_dic):
         #         pp(data_dic=self.data_dic)
 
-        res = self.twcc.doAPI(
+        res,t_url = self.twcc.doAPI(
             site_sn=self._csite_,
             api_key=self._api_key_,
             user_agent = self._user_agent,
@@ -96,7 +114,8 @@ class GenericService(object):
 
         if self._debug_:
             logger.info({'res':res})
-        #     pp(res=res)
+            self._send_ga(t_url)
+        
         if type(res) == type([]):
             for eachone in res:
                 if 'create_time' in eachone:
@@ -104,6 +123,9 @@ class GenericService(object):
         elif type(res) == type({}):
             if 'create_time' in res:
                     res['create_time'] = timezone2local(res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        if 'message' in res:
+            print(res)
+            exit(1)
         return res
 
     def create(self, mid):

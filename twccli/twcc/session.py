@@ -3,6 +3,7 @@ import copy
 import os
 import re
 import yaml
+import uuid
 import shutil
 import datetime
 from collections import defaultdict
@@ -288,7 +289,7 @@ class Session2(object):
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = twcc_api_key
         sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(proj_code)
-
+        sessionData["_default"]['twcc_cid'] = str(uuid.uuid1())
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
