@@ -10,7 +10,7 @@ futures==3.3.0 ; python_version == '2.6' or python_version == '2.7'
 idna==2.8
 jmespath==0.10.0
 prompt-toolkit==1.0.14
-pygments==2.3.1
+pygments==2.7.4
 pyinquirer==1.0.3
 python-dateutil==2.8.1 ; python_version >= '2.7'
 pyyaml==5.4
@@ -21,5 +21,5 @@ six==1.12.0
 termcolor==1.1.0
 terminaltables==3.1.0
 tqdm==4.26.0
-urllib3==1.24.1
+urllib3==1.25.9
 wcwidth==0.1.7
