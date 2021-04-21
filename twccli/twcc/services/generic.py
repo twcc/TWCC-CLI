@@ -123,7 +123,7 @@ class GenericService(object):
         elif type(res) == type({}):
             if 'create_time' in res:
                     res['create_time'] = timezone2local(res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
-        if 'message' in res:
+        if not res == b'' and 'message' in res:
             print(res)
             exit(1)
         return res
