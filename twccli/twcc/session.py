@@ -7,7 +7,7 @@ import uuid
 import shutil
 import datetime
 from collections import defaultdict
-from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout
+from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout, send_ga
 from twccli.version import __version__
 
 class Session2(object):
@@ -284,12 +284,18 @@ class Session2(object):
 
     @staticmethod
     def _getSessionData(twcc_api_key=None, proj_code=None):
+        import sys
+        import json
+        import requests as rq
+        url = 'http://ipinfo.io/json'
+        res = rq.get(url)
         sessionData = defaultdict(dict)
         whoami = Session2._whoami(twcc_api_key)
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = twcc_api_key
         sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(proj_code)
         sessionData["_default"]['twcc_cid'] = str(uuid.uuid1())
+        sessionData["_meta"]['country']  = json.loads(res.text)['country']
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
@@ -309,6 +315,9 @@ class Session2(object):
                 res_name = resources[res]
                 proj_codes[res] = projects[proj][res_name]
             sessionData['projects'][proj] = proj_codes
+        ua = user_agent if not user_agent == None else ''
+        ga_params = {'geoid':sessionData["_meta"]['country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"t_url":'',"p_version":sys.version.split(' ')[0]}
+        send_ga(sessionData['_default']['twcc_cid'],ga_params)
 
         return dict(sessionData)
 

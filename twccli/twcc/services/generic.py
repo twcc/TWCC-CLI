@@ -72,18 +72,20 @@ class GenericService(object):
         return self.twcc.try_alive()
     def _send_ga(self,t_url):
         twcc_file_session = Session2._getSessionFile()
-        
         sessConf = yaml.load(open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
-        func_call_stack = []
-        for trace_line in traceback.format_stack():
-            funcs =  re.findall(r'in ([_A-Za-z]+)',trace_line)
-            if funcs:
-                func_call_stack.extend(funcs)
-        ua = self._user_agent
-        if self._user_agent == None:
-            ua = ''
-        ga_params = {'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'=>'.join(func_call_stack),"t_url":t_url,"p_version":sys.version.split(' ')[0]}
-        send_ga(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
+        print(traceback.format_stack())
+        if not sessConf == None and 'twcc_cid' in sessConf['_default']:
+            func_call_stack = []
+            for trace_line in traceback.format_stack():
+                funcs =  re.findall(r'in ([_A-Za-z]+)',trace_line)
+                if funcs:
+                    func_call_stack.extend(funcs)
+            ua = '' if self._user_agent == None else self._user_agent 
+            country = sessConf['_meta']['country'] if 'country' in sessConf['_meta'] else ''
+            func_list = ','.join(func_call_stack)[','.join(func_call_stack).rindex('invoke'):].split(',')[1:-3]
+            print(func_list)
+            ga_params = {'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":','.join(func_list),"t_url":t_url,"p_version":sys.version.split(' ')[0]}
+            send_ga(sessConf['_default']['twcc_cid'],ga_params)
         # print(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
         
     def _do_api(self):
