@@ -70,10 +70,10 @@ class GenericService(object):
 
     def _isAlive(self):
         return self.twcc.try_alive()
-    def _send_ga(self,t_url):
+    def _send_ga(self,event_name,t_url = None):
         twcc_file_session = Session2._getSessionFile()
         sessConf = yaml.load(open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
-        print(traceback.format_stack())
+        # print(traceback.format_stack())
         if not sessConf == None and 'twcc_cid' in sessConf['_default']:
             func_call_stack = []
             for trace_line in traceback.format_stack():
@@ -83,9 +83,10 @@ class GenericService(object):
             ua = '' if self._user_agent == None else self._user_agent 
             country = sessConf['_meta']['country'] if 'country' in sessConf['_meta'] else ''
             func_list = ','.join(func_call_stack)[','.join(func_call_stack).rindex('invoke'):].split(',')[1:-3]
-            print(func_list)
-            ga_params = {'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":','.join(func_list),"t_url":t_url,"p_version":sys.version.split(' ')[0]}
-            send_ga(sessConf['_default']['twcc_cid'],ga_params)
+            ga_params = {'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
+            if event_name == 'do_api':
+                ga_params = {'func':','.join(func_list),'url':t_url,'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
+            send_ga(event_name,sessConf['_default']['twcc_cid'],ga_params)
         # print(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
         
     def _do_api(self):
@@ -116,7 +117,7 @@ class GenericService(object):
 
         if self._debug_:
             logger.info({'res':res})
-            self._send_ga(t_url)
+            self._send_ga('do_api',t_url=t_url)
         
         if type(res) == type([]):
             for eachone in res:

@@ -316,8 +316,8 @@ class Session2(object):
                 proj_codes[res] = projects[proj][res_name]
             sessionData['projects'][proj] = proj_codes
         ua = user_agent if not user_agent == None else ''
-        ga_params = {'geoid':sessionData["_meta"]['country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"t_url":'',"p_version":sys.version.split(' ')[0]}
-        send_ga(sessionData['_default']['twcc_cid'],ga_params)
+        ga_params = {'geoid':sessionData["_meta"]['country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"p_version":sys.version.split(' ')[0]}
+        send_ga('config_init',sessionData['_default']['twcc_cid'],ga_params)
 
         return dict(sessionData)
 

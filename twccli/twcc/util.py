@@ -150,13 +150,15 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     else:
         return table.table
 
-def send_ga(cid,params):
+def send_ga(event_name, cid, params):
     measurement_id='G-6S0562GHKE'
     api_secret='wNf5Se9QSP2YdvgIjfAHiw'
     host = 'https://www.google-analytics.com'
     uri = '/mp/collect?measurement_id={}&api_secret={}'.format(measurement_id,api_secret)
-    payload = {"client_id":cid, "non_personalized_ads":"false","events":[{"name":"cli_use","params":params}]}
+    payload = {"client_id":cid, "non_personalized_ads":"false","events":[{"name":event_name[:39],"params":params}]}
     # "userId": "",
+    # print(event_name)
+    # print(payload)
     headers = {'content-type': 'application/json'}
     res = rq.post(host+uri,data=json.dumps(payload),headers=headers)
 

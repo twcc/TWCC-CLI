@@ -2,10 +2,12 @@
 from __future__ import print_function
 import click
 import os
+import sys
 from twccli.twcc.util import validate, isNone
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.util import *
+from twccli.twcc.services.generic import GenericService
 
 lang_encoding = """
 export LANG=C.UTF-8
@@ -14,15 +16,15 @@ export PYTHONIOENCODING=UTF-8
 """
 
 @click.command(help='Get exsisting information.')
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
+# @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
-def whoami(ctx, verbose):
+def whoami(ctx):
     """Command line for whoami, print information of account and session
 
     :param verbose: Enables verbose mode
     :type verbose: bool
     """
-    ctx.verbose = verbose
+    # ctx.verbose = verbose
     ctx.log("Hi, {}, nice to meet you!".format(
         Session2._whoami()['display_name']))
     print(Session2())
@@ -103,6 +105,12 @@ def version(ctx):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="Configure the TWCC CLI.")
 def cli():
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 

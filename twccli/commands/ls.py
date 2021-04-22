@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 import json
 import re
+import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
@@ -15,6 +16,7 @@ from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 from click.core import Group
 
@@ -403,11 +405,12 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
 @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
-    # keyring = Keypairs()
-    # ans = keyring.list()
-    # if 'message' in ans:
-    #     jpp(ans)
-    #     exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 

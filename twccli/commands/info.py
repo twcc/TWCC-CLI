@@ -7,7 +7,7 @@ import datetime
 import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.services.base import acls, Users, image_commit, Keypairs, projects
-
+from twccli.twcc.services.generic import GenericService
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -16,11 +16,12 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
 @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
-    # keyring = Keypairs()
-    # ans = keyring.list()
-    # if 'message' in ans:
-    #     jpp(ans)
-    #     exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
