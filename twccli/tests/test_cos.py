@@ -64,6 +64,11 @@ class TestCosLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
+        cmd_list = "ls cos -bkt {} -okey index.html -pub -json".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+        assert 'is_public' in json.loads(out)[0]
+
         cmd_list = "ch cos -bkt {} -okey index.html --set-non-public".format(self.bk_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
