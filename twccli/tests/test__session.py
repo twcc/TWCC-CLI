@@ -13,7 +13,7 @@ class TestSessionLifecyc:
         pass
 
     def _init(self):
-        cmd_list = "config init --apikey {} -pcode {} -ga".format(
+        cmd_list = "config init -ga --apikey {} -pcode {}".format(
             self.apikey, self.pcode)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
