@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 import os
 import sys
+import uuid
 from twccli.twcc.util import validate, isNone
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment, logger
@@ -74,7 +75,10 @@ def init(env, apikey, proj_code, rc, user_agent):
             if env.verbose:
                 logger.info("Receiving Project Code: {}".format(proj_code))
                 logger.info("Receiving API Key: {}".format(apikey))
-            Session2(twcc_api_key=apikey, twcc_project_code=proj_code, user_agent = user_agent)
+            ga_agree_flag = click.confirm(
+                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+            cid = str(uuid.uuid1()) if ga_agree_flag else None
+            Session2(twcc_api_key=apikey, twcc_project_code=proj_code, user_agent = user_agent, twcc_cid = cid )
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
