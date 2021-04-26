@@ -34,6 +34,8 @@ def whoami(ctx):
 @click.command(help='Configure the TWCC CLI.')
 @click.option('-ua', '--user-agent', 'user_agent',
               help="Meta data to define cli doing for")
+@click.option('-ga / -noga', '--agree-ga / --not-agree-ga', 'ga_flag',
+              help="Agree using ga analytics", is_flag=True, default=None)
 @click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey',
@@ -41,7 +43,7 @@ def whoami(ctx):
 @click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
               help="Set bashrc parameters.")
 @pass_environment
-def init(env, apikey, proj_code, rc, user_agent):
+def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     """Constructor method
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
@@ -75,9 +77,12 @@ def init(env, apikey, proj_code, rc, user_agent):
             if env.verbose:
                 logger.info("Receiving Project Code: {}".format(proj_code))
                 logger.info("Receiving API Key: {}".format(apikey))
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            cid = str(uuid.uuid1()) if ga_agree_flag else None
+            if not ga_flag == None:
+                cid = str(uuid.uuid1()) if ga_flag else None
+            else:
+                ga_agree_flag = click.confirm(
+                    'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+                cid = str(uuid.uuid1()) if ga_agree_flag else None
             Session2(twcc_api_key=apikey, twcc_project_code=proj_code, user_agent = user_agent, twcc_cid = cid )
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
