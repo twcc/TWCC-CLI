@@ -13,6 +13,7 @@ from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import GupSiteBlockSet, Session2
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.compute_util import doSiteStable, create_vcs
+from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 
 def create_commit(site_id, tag, isAll=False):
@@ -134,11 +135,12 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="Create (allocate) your TWCC resources.")
 def cli():
-    keyring = Keypairs()
-    ans = keyring.list()
-    if 'message' in ans:
-        jpp(ans)
-        exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 
