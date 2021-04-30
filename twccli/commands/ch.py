@@ -3,11 +3,36 @@ from __future__ import print_function
 import click
 import json
 # , pp, jpp, table_layout, SpinCursor, isNone,
-from twccli.twcc.util import mk_names
+from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
-from twccli.twcc.services.generic import GenericService
+from twccli.twcc.services.s3_tools import S3
+
+
+
+
+# functions
+def set_object_public(bkt, okey_regex, is_public = False):
+    import re
+    s3 = S3()
+    files = s3.list_object(bkt)
+    if not isNone(okey_regex):
+        for mfile in files:
+            if re.search(okey_regex, mfile[u'Key']): # 會不會中招呀!?
+                s3.put_obj_acl(okey=mfile[u'Key'], bkt=bkt, is_public=is_public)
+                print("Making bucket-name: %s, object-key: %s, %s. "%(bkt, mfile[u'Key'], "public" if is_public else "non-public"))
+
+def set_object_content_type(bkt, okey_regex, mime):
+    import re
+    s3 = S3()
+    files = s3.list_object(bkt)
+    if not isNone(okey_regex):
+        for mfile in files:
+            if re.search(okey_regex, mfile[u'Key']): # 會不會中招呀!?
+                s3.set_obj_contet_type(bkt, mfile[u'Key'], mime)
+                print("Making bucket-name: %s, object-key: %s, %s. "%(bkt, mfile[u'Key'], mime))
+
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -143,9 +168,46 @@ def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table): #listener
     members = mk_names(member, more_members)
     change_loadbalancer(vlb_id,members,lb_method,is_table)
 
+@click.option('-bkt',
+              '--bucket-name',
+              'name',
+              default=None,
+              type=str,
+              help="Name of the Bucket.")
+@click.option('-okey',
+              '--object-key-name',
+              'okey',
+              default=None,
+              type=str,
+              help="Name of specific object key. Regular Expression compatible.")
+@click.option('-pub / -nopub',
+              '--set-public / --unset-public',
+              'is_public',
+              is_flag=True,
+              default=None,
+              show_default=True,
+              help="Set object to public or private.")
+@click.option('-mime',
+              '--set-content-type',
+              'mime',
+              type=str,
+              default=None,
+              help="Set content type for object.")
+@click.command(help="Update permission of your objects.")
+@pass_environment
+def cos(env, name, okey, is_public, mime):
+    """Command line for change COS buckets and objects
+    """
+
+    if not isNone(mime):
+        set_object_content_type(name, okey, mime = mime)
+    if not isNone(is_public):
+        set_object_public(name, okey, is_public = is_public)
+
 cli.add_command(vcs)
 cli.add_command(vds)
 cli.add_command(vlb)
+cli.add_command(cos)
 
 
 def main():

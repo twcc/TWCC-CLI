@@ -97,44 +97,39 @@ class S3():
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
 
-    def put_obj_acl(self, key , bkt, is_public):
+    def put_obj_acl(self, okey , bkt, is_public=False):
         acl_string ='private'
         if is_public:
             acl_string ='public-read'
 
-        res =self.s3_cli.put_object_acl(ACL=acl_string,
-               Bucket=bkt,
-               Key = key)
+        res = self.s3_cli.put_object_acl(ACL=acl_string,
+               Bucket=bkt, Key = okey)
+        return res
 
-    def is_key_public(self, key, bkt):
-        date = ''
-        publicFlag = 'N'
-        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=key)
-        # get public flag ===================
-        for grants in res['Grants']:
-            for grantee in grants['Grantee']:
-                if grantee == "URI":
-                    if grants['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers':
-                        publicFlag = 'Y'
+    def get_object_info(self, bkt, okey):
+        '''
+            [{u'Grantee': {u'Type': 'Group', u'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, u'Permission': 'READ'}, {u'Grantee': {u'Type': 'CanonicalUser', u'DisplayName': 'GOV108029', u'ID'
+            : 'dc34c81d-f783-4227-9a3c-5700a16bdf6d'}, u'Permission': 'FULL_CONTROL'}]
+        '''
+        res = self.s3_cli.get_object_acl(Bucket=bkt, Key = okey)
+        allow_public_read = {u'Grantee': {
+                               u'Type': 'Group',
+                               u'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'},
+                             u'Permission': 'READ'}
+        for grantee in res[u'Grants']:
+            if grantee == allow_public_read:
+                return {"is_public_read": "https://cos.twcc.ai/%s/%s"%(bkt, okey)}
+        return {"is_public_read": False}
 
-        # get date ===========================
-        for metadata in res['ResponseMetadata']:
-            date = res['ResponseMetadata']['HTTPHeaders']['date']
 
-        # combine return json string ====
-        ret = []
-        ret.append({"okey": key,
-                            "time": date,
-                            "is_public": publicFlag})
+    def set_obj_contet_type(self, bkt, okey, metadata='application/xml'):
+        res = self.s3_cli.copy_object(Bucket=bkt,
+                                Key=okey,
+                                ContentType=metadata,
+                                MetadataDirective="REPLACE",
+                                CopySource=bkt + "/" + okey)
 
-        return ret
-    def object_acl(self,bucket, key):
 
-        #object_acl = self.s3res.ObjectAcl(bucket, key)
-        #response = object_acl.put(ACL='public-read')
-        res = self.s3_cli.get_object_acl( Bucket=bucket, Key=key)
-
-        #{'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
     def list_object(self, bucket_name):
         """ Listing all the file insife of S3 bucket.
 
@@ -150,7 +145,7 @@ class S3():
                 NextMarker = res['NextMarker']
             else:
                 break
-        
+
         # res = self.s3_cli.list_objects(Bucket=bucket_name)
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
@@ -362,3 +357,54 @@ class S3():
         except ClientError as e:
             return False
         return True
+
+    def compatibilityTest(self, bucket_name, object_name):
+        '''
+        check compatibility for boto3
+        https://boto3.amazonaws.com/v1/documentation/api/1.9.42/reference/services/s3.html
+        '''
+        bucket_funcs = [
+            'get_bucket_accelerate_configuration',
+            'get_bucket_acl',
+            'get_bucket_analytics_configuration',
+            'get_bucket_cors',
+            'get_bucket_encryption',
+            'get_bucket_inventory_configuration',
+            'get_bucket_lifecycle',
+            'get_bucket_lifecycle_configuration',
+            'get_bucket_location',
+            'get_bucket_logging',
+            'get_bucket_metrics_configuration',
+            'get_bucket_notification',
+            'get_bucket_notification_configuration',
+            'get_bucket_policy',
+            'get_bucket_replication',
+            'get_bucket_request_payment',
+            'get_bucket_tagging',
+            'get_bucket_versioning',
+            'get_bucket_website'
+        ]
+        object_funcs = [
+            'get_object',
+            'get_object_acl',
+            'get_object_tagging',
+            'get_object_torrent'
+        ]
+
+        for x in bucket_funcs:
+            class_method = getattr(self.s3_cli, x)
+            try:
+                class_method(Bucket=bucket_name)
+                print("- %s(), OK!"%x)
+            except Exception as error:
+                print("- %s(), Error!"%x)
+                print("\t", error.message)
+
+        for x in object_funcs:
+            class_method = getattr(self.s3_cli, x)
+            try:
+                class_method(Bucket=bucket_name, Key=object_name)
+                print("- %s(), OK!"%x)
+            except Exception as error:
+                print("- %s(), Error!"%x)
+
