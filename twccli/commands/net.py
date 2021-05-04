@@ -67,7 +67,7 @@ def ccs(env, siteId, port, isAttach):
               '--floating-ip / --no-floating-ip',
               'fip',
               is_flag=True,
-              default=False,
+              default=None,
               show_default=False,
               help='Configure your instance with or without a floating IP.')
 @click.option('-in/-out',
