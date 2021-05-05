@@ -35,7 +35,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
     ans = []
 
     # check if using name
-    if len(ids_or_names) == 1 and not ids_or_names[0].isnumeric():
+    if len(ids_or_names) == 1 and type("") == type(ids_or_names[0]) and not ids_or_names[0].isnumeric():
         site_name_based = ids_or_names[0]
 
         # reset input ids_or_names

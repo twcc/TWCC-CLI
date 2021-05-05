@@ -164,7 +164,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
                                 "ingress" if isIngress else "egress")
             errorFlg = False
-            
+
         if errorFlg:
             raise ValueError("Error! Nothing to do! Check `--help` for detail.")
 
@@ -173,6 +173,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="NETwork related operations.")
 def cli():
     try:
+        import sys
         ga = GenericService()
         func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
         ga._send_ga(func_call)
