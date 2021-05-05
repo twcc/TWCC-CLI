@@ -185,7 +185,9 @@ def convert_credential():
     hdler = CredentialHandler()
 
     if hdler.isOldCredential():
-        if click.confirm("Old Credential found, version: v%s.\nDo you want to renew your credentials format?"%(hdler.old_version), default=True):
+        click.echo(click.style("Old Credential found! Current credential is version: v%s."%(hdler.old_version), bg='blue', fg='white', blink=True, bold=True))
+
+        if click.confirm("Do you want to renew your credentials format?", default=True):
             hdler.renew()
 
 
@@ -217,9 +219,10 @@ class CredentialHandler():
 
         from click.testing import CliRunner
         runner = CliRunner()
-        cmd_list = "config init --apikey %s -pcode %s"%(self.old_api, self.prj_code)
+        cmd_list = "config init --apikey %s -pcode %s -ga"%(self.old_api, self.prj_code)
         result = runner.invoke(cli, cmd_list.split(" "))
-        click.echo("[Succeful] Successfully convert credential to latest version, %s. "%(self.cli_version))
+        stmt = "[Succeful] Successfully convert credential to latest version, %s. "%(self.cli_version)
+        click.echo(click.style(stmt, fg='green', blink=True))
 
     def _backup(self):
         from shutil import copyfile
