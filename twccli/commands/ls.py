@@ -534,6 +534,7 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, column = column, is_all=is_all)
+
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
