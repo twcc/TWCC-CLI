@@ -16,6 +16,7 @@ try:
         os.mkdir(log_dir)
 except:
     log_dir = os.environ['HOME']
+
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
@@ -145,7 +146,8 @@ def cli(env, verbose, show_and_verbose):
     check_if_py2()
     if show_and_verbose:
         env.verbose = True
-        logger.add(sys.stderr, level="DEBUG")
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+            logger.add(sys.stderr, level="DEBUG")
     pass
 
 class bcolors:
