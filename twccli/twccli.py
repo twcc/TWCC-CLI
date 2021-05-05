@@ -8,14 +8,18 @@ os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
 if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
-    log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
+    _TWCC_DATA_DIR_ = os.environ['TWCC_DATA_PATH']
 else:
-    log_dir = "{}/log".format(os.path.join(os.environ['HOME'], '.twcc_data'))
+    _TWCC_DATA_DIR_ = os.path.join(os.environ['HOME'], '.twcc_data')
+
+log_dir = os.path.join(_TWCC_DATA_DIR_, "log")
+
 try:
     if not os.path.isdir(log_dir):
         os.mkdir(log_dir)
 except:
     log_dir = os.environ['HOME']
+
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
@@ -143,6 +147,7 @@ def cli(env, verbose, show_and_verbose):
     """
     env.verbose = verbose
     check_if_py2()
+    convert_credential()
     if show_and_verbose:
         env.verbose = True
         logger.add(sys.stderr, level="DEBUG")
@@ -174,6 +179,31 @@ def check_if_py2():
             print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
                 "TWCC-CLI will not support Python 2.7 after 1st Jul., 21'.\nTWCC-CLI 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
 
+
+def convert_credential():
+    old_credential = os.path.join(_TWCC_DATA_DIR_, "credential")
+    new_credential = os.path.join(_TWCC_DATA_DIR_, "credential_new")
+
+    from os import path
+    import yaml
+    from datetime import datetime
+    from version import __version__
+
+    if not path.exists(old_credential):
+        return True
+
+    with open(old_credential, 'r') as stream:
+        try:
+            cnf = yaml.safe_load(stream)
+            print(cnf)
+            cnf['_meta']['cli_version'] = __version__
+            cnf['_meta']['ctime'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print(cnf)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    #if path.isfile(old_credential):
+    #    print (old_credential)
 
 if __name__ == '__main__':
     cli()
