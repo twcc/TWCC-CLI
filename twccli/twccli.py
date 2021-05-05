@@ -2,6 +2,7 @@
 import click
 import os
 import sys
+from os import path
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
@@ -181,29 +182,54 @@ def check_if_py2():
 
 
 def convert_credential():
-    old_credential = os.path.join(_TWCC_DATA_DIR_, "credential")
-    new_credential = os.path.join(_TWCC_DATA_DIR_, "credential_new")
+    hdler = CredentialHandler()
 
-    from os import path
-    import yaml
-    from datetime import datetime
-    from version import __version__
+    if hdler.isOldCredential():
+        if click.confirm("Old Credential found, version: v%s.\nDo you want to renew your credentials format?"%(hdler.old_version), default=True):
+            hdler.renew()
 
-    if not path.exists(old_credential):
-        return True
 
-    with open(old_credential, 'r') as stream:
-        try:
-            cnf = yaml.safe_load(stream)
-            print(cnf)
-            cnf['_meta']['cli_version'] = __version__
-            cnf['_meta']['ctime'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            print(cnf)
-        except yaml.YAMLError as exc:
-            print(exc)
+class CredentialHandler():
+    def __init__(self):
+        self.old_credential = path.join(_TWCC_DATA_DIR_, "credential")
 
-    #if path.isfile(old_credential):
-    #    print (old_credential)
+        from datetime import datetime
+        self.backup_credential = path.join(_TWCC_DATA_DIR_, "credential.bakup_"+datetime.now().strftime("%m%d%H%M"))
+
+        from version import __version__
+        self.cli_version = __version__
+
+    def isOldCredential(self):
+        if path.exists(self.old_credential):
+            with open(self.old_credential, 'r') as stream:
+                try:
+                    cnf = yaml.safe_load(stream)
+                    self.old_api = cnf['_default']['twcc_api_key']
+                    self.prj_code = cnf['_default']['twcc_proj_code']
+                    self.old_version = cnf['_meta']['cli_version']
+                    return False if cnf['_meta']['cli_version'] == self.cli_version else True
+                except yaml.YAMLError as exc:
+                    print(exc)
+
+    def renew(self):
+        self._backup()
+        self._removeOld()
+
+        from click.testing import CliRunner
+        runner = CliRunner()
+        cmd_list = "config init --apikey %s -pcode %s"%(self.old_api, self.prj_code)
+        result = runner.invoke(cli, cmd_list.split(" "))
+        click.echo("[Succeful] Successfully convert credential to latest version, %s. "%(self.cli_version))
+
+    def _backup(self):
+        from shutil import copyfile
+        copyfile(self.old_credential, self.backup_credential)
+
+    def _removeOld(self):
+        import os
+        os.remove(self.old_credential)
+
+
 
 if __name__ == '__main__':
     cli()

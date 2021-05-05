@@ -51,7 +51,7 @@ class Session2(object):
             self.loadSession()
         else:
             self._initSession()
-    @staticmethod        
+    @staticmethod
     def _getUserAgent():
         if 'User_Agent' in os.environ and len(os.environ['User_Agent'])>0:
             return os.environ['User_Agent']
@@ -64,7 +64,7 @@ class Session2(object):
                     return yaml['_meta']['user_agent']
                 else:
                     return None
-    
+
     def _initSession(self):
 
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
