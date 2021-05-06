@@ -5,6 +5,7 @@ import click
 import threading
 import math
 import sys
+import re
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain

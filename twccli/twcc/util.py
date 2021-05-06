@@ -117,7 +117,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             else:
                 row_data.append(val)
         table_info.append(row_data)
-    table = AsciiTable(table_info, " {} ".format(title))
+    table = AsciiTable(table_info, title=" {} ".format(title))
 
     for idy in range(len(table.table_data)):
         for idx in range(len(table.table_data[idy])):
@@ -150,6 +150,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     if debug:
         cprint("- %.3f seconds" %
                (time.time() - start_time), 'red', attrs=['bold'])
+        
     if isPrint:
         print(table.table)
     else:

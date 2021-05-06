@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import sys
+import re
 import click
 import json
-# , pp, jpp, table_layout, SpinCursor, isNone,
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
@@ -25,7 +26,6 @@ def set_object_public(bkt, okey_regex, is_public=False):
 
 
 def set_object_content_type(bkt, okey_regex, mime):
-    import re
     s3 = S3()
     files = s3.list_object(bkt)
     if not isNone(okey_regex):
@@ -36,6 +36,14 @@ def set_object_content_type(bkt, okey_regex, mime):
                       (bkt, mfile[u'Key'], mime))
 
 
+def set_versioning(bkt, versioning):
+    s3 = S3()
+    if versioning == True:
+        s3.enable_versioning(bkt)
+    else:
+        s3.disable_versioning(bkt)
+
+
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -43,6 +51,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS, help="Change your TWCC resources.")
 def cli():
     try:
+        from twccli.twcc.services.generic import GenericService
         ga = GenericService()
         func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
             r'\d', i) == [] and not i == '-sv']).replace('-', '')
@@ -199,9 +208,15 @@ def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table):  # listen
               type=str,
               default=None,
               help="Set content type for object.")
+@click.option('-ver / -nover',
+              '--enable-versioning / --disable-versioning',
+              'versioning',
+              is_flag=True,
+              default=None,
+              help="Enabled or Disabled versioning for a bucket.")
 @click.command(help="Update permission of your objects.")
 @pass_environment
-def cos(env, name, okey, is_public, mime):
+def cos(env, name, okey, is_public, mime, versioning):
     """Command line for change COS buckets and objects
     """
 
@@ -209,6 +224,8 @@ def cos(env, name, okey, is_public, mime):
         set_object_content_type(name, okey, mime=mime)
     if not isNone(is_public):
         set_object_public(name, okey, is_public=is_public)
+    if not isNone(versioning):
+        set_versioning(name, versioning)
 
 
 cli.add_command(vcs)

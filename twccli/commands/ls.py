@@ -343,14 +343,14 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             jpp([])
 
 
-def list_buckets(is_table):
+def list_buckets(is_table, versioning):
     """List buckets in table/json format
 
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
     """
     s3 = S3()
-    buckets = s3.list_bucket()
+    buckets = s3.list_bucket(show_versioning=versioning)
     if is_table:
         table_layout("COS buckets {}", buckets, isWrap=False, isPrint=True)
     else:
@@ -375,6 +375,7 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
     """
     import re
     s3 = S3()
+
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
 
@@ -391,14 +392,23 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
                 more_details.append(mdata)
             files = more_details
 
+        col_caption = ['LastModified', 'Key', 'Size', 'is_public'] if is_public else [
+            'LastModified', 'Key', 'Size']
+        is_versioning = False
+        if s3.get_versioning(bucket_name)[u'Status'] == "Enabled":
+            is_versioning = True
+            col_caption.append('Versioning')
+
         if is_table and not isNone(files):
-            table_layout("COS objects {}".format(bucket_name),
+            bkt_state = "%s (Versioing: On)" % (
+                bucket_name) if is_versioning else bucket_name
+            table_layout("COS objects {}".format(bkt_state),
                          files,
                          isWrap=False,
                          max_len=30,
                          isPrint=True,
                          captionInOrder=True,
-                         caption_row=['LastModified', 'Key', 'Size', 'is_public'] if is_public else ['LastModified', 'Key', 'Size'])
+                         caption_row=col_caption)
         else:
             jpp(files)
 
@@ -614,9 +624,15 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
               default=True,
               show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-ver',
+              '--check-versioning',
+              'versioning',
+              is_flag=True,
+              default=None,
+              help="Get versioning is enabled or not.")
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
-def cos(env, name, okey, is_public, is_table, ids_or_names):
+def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
     """Command line for List COS
        Functions:
        1. list bucket
@@ -625,7 +641,7 @@ def cos(env, name, okey, is_public, is_table, ids_or_names):
 
     ids_or_names = mk_names(name, ids_or_names)
     if len(ids_or_names) == 0:
-        list_buckets(is_table)
+        list_buckets(is_table, versioning)
     else:
         list_files(ids_or_names, okey_regex=okey,
                    is_public=is_public, is_table=is_table)
