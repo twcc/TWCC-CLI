@@ -7,6 +7,7 @@ from twccli.twcc.services.base import Keypairs
 from twccli.twcc.services.generic import GenericService
 import click
 import re
+import sys
 
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
@@ -176,14 +177,10 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help="NETwork related operations.")
 def cli():
-    try:
-        ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
-            r'\d', i) == [] and not i == '-sv']).replace('-', '')
-        ga._send_ga(func_call)
-    except Exception as e:
-        logger.warning(e)
-    pass
+    ga = GenericService()
+    func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+        r'\d', i) == [] and not i == '-sv']).replace('-', '')
+    ga._send_ga(func_call)
 
 
 cli.add_command(ccs)
