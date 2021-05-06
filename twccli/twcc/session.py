@@ -6,7 +6,7 @@ import yaml
 import shutil
 import datetime
 from collections import defaultdict
-from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout
+from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout, send_ga
 from twccli.version import __version__
 
 class Session2(object):
@@ -21,7 +21,8 @@ class Session2(object):
                  twcc_api_key=None,
                  twcc_file_session=None,
                  twcc_project_code=None,
-                 user_agent=None):
+                 user_agent=None,
+                 twcc_cid=None):
         """
         Session2 controls all TWCC API required information,
         incl. api_key, s3 keys, project code, parameters in user environment.
@@ -40,6 +41,7 @@ class Session2(object):
             [type] -- [description]
         """
         self.twcc_api_key = twcc_api_key
+        self.twcc_cid = twcc_cid
         self.twcc_data_path = Session2._getTwccDataPath(twcc_data_path)
         self.twcc_file_session = Session2._getSessionFile(twcc_file_session)
         self.twcc_file_resources = Session2._getResourceFile()
@@ -71,7 +73,7 @@ class Session2(object):
         mkdir_p(session_path)
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
-                Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code), fn, encoding='utf-8', allow_unicode=True)
+                Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code, self.twcc_cid), fn, encoding='utf-8', allow_unicode=True)
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
     def isApiKey(self):
@@ -155,7 +157,7 @@ class Session2(object):
     def _getIsrvProjs(api_key=None):
         from twccli.twcc.services.base import projects
         twcc_proj = projects(api_key=api_key)
-        return twcc_proj.getProjects()
+        return twcc_proj.getProjects(isAll=True, is_table=False, is_print = False)
 
     def getIsrvProjs(self):
         return Session2._getIsrvProjs(api_key=self.twcc_api_key)
@@ -282,13 +284,20 @@ class Session2(object):
         return Session2._getApiKey()
 
     @staticmethod
-    def _getSessionData(twcc_api_key=None, proj_code=None):
+    def _getSessionData(twcc_api_key=None, proj_code=None, twcc_cid=None):
+        import sys
+        import json
+        import requests as rq
+        url = 'http://ipinfo.io/json'
+        res = rq.get(url)
         sessionData = defaultdict(dict)
         whoami = Session2._whoami(twcc_api_key)
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = twcc_api_key
         sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(proj_code)
-
+        if not twcc_cid == None:
+            sessionData["_default"]['twcc_cid'] = twcc_cid
+        sessionData["_meta"]['country']  = json.loads(res.text)['country']
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
@@ -299,7 +308,6 @@ class Session2(object):
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
-
         resources = Session2._getTwccResourses()
         projects = Session2._getAvblProjs(twcc_api_key)
         for proj in projects:
@@ -308,6 +316,10 @@ class Session2(object):
                 res_name = resources[res]
                 proj_codes[res] = projects[proj][res_name]
             sessionData['projects'][proj] = proj_codes
+        if not twcc_cid == None:
+            ua = user_agent if not user_agent == None else ''
+            ga_params = {'geoid':sessionData["_meta"]['country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"p_version":sys.version.split(' ')[0]}
+            send_ga('config_init',sessionData['_default']['twcc_cid'],ga_params)
 
         return dict(sessionData)
 

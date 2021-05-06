@@ -4,6 +4,7 @@ from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.base import Keypairs
+from twccli.twcc.services.generic import GenericService
 import click
 import re
 
@@ -66,7 +67,7 @@ def ccs(env, siteId, port, isAttach):
               '--floating-ip / --no-floating-ip',
               'fip',
               is_flag=True,
-              default=True,
+              default=None,
               show_default=False,
               help='Configure your instance with or without a floating IP.')
 @click.option('-in/-out',
@@ -134,7 +135,6 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
         # case 2: port setting
         from netaddr import IPNetwork
         IPNetwork(cidr)
-
         if not isNone(portrange):
             if re.findall('[^0-9-]', portrange):
                 raise ValueError('port range should be digital-digital')
@@ -143,7 +143,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             secg_id = secg_list['id']
             port_list = portrange.split('-')
             if len(port_list) == 2:
-                port_min, port_max = [int(port) for port in port_list]
+                port_min, port_max = [int(mport) for mport in port_list]
                 if port_min < 0 or port_max < 0:
                     raise ValueError('port range must bigger than 0')
                 elif port_min > port_max:
@@ -155,6 +155,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
                                 "ingress" if isIngress else "egress")
             errorFlg = False
+
         if not isNone(port):
             secg_list = getSecGroupList(site_ids[i])
             secg_id = secg_list['id']
@@ -171,11 +172,12 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS,help="NETwork related operations.")
 def cli():
-    keyring = Keypairs()
-    ans = keyring.list()
-    if ans == {'message': 'Your request is unauthorized. Key is expired.'}:
-        print(ans)
-        exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 

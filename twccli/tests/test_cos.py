@@ -48,6 +48,31 @@ class TestCosLifecyc:
 
         assert flag
 
+    def _upload_to_bkt(self):
+        open("index.html", 'w').write("<html><h1>hihi</h1></html>")
+        cmd_list = "cp cos -bkt {} -fn index.html".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+
+        cmd_list = "ls cos -bkt {} -json".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+        assert json.loads(out)[0][u'Key'] == 'index.html'
+
+    def _mk_index_public(self):
+        cmd_list = "ch cos -bkt {} -okey index.html --set-public --set-content-type text/html".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+
+        cmd_list = "ls cos -bkt {} -okey index.html -pub -json".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+        assert 'is_public' in json.loads(out)[0]
+
+        cmd_list = "ch cos -bkt {} -okey index.html --set-non-public".format(self.bk_name)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(u" "))
+
     def _del_bucket_no_r(self, bkt):
         cmd_list = "rm cos -bkt {} -f".format(bkt)
         print(cmd_list)
@@ -77,11 +102,15 @@ class TestCosLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(u" "))
 
+
+    #### HERE is the test
     def test_create_bucket(self):
         self._loadSession()
         self._loadParams()
         self._create_bucket(self.bk_name)
         self._list_bucket_after_create()
+        self._upload_to_bkt()
+        self._mk_index_public()
         self._del_bucket(self.bk_name)
         self._list_bucket_after_delete()
 
@@ -393,12 +422,12 @@ class TestCosLifecyc:
         [self._create_upload_file('{}/{}'.format(isu178_upload_folder,'isu178_'+str(i))) for i in range(1001)]
         self._op_folder(bk_isu178,isu178_upload_folder,'to-cos')
         self._op_folder(bk_isu178,isu178_download_folder,'from-cos')
-        
+
         if self._check_isu178_upload_files('./'+os.path.join(isu178_download_folder,isu178_upload_folder),'1001'):
-            assert True 
+            assert True
         else:
             assert False
         self._remove_dir(isu178_download_folder, isu178_upload_folder)
         self._del_bucket(bk_isu178)
 
-        
+
