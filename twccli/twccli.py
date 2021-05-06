@@ -40,6 +40,7 @@ else:
                         fmt=config['formatters']['default']['format'], logger=logger)
     # coloredlogs.install(logger=logger)
 
+
 class Environment(object):
     def __init__(self):
         self.verbose = False
@@ -127,6 +128,7 @@ cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+
 @click.command(context_settings=CONTEXT_SETTINGS, cls=TWCCLI)
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode.")
 @click.option("-sv", "--show_and_verbose", is_flag=True, help="Enables verbose mode and show in console.")
@@ -148,6 +150,7 @@ def cli(env, verbose, show_and_verbose):
         logger.add(sys.stderr, level="DEBUG")
     pass
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -164,15 +167,17 @@ class bcolors:
         self.FAIL = ''
         self.ENDC = ''
 
+
 def check_if_py2():
     if sys.version_info[0] < 3:
         from os import environ
         __show_deprecated__ = False
         if environ.get('TWCC_SHOW_DEPRECATED') is not None:
-            __show_deprecated__ = False if environ.get('TWCC_SHOW_DEPRECATED') == 'False' else True
+            __show_deprecated__ = False if environ.get(
+                'TWCC_SHOW_DEPRECATED') == 'False' else True
         if __show_deprecated__:
             print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
-                "TWCC-CLI will not support Python 2.7 after 1st Jul., 21'.\nTWCC-CLI 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
+                  "TWCC-CLI will not support Python 2.7 after 1st Jul., 21'.\nTWCC-CLI 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
 
 
 if __name__ == '__main__':

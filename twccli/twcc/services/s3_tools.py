@@ -139,14 +139,14 @@ class S3():
         res_list = []
         NextMarker = ''
         while True:
-            res = self.s3_cli.list_objects(Bucket=bucket_name,Marker=NextMarker)
+            res = self.s3_cli.list_objects(Bucket=bucket_name,
+                                           Marker=NextMarker)
             res_list.append(res)
             if 'NextMarker' in res:
                 NextMarker = res['NextMarker']
             else:
                 break
 
-        # res = self.s3_cli.list_objects(Bucket=bucket_name)
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
         to_zone = tz.tzlocal()

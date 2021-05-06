@@ -63,21 +63,25 @@ def list_load_balances(site_ids_or_names, column, is_all, is_table):
     if len(site_ids_or_names) > 0:
         if column == '':
             cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
-                'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+                    'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         for vlb_id in site_ids_or_names:
             ans.append(vlb.list(vlb_id))
     else:
         if column == '':
             cols = ['id', 'name',  'create_time',
-                'private_net_name', 'status', 'pools_method']
+                    'private_net_name', 'status', 'pools_method']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
         if 'detail' in this_ans:
@@ -165,7 +169,7 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
             images = img.list(srv_id)
             if not images:
                 continue
-            [image.setdefault('site_id',sid) for image in images]
+            [image.setdefault('site_id', sid) for image in images]
             ans.extend(images)
             cols = ['id', 'site_id', 'name', 'status', 'create_time']
     else:
@@ -190,6 +194,7 @@ def list_gpu_log(site_ids_or_names):
         log = a.getLog(site_id)
         site_log[site_id] = log
     jpp(site_log)
+
 
 def list_gpu_flavor(is_table=True):
     ans = GpuSite.getGpuList()
@@ -312,12 +317,12 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans_flavor = jmespath.search('Pod[0].flavor',ans_info)
+            ans_flavor = jmespath.search('Pod[0].flavor', ans_info)
             if not ans_flavor == None:
                 ans['flavor'] = ans_flavor
-            ans_image = jmespath.search('Pod[0].container[0].image',ans_info)
+            ans_image = jmespath.search('Pod[0].container[0].image', ans_info)
             if not ans_image == None and '/' in ans_image:
-                ans['image'] =  ans_image.split('/')[-1]
+                ans['image'] = ans_image.split('/')[-1]
             my_GpuSite.append(ans)
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
@@ -351,10 +356,12 @@ def list_buckets(is_table):
     else:
         jpp(buckets)
 
+
 def show_dict(obj):
     for obj_key in obj.keys():
-        print("== %s =="%(obj_key))
+        print("== %s ==" % (obj_key))
         print(obj[obj_key])
+
 
 def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
     """List file in specific folder in buckets table/json format
@@ -372,13 +379,15 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
         files = s3.list_object(bucket_name)
 
         if not isNone(okey_regex):
-            files = [ mfile for mfile in files if re.search(okey_regex, mfile[u'Key'])] # 會不會中招呀!?
+            files = [mfile for mfile in files if re.search(
+                okey_regex, mfile[u'Key'])]  # 會不會中招呀!?
 
         if is_public:
             more_details = []
             for mfile in files:
                 mdata = mfile
-                mdata['is_public'] = s3.get_object_info(bucket_name, mfile[u'Key'])['is_public_read']
+                mdata['is_public'] = s3.get_object_info(
+                    bucket_name, mfile[u'Key'])['is_public_read']
                 more_details.append(mdata)
             files = more_details
 
@@ -389,7 +398,7 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
                          max_len=30,
                          isPrint=True,
                          captionInOrder=True,
-                         caption_row = ['LastModified', 'Key', 'Size', 'is_public'] if is_public else ['LastModified', 'Key', 'Size'])
+                         caption_row=['LastModified', 'Key', 'Size', 'is_public'] if is_public else ['LastModified', 'Key', 'Size'])
         else:
             jpp(files)
 
@@ -414,7 +423,8 @@ def list_secg(ids_or_names, is_table=True):
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail,
-                         caption_row = ['id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
+                         caption_row=[
+                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
                          isPrint=True, captionInOrder=True)
         else:
             jpp(secg_detail)
@@ -433,7 +443,8 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 def cli():
     try:
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)
@@ -458,7 +469,7 @@ def cli():
 @click.option('-col',
               '--column',
               'column',
-              default = '',
+              default='',
               help='User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name')
 @click.option('-img',
               '--image',
@@ -533,7 +544,7 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
-        list_vcs(site_ids_or_names, is_table, column = column, is_all=is_all)
+        list_vcs(site_ids_or_names, is_table, column=column, is_all=is_all)
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
@@ -616,7 +627,8 @@ def cos(env, name, okey, is_public, is_table, ids_or_names):
     if len(ids_or_names) == 0:
         list_buckets(is_table)
     else:
-        list_files(ids_or_names, okey_regex = okey, is_public = is_public, is_table = is_table)
+        list_files(ids_or_names, okey_regex=okey,
+                   is_public=is_public, is_table=is_table)
 
 
 # end object ==================================================
@@ -857,7 +869,7 @@ def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
 @click.option('-col',
               '--column',
               'column',
-              default = '',
+              default='',
               help='User define table column. ex: twccli ls vlb -col pools[0].members')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,

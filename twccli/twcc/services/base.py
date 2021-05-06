@@ -17,7 +17,8 @@ class Users(GenericService):
 
     def getInfo(self):
         return self.list()
-    def getHFS(self,is_table):
+
+    def getHFS(self, is_table):
         info = self.list()
         if len(info) > 0:
             info = info[0]
@@ -27,17 +28,19 @@ class Users(GenericService):
             for key in gpfs.keys():
                 gpfs[key]['dictionary'] = key
                 total_gpfs.append((gpfs[key]))
-            cols = ['dictionary','usage', 'default_quota', 'extra_quota', 'expired_date','last_updated_time']
+            cols = ['dictionary', 'usage', 'default_quota',
+                    'extra_quota', 'expired_date', 'last_updated_time']
             if is_table:
                 table_layout("HFS Result",
-                            total_gpfs,
-                            cols,
-                            isPrint=True,
-                            isWrap=False)
+                             total_gpfs,
+                             cols,
+                             isPrint=True,
+                             isWrap=False)
             else:
                 jpp(total_gpfs)
         else:
             raise KeyError("Account for API not found.")
+
     def getAccountInfo(self):
         info = self.list()
         if len(info) > 0:
@@ -81,6 +84,7 @@ class image_commit(GenericService):
         self.res_type = "txt"
         self._do_api()
 
+
 class ApiKey(GenericService):
     def __init__(self, api_key=None):
 
@@ -95,7 +99,6 @@ class ApiKey(GenericService):
         self.http_verb = 'get'
         self.res_type = 'json'
         return self._do_api()
-
 
 
 class acls(GenericService):
@@ -165,11 +168,11 @@ class projects(GenericService):
         self.url_dic = {'projects': proj_id, 'solutions': sol_id}
         return self.list()
 
-    def getProjects(self, isAll=False, is_table = True, is_print = True):
+    def getProjects(self, isAll=False, is_table=True, is_print=True):
         s = iservice(api_key=self._api_key_)
         my_prj = {}
         total_prj = []
-        cols = ['prj_name','prj_code', 'prj_avbl_cr']
+        cols = ['prj_name', 'prj_code', 'prj_avbl_cr']
         if isAll == True:
             res = s.getProjects(isAll)
             if 'wallet' in res:
@@ -178,11 +181,11 @@ class projects(GenericService):
                     prj_avbl_cr = float(prj[u"錢包餘額"])
                     prj_name = prj[u"計畫名稱"]
                     prj_ele = {
-                            # 'su_qouta':prj['su_qouta'],
-                            # 'obtained_su':prj['obtained_su'],
-                            'prj_code': prj_code,
-                            'prj_avbl_cr': prj_avbl_cr,
-                            'prj_name': prj_name}
+                        # 'su_qouta':prj['su_qouta'],
+                        # 'obtained_su':prj['obtained_su'],
+                        'prj_code': prj_code,
+                        'prj_avbl_cr': prj_avbl_cr,
+                        'prj_name': prj_name}
                     total_prj.append(prj_ele)
                     my_prj[prj_code] = prj_ele
             if not is_print:
@@ -190,7 +193,7 @@ class projects(GenericService):
             my_prj = total_prj
             res = res['wallet']
         else:
-            res_all = s.getProjects(isAll = True)
+            res_all = s.getProjects(isAll=True)
             res = s.getProjects()
             wallet_code = res['wallet_code']
             my_prj = {}
@@ -198,27 +201,28 @@ class projects(GenericService):
             for prj in res_all['wallet']:
                 if prj[u'錢包ID'] == wallet_code:
                     my_prj = {
-                        'prj_name' : prj[u"計畫名稱"],
-                        'prj_code' : prj[u"計畫系統代碼"],
-                        'time' : prj[u"計畫開始時間"]+'-'+prj[u"計畫結束時間"],
-                        'wallet_owner' : prj[u"錢包擁有者"],
+                        'prj_name': prj[u"計畫名稱"],
+                        'prj_code': prj[u"計畫系統代碼"],
+                        'time': prj[u"計畫開始時間"]+'-'+prj[u"計畫結束時間"],
+                        'wallet_owner': prj[u"錢包擁有者"],
                         'person_quota': int(float(res['su_qouta'])),
                         'person_Tquota': int(float(res['obtained_su'])),
                         'project_quota': int(float(res['prj_su_quota'])),
-                        'project_Tquota' : int(float(res['prj_obtained_su']))
-                        
+                        'project_Tquota': int(float(res['prj_obtained_su']))
+
                     }
-            
+
             # my_prj['one'] = res
             # my_prj['all'] = res_all
             res['prj_code'] = my_prj['prj_code']
-            cols = ['prj_name','prj_code', 'time', 'person_quota', 'person_Tquota','project_quota','project_Tquota','wallet_owner']
+            cols = ['prj_name', 'prj_code', 'time', 'person_quota',
+                    'person_Tquota', 'project_quota', 'project_Tquota', 'wallet_owner']
         if is_table:
             table_layout("Project Result",
-                        my_prj,
-                        cols,
-                        isPrint=True,
-                        isWrap=False)
+                         my_prj,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
         else:
             jpp(res)
 
@@ -232,6 +236,7 @@ class projects(GenericService):
         proj_id = self.getS3ProjId(proj_code)
         self.url_dic = {'projects': proj_id, 'key': ''}
         return self.list()
+
 
 class api_key(GenericService):
     def __init__(self, debug=False):
@@ -256,7 +261,7 @@ class iservice(GenericService):
         return self.list()
 
     def getProducts(self):
-        self.ext_get = {"product_system_code":"AI"}
+        self.ext_get = {"product_system_code": "AI"}
         self.url_dic = {"iservice": "products"}
         return self.list()
 

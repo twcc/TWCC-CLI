@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from generic import GenericService
 from os import sys, path
 sys.path.append(path.dirname(path.abspath(__file__)))
-from generic import GenericService
 
 
 class solutions(GenericService):

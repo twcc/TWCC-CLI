@@ -9,6 +9,7 @@ from collections import defaultdict
 from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout, send_ga
 from twccli.version import __version__
 
+
 class Session2(object):
     # static varibles
     PackageYaml = "{}/yaml/TWCC_API.yaml".format(
@@ -53,9 +54,10 @@ class Session2(object):
             self.loadSession()
         else:
             self._initSession()
-    @staticmethod        
+
+    @staticmethod
     def _getUserAgent():
-        if 'User_Agent' in os.environ and len(os.environ['User_Agent'])>0:
+        if 'User_Agent' in os.environ and len(os.environ['User_Agent']) > 0:
             return os.environ['User_Agent']
         else:
             yaml = Session2._isValidSession(isConfig=True)
@@ -66,7 +68,7 @@ class Session2(object):
                     return yaml['_meta']['user_agent']
                 else:
                     return None
-    
+
     def _initSession(self):
 
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
@@ -157,7 +159,7 @@ class Session2(object):
     def _getIsrvProjs(api_key=None):
         from twccli.twcc.services.base import projects
         twcc_proj = projects(api_key=api_key)
-        return twcc_proj.getProjects(isAll=True, is_table=False, is_print = False)
+        return twcc_proj.getProjects(isAll=True, is_table=False, is_print=False)
 
     def getIsrvProjs(self):
         return Session2._getIsrvProjs(api_key=self.twcc_api_key)
@@ -268,7 +270,7 @@ class Session2(object):
 
     @staticmethod
     def _getApiKey(twcc_api_key):
-        if 'TWCC_API_KEY' in os.environ and len(os.environ['TWCC_API_KEY'])>0:
+        if 'TWCC_API_KEY' in os.environ and len(os.environ['TWCC_API_KEY']) > 0:
             return os.environ['TWCC_API_KEY']
         else:
             if Session2._isValidSession():
@@ -294,10 +296,11 @@ class Session2(object):
         whoami = Session2._whoami(twcc_api_key)
         sessionData["_default"]['twcc_username'] = whoami['username']
         sessionData["_default"]['twcc_api_key'] = twcc_api_key
-        sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(proj_code)
+        sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(
+            proj_code)
         if not twcc_cid == None:
             sessionData["_default"]['twcc_cid'] = twcc_cid
-        sessionData["_meta"]['country']  = json.loads(res.text)['country']
+        sessionData["_meta"]['country'] = json.loads(res.text)['country']
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
@@ -318,8 +321,10 @@ class Session2(object):
             sessionData['projects'][proj] = proj_codes
         if not twcc_cid == None:
             ua = user_agent if not user_agent == None else ''
-            ga_params = {'geoid':sessionData["_meta"]['country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"p_version":sys.version.split(' ')[0]}
-            send_ga('config_init',sessionData['_default']['twcc_cid'],ga_params)
+            ga_params = {'geoid': sessionData["_meta"]['country'], 'ua': ua, "version": sessionData['_meta']
+                         ['cli_version'], "func": 'config_init', "p_version": sys.version.split(' ')[0]}
+            send_ga('config_init',
+                    sessionData['_default']['twcc_cid'], ga_params)
 
         return dict(sessionData)
 

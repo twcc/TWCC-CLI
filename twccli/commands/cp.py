@@ -104,7 +104,8 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 def cli():
     try:
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)
