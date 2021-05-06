@@ -395,7 +395,8 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
         col_caption = ['LastModified', 'Key', 'Size', 'is_public'] if is_public else [
             'LastModified', 'Key', 'Size']
         is_versioning = False
-        if s3.get_versioning(bucket_name)[u'Status'] == "Enabled":
+        ver_info = s3.get_versioning(bucket_name)
+        if u'Status' in ver_info and ver_info[u'Status'] == "Enabled":
             is_versioning = True
             col_caption.append('Versioning')
 
