@@ -36,6 +36,16 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
 
+    # check if using name
+    if len(ids_or_names) == 1 and type("") == type(ids_or_names[0]) and not ids_or_names[0].isnumeric():
+        site_name_based = ids_or_names[0]
+
+        # reset input ids_or_names
+        ans_ids = vcs.list(is_all)
+        ans_ids = [x for x in ans_ids if x['name'] == ids_or_names[0]]
+        if len(ans_ids) == 1:
+            ids_or_names = [ans_ids[0][u'id']]
+
     if len(ids_or_names) > 0:
         if column == '':
             cols = ['id', 'name', 'public_ip', 'private_ip',
@@ -44,6 +54,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             cols = column.split(',')
             if not 'id' in cols: cols.append('id')
             if not 'name' in cols: cols.append('name')
+
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -65,6 +76,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             if not 'id' in cols: cols.append('id')
             if not 'name' in cols: cols.append('name')
         ans = vcs.list(is_all)
+
     for each_vcs in ans:
         if each_vcs['status']=="NotReady":
             each_vcs['status']="Stopped"
