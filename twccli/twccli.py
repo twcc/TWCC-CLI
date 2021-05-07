@@ -2,6 +2,7 @@
 import click
 import os
 import sys
+import yaml
 from os import path
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
@@ -27,7 +28,6 @@ if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     logger.add(os.path.join(log_dir, "twcc.log"), format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
                rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
 else:
-    import yaml
     import logging
     import coloredlogs
     import logging.config

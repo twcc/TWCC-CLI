@@ -26,7 +26,7 @@ class TestCosLifecyc:
         result = self.runner.invoke(cli, cmd_list)
         print(result.output)
         #assert result.exit_code == 0
-        return str(result.output).encode("utf-8")
+        return result.output
 
     def _create_bucket(self, bk):
         cmd_list = "mk cos -bkt {}".format(bk)
@@ -37,7 +37,6 @@ class TestCosLifecyc:
         cmd_list = "ls cos -json"
         print(cmd_list)
         self.list_out = self.__run(cmd_list.split(u" "))
-        print(self.list_out)
         out = json.loads(self.list_out)
 
         flag = False
