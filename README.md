@@ -21,9 +21,23 @@ export PYTHONIOENCODING=UTF-8
 ```
 
 ## INDEX: 
-1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+1. [TWCC-CLI α for v0.5](https://github.com/twcc/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
 1. Release Notes :point_down:
+
+### v0.5.16 Release Note
+
+![img](https://media.giphy.com/media/3o6Ztk7NosfLVRqcpy/giphy.gif)
+
+**Feature**
+- CLI is now collected users operating information by GA. If you don't want to be collect, just keep your `ga_cid` value **EMPTY** in `$HOME/.twcc_data/credential`.
+- Users can turn on/off COS bucket version control feature and create public access URL for specific objects.
+- Users can checkout [HFS](https://man.twcc.ai/@twccdocs/rypYCr_TN) info with CLI
+- Users can list CCS log, and show more information.
+- CLI now can renew your credential file automatically, keep it up-to-date.
+
+**Bug Fix**
+- fix bug in `net vcs`
 
 ### v0.5.15 Release Note
 

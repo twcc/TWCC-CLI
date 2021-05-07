@@ -144,7 +144,7 @@ class ServiceOperation:
             logger.info(t_api)
             logger.info(t_headers)
             logger.info("--- URL: %s, Status: %s, (%.3f sec) ---" %
-                    (t_api, r.status_code, time.time() - start_time))
+                        (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
 
     def doAPI(self,
@@ -174,12 +174,13 @@ class ServiceOperation:
         mkAPIUrl_v3 = False
         if http == 'get' or http == 'put' or http == 'patch':
             mkAPIUrl_v3 = True
-        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict, is_v3=mkAPIUrl_v3)
+        t_url = self.mkAPIUrl(site_sn, api_host, func,
+                              url_dict=url_dict, is_v3=mkAPIUrl_v3)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
-                                 user_agent = user_agent,
+                                 user_agent=user_agent,
                                  ctype=ctype)
         if not isNone(url_ext_get):
             t_url += "?"
@@ -192,11 +193,11 @@ class ServiceOperation:
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 try:
-                    return res[0].json()
+                    return res[0].json(), t_url
                 except:
-                    return res[0].content
+                    return res[0].content, t_url
             elif res_type == 'txt':
-                return res[0].content
+                return res[0].content, t_url
 
     def mkHeader(self,
                  site_sn=None,
@@ -256,12 +257,12 @@ class ServiceOperation:
         self._i = logging.info
         self._d = logging.debug
         self._w = logging.warning
-        
-
 
     def show(self):
-        logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
-        logger.info("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 +
+                    " [info] BEGIN " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 +
+                    " [info] ENDS  " + "=" * 10 + "-" * 10)
 
     def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None, is_v3=True):
 
@@ -312,11 +313,12 @@ class ServiceOperation:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
 
+
 def isV3(fun_str):
-    if  fun_str == "sites":
+    if fun_str == "sites":
         return True
     if "sites" in fun_str and "action" in fun_str:
         return True
-    if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
+    if len(set(fun_str.split("/")).intersection(set(['images', 'save']))) == 2:
         return True
     return False

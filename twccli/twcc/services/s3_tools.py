@@ -42,7 +42,7 @@ class S3():
                                      endpoint_url='https://' + self.endpoint_url,
                                      verify=False)
 
-    def list_bucket(self):
+    def list_bucket(self, show_versioning=False):
         """ Listing all the bucket for S3 directory
 
             :return            : List all S3 buckets
@@ -59,6 +59,15 @@ class S3():
                         to_zone).strftime("%m/%d/%Y %H:%M:%S")
                 else:
                     ele[y] = x[y]
+                    
+                if show_versioning:
+                    if u'Name' in ele:
+                        ans = self.get_versioning(ele[u'Name'])
+                        if u'Status' in ans:
+                            ele[u'Versioning'] = ans[u'Status']
+                        else:
+                            ele[u'Versioning'] = "Suspended"
+                    
             res.append(ele)
         return res
 
@@ -97,45 +106,38 @@ class S3():
             print("Can not find {} in {}".format(downdir, bucket_name))
             return
 
-    def put_obj_acl(self, key , bkt, is_public):
-        acl_string ='private'
+    def put_obj_acl(self, okey, bkt, is_public=False):
+        acl_string = 'private'
         if is_public:
-            acl_string ='public-read'
+            acl_string = 'public-read'
 
-        res =self.s3_cli.put_object_acl(ACL=acl_string,
-               Bucket=bkt,
-               Key = key)
+        res = self.s3_cli.put_object_acl(ACL=acl_string,
+                                         Bucket=bkt, Key=okey)
+        return res
 
-    def is_key_public(self, key, bkt):
-        date = ''
-        publicFlag = 'N'
-        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=key)
-        # get public flag ===================
-        for grants in res['Grants']:
-            for grantee in grants['Grantee']:
-                if grantee == "URI":
-                    if grants['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers':
-                        publicFlag = 'Y'
+    def get_object_info(self, bkt, okey):
+        '''
+            [{u'Grantee': {u'Type': 'Group', u'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, u'Permission': 'READ'}, {u'Grantee': {u'Type': 'CanonicalUser', u'DisplayName': 'GOV108029', u'ID'
+            : 'dc34c81d-f783-4227-9a3c-5700a16bdf6d'}, u'Permission': 'FULL_CONTROL'}]
+        '''
+        res = self.s3_cli.get_object_acl(Bucket=bkt, Key=okey)
+        allow_public_read = {u'Grantee': {
+            u'Type': 'Group',
+            u'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'},
+            u'Permission': 'READ'}
+        for grantee in res[u'Grants']:
+            if grantee == allow_public_read:
+                return {"is_public_read": "https://cos.twcc.ai/%s/%s" % (bkt, okey)}
+        return {"is_public_read": False}
 
-        # get date ===========================
-        for metadata in res['ResponseMetadata']:
-            date = res['ResponseMetadata']['HTTPHeaders']['date']
+    def set_obj_contet_type(self, bkt, okey, metadata='application/xml'):
+        res = self.s3_cli.copy_object(Bucket=bkt,
+                                      Key=okey,
+                                      ContentType=metadata,
+                                      MetadataDirective="REPLACE",
+                                      CopySource=bkt + "/" + okey)
 
-        # combine return json string ====
-        ret = []
-        ret.append({"okey": key,
-                            "time": date,
-                            "is_public": publicFlag})
-
-        return ret
-    def object_acl(self,bucket, key):
-
-        #object_acl = self.s3res.ObjectAcl(bucket, key)
-        #response = object_acl.put(ACL='public-read')
-        res = self.s3_cli.get_object_acl( Bucket=bucket, Key=key)
-
-        #{'Grantee': {'Type': 'Group', 'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}, 'Permission': 'READ'}
-    def list_object(self, bucket_name):
+    def list_object(self, bucket_name, show_versioning=False):
         """ Listing all the file insife of S3 bucket.
 
             :param bucket_name : Unique string name
@@ -144,24 +146,25 @@ class S3():
         res_list = []
         NextMarker = ''
         while True:
-            res = self.s3_cli.list_objects(Bucket=bucket_name,Marker=NextMarker)
+            res = self.s3_cli.list_objects(Bucket=bucket_name,
+                                           Marker=NextMarker)
             res_list.append(res)
             if 'NextMarker' in res:
                 NextMarker = res['NextMarker']
             else:
                 break
-        
-        # res = self.s3_cli.list_objects(Bucket=bucket_name)
+
         not_show = set(('ETag', 'Owner', 'StorageClass'))
         tmp = []
         to_zone = tz.tzlocal()
         for res in res_list:
+            
             if not 'Contents' in res:
                 continue
             else:
                 for ele in res['Contents']:
                     if isNone(ele):
-                        continue#return []
+                        continue  # return []
                     data = {}
                     for key in ele:
                         if not key in not_show:
@@ -172,18 +175,12 @@ class S3():
                                     to_zone).strftime("%m/%d/%Y %H:%M:%S")
                             else:
                                 data[key] = ele[key]
+                    data['Versioning'] = len(self.s3_cli.list_object_versions(Bucket=bucket_name, Prefix=ele['Key'])['Versions'])
                     tmp.append(data)
         if tmp:
             return tmp
         else:
             return None
-
-    def upload_file(self, bucket_name=None, key=None):
-        try:
-            self.s3_cli.upload_file(remotePath, bucket_name, key)
-        except ClientError as e:
-            print(e)
-            return False
 
     def upload_bucket(self, file_name=None, bucket_name=None, key=None, path=None, r=False):
         """ Upload to S3
@@ -264,7 +261,7 @@ class S3():
                 all_objs = self.list_object(bucket_name)
 
                 # loop through all the objects
-                for obj in all_objs :
+                for obj in all_objs:
                     full_path = os.path.abspath(path)
                     if re.match("^\/", obj['Key']):
                         ff_name = os.path.join(full_path, obj['Key'][1:])
@@ -274,7 +271,8 @@ class S3():
                     dest_path = os.path.abspath(ff_name)
                     # check if the download folder exists
                     if not os.path.isdir(dest_path):
-                        mkpath(os.path.sep.join(dest_path.split(os.path.sep)[:-1]))
+                        mkpath(os.path.sep.join(
+                            dest_path.split(os.path.sep)[:-1]))
                     # download to the correct path
                     self.s3_cli.download_file(bucket_name, obj['Key'], ff_name)
             else:
@@ -336,6 +334,22 @@ class S3():
         res = self.s3_cli.delete_object(Bucket=bucket_name,
                                         Key=file_name)
 
+    def enable_versioning(self, bucket_name):
+        return self._set_versioning(bucket_name, state='Enabled')
+
+    def disable_versioning(self, bucket_name):
+        return self._set_versioning(bucket_name, state='Suspended')
+
+    def get_versioning(self, bucket_name):
+        return self.s3_cli.get_bucket_versioning(Bucket=bucket_name)
+
+    def _set_versioning(self, bucket_name, state="Suspended"):
+        def_state = set(['Enabled', 'Suspended'])
+
+        if state in def_state:
+            return self.s3_cli.put_bucket_versioning(Bucket=bucket_name,
+                                                     VersioningConfiguration={'Status': state})
+
     # def test_table(self, table_data):
     #     """ Testing showing table
     #     """
@@ -362,3 +376,53 @@ class S3():
         except ClientError as e:
             return False
         return True
+
+    def compatibilityTest(self, bucket_name, object_name):
+        '''
+        check compatibility for boto3
+        https://boto3.amazonaws.com/v1/documentation/api/1.9.42/reference/services/s3.html
+        '''
+        bucket_funcs = [
+            'get_bucket_accelerate_configuration',
+            'get_bucket_acl',
+            'get_bucket_analytics_configuration',
+            'get_bucket_cors',
+            'get_bucket_encryption',
+            'get_bucket_inventory_configuration',
+            'get_bucket_lifecycle',
+            'get_bucket_lifecycle_configuration',
+            'get_bucket_location',
+            'get_bucket_logging',
+            'get_bucket_metrics_configuration',
+            'get_bucket_notification',
+            'get_bucket_notification_configuration',
+            'get_bucket_policy',
+            'get_bucket_replication',
+            'get_bucket_request_payment',
+            'get_bucket_tagging',
+            'get_bucket_versioning',
+            'get_bucket_website'
+        ]
+        object_funcs = [
+            'get_object',
+            'get_object_acl',
+            'get_object_tagging',
+            'get_object_torrent'
+        ]
+
+        for x in bucket_funcs:
+            class_method = getattr(self.s3_cli, x)
+            try:
+                class_method(Bucket=bucket_name)
+                print("- %s(), OK!" % x)
+            except Exception as error:
+                print("- %s(), Error!" % x)
+                print("\t", error.message)
+
+        for x in object_funcs:
+            class_method = getattr(self.s3_cli, x)
+            try:
+                class_method(Bucket=bucket_name, Key=object_name)
+                print("- %s(), OK!" % x)
+            except Exception as error:
+                print("- %s(), Error!" % x)

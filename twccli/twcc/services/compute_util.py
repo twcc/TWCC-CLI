@@ -27,21 +27,34 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
+        import click
+        click.echo(click.style(str_title, bg='blue', fg='white', blink=True, bold=True))
+        return click.confirm(str_text, default=True)
 
 
-def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
+def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
+
+    # check if using name
+    if len(ids_or_names) == 1 and type("") == type(ids_or_names[0]) and not ids_or_names[0].isnumeric():
+        site_name_based = ids_or_names[0]
+
+        # reset input ids_or_names
+        ans_ids = vcs.list(is_all)
+        ans_ids = [x for x in ans_ids if x['name'] == ids_or_names[0]]
+        if len(ans_ids) == 1:
+            ids_or_names = [ans_ids[0][u'id']]
 
     if len(ids_or_names) > 0:
         if column == '':
             cols = ['id', 'name', 'public_ip', 'private_ip',
-                'private_network', 'create_time', 'status']
+                    'private_network', 'create_time', 'status']
         else:
             cols = column.split(',')
             if not 'id' in cols: cols.append('id')
             if not 'name' in cols: cols.append('name')
+
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -60,9 +73,12 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         ans = vcs.list(is_all)
+
     for each_vcs in ans:
         if each_vcs['status']=="NotReady":
             each_vcs['status']="Stopped"
@@ -70,7 +86,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             each_vcs['status']="Stopping"
         if each_vcs['status']=="Unshelving":
             each_vcs['status']="Starting"
-    ans = sorted(ans, key=lambda k: k['create_time']) 
+    ans = sorted(ans, key=lambda k: k['create_time'])
     if len(ans) > 0:
         if not is_print:
             return ans
@@ -221,14 +237,13 @@ def change_loadbalancer(vlb_id, members, lb_method, is_table):
         ans['private_net_name'] = ans['private_net']['name']
         ans['pools_method'] = ','.join(
             [ans_pool['method'] for ans_pool in ans['pools']])
-        ans['create_time'] = timezone2local(ans['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         for ans_pool in ans['pools']:
             ans['members_IP,status'] = ['({}:{},{})'.format(ans_pool_members['ip'], ans_pool_members['port'],
-                                                                    ans_pool_members['status']) for ans_pool_members in ans_pool['members']]
+                                                            ans_pool_members['status']) for ans_pool_members in ans_pool['members']]
 
         ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(
             ans_listeners['name'], ans_listeners['protocol'], ans_listeners['protocol_port'], ans_listeners['status']) for ans_listeners in ans['listeners']]
-        
+
     if len(ans) > 0:
         if is_table:
             table_layout("Load Balancers Info.:", ans,
@@ -246,8 +261,9 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         for vol_id in ids_or_names:
             srvid = getServerId(site_id) if not isNone(site_id) else None
             this_ans = vol.list(vol_id)
-            if this_ans['volume_type'] =='ssd':
-                ans.append({"detail": "Invalid volume: SSD Volume could not to extend"})
+            if this_ans['volume_type'] == 'ssd':
+                ans.append(
+                    {"detail": "Invalid volume: SSD Volume could not to extend"})
                 is_table = False
                 continue
             this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
@@ -263,7 +279,8 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
                     the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         raise ValueError
-    cols = ['id', 'name', 'size', 'create_time','volume_type' , 'status', 'mountpoint']
+    cols = ['id', 'name', 'size', 'create_time',
+            'volume_type', 'status', 'mountpoint']
     if len(ans) > 0:
         if is_table:
             table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
@@ -277,7 +294,7 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     ans = []
 
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip','create_time', 'status']
+        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
         show_desc_flag = False
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
@@ -293,7 +310,7 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
             else:
                 pass
             if not desc == '':
-                vcs.patch_desc(site_id,desc)
+                vcs.patch_desc(site_id, desc)
                 show_desc_flag = True
         if show_desc_flag:
             cols.append('desc')
@@ -310,12 +327,12 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
         for each_vcs in ans:
-            if each_vcs['status']=="NotReady":
-                each_vcs['status']="Stopped"
-            if each_vcs['status']=="Shelving":
-                each_vcs['status']="Stopping"
-            if each_vcs['status']=="Unshelving":
-                each_vcs['status']="Starting"
+            if each_vcs['status'] == "NotReady":
+                each_vcs['status'] = "Stopped"
+            if each_vcs['status'] == "Shelving":
+                each_vcs['status'] = "Stopping"
+            if each_vcs['status'] == "Unshelving":
+                each_vcs['status'] = "Starting"
         if not is_print:
             return ans
         if is_table:
