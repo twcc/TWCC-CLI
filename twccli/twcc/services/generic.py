@@ -78,7 +78,7 @@ class GenericService(object):
         if not sessConf == None and 'ga_cid' in sessConf['_meta']:
             func_call_stack = []
             for trace_line in traceback.format_stack():
-                funcs =  re.findall(r'in ([_A-Za-z]+)',trace_line)
+                funcs = re.findall(r'in ([_A-Za-z]+)', trace_line)
                 if funcs:
                     func_call_stack.extend(funcs)
 
@@ -93,15 +93,18 @@ class GenericService(object):
 
     def _do_api(self):
         if self._debug_:
-            logger_info = {'csite':self._csite_,'func':self._func_,'res_type':self.res_type}
-            if not isNone(self.url_dic): logger_info.update({'url_dic':self.url_dic})
-            if not isNone(self.data_dic): logger_info.update({'data_dic':self.data_dic})
+            logger_info = {'csite': self._csite_,
+                           'func': self._func_, 'res_type': self.res_type}
+            if not isNone(self.url_dic):
+                logger_info.update({'url_dic': self.url_dic})
+            if not isNone(self.data_dic):
+                logger_info.update({'data_dic': self.data_dic})
             logger.info(logger_info)
 
-        res,t_url = self.twcc.doAPI(
+        res, t_url = self.twcc.doAPI(
             site_sn=self._csite_,
             api_key=self._api_key_,
-            user_agent = self._user_agent,
+            user_agent=self._user_agent,
             func=self._func_.lower(),
             url_dict=self.url_dic if not isNone(self.url_dic) else None,
             data_dict=self.data_dic if not isNone(self.data_dic) else None,
@@ -116,10 +119,12 @@ class GenericService(object):
         if type(res) == type([]):
             for eachone in res:
                 if 'create_time' in eachone:
-                    eachone['create_time'] = timezone2local(eachone['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+                    eachone['create_time'] = timezone2local(
+                        eachone['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         elif type(res) == type({}):
             if 'create_time' in res:
-                    res['create_time'] = timezone2local(res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+                res['create_time'] = timezone2local(
+                    res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         if not res == b'' and 'message' in res:
             print(res)
             exit(1)

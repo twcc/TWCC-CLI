@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import re
 import click
 import time
 import sys
@@ -17,6 +18,7 @@ from twccli.twcc.services.compute_util import doSiteStable, create_vcs
 from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 
+
 def create_commit(site_id, tag, isAll=False):
     ccs = Sites()
 
@@ -26,6 +28,7 @@ def create_commit(site_id, tag, isAll=False):
             '/')[-1].split(":")[0]
         c = image_commit()
         return c.createCommit(site_id, tag, img_name)
+
 
 def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
     """Create load balance by name
@@ -41,7 +44,7 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
-    ans = vlb.create(vlb_name,pools,vnet_id, listeners, vlb_desc)
+    ans = vlb.create(vlb_name, pools, vnet_id, listeners, vlb_desc)
     if 'detail' in ans:
         is_table = False
     else:
@@ -53,6 +56,7 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
         table_layout("Load Balancer", ans, cols, isPrint=True)
     else:
         jpp(ans)
+
 
 def create_volume(vol_name, size, is_table):
     """Create volume by name
@@ -70,6 +74,7 @@ def create_volume(vol_name, size, is_table):
         table_layout("Volumes", ans, cols, isPrint=True)
     else:
         jpp(ans)
+
 
 def create_bucket(bucket_name):
     """Create bucket by name
@@ -132,13 +137,17 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
 
 # end original function ==================================================
 
+
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS,help="Create (allocate) your TWCC resources.")
+
+
+@click.group(context_settings=CONTEXT_SETTINGS, help="Create (allocate) your TWCC resources.")
 def cli():
     try:
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)
@@ -168,7 +177,6 @@ def cli():
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
-
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Volume type of the boot volume.")
@@ -230,22 +238,24 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 raise ValueError('the number of name should equals to sites')
         created_snap_list = []
         if not isNone(sids) or len(sids) > 0:
-            for index,sid in enumerate(sids):
+            for index, sid in enumerate(sids):
                 img_name = ''
                 img = VcsImage()
                 desc_str = "twccli created at {}".format(
                     datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if len(name) == 1 and name[0] == 'twccli':
                     img_name = 'twccli'+datetime.now().strftime("%d%m%H%M")+str(index)
-                else: 
+                else:
                     img_name = name[index]
                 ans = img.createSnapshot(sid, img_name, desc_str)
-                if "detail" in ans: is_table = False
+                if "detail" in ans:
+                    is_table = False
                 else:
                     img = VcsImage()
                     srv_id = getServerId(sid)
                     searched_imgs = img.list(srv_id)
-                    ans = [eachimg for eachimg in searched_imgs if eachimg['name'] == img_name][0]
+                    ans = [
+                        eachimg for eachimg in searched_imgs if eachimg['name'] == img_name][0]
                 created_snap_list.append(ans)
                 time.sleep(1)
         ans = created_snap_list
@@ -380,6 +390,7 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
         else:
             jpp(ans)
 
+
 @click.option('-n', '--vnet_name', 'name', default="twccli", type=str,
               help="Name of the virtual network.")
 @click.option('-gw', '--getway', 'getway',  type=str,
@@ -403,23 +414,25 @@ def vnet(env, name, getway, cidr, is_table, wait):
     net = Networks()
     # TODO varify getway and cidr @Leo
     import re
-    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',getway):
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$', getway):
         raise ValueError("Getway format error")
     if not '/' in cidr:
         raise ValueError("CIDR format error")
-    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$',cidr.split('/')[0]):
+    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$', cidr.split('/')[0]):
         raise ValueError("CIDR format error")
-    ans = net.create(name,getway,cidr)
+    ans = net.create(name, getway, cidr)
     if wait:
         doSiteStable(ans['id'], site_type='vnet')
         ans = net.queryById(ans['id'])
     if 'detail' in ans:
         is_table = False
     if is_table:
-        cols = ["id", "name", "cidr","status"]
+        cols = ["id", "name", "cidr", "status"]
         table_layout("VCS Networks", ans, cols, isPrint=True)
     else:
         jpp(ans)
+
+
 @click.option('-n', '--vol_name', 'name', default="twccli", type=str,
               help="Name of the volume.")
 @click.option('-sz', '--vol-size', default=100, type=int, show_default=True,
@@ -436,19 +449,20 @@ def vds(name, vol_size, is_table):
     :param vol_size: Enter size for your resources.
     :type vol_size: int
     """
-    create_volume(name,vol_size,is_table)
+    create_volume(name, vol_size, is_table)
 
-@click.option('-d', '--load_balance_description', 'vlb_desc',default="",show_default=True, type=str,
+
+@click.option('-d', '--load_balance_description', 'vlb_desc', default="", show_default=True, type=str,
               help="Description of the load balance.")
 @click.option('-n', '--load_balance_name', 'vlb_name', default="twccli_lb", type=str,
               help="Name of the load balance.")
-@click.option('-lm', '--lb_method','lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),multiple=True,
+@click.option('-lm', '--lb_method', 'lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False), multiple=True,
               help="Method of the load balancer.")
-@click.option('-lt', '--listener_type','listener_types',   default=["APP_LB"],show_default=True, type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
+@click.option('-lt', '--listener_type', 'listener_types',   default=["APP_LB"], show_default=True, type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
               help="The type of the listener of balancer.")
-@click.option('-lp', '--listener_port','listener_ports',  default=["80"],show_default=True, multiple=True,
+@click.option('-lp', '--listener_port', 'listener_ports',  default=["80"], show_default=True, multiple=True,
               help="The port of the listener of balancer.")
-@click.option('-vnn', '--virtual_network_name', 'vnet_name', default="default_network",show_default=True , required=True, type=str,
+@click.option('-vnn', '--virtual_network_name', 'vnet_name', default="default_network", show_default=True, required=True, type=str,
               help="Virtual Network id")
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
@@ -481,23 +495,27 @@ def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_des
     net = Networks()
     nets = net.list()
     net_name2id = {}
-    [net_name2id.setdefault(net['name'],net['id']) for net in nets]
+    [net_name2id.setdefault(net['name'], net['id']) for net in nets]
     if not vnet_name in net_name2id:
         raise ValueError('the virtual network name not exist')
 
     listeners = []
     listener_index = 0
-    listener_types_mapping = {'APP_LB':'HTTP','NETWORK_LB':'TCP'}
+    listener_types_mapping = {'APP_LB': 'HTTP', 'NETWORK_LB': 'TCP'}
     protocol = ''
-    for listener_type,listener_port in zip(listener_types,listener_ports):
-        listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port, 'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
+    for listener_type, listener_port in zip(listener_types, listener_ports):
+        listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port,
+                         'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
         listener_index += 1
     pools = []
     if len(lb_methods) > 1:
         raise ValueError('not support yet')
     for i, lb_method in enumerate(lb_methods):
-        pools.append({'method': lb_method, 'protocol': "HTTP", 'name': "pool-{}".format(i)})
-    create_load_balance(vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
+        pools.append({'method': lb_method, 'protocol': "HTTP",
+                     'name': "pool-{}".format(i)})
+    create_load_balance(
+        vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
+
 
 cli.add_command(vcs)
 cli.add_command(cos)
@@ -506,7 +524,6 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-
 
 
 def main():

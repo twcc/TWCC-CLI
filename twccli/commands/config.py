@@ -16,6 +16,7 @@ export LC_ALL=C.UTF-8
 export PYTHONIOENCODING=UTF-8
 """
 
+
 @click.command(help='Get exsisting information.')
 # @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
@@ -83,7 +84,8 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
                 ga_agree_flag = click.confirm(
                     'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
                 cid = str(uuid.uuid1()) if ga_agree_flag else None
-            Session2(twcc_api_key=apikey, twcc_project_code=proj_code, user_agent = user_agent, twcc_cid = cid )
+            Session2(twcc_api_key=apikey, twcc_project_code=proj_code,
+                     user_agent=user_agent, twcc_cid=cid)
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
@@ -93,14 +95,17 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
 
                 open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
             else:
-                click.echo("Please add encoding setting to your environment: \n {}".format(lang_encoding))
+                click.echo(
+                    "Please add encoding setting to your environment: \n {}".format(lang_encoding))
 
         else:
             raise ValueError("API Key is not validated.")
     else:
         if env.verbose:
-            logger.info("load credential from {}".format(Session2()._getSessionFile()))
+            logger.info("load credential from {}".format(
+                Session2()._getSessionFile()))
         print(Session2())
+
 
 @click.command(help='Show this version.')
 @pass_environment
@@ -111,12 +116,16 @@ def version(ctx):
     from twccli.version import __version__
     ctx.log("This version is {}".format(__version__))
 
+
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS,help="Configure the TWCC CLI.")
+
+
+@click.group(context_settings=CONTEXT_SETTINGS, help="Configure the TWCC CLI.")
 def cli():
     try:
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)
@@ -126,7 +135,6 @@ def cli():
 cli.add_command(whoami)
 cli.add_command(init)
 cli.add_command(version)
-
 
 
 def main():

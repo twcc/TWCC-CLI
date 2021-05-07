@@ -31,6 +31,7 @@ def jpp(inobj):
     print(json.dumps(inobj, ensure_ascii=False,
                      sort_keys=True, indent=4, separators=(',', ': ')))
 
+
 @pass_environment
 def isDebug(env):
     return True if os.environ.get("TWCC_CLI_STAGE") == "dev" or env.verbose else False
@@ -105,14 +106,18 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             try:
                 val = jmespath.search(cap, ele)
             except jmespath.exceptions.ParseError:
-                if cap in ele: val = ele[cap]
-                else: val = ''
-            if val == None: val = ''
+                if cap in ele:
+                    val = ele[cap]
+                else:
+                    val = ''
+            if val == None:
+                val = ''
             if val == 'Error' or val == "ERROR":
                 row_data.append(Color("{autored}%s{/autored}" % val))
-            else: row_data.append(val)
+            else:
+                row_data.append(val)
         table_info.append(row_data)
-    table = AsciiTable(table_info, " {} ".format(title))
+    table = AsciiTable(table_info, title=" {} ".format(title))
 
     for idy in range(len(table.table_data)):
         for idx in range(len(table.table_data[idy])):
@@ -145,10 +150,12 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     if debug:
         cprint("- %.3f seconds" %
                (time.time() - start_time), 'red', attrs=['bold'])
+        
     if isPrint:
         print(table.table)
     else:
         return table.table
+
 
 def send_ga(event_name, cid, params):
 
@@ -304,7 +311,6 @@ def name_validator(name):
         return True
     return False
 
+
 def mkCcsHostName(ip_addr):
-    return "%s.ccs.twcc.ai"%("-".join(ip_addr.split(".")))
-
-
+    return "%s.ccs.twcc.ai" % ("-".join(ip_addr.split(".")))

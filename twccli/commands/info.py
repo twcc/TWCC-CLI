@@ -18,16 +18,17 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 def cli():
     try:
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)
     pass
 
+
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-
 @click.command(help="Get your HFS Information.")
 @click.pass_context
 def hfs(ctx, is_table):
@@ -36,6 +37,8 @@ def hfs(ctx, is_table):
     """
     user = Users()
     user.getHFS(is_table)
+
+
 @click.option(
     '-all',
     '--show-all',
@@ -45,9 +48,8 @@ def hfs(ctx, is_table):
     help="List all the containers in the project. (Tenant Administrators only)"
 )
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
-            is_flag=True, default=True, show_default=True,
-            help="Show information in Table view or JSON view.")
-
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
 @click.command(help="Get your HFS Information.")
 @click.pass_context
 def proj(ctx, is_all, is_table):
@@ -55,9 +57,7 @@ def proj(ctx, is_all, is_table):
 
     """
     proj = projects()
-    proj.getProjects(is_all,is_table)
-    
-    
+    proj.getProjects(is_all, is_table)
 
 
 cli.add_command(hfs)

@@ -1,5 +1,5 @@
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
-from twccli.twcc.util import isNone,mk_names
+from twccli.twcc.util import isNone, mk_names
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs
 from twccli.twccli import pass_environment, logger
@@ -7,6 +7,8 @@ from twccli.twcc.services.base import Keypairs
 from twccli.twcc.services.generic import GenericService
 import click
 import re
+import sys
+
 
 @click.command(help='Manage CCS (Container Compute Service) ports.')
 @click.option('-p',
@@ -82,8 +84,7 @@ def ccs(env, siteId, port, isAttach):
     '--port-range',
     'portrange',
     type=str,
-    help=
-    'Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.'
+    help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.'
 )
 @click.option('-proto',
               '--protocol',
@@ -147,13 +148,14 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
                 if port_min < 0 or port_max < 0:
                     raise ValueError('port range must bigger than 0')
                 elif port_min > port_max:
-                    raise ValueError('port_range_min must be <= port_range_max')
+                    raise ValueError(
+                        'port_range_min must be <= port_range_max')
             else:
                 raise ValueError('port range set error')
 
             secg = VcsSecurityGroup()
             secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
-                                "ingress" if isIngress else "egress")
+                                  "ingress" if isIngress else "egress")
             errorFlg = False
 
         if not isNone(port):
@@ -162,15 +164,18 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
 
             secg = VcsSecurityGroup()
             secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
-                                "ingress" if isIngress else "egress")
+                                  "ingress" if isIngress else "egress")
             errorFlg = False
 
         if errorFlg:
-            raise ValueError("Error! Nothing to do! Check `--help` for detail.")
+            raise ValueError(
+                "Error! Nothing to do! Check `--help` for detail.")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.group(context_settings=CONTEXT_SETTINGS,help="NETwork related operations.")
+
+
+@click.group(context_settings=CONTEXT_SETTINGS, help="NETwork related operations.")
 def cli():
     try:
         import sys
