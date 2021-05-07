@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 import json
 import re
+import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
@@ -22,7 +23,8 @@ def cli():
             r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
-        logger.warning(e)
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+            logger.warning(e)
     pass
 
 
