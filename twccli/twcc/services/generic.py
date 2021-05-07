@@ -70,39 +70,33 @@ class GenericService(object):
 
     def _isAlive(self):
         return self.twcc.try_alive()
-    def _send_ga(self,event_name,t_url = None):
+
+    def _send_ga(self, event_name, t_url = None):
         twcc_file_session = Session2._getSessionFile()
         sessConf = yaml.load(open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
-        # print(traceback.format_stack())
-        if not sessConf == None and 'twcc_cid' in sessConf['_default']:
+
+        if not sessConf == None and 'ga_cid' in sessConf['_meta']:
             func_call_stack = []
             for trace_line in traceback.format_stack():
                 funcs =  re.findall(r'in ([_A-Za-z]+)',trace_line)
                 if funcs:
                     func_call_stack.extend(funcs)
-            ua = '' if self._user_agent == None else self._user_agent 
-            country = sessConf['_meta']['country'] if 'country' in sessConf['_meta'] else ''
+
+            ua = '' if self._user_agent == None else self._user_agent
+            country = sessConf['_meta']['ga_country'] if 'ga_country' in sessConf['_meta'] else ''
             func_list = ','.join(func_call_stack)[','.join(func_call_stack).rindex('invoke'):].split(',')[1:-3]
             ga_params = {'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
+
             if event_name == 'do_api':
                 ga_params = {'func':','.join(func_list),'url':t_url,'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
-            send_ga(event_name,sessConf['_default']['twcc_cid'],ga_params)
-        # print(sessConf['_default']['twcc_cid'],sessConf['_default']['twcc_username'],ga_params)
-        
+            send_ga(event_name, sessConf['_meta']['ga_cid'],ga_params)
+
     def _do_api(self):
         if self._debug_:
             logger_info = {'csite':self._csite_,'func':self._func_,'res_type':self.res_type}
             if not isNone(self.url_dic): logger_info.update({'url_dic':self.url_dic})
             if not isNone(self.data_dic): logger_info.update({'data_dic':self.data_dic})
             logger.info(logger_info)
-        #     pp(csite=self._csite_,
-        #         func=self._func_,
-        #         res_type=self.res_type)
-
-        #     if not isNone(self.url_dic):
-        #         pp(url_dic=self.url_dic)
-        #     if not isNone(self.data_dic):
-        #         pp(data_dic=self.data_dic)
 
         res,t_url = self.twcc.doAPI(
             site_sn=self._csite_,
@@ -118,7 +112,7 @@ class GenericService(object):
         if self._debug_:
             logger.info({'res':res})
             self._send_ga('do_api',t_url=t_url)
-        
+
         if type(res) == type([]):
             for eachone in res:
                 if 'create_time' in eachone:

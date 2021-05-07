@@ -153,7 +153,8 @@ def cli(env, verbose, show_and_verbose):
     convert_credential()
     if show_and_verbose:
         env.verbose = True
-        logger.add(sys.stderr, level="DEBUG")
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+            logger.add(sys.stderr, level="DEBUG")
     pass
 
 
