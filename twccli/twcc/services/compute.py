@@ -60,7 +60,8 @@ class GpuSite(GpuService):
                     (49, "Torch"),
                     (52, "DIGITS")]
 
-        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image', u'Preemptive GPU(Custom Image)'])
+        ext_cntr_sol = set(['Preemptive GPU', 'Custom Image',
+                           u'Preemptive GPU(Custom Image)'])
         sols = solutions().list()
         for ele in sols:
             if ele['name'] in ext_cntr_sol:
@@ -203,19 +204,25 @@ class GpuSite(GpuService):
 
         info_detail = self.getDetail(site_id)
         usr_name = Session2._whoami()['username']
-
-        info_port = [x for x in info_detail['Service'][0]['ports']]
+        info_pod_port = [x for x in info_detail['Pod']
+                         [0]['container'][0]['ports']]
+        info_pod_port2name = {}
+        for each_pod_port in info_pod_port:
+            info_pod_port2name[each_pod_port['port']] = each_pod_port['name']
+        info_service = [x for x in info_detail['Service'][0]['ports']]
         if not ssh_info:
             # don't show node port
             ans = [dict([(y, x[y]) for y in x if not y == 'node_port'])
-                   for x in info_port]
+                   for x in info_service]
+            for eachans in ans:
+                if eachans['target_port'] in info_pod_port2name:
+                    eachans['name'] = info_pod_port2name[eachans['target_port']]
             return ans
         else:
-            info_port = [x['port'] for x in info_detail['Service']
-                         [0]['ports'] if x['target_port'] == 22][0]
+            info_service = [x['port'] for x in info_detail['Service']
+                            [0]['ports'] if x['target_port'] == 22][0]
             info_pub_ip = info_detail['Service'][0]['public_ip'][0]
-
-            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_port)
+            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_service)
 
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
@@ -252,7 +259,7 @@ class GpuSite(GpuService):
         detail = self.getDetail(site_id)
         pod_name = detail['Pod'][0]['name']
         cntr_name = detail['Pod'][0]['container'][0]['name']
-        self.ext_get = {"pod_name": pod_name, "container_name":cntr_name}
+        self.ext_get = {"pod_name": pod_name, "container_name": cntr_name}
         self.url_dic = {"sites": site_id, 'container/logs': ""}
         self.http_verb = 'get'
         self.res_type = 'json'
@@ -260,15 +267,14 @@ class GpuSite(GpuService):
 
     def getJpnbToken(self, site_id):
         log_txt = self.getLog(site_id)
-        re_comp = re.findall(r'https:\/\/(?P<ccs_host_name>.+):8888\/\?token=', "\n".join(log_txt), re.M)
+        re_comp = re.findall(
+            r'https:\/\/(?P<ccs_host_name>.+):8888\/\?token=', "\n".join(log_txt), re.M)
         if len(re_comp) > 0:
             import hashlib
             if type(re_comp[0]) == str:
                 return hashlib.md5(re_comp[0].encode('utf8')).hexdigest()
             else:
                 return hashlib.md5(re_comp[0].decode()).hexdigest()
-
-
 
 
 class VcsSite(CpuService):
@@ -305,7 +311,7 @@ class VcsSite(CpuService):
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"), ]
-        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),'r') as f:
+        with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         if 'extra_sol' in config and not isNone(config['extra_sol']):
             sol_list.extend(config['extra_sol'])
@@ -362,7 +368,8 @@ class VcsSite(CpuService):
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
 
-        name2isrv = dict([(wanted_pro[name2id[x]], x) for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
+        name2isrv = dict([(wanted_pro[name2id[x]], x)
+                         for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
 
         res = {}
         for ele in extra_prop:
@@ -372,7 +379,9 @@ class VcsSite(CpuService):
                 res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
                                                           for x in extra_prop[ele] if re.search('public', x)]
             elif ele == 'system-volume-type':
-                res["x-extra-property-{}".format(ele)] = {"hdd": "block_storage-hdd"} # current setting
+                # current setting
+                res["x-extra-property-{}".format(ele)
+                    ] = {"hdd": "block_storage-hdd"}
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
@@ -380,6 +389,7 @@ class VcsSite(CpuService):
 
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
+
         def filter_flavor_id(x): return True if "flavor_id" in json.loads(
             x['other_content']) else False
         def get_flavor_id(x): return int(
@@ -401,6 +411,7 @@ class VcsSite(CpuService):
                          "project": self._project_id,
                          "solution": sol_id}
         return self._do_api()
+
     def patch_desc(self, site_id, desc):
         self.http_verb = 'patch'
         self.url_dic = {'sites': site_id}
@@ -533,20 +544,24 @@ class VcsServer(CpuService):
         self.ext_get = {'project': self._project_id,
                         'site': site_id}
         return self._do_api()
+
+
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
         self._func_ = "loadbalancers"
         self._csite_ = Session2._getClusterName("VCS")
+
     def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
         self.http_verb = 'post'
-        self.data_dic = {'name':vlb_name, 'private_net':vnet_id, 'pools':pools, 'listeners':listeners, 'desc':vlb_desc}
+        self.data_dic = {'name': vlb_name, 'private_net': vnet_id,
+                         'pools': pools, 'listeners': listeners, 'desc': vlb_desc}
         return self._do_api()
 
     def update(self, vlb_id, listeners, pools):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
-        self.data_dic = {'pools':pools, 'listeners':listeners}
+        self.data_dic = {'pools': pools, 'listeners': listeners}
         return self._do_api()
 
     def isStable(self, site_id):
@@ -561,7 +576,7 @@ class LoadBalancers(CpuService):
                 return self._do_api()
             else:
                 self.ext_get = {'project': self._project_id}
-                all_vlbs= self._do_api()
+                all_vlbs = self._do_api()
                 my_username = Session2().twcc_username
                 return [x for x in all_vlbs if x["user"]['username'] == my_username]
 
@@ -575,6 +590,8 @@ class LoadBalancers(CpuService):
         self.http_verb = 'delete'
         self.url_dic = {"loadbalancers": vlb_id}
         return self._do_api()
+
+
 class Volumes(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
@@ -583,7 +600,8 @@ class Volumes(CpuService):
 
     def create(self, name, size, desc="", volume_type="hdd"):
         self.http_verb = 'post'
-        self.data_dic = {'project': self._project_id, "name": name, "size":size, "desc":desc,"volume_type":volume_type}
+        self.data_dic = {'project': self._project_id, "name": name,
+                         "size": size, "desc": desc, "volume_type": volume_type}
         return self._do_api()
 
     def deleteById(self, sys_vol_id):
@@ -593,11 +611,11 @@ class Volumes(CpuService):
 
     def update(self, sys_vol_id, vol_status, srvid, size, wait):
         self.http_verb = 'put'
-        self.url_dic = {"volumes": sys_vol_id, "action":""}
-        if vol_status in ['attach','detach']:
+        self.url_dic = {"volumes": sys_vol_id, "action": ""}
+        if vol_status in ['attach', 'detach']:
             self.data_dic = {"status": vol_status, "server": srvid}
         elif vol_status == "extend":
-            self.data_dic = {"status": vol_status, "server": 0, "size":size}
+            self.data_dic = {"status": vol_status, "server": 0, "size": size}
         else:
             raise ValueError("please provide -sts")
         return self._do_api()
@@ -612,7 +630,7 @@ class Volumes(CpuService):
                 return all_volumes
             else:
                 self.ext_get = {'project': self._project_id}
-                all_volumes= self._do_api()
+                all_volumes = self._do_api()
                 my_username = Session2().twcc_username
                 return [x for x in all_volumes if x["user"]['username'] == my_username]
         else:
@@ -620,8 +638,6 @@ class Volumes(CpuService):
             self.res_type = 'json'
             self.url_dic = {"volumes": sys_vol_id}
             return self._do_api()
-
-
 
 
 def getServerId(site_id):

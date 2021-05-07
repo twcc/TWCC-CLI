@@ -36,6 +36,6 @@
       shell: pip install TWCC-CLI
     - name: setup twccli
       become: ubuntu
-      shell: twccli config init --apikey {{ twcc_api_key }} -pcode {{ twcc_proj_code }} -rc 
+      shell: twccli config init --apikey {{ twcc_api_key }} -pcode {{ twcc_proj_code }} -rc -ga
       args:
         executable: /bin/bash

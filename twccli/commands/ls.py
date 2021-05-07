@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 import json
 import re
+import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
@@ -12,10 +13,10 @@ from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.solutions import solutions
-from twccli.twcc.services.base import acls, users, image_commit
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 from click.core import Group
 
@@ -62,21 +63,25 @@ def list_load_balances(site_ids_or_names, column, is_all, is_table):
     if len(site_ids_or_names) > 0:
         if column == '':
             cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
-                'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+                    'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         for vlb_id in site_ids_or_names:
             ans.append(vlb.list(vlb_id))
     else:
         if column == '':
             cols = ['id', 'name',  'create_time',
-                'private_net_name', 'status', 'pools_method']
+                    'private_net_name', 'status', 'pools_method']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         ans = vlb.list(isAll=is_all)
     for this_ans in ans:
         if 'detail' in this_ans:
@@ -164,7 +169,7 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
             images = img.list(srv_id)
             if not images:
                 continue
-            [image.setdefault('site_id',sid) for image in images]
+            [image.setdefault('site_id', sid) for image in images]
             ans.extend(images)
             cols = ['id', 'site_id', 'name', 'status', 'create_time']
     else:
@@ -180,6 +185,15 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
                          isWrap=False)
         else:
             jpp(ans)
+
+
+def list_gpu_log(site_ids_or_names):
+    a = GpuSite()
+    site_log = {}
+    for site_id in site_ids_or_names:
+        log = a.getLog(site_id)
+        site_log[site_id] = log
+    jpp(site_log)
 
 
 def list_gpu_flavor(is_table=True):
@@ -303,12 +317,12 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans_flavor = jmespath.search('Pod[0].flavor',ans_info)
+            ans_flavor = jmespath.search('Pod[0].flavor', ans_info)
             if not ans_flavor == None:
                 ans['flavor'] = ans_flavor
-            ans_image = jmespath.search('Pod[0].container[0].image',ans_info)
+            ans_image = jmespath.search('Pod[0].container[0].image', ans_info)
             if not ans_image == None and '/' in ans_image:
-                ans['image'] =  ans_image.split('/')[-1]
+                ans['image'] = ans_image.split('/')[-1]
             my_GpuSite.append(ans)
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
@@ -329,21 +343,27 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             jpp([])
 
 
-def list_buckets(is_table):
+def list_buckets(is_table, versioning):
     """List buckets in table/json format
 
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
     """
     s3 = S3()
-    buckets = s3.list_bucket()
+    buckets = s3.list_bucket(show_versioning=versioning)
     if is_table:
         table_layout("COS buckets {}", buckets, isWrap=False, isPrint=True)
     else:
         jpp(buckets)
 
 
-def list_files(ids_or_names, is_table):
+def show_dict(obj):
+    for obj_key in obj.keys():
+        print("== %s ==" % (obj_key))
+        print(obj[obj_key])
+
+
+def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
     """List file in specific folder in buckets table/json format
 
     :param ids_or_names: list of site id
@@ -353,16 +373,43 @@ def list_files(ids_or_names, is_table):
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
     """
+    import re
     s3 = S3()
+
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
 
+        if not isNone(okey_regex):
+            files = [mfile for mfile in files if re.search(
+                okey_regex, mfile[u'Key'])]  # 會不會中招呀!?
+
+        if is_public:
+            more_details = []
+            for mfile in files:
+                mdata = mfile
+                mdata['is_public'] = s3.get_object_info(
+                    bucket_name, mfile[u'Key'])['is_public_read']
+                more_details.append(mdata)
+            files = more_details
+
+        col_caption = ['LastModified', 'Key', 'Size', 'is_public'] if is_public else [
+            'LastModified', 'Key', 'Size']
+        is_versioning = False
+        ver_info = s3.get_versioning(bucket_name)
+        if u'Status' in ver_info and ver_info[u'Status'] == "Enabled":
+            is_versioning = True
+            col_caption.append('Versioning')
+
         if is_table and not isNone(files):
-            table_layout("COS objects {}".format(bucket_name),
+            bkt_state = "%s (Versioing: On)" % (
+                bucket_name) if is_versioning else bucket_name
+            table_layout("COS objects {}".format(bkt_state),
                          files,
                          isWrap=False,
                          max_len=30,
-                         isPrint=True)
+                         isPrint=True,
+                         captionInOrder=True,
+                         caption_row=col_caption)
         else:
             jpp(files)
 
@@ -387,7 +434,9 @@ def list_secg(ids_or_names, is_table=True):
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail,
-                         isPrint=True)
+                         caption_row=[
+                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
+                         isPrint=True, captionInOrder=True)
         else:
             jpp(secg_detail)
         return True
@@ -403,11 +452,13 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
 @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
-    keyring = Keypairs()
-    ans = keyring.list()
-    if 'message' in ans:
-        jpp(ans)
-        exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 
@@ -429,7 +480,7 @@ def cli():
 @click.option('-col',
               '--column',
               'column',
-              default = '',
+              default='',
               help='User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name')
 @click.option('-img',
               '--image',
@@ -505,6 +556,7 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
         list_vcs(site_ids_or_names, is_table, column = column, is_all=is_all)
+
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
             datetime.datetime.now().strftime("_%m%d%H%M"))
@@ -549,11 +601,24 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
 @click.command(
     help="'List' details of your COS (Cloud Object Storage) buckets.")
 @click.option('-bkt',
-              '--bucket_name',
+              '--bucket-name',
               'name',
               default=None,
               type=str,
               help="Name of the Bucket.")
+@click.option('-okey',
+              '--object-key-name',
+              'okey',
+              default=None,
+              type=str,
+              help="Name of specific object key. Regular Expression compatible.")
+@click.option('-pub / -nopub',
+              '--show-public-status / --no-show-public-status',
+              'is_public',
+              is_flag=True,
+              default=False,
+              show_default=True,
+              help="Show is public allow to read.")
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -561,19 +626,27 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
               default=True,
               show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-ver',
+              '--check-versioning',
+              'versioning',
+              is_flag=True,
+              default=None,
+              help="Get versioning is enabled or not.")
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
-def cos(env, name, is_table, ids_or_names):
+def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
     """Command line for List COS
        Functions:
        1. list bucket
        2. list files in specific folder in bucket
     """
+
     ids_or_names = mk_names(name, ids_or_names)
     if len(ids_or_names) == 0:
-        list_buckets(is_table)
+        list_buckets(is_table, versioning)
     else:
-        list_files(ids_or_names, is_table)
+        list_files(ids_or_names, okey_regex=okey,
+                   is_public=is_public, is_table=is_table)
 
 
 # end object ==================================================
@@ -622,6 +695,11 @@ def cos(env, name, is_table, ids_or_names):
               'res_property',
               flag_value='image',
               help='List all CCS image name.')
+@click.option('-log',
+              '--log',
+              'res_property',
+              flag_value='log',
+              help='List CCS log.')
 @click.option('-itype',
               '--image-type-name',
               'res_property',
@@ -659,6 +737,10 @@ def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
         print("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
+
+    if res_property == 'log':
+        site_ids_or_names = mk_names(name, site_ids_or_names)
+        list_gpu_log(site_ids_or_names)
 
     if not res_property:
         site_ids_or_names = mk_names(name, site_ids_or_names)
@@ -805,7 +887,7 @@ def vnet(ctx, vnetid, ids_or_names, is_all, is_table):
 @click.option('-col',
               '--column',
               'column',
-              default = '',
+              default='',
               help='User define table column. ex: twccli ls vlb -col pools[0].members')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,

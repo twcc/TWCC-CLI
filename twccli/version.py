@@ -1,8 +1,6 @@
-import os
-
 __TWCC_CLI_MAJOR__ = "0"
 __TWCC_CLI_MINOR__ = "5"
-__TWCC_CLI_BATCH__ = "15"
+__TWCC_CLI_BATCH__ = "16"
 __TWCC_CLI_STAGE__ = ""
 if len(__TWCC_CLI_STAGE__)==0:
     __version__ = "{}.{}.{}".format(
