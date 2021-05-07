@@ -27,12 +27,24 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
+        import click
+        click.echo(click.style(str_title, bg='blue', fg='white', blink=True, bold=True))
+        return click.confirm(str_text, default=True)
 
 
 def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
+
+    # check if using name
+    if len(ids_or_names) == 1 and type("") == type(ids_or_names[0]) and not ids_or_names[0].isnumeric():
+        site_name_based = ids_or_names[0]
+
+        # reset input ids_or_names
+        ans_ids = vcs.list(is_all)
+        ans_ids = [x for x in ans_ids if x['name'] == ids_or_names[0]]
+        if len(ans_ids) == 1:
+            ids_or_names = [ans_ids[0][u'id']]
 
     if len(ids_or_names) > 0:
         if column == '':
@@ -40,10 +52,9 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
                     'private_network', 'create_time', 'status']
         else:
             cols = column.split(',')
-            if not 'id' in cols:
-                cols.append('id')
-            if not 'name' in cols:
-                cols.append('name')
+            if not 'id' in cols: cols.append('id')
+            if not 'name' in cols: cols.append('name')
+
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -67,13 +78,14 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
             if not 'name' in cols:
                 cols.append('name')
         ans = vcs.list(is_all)
+
     for each_vcs in ans:
-        if each_vcs['status'] == "NotReady":
-            each_vcs['status'] = "Stopped"
-        if each_vcs['status'] == "Shelving":
-            each_vcs['status'] = "Stopping"
-        if each_vcs['status'] == "Unshelving":
-            each_vcs['status'] = "Starting"
+        if each_vcs['status']=="NotReady":
+            each_vcs['status']="Stopped"
+        if each_vcs['status']=="Shelving":
+            each_vcs['status']="Stopping"
+        if each_vcs['status']=="Unshelving":
+            each_vcs['status']="Starting"
     ans = sorted(ans, key=lambda k: k['create_time'])
     if len(ans) > 0:
         if not is_print:

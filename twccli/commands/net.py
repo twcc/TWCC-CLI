@@ -177,10 +177,14 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help="NETwork related operations.")
 def cli():
-    ga = GenericService()
-    func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
-        r'\d', i) == [] and not i == '-sv']).replace('-', '')
-    ga._send_ga(func_call)
+    try:
+        import sys
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
+    pass
 
 
 cli.add_command(ccs)

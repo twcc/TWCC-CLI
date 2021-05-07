@@ -158,19 +158,25 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
 
 
 def send_ga(event_name, cid, params):
+
+    if isNone(cid) or len(cid) == 0:
+        return True
+
     measurement_id = 'G-6S0562GHKE'
     api_secret = 'wNf5Se9QSP2YdvgIjfAHiw'
     host = 'https://www.google-analytics.com'
-    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(
-        measurement_id, api_secret)
-    payload = {"client_id": cid, "non_personalized_ads": "false",
-               "events": [{"name": event_name[:39], "params":params}]}
-    # "userId": "",
-    # print(event_name)
-    # print(payload)
+    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(measurement_id,api_secret)
+    payload = {"client_id":cid, "non_personalized_ads":"false","events":[{"name":event_name[:39],"params":params}]}
     headers = {'content-type': 'application/json'}
-    res = rq.post(host+uri, data=json.dumps(payload), headers=headers)
 
+    if isDebug():
+        from ..twccli import logger
+        logger_info = {'payload': payload,
+                       'headers': headers,
+                       'endpoint': host+uri}
+        logger.info(logger_info)
+
+    res = rq.post(host+uri,data=json.dumps(payload),headers=headers)
 
 def dic_seperator(d):
     non_dic_cap_table = []

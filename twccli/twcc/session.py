@@ -54,7 +54,6 @@ class Session2(object):
             self.loadSession()
         else:
             self._initSession()
-
     @staticmethod
     def _getUserAgent():
         if 'User_Agent' in os.environ and len(os.environ['User_Agent']) > 0:
@@ -76,6 +75,18 @@ class Session2(object):
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
                 Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code, self.twcc_cid), fn, encoding='utf-8', allow_unicode=True)
+
+            from services.generic import GenericService
+            import sys
+            cli = GenericService()
+            fun_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+            cli._send_ga(fun_call)
+
+        #if not twcc_cid == None:
+        #    ua = user_agent if not user_agent == None else ''
+        #    ga_params = {'geoid':sessionData["_meta"]['ga_country'], 'ua':ua,"version":sessionData['_meta']['cli_version'],"func":'config_init',"p_version":sys.version.split(' ')[0]}
+        #    send_ga('config_init',sessionData['_meta']['ga_cid'],ga_params)
+
         shutil.copyfile(self.package_yaml, self.twcc_file_resources)
 
     def isApiKey(self):
@@ -299,8 +310,8 @@ class Session2(object):
         sessionData["_default"]['twcc_proj_code'] = Session2._getDefaultProject(
             proj_code)
         if not twcc_cid == None:
-            sessionData["_default"]['twcc_cid'] = twcc_cid
-        sessionData["_meta"]['country'] = json.loads(res.text)['country']
+            sessionData["_meta"]['ga_cid'] = twcc_cid
+        sessionData["_meta"]['ga_country']  = json.loads(res.text)['country']
         sessionData["_meta"]['ctime'] = datetime.datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
         sessionData["_meta"]['cli_version'] = __version__
@@ -319,12 +330,7 @@ class Session2(object):
                 res_name = resources[res]
                 proj_codes[res] = projects[proj][res_name]
             sessionData['projects'][proj] = proj_codes
-        if not twcc_cid == None:
-            ua = user_agent if not user_agent == None else ''
-            ga_params = {'geoid': sessionData["_meta"]['country'], 'ua': ua, "version": sessionData['_meta']
-                         ['cli_version'], "func": 'config_init', "p_version": sys.version.split(' ')[0]}
-            send_ga('config_init',
-                    sessionData['_default']['twcc_cid'], ga_params)
+
 
         return dict(sessionData)
 

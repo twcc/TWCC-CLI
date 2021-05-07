@@ -2,27 +2,32 @@
 import click
 import os
 import sys
+import yaml
+from os import path
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
 if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
-    log_dir = "{}/log".format(os.environ['TWCC_DATA_PATH'])
+    _TWCC_DATA_DIR_ = os.environ['TWCC_DATA_PATH']
 else:
-    log_dir = "{}/log".format(os.path.join(os.environ['HOME'], '.twcc_data'))
+    _TWCC_DATA_DIR_ = os.path.join(os.environ['HOME'], '.twcc_data')
+
+log_dir = os.path.join(_TWCC_DATA_DIR_, "log")
+
 try:
     if not os.path.isdir(log_dir):
         os.mkdir(log_dir)
 except:
     log_dir = os.environ['HOME']
+
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
     logger.remove()
     logger.add(os.path.join(log_dir, "twcc.log"), format="{time:YYYY-MM-DD HH:mm:ss} |【{level}】| {file} {function} {line} | {message}",
                rotation="00:00", retention='20 days', encoding='utf8', level="INFO", mode='a')
 else:
-    import yaml
     import logging
     import coloredlogs
     import logging.config
@@ -145,9 +150,11 @@ def cli(env, verbose, show_and_verbose):
     """
     env.verbose = verbose
     check_if_py2()
+    convert_credential()
     if show_and_verbose:
         env.verbose = True
-        logger.add(sys.stderr, level="DEBUG")
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+            logger.add(sys.stderr, level="DEBUG")
     pass
 
 
@@ -178,6 +185,68 @@ def check_if_py2():
         if __show_deprecated__:
             print(bcolors.WARNING + "******** Warning from TWCC.ai ********\n" +
                   "TWCC-CLI will not support Python 2.7 after 1st Jul., 21'.\nTWCC-CLI 工具即將在中華民國一百一十年七月一日後不再支援 Python 2.7 版。\nPlease update your Python version, or visit https://www.python.org for details.\n請更新您的 Python 工具或請到 https://www.python.org 暸解更多消息。\n" + bcolors.ENDC)
+
+
+def convert_credential():
+    hdler = CredentialHandler()
+
+    if hdler.isOldCredential():
+        click.echo(click.style("Old Credential found! Current credential is version: v%s." % (
+            hdler.old_version), bg='blue', fg='white', blink=True, bold=True))
+
+        if click.confirm("Do you want to renew your credentials format?", default=True):
+            hdler.renew()
+
+
+class CredentialHandler():
+    def __init__(self):
+        self.old_credential = path.join(_TWCC_DATA_DIR_, "credential")
+
+        from datetime import datetime
+        self.backup_credential = path.join(
+            _TWCC_DATA_DIR_, "credential.bakup_"+datetime.now().strftime("%m%d%H%M"))
+
+        # import os
+        # ver_fn = path.join(path.dirname(path.abspath(__file__)), 'version.py')
+        # print(ver_fn)
+        # version_cnt = open(ver_fn, 'r').read()
+        # print(version_cnt)
+        # eval(version_cnt)
+        from .version import __version__
+        self.cli_version = __version__
+
+    def isOldCredential(self):
+        if path.exists(self.old_credential):
+            with open(self.old_credential, 'r') as stream:
+                try:
+                    cnf = yaml.safe_load(stream)
+                    self.old_api = cnf['_default']['twcc_api_key']
+                    self.prj_code = cnf['_default']['twcc_proj_code']
+                    self.old_version = cnf['_meta']['cli_version']
+                    return False if cnf['_meta']['cli_version'] == self.cli_version else True
+                except yaml.YAMLError as exc:
+                    print(exc)
+
+    def renew(self):
+        self._backup()
+        self._removeOld()
+
+        from click.testing import CliRunner
+        runner = CliRunner()
+        cmd_list = "config init --apikey %s -pcode %s -ga" % (
+            self.old_api, self.prj_code)
+        result = runner.invoke(cli, cmd_list.split(" "))
+        stmt = "[Succeful] Successfully convert credential to latest version, %s. " % (
+            self.cli_version)
+        click.echo(click.style(stmt, fg='green', blink=True))
+
+    def _backup(self):
+        from shutil import copyfile
+        copyfile(self.old_credential, self.backup_credential)
+
+    def _removeOld(self):
+        import os
+        os.remove(self.old_credential)
 
 
 if __name__ == '__main__':
