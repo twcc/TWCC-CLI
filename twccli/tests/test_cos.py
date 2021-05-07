@@ -32,12 +32,12 @@ class TestCosLifecyc:
     def _create_bucket(self, bk):
         cmd_list = "mk cos -bkt {}".format(bk)
         print(cmd_list)
-        self.create_out = self.__run(cmd_list.split(u" "))
+        self.create_out = self.__run(cmd_list.split(" "))
 
     def _list_bucket_after_create(self):
         cmd_list = "ls cos -json"
         print(cmd_list)
-        self.list_out = self.__run(cmd_list.split(u" "))
+        self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)
         out = json.loads(self.list_out)
 
@@ -52,41 +52,44 @@ class TestCosLifecyc:
         open("index.html", 'w').write("<html><h1>hihi</h1></html>")
         cmd_list = "cp cos -bkt {} -fn index.html".format(self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
         cmd_list = "ls cos -bkt {} -json".format(self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
         assert json.loads(out)[0][u'Key'] == 'index.html'
 
     def _mk_index_public(self):
-        cmd_list = "ch cos -bkt {} -okey index.html --set-public --set-content-type text/html".format(self.bk_name)
+        cmd_list = "ch cos -bkt {} -okey index.html --set-public --set-content-type text/html".format(
+            self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
-        cmd_list = "ls cos -bkt {} -okey index.html -pub -json".format(self.bk_name)
+        cmd_list = "ls cos -bkt {} -okey index.html -pub -json".format(
+            self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
         assert 'is_public' in json.loads(out)[0]
 
-        cmd_list = "ch cos -bkt {} -okey index.html --set-non-public".format(self.bk_name)
+        cmd_list = "ch cos -bkt {} -okey index.html --set-non-public".format(
+            self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _del_bucket_no_r(self, bkt):
         cmd_list = "rm cos -bkt {} -f".format(bkt)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _del_bucket(self, bkt):
         cmd_list = "rm cos -bkt {} -r -f".format(bkt)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _list_bucket_after_delete(self):
         cmd_list = "ls cos -json"
         print(cmd_list)
-        self.list_out = self.__run(cmd_list.split(u" "))
+        self.list_out = self.__run(cmd_list.split(" "))
         out = json.loads(self.list_out)
 
         flag = True
@@ -100,19 +103,7 @@ class TestCosLifecyc:
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(
             self.upload_dir, self.bk_name)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
-
-
-    #### HERE is the test
-    def test_create_bucket(self):
-        self._loadSession()
-        self._loadParams()
-        self._create_bucket(self.bk_name)
-        self._list_bucket_after_create()
-        self._upload_to_bkt()
-        self._mk_index_public()
-        self._del_bucket(self.bk_name)
-        self._list_bucket_after_delete()
+        out = self.__run(cmd_list.split(" "))
 
     def _create_hierarchy_files(self, dir):
         cmd1 = ["mkdir", dir]
@@ -132,24 +123,28 @@ class TestCosLifecyc:
     def _upload_files(self, bk, dir):
         cmd_list = "cp cos -upload -src {} -dest {} -r".format(dir, bk)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
+
     def _op_folder(self, bk, dir, op):
         cmd_list = "cp cos -bkt {} -dir {} -sync {}".format(bk, dir, op)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _download_files(self, bk, dir):
         cmd_list = "cp cos -download -src {} -dest {} -r".format(bk, dir)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _del_isu85_files(self):
         dir = self.isu85_Dir.replace("./", "")
         cmd = ["rm", "-rf", self.isu85_Dir]
         subprocess.run(cmd)
+
     def _check_isu178_upload_files(self, download_path, check_res):
-        response = subprocess.check_output('ls {} | wc -l'.format(download_path), shell=True).decode('utf8').strip()
+        response = subprocess.check_output(
+            'ls {} | wc -l'.format(download_path), shell=True).decode('utf8').strip()
         return True if response == check_res else False
+
     def _check_isu85_upload_files(self):
         '''
         localList = []
@@ -162,7 +157,7 @@ class TestCosLifecyc:
 
         cmd_remote = "ls cos -n {} -json".format("bk123")
         print(cmd_remote)
-        self.list_out = self.__run(cmd_remote.split(u" "))
+        self.list_out = self.__run(cmd_remote.split(" "))
         out2 = json.loads(self.list_out)
         print(out2)
 
@@ -221,29 +216,28 @@ class TestCosLifecyc:
         p.communicate()
 
     def _upload_single_file_by_fn(self, src, bk, fn):
-        cmd_list = "cp cos -bkt {} -dir {} -fn {} -sync to-cos".format(bk, src, fn)
+        cmd_list = "cp cos -bkt {} -dir {} -fn {} -sync to-cos".format(
+            bk, src, fn)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _upload_single_file(self, bk, file):
-
         cmd_list = "cp cos -bkt {} -fn {} -sync to-cos".format(bk, file)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _download_single_file(self, bk, key, downdir):
-
         cmd_list = "cp cos -bkt {} -dir {} -okey {} -sync from-cos".format(
             bk, downdir, key)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _download_specific_dir(self, bk, dest, downdir):
 
         cmd_list = "cp cos -bkt {} -dir {} -okey {} -sync from-cos".format(
             bk, dest, downdir)
         print(cmd_list)
-        out = self.__run(cmd_list.split(u" "))
+        out = self.__run(cmd_list.split(" "))
 
     def _mk_146_upload_file(self, dir):
         cmd1 = ["mkdir", dir]
@@ -419,15 +413,50 @@ class TestCosLifecyc:
         self._create_bucket(bk_isu178)
         self._create_download_dir(isu178_upload_folder)
         self._create_download_dir(isu178_download_folder)
-        [self._create_upload_file('{}/{}'.format(isu178_upload_folder,'isu178_'+str(i))) for i in range(1001)]
-        self._op_folder(bk_isu178,isu178_upload_folder,'to-cos')
-        self._op_folder(bk_isu178,isu178_download_folder,'from-cos')
+        [self._create_upload_file(
+            '{}/{}'.format(isu178_upload_folder, 'isu178_'+str(i))) for i in range(1001)]
+        self._op_folder(bk_isu178, isu178_upload_folder, 'to-cos')
+        self._op_folder(bk_isu178, isu178_download_folder, 'from-cos')
 
-        if self._check_isu178_upload_files('./'+os.path.join(isu178_download_folder,isu178_upload_folder),'1001'):
+        if self._check_isu178_upload_files('./'+os.path.join(isu178_download_folder, isu178_upload_folder), '1001'):
             assert True
         else:
             assert False
         self._remove_dir(isu178_download_folder, isu178_upload_folder)
         self._del_bucket(bk_isu178)
 
+    def _chk_bkt_versioning(self):
+        cmd_list = "ch cos --bucket-name {} --enable-versioning".format(
+            self.bk_name)
+        print(cmd_list)
+        self.__run(cmd_list.split(" "))
 
+        cmd_list = "ls cos --check-versioning --json-view".format(self.bk_name)
+        print(cmd_list)
+        out = json.loads(self.__run(cmd_list.split(" ")))
+        bkt_info = [x for x in out if x['Name'] == self.bk_name]
+        assert bkt_info[0]['Versioning'] == 'Enabled'
+
+        cmd_list = "ch cos --bucket-name {} --disable-versioning".format(
+            self.bk_name)
+        print(cmd_list)
+        self.__run(cmd_list.split(" "))
+
+        cmd_list = "ls cos --check-versioning --json-view".format(self.bk_name)
+        print(cmd_list)
+        out = json.loads(self.__run(cmd_list.split(" ")))
+        bkt_info = [x for x in out if x['Name'] == self.bk_name]
+        assert bkt_info[0]['Versioning'] == 'Suspended'
+
+    # HERE is the test
+
+    def test_create_bucket(self):
+        self._loadSession()
+        self._loadParams()
+        self._create_bucket(self.bk_name)
+        # self._list_bucket_after_create()
+        # self._upload_to_bkt()
+        # self._mk_index_public()
+        self._chk_bkt_versioning()
+        self._del_bucket(self.bk_name)
+        self._list_bucket_after_delete()
