@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 import json
 import re
+import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
@@ -15,6 +16,7 @@ from twccli.twcc.services.solutions import solutions
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
+from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 from click.core import Group
 
@@ -349,8 +351,12 @@ def list_buckets(is_table):
     else:
         jpp(buckets)
 
+def show_dict(obj):
+    for obj_key in obj.keys():
+        print("== %s =="%(obj_key))
+        print(obj[obj_key])
 
-def list_files(ids_or_names, is_table):
+def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
     """List file in specific folder in buckets table/json format
 
     :param ids_or_names: list of site id
@@ -360,16 +366,30 @@ def list_files(ids_or_names, is_table):
     :param is_table: Show information in Table view or JSON view.
     :type is_table: bool
     """
+    import re
     s3 = S3()
     for bucket_name in ids_or_names:
         files = s3.list_object(bucket_name)
+
+        if not isNone(okey_regex):
+            files = [ mfile for mfile in files if re.search(okey_regex, mfile[u'Key'])] # 會不會中招呀!?
+
+        if is_public:
+            more_details = []
+            for mfile in files:
+                mdata = mfile
+                mdata['is_public'] = s3.get_object_info(bucket_name, mfile[u'Key'])['is_public_read']
+                more_details.append(mdata)
+            files = more_details
 
         if is_table and not isNone(files):
             table_layout("COS objects {}".format(bucket_name),
                          files,
                          isWrap=False,
                          max_len=30,
-                         isPrint=True)
+                         isPrint=True,
+                         captionInOrder=True,
+                         caption_row = ['LastModified', 'Key', 'Size', 'is_public'] if is_public else ['LastModified', 'Key', 'Size'])
         else:
             jpp(files)
 
@@ -411,11 +431,12 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
 @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
 def cli():
-    keyring = Keypairs()
-    ans = keyring.list()
-    if 'message' in ans:
-        jpp(ans)
-        exit(1)
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 
@@ -557,11 +578,24 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
 @click.command(
     help="'List' details of your COS (Cloud Object Storage) buckets.")
 @click.option('-bkt',
-              '--bucket_name',
+              '--bucket-name',
               'name',
               default=None,
               type=str,
               help="Name of the Bucket.")
+@click.option('-okey',
+              '--object-key-name',
+              'okey',
+              default=None,
+              type=str,
+              help="Name of specific object key. Regular Expression compatible.")
+@click.option('-pub / -nopub',
+              '--show-public-status / --no-show-public-status',
+              'is_public',
+              is_flag=True,
+              default=False,
+              show_default=True,
+              help="Show is public allow to read.")
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -571,17 +605,18 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
-def cos(env, name, is_table, ids_or_names):
+def cos(env, name, okey, is_public, is_table, ids_or_names):
     """Command line for List COS
        Functions:
        1. list bucket
        2. list files in specific folder in bucket
     """
+
     ids_or_names = mk_names(name, ids_or_names)
     if len(ids_or_names) == 0:
         list_buckets(is_table)
     else:
-        list_files(ids_or_names, is_table)
+        list_files(ids_or_names, okey_regex = okey, is_public = is_public, is_table = is_table)
 
 
 # end object ==================================================
