@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from click.testing import CliRunner
-#from ..twcc import Session2
-#from ..twcc.util import isNone
 import os
 import re
 import click
@@ -24,8 +22,9 @@ class TestCosLifecyc:
         self.dir = "dir_{}".format(str(rand))
 
     def __run(self, cmd_list):
+        print(cmd_list)
         result = self.runner.invoke(cli, cmd_list)
-        # print(result.output)
+        print(result.output)
         #assert result.exit_code == 0
         return result.output
 
@@ -38,7 +37,6 @@ class TestCosLifecyc:
         cmd_list = "ls cos -json"
         print(cmd_list)
         self.list_out = self.__run(cmd_list.split(u" "))
-        print(self.list_out)
         out = json.loads(self.list_out)
 
         flag = False

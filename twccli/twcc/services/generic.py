@@ -176,7 +176,3 @@ class GpuService(GenericService):
         self.cluster_tag = "CNTR"
         self._csite_ = Session2._getClusterName(self.cluster_tag)
 
-
-if __name__ == "__main__":
-    ga = GenericService()
-    print(ga)
