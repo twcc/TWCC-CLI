@@ -27,7 +27,9 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
     else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
+        import click
+        click.echo(click.style(str_title, bg='blue', fg='white', blink=True, bold=True))
+        return click.confirm(str_text, default=True)
 
 
 def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
@@ -82,9 +84,7 @@ def list_vcs(ids_or_names, is_table, column='',is_all=False, is_print=True):
             each_vcs['status']="Stopping"
         if each_vcs['status']=="Unshelving":
             each_vcs['status']="Starting"
-
     ans = sorted(ans, key=lambda k: k['create_time'])
-
     if len(ans) > 0:
         if not is_print:
             return ans
