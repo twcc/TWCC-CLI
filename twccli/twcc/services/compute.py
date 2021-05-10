@@ -367,7 +367,6 @@ class VcsSite(CpuService):
         products = self.getIsrvFlavors()
         wanted_pro = dict([(x, products[x]['desc'])
                            for x in products if x in tflvs_keys])
-
         name2isrv = dict([(wanted_pro[name2id[x]], x)
                          for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
 
@@ -390,10 +389,17 @@ class VcsSite(CpuService):
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
 
-        def filter_flavor_id(x): return True if "flavor_id" in json.loads(
-            x['other_content']) else False
-        def get_flavor_id(x): return int(
-            json.loads(x['other_content'])['flavor_id'])
+        def filter_flavor_id(x): 
+            try:
+                other_content_json = json.loads(x['other_content'])
+            except ValueError as e:
+                return False
+            if "flavor_id" in  other_content_json:
+                return True 
+            else:
+                return False
+            
+        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
 
         fid_desc = dict([(get_flavor_id(x), x)
                          for x in isrv.getProducts() if filter_flavor_id(x)])
