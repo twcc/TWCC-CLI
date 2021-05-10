@@ -75,9 +75,10 @@ class Session2(object):
         with open(self.twcc_file_session, 'w') as fn:
             documents = yaml.safe_dump(
                 Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code, self.twcc_cid), fn, encoding='utf-8', allow_unicode=True)
-
+                
+            from os import sys, path
+            sys.path.append(path.dirname(path.abspath(__file__)))
             from services.generic import GenericService
-            import sys
             cli = GenericService()
             fun_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
             cli._send_ga(fun_call)
