@@ -10,17 +10,17 @@ before_script:
 #    - curl -O https://bootstrap.pypa.io/get-pip.py
 #    - python get-pip.py
 
-python27:
-  stage: test
-  image: python:2.7
-  variables:
-    TWCC_CICD_STAGE: 'minor'
-  script: 
-    - echo $TWCC_CICD_STAGE
-    - pip install tox
-    - tox -e py27
-  only:
-    - merge_requests
+#python27:
+#  stage: test
+#  image: python:2.7
+#  variables:
+#    TWCC_CICD_STAGE: 'minor'
+#  script: 
+#    - echo $TWCC_CICD_STAGE
+#    - pip install tox
+#    - tox -e py27
+#  only:
+#    - merge_requests
 
 python37:
   stage: test
@@ -33,6 +33,7 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
+    - merge_requests
     - dev
 
 python36:
