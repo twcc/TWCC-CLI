@@ -1,0 +1,91 @@
+image: python
+
+stages:
+    - test
+    - deploy
+
+before_script:
+    - python -V
+    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+#    - curl -O https://bootstrap.pypa.io/get-pip.py
+#    - python get-pip.py
+
+#python27:
+#  stage: test
+#  image: python:2.7
+#  variables:
+#    TWCC_CICD_STAGE: 'minor'
+#  script: 
+#    - echo $TWCC_CICD_STAGE
+#    - pip install tox
+#    - tox -e py27
+#  only:
+#    - merge_requests
+
+python37:
+  stage: test
+  image: python:3.7
+  variables:
+    TWCC_CICD_STAGE: 'minor'
+  script: 
+    - echo $TWCC_CICD_STAGE
+    - pip install tox
+    - export TWCC_SHOW_DEPRECATED=False
+    - tox -e py37
+  only:
+    - merge_requests
+    - dev
+
+python36:
+  stage: test
+  image: python:3.6
+  variables:
+    TWCC_CICD_STAGE: 'MAJOR'
+  script: 
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - pip install tox
+    - tox -e py36
+  only:
+    - master
+
+
+manual MAJOR version:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PYPI_USERNAME
+    TWINE_PASSWORD: $PYPI_PASSWORD
+  script:
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - twine upload --verbose dist/*
+  only:
+    - master
+  when: manual
+  allow_failure: false
+
+manual deploy to GITHUB:
+  stage: deploy
+  script:
+    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI 
+    - cd TWCC-CLI/
+    - git checkout v0.5
+    - git remote add upstream $CI_REPOSITORY_URL
+    - git fetch upstream
+    - git config --global user.email "1803001@narlabs.org.tw"
+    - git config --global user.name $GITHUB_USRERNAME
+    - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - git add twccli/version.py
+    - git commit -m "TWCC-CLI weekly release"
+    - git push
+  only:
+    - master
+  when: manual
+  allow_failure: false

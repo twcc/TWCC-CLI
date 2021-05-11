@@ -1,2 +1,13 @@
 *.pyc
 *log/
+.vscode/*
+.ipynb_checkpoints/
+.pyc
+.swp
+*.egg-info*
+*venv*
+*.tox*
+dist/*
+.coverage
+build/*
+*,cover
