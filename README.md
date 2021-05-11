@@ -5,7 +5,7 @@
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI/?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 
 ## INDEX: 
 
