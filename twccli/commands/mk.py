@@ -169,6 +169,8 @@ def cli():
               help="Name of the key pair for access your instance.")
 @click.option('-net', '--network', 'network', default=None, type=str,
               help="Name of the network.")
+@click.option('-pwd', '--password', 'password', default=None, type=str,
+              help="Password of the win images.")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
               help="Name of the image type.")
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
@@ -197,7 +199,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, is_table):
+        flavor, img_name, wait, network, snapshot, sol, fip, password, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -221,6 +223,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
     :type network: string
     :param sol: Enter TWCC solution name
     :type sol: string
+    :param pwd: Password of the win images
+    :type pwd: string
     :param fip: Set this flag for applying a floating IP
     :type fip: bool
     :param is_table: Set this flag table view or json view
@@ -266,11 +270,13 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             name = name[0]
         if name == 'twccli':
             name = "{}{}".format(name, flavor.replace(".", ''))
+            if isNone(password):
+                name = name+'win'
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip)
+                         fip=fip, password = password)
         ans["solution"] = sol
         ans["flavor"] = flavor
 

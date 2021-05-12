@@ -109,7 +109,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None):
+               data_vol=None, data_vol_size=0, fip=None, password = None):
     """Create vcs
     create vcs by set solution, image name, flavor
     create vcs by default value
@@ -159,19 +159,21 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     if isNone(img_name):
         img_name = "Ubuntu 20.04"
     required['x-extra-property-image'] = img_name
-
+    if not isNone(password):
+        required['x-extra-property-password'] =  password
     # x-extra-property-private-network
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
 
+    if isNone(password):
     # x-extra-property-keypair
-    if isNone(keypair):
-        raise ValueError("Missing parameter: `-key`.")
-    if not keypair in set(extra_props['x-extra-property-keypair']):
-        raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
-                                                                         ", ".join(extra_props['x-extra-property-keypair'])))
-    required['x-extra-property-keypair'] = keypair
+        if isNone(keypair):
+            raise ValueError("Missing parameter: `-key`.")
+        if not keypair in set(extra_props['x-extra-property-keypair']):
+            raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
+                                                                            ", ".join(extra_props['x-extra-property-keypair'])))
+        required['x-extra-property-keypair'] = keypair
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
