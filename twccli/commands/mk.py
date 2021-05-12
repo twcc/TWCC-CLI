@@ -270,7 +270,9 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             name = name[0]
         if name == 'twccli':
             name = "{}{}".format(name, flavor.replace(".", ''))
-            if isNone(password):
+            if not isNone(password):
+                if re.findall(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{17,72}$',password) == []:
+                    raise 'Password required 17-72 characters, at least one uppercase letter, one lowercase letter, one number and one special character'
                 name = name+'win'
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
