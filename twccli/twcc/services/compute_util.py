@@ -161,7 +161,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] =  password
-    # x-extra-property-private-network
+        
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
