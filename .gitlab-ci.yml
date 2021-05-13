@@ -88,10 +88,11 @@ manual deploy to GITHUB:
     - git push --set-upstream origin $TWCC_CLI_VER
     - >
       curl \
+        -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
-        -d '{"head":"master","base":"$TWCC_CLI_VER"}'
+        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"test_body", "title":"test_title", "maintainer_can_modify":true}'
   only:
     - merge_requests
   when: manual
