@@ -93,6 +93,6 @@ manual deploy to GITHUB:
     - gh release create $TWCC_CLI_VER
     - gh pr create
   only:
-    - master
+    - 307-v0-5-16-2-release
   when: manual
   allow_failure: false
