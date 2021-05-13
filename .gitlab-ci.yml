@@ -33,7 +33,7 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-    - merge_requests
+#    - merge_requests
     - dev
 
 python36:
