@@ -88,14 +88,14 @@ manual deploy to GITHUB:
     - git push --set-upstream origin $TWCC_CLI_VER
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
     - >
-      curl \
+      curl --data-binary \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
         -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"'"$RELEASE_NOTE"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
     - >
-      curl \
+      curl --data-binary \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
