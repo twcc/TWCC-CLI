@@ -92,7 +92,7 @@ def quota(ctx, is_all, is_table):
             username = x[u'user'][u'username']
             quota[username] = {'CCS': x}
 
-        for x in quota_ccs:
+        for x in quota_vcs:
             username = x[u'user'][u'username']
             quota[username]['VCS'] = x
 
