@@ -92,7 +92,14 @@ manual deploy to GITHUB:
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
-        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"test_body", "title":"test_title", "maintainer_can_modify":true}'
+        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"Autobots Assemble!!", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
+    - >
+      curl \
+        -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
+        -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/twcc/TWCC-CLI/releases \
+        -d '{"name":"'"$TWCC_CLI_VER"'", "body":"Autobots Assemble!!", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
   only:
     - merge_requests
   when: manual
