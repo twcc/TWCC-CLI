@@ -85,24 +85,22 @@ manual deploy to GITHUB:
     - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - git add twccli/version.py
     - git commit -m "TWCC-CLI Release for $TWCC_CLI_VER"
-    - git push --set-upstream origin $TWCC_CLI_VER
+#    - git push --set-upstream origin $TWCC_CLI_VER
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
     - >
-      curl \
+      curl --data-urlencode "body=$RELEASE_NOTE" \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
-        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}' \
-        --data-urlencode "body=$RELEASE_NOTE"
+        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
     - >
-      curl \
+      curl --data-urlencode "body=$RELEASE_NOTE" \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/releases \
-        -d '{"name":"'"$TWCC_CLI_VER"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}' \
-        --data-urlencode "body=$RELEASE_NOTE"
+        -d '{"name":"'"$TWCC_CLI_VER"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
   only:
     - merge_requests
   when: manual
