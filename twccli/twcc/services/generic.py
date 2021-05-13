@@ -165,6 +165,15 @@ class CpuService(GenericService):
     def __init__(self):
         GenericService.__init__(self, cluster_tag="VCS")
 
+    def getQuota(self, isAll=False):
+        if isAll:
+            self._func_ = "projects"
+            self.url_dic = {"projects": "%s/user_quotas"%(self._project_id)}
+        else:
+            self._func_ = "project_quotas"
+            self.url_dic = {"project_quotas":""}
+            self.ext_get = {"project":self._project_id}
+        return self.list()
 
 class GpuService(GenericService):
     def __init__(self):
@@ -172,3 +181,12 @@ class GpuService(GenericService):
         self.cluster_tag = "CNTR"
         self._csite_ = Session2._getClusterName(self.cluster_tag)
 
+    def getQuota(self, isAll=False):
+        if isAll:
+            self._func_ = "projects"
+            self.url_dic = {"projects": "%s/user_quotas"%(self._project_id)}
+        else:
+            self._func_ = "project_quotas"
+            self.url_dic = {"project_quotas":""}
+            self.ext_get = {"project":self._project_id}
+        return self.list()
