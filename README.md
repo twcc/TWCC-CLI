@@ -1,10 +1,24 @@
 ###### tags: `twcc`, `twccli`
 
-[![CircleCI](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5.svg?style=shield)](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5)
-
-
 # TWCC-CLI Project
 
+
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
+
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
+
+## INDEX: 
+
+- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) (New version coming soon!)
+
+## UPDATED:
+- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!(New version coming soon!)
+
+## Contact us
+If you have any questions, please email us at: 
+- iservice@twcc.ai for account support
+- isupport@twcc.ai for technical support
+=======
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
 **NOTICE**
@@ -110,9 +124,9 @@ export PYTHONIOENCODING=UTF-8
 **fix bug**
 - fix COS command line problems.
 
-
 ### v0.5.11 Release Note
 ![img](https://media.giphy.com/media/y6T75vNWBQzCg/giphy.gif)
+
 **change**
 - In v0.5.10, we use `--product-type` in wrong place, that has been correct.
 - We change `cp cos` command structures, new command  descriptions as following:
@@ -143,6 +157,7 @@ Welcome to [leave comments](https://github.com/TW-NCHC/TWCC-CLI/issues/new!!
  
 ### v0.5.10 Release Note
 ![img](https://media.giphy.com/media/xTiTntKyFNFbCNuqkw/giphy.gif)
+
 **change**
 - VCS images showing table shows "product-type" now!
 
