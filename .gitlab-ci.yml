@@ -33,7 +33,7 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-    - merge_requests
+#    - merge_requests
     - dev
 
 python36:
@@ -73,19 +73,26 @@ manual deploy to GITHUB:
   script:
     - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI 
     - cd TWCC-CLI/
-    - git checkout v0.5
+    - export TWCC_CLI_VER="v`python ../twccli/version.py`"
+    - git checkout -b $TWCC_CLI_VER
     - git remote add upstream $CI_REPOSITORY_URL
     - git fetch upstream
-    - git config --global user.email "1803001@narlabs.org.tw"
+    - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
     - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
     - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - git add twccli/version.py
-    - git commit -m "TWCC-CLI weekly release"
-    - git push
+    - git commit -m "TWCC-CLI Release for $TWCC_CLI_VER"
+    - git push --set-upstream origin $TWCC_CLI_VER
+    - >
+      curl \
+        -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/twcc/TWCC-CLI/pulls \
+        -d '{"head":"master","base":"$TWCC_CLI_VER"}'
   only:
-    - master
+    - merge_requests
   when: manual
   allow_failure: false
