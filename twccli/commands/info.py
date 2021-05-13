@@ -47,12 +47,12 @@ def hfs(ctx, is_table):
     'is_all',
     is_flag=True,
     type=bool,
-    help="List all the containers in the project. (Tenant Administrators only)"
+    help="Show information of all project that you joined."
 )
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.command(help="Get your HFS Information.")
+@click.command(help="Get your project information.")
 @click.pass_context
 def proj(ctx, is_all, is_table):
     """Command line for info hfs
