@@ -94,6 +94,7 @@ manual deploy to GITHUB:
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
         -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
+    - echo $RELEASE_NOTE
     - >
       curl --data-urlencode "body=$RELEASE_NOTE" \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
