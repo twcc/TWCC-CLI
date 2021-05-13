@@ -25,6 +25,13 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.16.2 Release Note
+
+**Feature**
+- Users can create VCS with windows img
+**Bug Fix**
+- fix some bugs
+
 ### v0.5.16.1 Release Note
 
 **Bug Fix**
