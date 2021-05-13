@@ -93,16 +93,14 @@ manual deploy to GITHUB:
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/pulls \
-        --data-raw "body=$RELEASE_NOTE" \
-        -d '{"base":"master","head":"'"$TWCC_CLI_VER"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}' 
+        --data-urlencode '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"'"$RELEASE_NOTE"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
     - >
       curl \
         -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
         -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/twcc/TWCC-CLI/releases \
-        --data-raw "body=$RELEASE_NOTE" \
-        --data-binary '{"name":"'"$TWCC_CLI_VER"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
+        --data-urlencode '{"name":"'"$TWCC_CLI_VER"'", "body":"'"$RELEASE_NOTE"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
   only:
     - merge_requests
   when: manual
