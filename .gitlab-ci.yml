@@ -86,13 +86,13 @@ manual deploy to GITHUB:
     - git add twccli/version.py
     - git commit -m "TWCC-CLI Release for v$TWCC_CLI_VER"
     - git push --set-upstream origin v0.5.16.2b
-    - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-    - sudo apt-add-repository https://cli.github.com/packages
-    - sudo apt install gh
+    - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+    - apt-add-repository https://cli.github.com/packages
+    - apt install gh
     - gh auth login --with-token $GITHUB_APIKEY
     - gh release create $TWCC_CLI_VER
     - gh pr create
   only:
-    - 307-v0-5-16-2-release
+    - merge_requests
   when: manual
   allow_failure: false
