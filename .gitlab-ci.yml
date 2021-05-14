@@ -80,9 +80,9 @@ manual deploy to GITHUB:
     - apt update && apt install -y gh
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
     - find / -name gh
-    - gh auth login --with-token $GITHUB_APIKEY
-    - gh release create $TWCC_CLI_VER
-    - gh pr create
+    - /usr/bin/gh auth login --with-token $GITHUB_APIKEY
+    - /usr/bin/gh release create $TWCC_CLI_VER --title $TWCC_CLI_VER --notes $RELEASE_NOTE
+    - /usr/bin/gh pr create --title $TWCC_CLI_VER --body $RELEASE_NOTE
 
   only:
     - merge_requests
