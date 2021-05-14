@@ -75,6 +75,7 @@ manual deploy to GITHUB:
     - git commit -m "TWCC-CLI Release for $TWCC_CLI_VER"
       #    - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+    - apt update && apt install software-properties-common
     - apt-add-repository https://cli.github.com/packages
     - apt update && apt install gh
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
