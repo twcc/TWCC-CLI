@@ -74,21 +74,10 @@ manual deploy to GITHUB:
     - git add twccli/version.py
     - git commit -m "TWCC-CLI Release for $TWCC_CLI_VER"
       #    - git push --set-upstream origin $TWCC_CLI_VER
+    - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+    - apt-add-repository https://cli.github.com/packages
+    - apt update && apt install gh
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
-    - >
-      curl \
-        -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
-        -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/twcc/TWCC-CLI/pulls \
-        --data-urlencode '{"base":"master","head":"'"$TWCC_CLI_VER"'", "body":"'"$TWCC_CLI_VER"'", "title":"'"$TWCC_CLI_VER"' Release", "maintainer_can_modify":true}'
-    - >
-      curl \
-        -u $GITHUB_USRERNAME:$GITHUB_APIKEY \
-        -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/twcc/TWCC-CLI/releases \
-        --data-urlencode '{"name":"'"$TWCC_CLI_VER"'", "body":"'"$TWCC_CLI_VER"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
   only:
     - merge_requests
       #- master
