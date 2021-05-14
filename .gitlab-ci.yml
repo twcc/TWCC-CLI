@@ -59,7 +59,7 @@ manual MAJOR version:
 manual deploy to GITHUB:
   stage: deploy
   script:
-    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/TW-NCHC/TWCC-CLI 
+    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
     - cd TWCC-CLI/
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
