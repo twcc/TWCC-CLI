@@ -21,7 +21,7 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-    - merge_requests
+      #- merge_requests
     - dev
 
 python36:
@@ -73,7 +73,7 @@ manual deploy to GITHUB:
     - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - git add twccli/version.py
     - git commit -m "TWCC-CLI Release for $TWCC_CLI_VER"
-    - git push --set-upstream origin $TWCC_CLI_VER
+      #    - git push --set-upstream origin $TWCC_CLI_VER
     - export RELEASE_NOTE="`bash scripts/get_latest_release_note.sh`"
     - >
       curl \
@@ -90,6 +90,7 @@ manual deploy to GITHUB:
         https://api.github.com/repos/twcc/TWCC-CLI/releases \
         --data-urlencode '{"name":"'"$TWCC_CLI_VER"'", "body":"'"$TWCC_CLI_VER"'", "tag_name":"'"$TWCC_CLI_VER"'", "maintainer_can_modify":true}'
   only:
-    - master
+    - merge_requests
+      #- master
   when: manual
   allow_failure: false
