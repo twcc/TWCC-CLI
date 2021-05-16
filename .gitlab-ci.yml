@@ -84,7 +84,6 @@ manual deploy to GITHUB:
     - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
 
   only:
-    - merge_requests
-      #- master
+    - master
   when: manual
   allow_failure: false
