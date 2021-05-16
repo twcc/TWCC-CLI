@@ -7,8 +7,6 @@ stages:
 before_script:
     - python -V
     - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
-#    - curl -O https://bootstrap.pypa.io/get-pip.py
-#    - python get-pip.py
 
 python37:
   stage: test
@@ -21,7 +19,7 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-      #- merge_requests
+    - merge_requests
     - dev
 
 python36:
