@@ -273,3 +273,5 @@ class Flavors(GenericService):
         self._csite_ = csite
         if not isNone(api_key):
             self._api_key_ = api_key
+
+
