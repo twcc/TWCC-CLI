@@ -1,4 +1,6 @@
 #!/bin/bash
 
-CMD=`grep -hnr "### v" README.md | sed 's/:### v/ /' | awk '/ /{print $1}' | head -n 2 |paste -sd " " -  | awk '/ /{print $1-1 " " $2}'`
-python -c "import sys; begin=int(sys.argv[1]); end=int(sys.argv[2]); stm=open('README.md', 'r').readlines(); import json; print(json.dumps(''.join([ x.strip() for x in stm[begin:end]])))" $CMD
+CMD=`grep -hnr "### v" README.md | sed 's/:### v/ /' | awk '/ /{print $1}' | head -n 2 |paste -sd " " -  | awk '/ /{print "cat README.md | head -n "$2-1 "  | tail  -" $2-$1+1}'`
+
+eval $CMD
+
