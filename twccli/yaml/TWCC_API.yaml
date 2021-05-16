@@ -157,6 +157,11 @@ avalible_funcs:
       http_verb:
         - 'get'
     -
+      name: "project_quotas"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
       name: "acls"
       url_type: "/api_key/{FUNCTION}/"
       http_verb:

@@ -2,6 +2,7 @@ import threading
 import sys
 import os
 import re
+import click
 import json
 import time
 import pytz
@@ -63,9 +64,8 @@ def isFile(fn):
     return True if os.path.isfile(fn) else False
 
 
-def resource_id_validater(id):
-
-    return id.isdigit()
+def resource_id_validater(mid):
+    return mid.isdigit()
 
 
 def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False, captionInOrder=False):
@@ -150,7 +150,7 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     if debug:
         cprint("- %.3f seconds" %
                (time.time() - start_time), 'red', attrs=['bold'])
-        
+
     if isPrint:
         print(table.table)
     else:
@@ -165,8 +165,10 @@ def send_ga(event_name, cid, params):
     measurement_id = 'G-6S0562GHKE'
     api_secret = 'wNf5Se9QSP2YdvgIjfAHiw'
     host = 'https://www.google-analytics.com'
-    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(measurement_id,api_secret)
-    payload = {"client_id":cid, "non_personalized_ads":"false","events":[{"name":event_name[:39],"params":params}]}
+    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(
+        measurement_id, api_secret)
+    payload = {"client_id": cid, "non_personalized_ads": "false",
+               "events": [{"name": event_name[:39], "params":params}]}
     headers = {'content-type': 'application/json'}
 
     if isDebug():
@@ -176,7 +178,8 @@ def send_ga(event_name, cid, params):
                        'endpoint': host+uri}
         logger.info(logger_info)
 
-    res = rq.post(host+uri,data=json.dumps(payload),headers=headers)
+    res = rq.post(host+uri, data=json.dumps(payload), headers=headers)
+
 
 def dic_seperator(d):
     non_dic_cap_table = []
@@ -314,3 +317,27 @@ def name_validator(name):
 
 def mkCcsHostName(ip_addr):
     return "%s.ccs.twcc.ai" % ("-".join(ip_addr.split(".")))
+
+
+def window_password_validater(password):
+    import re
+    if len(password) >= 17 and len(password) <= 72:
+        result = True
+        if not re.search("[A-Z]", password):
+            click.echo("For Windows upper case latter is needed, [A-Z].")
+            result = False
+        if result and not re.search("[a-z]", password):
+            click.echo("For Windows upper case latter is needed,[a-z].")
+            result = False
+        if result and not re.search("[0-9]", password):
+            click.echo("For Windows numeric latter is needed, [0-9].")
+            result = False
+        if result and not re.search("[@$!%*?&]", password):
+            click.echo(
+                "For Windows special character is needed, [@$!%*?&].")
+            result = False
+        return result
+    else:
+        click.echo(
+                "Your password is too long or too short, length: %s"%(len(password)))
+        return False

@@ -310,11 +310,14 @@ class VcsSite(CpuService):
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
-                    (177, "centos"), ]
+                    (177, "centos"), 
+                    (322, "winserver"),
+                    (319, "win10"),]
         with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
-        if 'extra_sol' in config and not isNone(config['extra_sol']):
-            sol_list.extend(config['extra_sol'])
+        if not isNone(config):
+            if 'extra_sol' in config and not isNone(config['extra_sol']):
+                sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
