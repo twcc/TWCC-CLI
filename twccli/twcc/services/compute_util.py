@@ -109,7 +109,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password = None):
+               data_vol=None, data_vol_size=0, fip=None, password = None, env = None):
     """Create vcs
     create vcs by set solution, image name, flavor
     create vcs by default value
@@ -174,6 +174,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
+        if not (env == {} or env == None):
+            required['x-extra-property-env'] = env
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
