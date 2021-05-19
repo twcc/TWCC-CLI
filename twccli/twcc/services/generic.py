@@ -125,9 +125,10 @@ class GenericService(object):
             if 'create_time' in res:
                 res['create_time'] = timezone2local(
                     res['create_time']).strftime("%Y-%m-%d %H:%M:%S")
-        if res == {'message': 'Your request is unauthorized'}:
-            print(res)
-            raise ValueError("API Key is not validated.")
+            if 'message' in res:
+                print(res)
+                raise ValueError("API Key is not validated.")
+        print(res)
         return res
 
     def create(self, mid):
