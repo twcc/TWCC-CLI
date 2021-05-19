@@ -333,8 +333,8 @@ class VcsSite(CpuService):
     def _do_list_solution(self, sol_id):
         self.proj = projects()
         self.proj._csite_ = self._csite_
-
-        return self.proj.getProjectSolution(self._project_id, sol_id)['site_extra_prop']
+        getProjectSolution = self.proj.getProjectSolution(self._project_id, sol_id)
+        return getProjectSolution['site_extra_prop'] if 'site_extra_prop' in getProjectSolution else []
 
     def getFlavors(self):
         flv = Flavors(self._csite_)
@@ -358,7 +358,7 @@ class VcsSite(CpuService):
         extra_prop = self._do_list_solution(sol_id)
 
         # processing flavors
-        extra_flv = set(extra_prop['flavor'])
+        extra_flv = set(extra_prop['flavor']) if 'flavor' in extra_prop else set([])
         def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
