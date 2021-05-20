@@ -142,7 +142,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
-            table_layout("Volume Result",
+            table_layout("VDS Result",
                          ans,
                          cols,
                          isPrint=True,
