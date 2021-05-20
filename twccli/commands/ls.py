@@ -514,11 +514,11 @@ def cli():
               'res_property',
               flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
-@click.option('-snap',
-              '--snapshots',
+@click.option('-cus-img',
+              '--custom-image',
               'res_property',
               flag_value='Snapshot',
-              help="List snapshots for the instance. `-s` is required!")
+              help="List custom images for the instance. `-s` is required!")
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',

@@ -262,14 +262,14 @@ def key(ctx, env,  name, ids_or_names, force):
               help='Name of the keypair, hash ID of the security group, or ID of the instance.')
 @click.option('-s', '--site-id', 'site_id',
               help='ID of the VCS.')
-@click.option('-snap-id', '--snapshot-id', 'name',
-              help='ID of snapshot.')
+@click.option('-cus-img-id', '--custom-image-id', 'name',
+              help='ID of custom image.')
 @click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
               help="Operates as tenant admin.")
 @click.option('-key', '--keypair', 'res_property', flag_value='Keypair',
               help="Delete existing keypair(s).")
-@click.option('-snap', '--snapshots', 'res_property', flag_value='Snapshot',
-              help="delete snapshots. `-snap-id` is required!")
+@click.option('-cus-img', '--custom-image', 'res_property', flag_value='Snapshot',
+              help="delete a custom image. `-cus-img-id` is required!")
 @click.option('-secg', '--security-group', 'res_property', flag_value='SecurityGroup',
               help="Delete existing security group(s).")
 @click.argument('ids_or_names', nargs=-1)
