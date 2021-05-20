@@ -179,15 +179,15 @@ def cli():
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
+@click.option('-sd-type', '--system-disk-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
-              help="Volume type of the boot volume.")
-@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
+              help="Disk type of the BOOTABLE disk.")
+@click.option('-dd-type', '--data-disk-type', 'data_vol', default="HDD", type=str,
               show_default=True,
-              help="Volume type of the data volume.")
-@click.option('-dvol-size', '--data-volume-size', 'data_vol_size', type=int,
+              help="Disk type of the DATA disk.")
+@click.option('-dd-size', '--data-disk-size', 'data_vol_size', type=int,
               default=0, show_default=True,
-              help="Size of the data volume in (GB).")
+              help="Size of the data disk in (GB).")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")

@@ -99,12 +99,12 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
 
 
 @click.option('-s', '--site-id', type=str, help="ID of the instance.")
-@click.option('-id', '--vol-id', 'name', type=str,
-              help="Index of the volume.")
+@click.option('-id', '--disk-id', 'name', type=str,
+              help="Index of the disk.")
 @click.option('-sz', '--disk-size', 'vol_size', type=int, show_default=True,
-              help="Extend size of the volume. Must be greater than current size")
+              help="Extend size of the disk. Must be greater than current size")
 @click.option('-sts', '--disk-status', 'vol_status', type=click.Choice(['attach', 'detach', 'extend'], case_sensitive=False),
-              help="Status of the volume.")
+              help="Status of the disk.")
 @click.option('-wait', '--wait', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
