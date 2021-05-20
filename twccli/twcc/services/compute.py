@@ -310,7 +310,7 @@ class VcsSite(CpuService):
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
-                    (177, "centos"), 
+                    (177, "centos"),
                     (322, "winserver"),
                     (319, "win10"),]
         with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
@@ -392,16 +392,16 @@ class VcsSite(CpuService):
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
 
-        def filter_flavor_id(x): 
+        def filter_flavor_id(x):
             try:
                 other_content_json = json.loads(x['other_content'])
             except ValueError as e:
                 return False
             if "flavor_id" in  other_content_json:
-                return True 
+                return True
             else:
                 return False
-            
+
         def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
 
         fid_desc = dict([(get_flavor_id(x), x)
