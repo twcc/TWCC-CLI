@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'TWCC-CLI Project'
-copyright = '2021, TWS Co. Ltd.'
+project = 'twccli'
+copyright = '2021, <a href="https://tws.twcc.ai" target="_blank">TWS Co. Ltd.</a>.'
 author = 'TWS Co. Ltd.'
 
 
@@ -28,8 +28,14 @@ author = 'TWS Co. Ltd.'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_click'
+    'sphinx_click',
+    'myst_parser'
 ]
+
+source_suffix = {
+        '.rst': 'restructuredtext',
+        '.md': 'markdown',
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

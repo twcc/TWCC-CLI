@@ -6,11 +6,22 @@
 Welcome to TWCC-CLI's documentation!
 ====================================
 
+TWCC-CLI
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
+  
+   twccli-manual
+   twccli-ch
+   twccli-config
+   twccli-cp
+   twccli-info
+   twccli-ls
+   twccli-mk
+   twccli-net
+   twccli-rm
    
-   twccli
 
 
 Indices and tables
