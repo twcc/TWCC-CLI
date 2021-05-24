@@ -58,7 +58,7 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
         jpp(ans)
 
 
-def create_volume(vol_name, size, is_table):
+def create_volume(vol_name, size, dtype, is_table):
     """Create volume by name
 
     :param vol_name: Enter volume name
@@ -68,7 +68,7 @@ def create_volume(vol_name, size, is_table):
         raise ValueError(
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
     vol = Volumes()
-    ans = vol.create(vol_name, size)
+    ans = vol.create(vol_name, size, desc="CLI create Disk", volume_type=dtype.lower())
     if is_table:
         cols = ["id", "name", "size", "volume_type"]
         table_layout("Volumes", ans, cols, isPrint=True)
@@ -179,15 +179,15 @@ def cli():
 @click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
               default=False,
               help="Create a snapshot for an instance. `-s` is required!")
-@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
+@click.option('-sd-type', '--system-disk-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
-              help="Volume type of the boot volume.")
-@click.option('-dvol-type', '--data-volume-type', 'data_vol', default="HDD", type=str,
+              help="Disk type of the BOOTABLE disk.")
+@click.option('-dd-type', '--data-disk-type', 'data_vol', default="HDD", type=str,
               show_default=True,
-              help="Volume type of the data volume.")
-@click.option('-dvol-size', '--data-volume-size', 'data_vol_size', type=int,
+              help="Disk type of the DATA disk.")
+@click.option('-dd-size', '--data-disk-size', 'data_vol_size', type=int,
               default=0, show_default=True,
-              help="Size of the data volume in (GB).")
+              help="Size of the data disk in (GB).")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -440,23 +440,29 @@ def vnet(env, name, getway, cidr, is_table, wait):
         jpp(ans)
 
 
-@click.option('-n', '--vol_name', 'name', default="twccli", type=str,
-              help="Name of the volume.")
-@click.option('-sz', '--vol-size', default=100, type=int, show_default=True,
-              help="Size of the volume.")
+@click.option('-n', '--disk-name', 'name', default="twccli", type=str,
+              help="Name of the disk.")
+@click.option('-t', '--disk-type', default="HDD", type=str, show_default=True,
+              help="Disk type: SSD or HDD")
+@click.option('-sz', '--disk-size', default=100, type=int, show_default=True,
+              help="Size of the disk.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your VDS (Virtual Disk Service).")
-def vds(name, vol_size, is_table):
+def vds(name, disk_type, disk_size, is_table):
     """Command line for create vds
 
     :param name: Enter name for your resources.
     :type name: string
-    :param vol_size: Enter size for your resources.
-    :type vol_size: int
+    :param disk_size: Enter size for your resources.
+    :type disk_size: int
+    :param disk_size: Enter size for your resources.
+    :type disk_size: int
     """
-    create_volume(name, vol_size, is_table)
+    if name=="twccli":
+        name="twccli%s%s"%(disk_size, disk_type.lower())
+    create_volume(name, disk_size, disk_type, is_table)
 
 
 @click.option('-d', '--load_balance_description', 'vlb_desc', default="", show_default=True, type=str,

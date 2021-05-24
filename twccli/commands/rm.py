@@ -376,14 +376,12 @@ def vnet(env, ids_or_names, vnetid, force):
 
     :param name: Enter name for your resources.
     :type name: string
-    :param vol_size: Enter size for your resources.
-    :type vol_size: int
     """
     del_vnet(mk_names(vnetid, ids_or_names), force)
 
 
-@click.option('-id', '--vol-id', 'name',
-              help="Index of the volume.")
+@click.option('-id', '--disk-id', 'name',
+              help="Index of the disk.")
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default=False,
               help='Force delete the container.')

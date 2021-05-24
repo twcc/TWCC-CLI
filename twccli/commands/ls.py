@@ -142,7 +142,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
-            table_layout("Volume Result",
+            table_layout("VDS Result",
                          ans,
                          cols,
                          isPrint=True,
@@ -815,14 +815,14 @@ def key(env, name, is_table, ids_or_names):
         jpp(ans)
 
 
-@click.option('-id', '--vol-id', 'name', type=int,
-              help="Index of the volume.")
+@click.option('-id', '--disk-id', 'name', type=int,
+              help="Index of the disk.")
 @click.option('-all',
               '--show-all',
               'is_all',
               is_flag=True,
               type=bool,
-              help="List all the volumes.")
+              help="List all the disks.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
