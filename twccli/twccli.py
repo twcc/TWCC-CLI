@@ -97,6 +97,7 @@ class TWCCLI(click.MultiCommand):
                 txt = f.read()
         except FileNotFoundError:
             print('Oops.')
+
         code = compile(txt, fn, 'exec')
         eval(code, ns, ns)
         return ns['cli']
@@ -127,9 +128,15 @@ def exception(logger):
     return decorator
 
 
-cli = TWCCLI(help='Welcome to TWCC, TaiWan Computing Cloud. '
-             'Thanks for using TWCC-CLI https://github.com/TW-NCHC/TWCC-CLI. '
-             '-- You Succeed, We Succeed!! --')
+cli = TWCCLI(help="""
+        Welcome to TWCC, TaiWan Computing Cloud.
+
+        https://github.com/tws/TWCC-CLI
+
+        -- You Succeed, We Succeed!! --
+
+                Powered by TWS
+    """)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -142,11 +149,11 @@ def cli(env, verbose, show_and_verbose):
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
-        https://github.com/TW-NCHC/TWCC-CLI
-
-        version: v0.5.x
+        https://github.com/tws/TWCC-CLI
 
         -- You Succeed, We Succeed!! --
+
+                Powered by TWS
     """
     env.verbose = verbose
     check_if_py2()
