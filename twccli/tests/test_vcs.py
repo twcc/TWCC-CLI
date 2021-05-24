@@ -14,7 +14,7 @@ import uuid
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        (self.flv, self.img, self.sys_vol) =  ("v.super", "Ubuntu 20.04", "HDD") #self.sol=ubuntu
+        (self.flv, self.img, self.sys_vol, self.sol) =  ("v.super", "Ubuntu 20.04", "HDD", "ubuntu") #
         self.ext_port = "81"
         self.ext_port_range = "3000-3010"
         self.apikey = os.environ['TWCC_API_KEY']
