@@ -310,7 +310,7 @@ class VcsSite(CpuService):
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
-                    (177, "centos"), 
+                    (177, "centos"),
                     (322, "winserver"),
                     (319, "win10"),]
         with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
@@ -333,8 +333,8 @@ class VcsSite(CpuService):
     def _do_list_solution(self, sol_id):
         self.proj = projects()
         self.proj._csite_ = self._csite_
-
-        return self.proj.getProjectSolution(self._project_id, sol_id)['site_extra_prop']
+        getProjectSolution = self.proj.getProjectSolution(self._project_id, sol_id)
+        return getProjectSolution['site_extra_prop'] if 'site_extra_prop' in getProjectSolution else []
 
     def getFlavors(self):
         flv = Flavors(self._csite_)
@@ -344,7 +344,8 @@ class VcsSite(CpuService):
     def getAvblImg(sol_name=None):
         avbl_imgs = [{"image-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04', u'Ubuntu 20.04']},
                      {"image-type": u"centos", "image": [
-                         u'CentOS-7-x86_64-1901']}
+                         u'CentOS 7.9', 'CentOS 8.2'
+                         ]}
                      ]
         res = []
         if isNone(sol_name) or len(sol_name) == 0:
@@ -358,7 +359,7 @@ class VcsSite(CpuService):
         extra_prop = self._do_list_solution(sol_id)
 
         # processing flavors
-        extra_flv = set(extra_prop['flavor'])
+        extra_flv = set(extra_prop['flavor']) if 'flavor' in extra_prop else set([])
         def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
@@ -392,16 +393,16 @@ class VcsSite(CpuService):
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
 
-        def filter_flavor_id(x): 
+        def filter_flavor_id(x):
             try:
                 other_content_json = json.loads(x['other_content'])
             except ValueError as e:
                 return False
             if "flavor_id" in  other_content_json:
-                return True 
+                return True
             else:
                 return False
-            
+
         def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
 
         fid_desc = dict([(get_flavor_id(x), x)
