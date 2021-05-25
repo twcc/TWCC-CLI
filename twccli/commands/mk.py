@@ -176,10 +176,10 @@ def cli():
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
               show_default=True,
               help="The product types (hardware configuration).")
-@click.option('-snap', '--snapshots', 'snapshot', is_flag=True,
+@click.option('-cus-img', '--custom-image', 'snapshot', is_flag=True,
               default=False,
-              help="Create a snapshot for an instance. `-s` is required!")
-@click.option('-sd-type', '--system-disk-type', 'sys_vol', default="HDD", type=str,
+              help="Create a custom image for an instance. `-s` is required!")
+@click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Disk type of the BOOTABLE disk.")
 @click.option('-dd-type', '--data-disk-type', 'data_vol', default="HDD", type=str,

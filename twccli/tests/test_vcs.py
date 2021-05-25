@@ -88,7 +88,7 @@ class TestVcsLifecyc:
                 "--product-type",   self.flv,
                 "--img_name",       self.img,
                 "--keypair",        self.key_name,
-                "--system-disk-type", self.sys_vol,
+                "--system-volume-type", self.sys_vol,
                 "-wait", "-json"
                 ]
         print("Using Params: %s"%" ".join(paras))
