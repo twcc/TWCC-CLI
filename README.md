@@ -25,7 +25,7 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 **Feature**
 - We add sonarqube for better software quality.
 - VCS `snapshot` be renamed to `custom-image` in TWCC.
-- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN?type=view#虛擬磁碟服務) in TWCC.
+- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN) in TWCC.
 - Enable envoronment variables for VCS, check out `twccli mk vcs -h`.
 
 **Bug Fix**
