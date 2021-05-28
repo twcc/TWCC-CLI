@@ -162,11 +162,6 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] =  password
-<<<<<<< HEAD
-
-=======
-
->>>>>>> upstream/master
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
@@ -179,13 +174,10 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
-<<<<<<< HEAD
-=======
         if not (env == {} or env == None):
             required['x-extra-property-env'] = json.dumps(env)
         else:
             required['x-extra-property-env'] = ""
->>>>>>> upstream/master
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
