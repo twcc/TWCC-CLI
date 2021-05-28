@@ -177,6 +177,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-keypair'] = keypair
         if not (env == {} or env == None):
             required['x-extra-property-env'] = json.dumps(env)
+        else:
+            required['x-extra-property-env'] = ""
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
