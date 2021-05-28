@@ -161,7 +161,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] =  password
-        
+
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
@@ -387,7 +387,7 @@ def doSiteStable(site_id, site_type='cntr'):
     elif site_type == 'vlb':
         b = LoadBalancers()
     else:
-        ValueError("Error")
+        raise ValueError("Error")
 
     wait_ready = False
     while not wait_ready:
