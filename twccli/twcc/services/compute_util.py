@@ -1,5 +1,6 @@
 import re
 import time
+import json
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.services.network import Networks
@@ -175,7 +176,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
         if not (env == {} or env == None):
-            required['x-extra-property-env'] = env
+            required['x-extra-property-env'] = json.dumps(env)
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'

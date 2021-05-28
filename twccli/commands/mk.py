@@ -280,9 +280,12 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         env_dict = {}
         if not env_keys == None:
             env_keys = list(set(env_keys))
-        if not env_keys == None and env_values == None and len(env_keys) == len(env_values):
-            for key,val in zip(env_keys,env_values):
-                env_dict.update({key:val})
+        if not env_keys == None and not env_values == None:
+            if len(env_keys) == len(env_values):
+                for key,val in zip(env_keys,env_values):
+                    env_dict.update({key:val})
+            else:
+                raise ValueError("env_keys and env_values length is different")
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
