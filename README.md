@@ -9,8 +9,6 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 
 [![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 
-## INDEX: 
-
 - for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) 
 - Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!
 
@@ -18,8 +16,6 @@ The TWCC Command Line Interface (CLI) is an environment to create and manage you
 If you have any questions, please email us at: 
 - iservice@twcc.ai for account support
 - isupport@twcc.ai for technical support
-
-=======
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5.17**. (New version coming soon! Please checkout **New Features** below.)
 
@@ -29,11 +25,6 @@ export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
 export PYTHONIOENCODING=UTF-8
 ```
-
-## INDEX: 
-1. [TWCC-CLI α for v0.5](https://github.com/twcc/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
-
-1. Release Notes :point_down:
 
 ### v0.5.17 Release Note
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
