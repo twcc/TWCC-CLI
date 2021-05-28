@@ -5,27 +5,21 @@
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 
 ## INDEX: 
 
-- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) (New version coming soon!)
-
-## UPDATED:
-- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!(New version coming soon!)
+- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) 
+- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!
 
 ## Contact us
 If you have any questions, please email us at: 
 - iservice@twcc.ai for account support
 - isupport@twcc.ai for technical support
-=======
-The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
 
-**NOTICE**
-If you want to use ansible, please set $ANSIBLE_LIBRARY to your environment.
-```
-export ANSIBLE_LIBRARY=
-```
+=======
+
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5.17**. (New version coming soon! Please checkout **New Features** below.)
 
 Remeber to set locale in environment
 ```
@@ -43,16 +37,16 @@ export PYTHONIOENCODING=UTF-8
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
 
 **Feature**
-- Users can follow [this spec](https://github.com/twcc/TWCC-CLI/issues/21) for AIML Pipeline.
-- We add sonarqube to ci
-- VCS `snapshot` be renamed to `custom-image` in TWCC
-- BSS(block storage service) be renamed to VDS(virtual disk service) in TWCC
-- https://git.twcc.ai/twcc/twcc-cli/-/issues/309
+- We add sonarqube for better software quality.
+- VCS `snapshot` be renamed to `custom-image` in TWCC.
+- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN?type=view#虛擬磁碟服務) in TWCC.
+- Enable envoronment variables for VCS, check out `twccli mk vcs -h`.
 
 **Bug Fix**
 - fix bug in `mk key`
 - fix bug in `ls -itype`
 - fix exception bug
+- Update AIML Pipeline scripts.
 
 ### v0.5.16.2 Release Note
 
