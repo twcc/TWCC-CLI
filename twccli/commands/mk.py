@@ -277,8 +277,6 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
-<<<<<<< HEAD
-=======
         env_dict = {}
         if not env_keys == None:
             env_keys = list(set(env_keys))
@@ -288,16 +286,11 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                     env_dict.update({key:val})
             else:
                 raise ValueError("env_keys and env_values length is different")
->>>>>>> upstream/master
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-<<<<<<< HEAD
-                         fip=fip, password=password)
-=======
                          fip=fip, password=password, env = env_dict,)
->>>>>>> upstream/master
         ans["solution"] = sol
         ans["flavor"] = flavor
 
