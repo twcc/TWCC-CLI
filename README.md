@@ -5,13 +5,9 @@
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
-<<<<<<< HEAD
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
-=======
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
 
 [![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
->>>>>>> upstream/master
 
 ## INDEX: 
 
@@ -39,8 +35,6 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
-<<<<<<< HEAD
-=======
 ### v0.5.17 Release Note
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
 
@@ -56,15 +50,11 @@ export PYTHONIOENCODING=UTF-8
 - fix exception bug
 - Update AIML Pipeline scripts.
 
->>>>>>> upstream/master
 ### v0.5.16.2 Release Note
 
 **Feature**
 - Users can create VCS with windows img
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/master
 **Bug Fix**
 - fix some bugs
 
