@@ -116,27 +116,28 @@ class ServiceOperation:
             self._to_curl(t_api, t_headers, t_data, mtype)
 
         start_time = time.time()
+        ssl_verify_mode = True
 
         if mtype == 'get':
-            r = requests.get(t_api, headers=t_headers, verify=False)
+            r = requests.get(t_api, headers=t_headers, verify=ssl_verify_mode)
 
         elif mtype == 'post':
             r = requests.post(t_api,
                               headers=t_headers,
                               data=json.dumps(t_data),
-                              verify=False)
+                              verify=ssl_verify_mode)
         elif mtype == "delete":
-            r = requests.delete(t_api, headers=t_headers, verify=False)
+            r = requests.delete(t_api, headers=t_headers, verify=ssl_verify_mode)
         elif mtype == "patch":
             r = requests.patch(t_api,
                                headers=t_headers,
                                data=json.dumps(t_data),
-                               verify=False)
+                               verify=ssl_verify_mode)
         elif mtype == "put":
             r = requests.put(t_api,
                              headers=t_headers,
                              data=json.dumps(t_data),
-                             verify=False)
+                             verify=ssl_verify_mode)
         else:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 

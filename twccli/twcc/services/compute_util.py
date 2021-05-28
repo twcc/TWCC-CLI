@@ -1,5 +1,6 @@
 import re
 import time
+import json
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.services.network import Networks
@@ -109,7 +110,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password = None):
+               data_vol=None, data_vol_size=0, fip=None, password = None, env = None):
     """Create vcs
     create vcs by set solution, image name, flavor
     create vcs by default value
@@ -161,7 +162,11 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] =  password
-        
+<<<<<<< HEAD
+
+=======
+
+>>>>>>> upstream/master
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
@@ -174,6 +179,13 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
+<<<<<<< HEAD
+=======
+        if not (env == {} or env == None):
+            required['x-extra-property-env'] = json.dumps(env)
+        else:
+            required['x-extra-property-env'] = ""
+>>>>>>> upstream/master
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
@@ -387,7 +399,7 @@ def doSiteStable(site_id, site_type='cntr'):
     elif site_type == 'vlb':
         b = LoadBalancers()
     else:
-        ValueError("Error")
+        raise ValueError("Error")
 
     wait_ready = False
     while not wait_ready:
