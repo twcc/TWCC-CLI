@@ -17,7 +17,7 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
  ❗ ❗ Always try to upgrade your TWCC-CLI by using `pip3 install -U TWCC-CLI`. ❗ ❗ ❗
 
 
-## Release Notes :point_down:
+## :point_down: Release Notes :point_down:
 
 ### v0.5.17 Release Note
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
@@ -247,4 +247,4 @@ If you have any questions, please email us at:
 - isupport@narlabs.org.tw for technical support
 
 
-![TWS](images/TWS-Logo.png)
+![TWS](images/TWS-Logo.png) | ![TWS TWCC-CLI Team](images/tws-twccli-team.jpeg)
