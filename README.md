@@ -2,38 +2,22 @@
 
 # TWCC-CLI Project
 
-
-The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
+The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
 
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
-## INDEX: 
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC resources. 
 
-- for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) 
-- Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!
+![TWCC_Resources](images/TWCC_resources.png)
 
-## Contact us
-If you have any questions, please email us at: 
-- iservice@twcc.ai for account support
-- isupport@twcc.ai for technical support
+If you have any questions, please email us at: iservice@twcc.ai for account support, and isupport@twcc.ai for technical support
 
-=======
+ ❗ ❗ Always try to upgrade your TWCC-CLI by using `pip3 install -U TWCC-CLI`. ❗ ❗ ❗
 
-The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5.17**. (New version coming soon! Please checkout **New Features** below.)
 
-Remeber to set locale in environment
-```
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
-export PYTHONIOENCODING=UTF-8
-```
-
-## INDEX: 
-1. [TWCC-CLI α for v0.5](https://github.com/twcc/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
-
-1. Release Notes :point_down:
+## :point_down: Release Notes :point_down:
 
 ### v0.5.17 Release Note
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
@@ -41,7 +25,7 @@ export PYTHONIOENCODING=UTF-8
 **Feature**
 - We add sonarqube for better software quality.
 - VCS `snapshot` be renamed to `custom-image` in TWCC.
-- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN?type=view#虛擬磁碟服務) in TWCC.
+- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN) in TWCC.
 - Enable envoronment variables for VCS, check out `twccli mk vcs -h`.
 
 **Bug Fix**
@@ -261,3 +245,6 @@ for Mar. 20th ,2020 (v0.5.2)
 If you have any questions, please email us at: 
 - iservice@narlabs.org.tw for account support
 - isupport@narlabs.org.tw for technical support
+
+
+![TWS](images/TWS-Logo.png) | ![TWS TWCC-CLI Team](images/tws-twccli-team.jpeg)
