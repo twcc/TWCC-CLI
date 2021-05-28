@@ -8,15 +8,13 @@ The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (
 
 [![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC resources. 
 
-**Contact us**
-
-The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **{%TWCC_CLI_VERSION%}**. (New version coming soon! Please checkout **New Features** below.)
+![TWCC_Resources](images/TWCC_resources.png)
 
 If you have any questions, please email us at: iservice@twcc.ai for account support, and isupport@twcc.ai for technical support
 
-
-❗ ❗ ❗ ❗ Always try to upgrade your TWCC-CLI by using `pip3 install -U TWCC-CLI`. ❗ ❗ ❗ ❗
+ ❗ ❗ Always try to upgrade your TWCC-CLI by using `pip3 install -U TWCC-CLI`. ❗ ❗ ❗
 
 
 ## Release Notes :point_down:
@@ -247,3 +245,6 @@ for Mar. 20th ,2020 (v0.5.2)
 If you have any questions, please email us at: 
 - iservice@narlabs.org.tw for account support
 - isupport@narlabs.org.tw for technical support
+
+
+![TWS](images/TWS-Logo.png)
