@@ -2,13 +2,16 @@
 
 # TWCC-CLI Project
 
-
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
 
 [![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) | [@PYPI](https://pypi.org/project/TWCC-CLI/)
 
+
+## INDEX: 
+
+>>>>>>> master
 - for more detail, please check [manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05) (Draft) 
 - Please follow instructions in [TWCC MANUAL](https://www.twcc.ai/#doc), thanks!
 
@@ -40,6 +43,7 @@ export PYTHONIOENCODING=UTF-8
 - fix bug in `ls -itype`
 - fix exception bug
 - Update AIML Pipeline scripts.
+
 
 ### v0.5.16.2 Release Note
 
