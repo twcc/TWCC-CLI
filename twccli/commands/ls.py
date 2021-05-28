@@ -142,7 +142,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
-            table_layout("Volume Result",
+            table_layout("VDS Result",
                          ans,
                          cols,
                          isPrint=True,
@@ -514,11 +514,11 @@ def cli():
               'res_property',
               flag_value='SecurityGroup',
               help="List existing security groups for VCS instance.")
-@click.option('-snap',
-              '--snapshots',
+@click.option('-cus-img',
+              '--custom-image',
               'res_property',
               flag_value='Snapshot',
-              help="List snapshots for the instance. `-s` is required!")
+              help="List custom images for the instance. `-s` is required!")
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -555,7 +555,7 @@ def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if isNone(res_property):
-        list_vcs(site_ids_or_names, is_table, column = column, is_all=is_all)
+        list_vcs(site_ids_or_names, is_table, column=column, is_all=is_all)
 
     if res_property == 'Snapshot':
         desc_str = "twccli_{}".format(
@@ -815,14 +815,14 @@ def key(env, name, is_table, ids_or_names):
         jpp(ans)
 
 
-@click.option('-id', '--vol-id', 'name', type=int,
-              help="Index of the volume.")
+@click.option('-id', '--disk-id', 'name', type=int,
+              help="Index of the disk.")
 @click.option('-all',
               '--show-all',
               'is_all',
               is_flag=True,
               type=bool,
-              help="List all the volumes.")
+              help="List all the disks.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
