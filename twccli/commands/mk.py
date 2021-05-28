@@ -171,6 +171,10 @@ def cli():
               help="Name of the network.")
 @click.option('-pwd', '--password', 'password', default=None, type=str,
               help="Password of the win images.")
+@click.option('-envk', '--env_key', 'env_keys',  show_default=False, multiple=True,
+              help="The keys of the environment parameters of instances.")
+@click.option('-envv', '--env_val', 'env_values',  show_default=False, multiple=True,
+              help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
               help="Name of the image type.")
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
@@ -199,7 +203,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, password, is_table):
+        flavor, img_name, wait, network, snapshot, sol, fip, password, env_keys, env_values, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -273,11 +277,20 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
+        env_dict = {}
+        if not env_keys == None:
+            env_keys = list(set(env_keys))
+        if not env_keys == None and not env_values == None:
+            if len(env_keys) == len(env_values):
+                for key,val in zip(env_keys,env_values):
+                    env_dict.update({key:val})
+            else:
+                raise ValueError("env_keys and env_values length is different")
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password)
+                         fip=fip, password=password, env = env_dict,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
