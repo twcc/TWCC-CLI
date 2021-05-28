@@ -41,10 +41,26 @@ export PYTHONIOENCODING=UTF-8
 
 1. Release Notes :point_down:
 
+### v0.5.17 Release Note
+![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
+
+**Feature**
+- Users can follow [this spec](https://github.com/twcc/TWCC-CLI/issues/21) for AIML Pipeline.
+- We add sonarqube to ci
+- VCS `snapshot` be renamed to `custom-image` in TWCC
+- BSS(block storage service) be renamed to VDS(virtual disk service) in TWCC
+- https://git.twcc.ai/twcc/twcc-cli/-/issues/309
+
+**Bug Fix**
+- fix bug in `mk key`
+- fix bug in `ls -itype`
+- fix exception bug
+
 ### v0.5.16.2 Release Note
 
 **Feature**
 - Users can create VCS with windows img
+
 **Bug Fix**
 - fix some bugs
 
