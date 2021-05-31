@@ -12,11 +12,4 @@ dist/*
 build/*
 *,cover
 coverage.xml
-<<<<<<< HEAD
 docs/_build
-=======
-<<<<<<< HEAD
-=======
-docs/_build
->>>>>>> upstream/master
->>>>>>> 8562c078b62eb35bfb47a721bfaa43a6686588aa
