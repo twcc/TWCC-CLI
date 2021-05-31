@@ -80,8 +80,29 @@ manual deploy to GITHUB:
     - export GITHUB_TOKEN=$GITHUB_APIKEY
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
     - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
-
   only:
     - master
+  when: manual
+  allow_failure: false
+
+deploy Beta to GITHUB:
+  stage: deploy
+  script:
+    - export TWCC_CLI_VER="`python twccli/version.py`"; echo $TWCC_CLI_VER
+    - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
+    - git fetch upstream
+    - git config --global user.email "August.Chao@twsc.io"
+    - git config --global user.name $GITHUB_USRERNAME
+    - git merge upstream/master --no-commit --no-ff --allow-unrelated-histories
+    - git push -u upstream "HEAD:$TWCC_CLI_VER"
+    - ls -alh
+      #- apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      #- apt update && apt install -y software-properties-common
+      #- apt-add-repository https://cli.github.com/packages
+      #- apt update && apt install -y gh
+      #- bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
+      #- export GITHUB_TOKEN=$GITHUB_APIKEY
+  only:
+    - 327-fix-pipeline-in-v0-5-17-1
   when: manual
   allow_failure: false
