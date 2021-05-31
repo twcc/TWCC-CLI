@@ -1,4 +1,0 @@
-sphinx_click
-myst-parser
-loguru
-jmespath

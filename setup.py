@@ -43,38 +43,12 @@ def load_requirements(fname):
     reqs = parse_requirements(fname, session="test")
     return [str(ir.req) for ir in reqs]
 
-reqs = [
-        'netaddr',
-        'pytz',
-        'boto3',
-        'botocore',
-        'certifi',
-        'chardet',
-        'Click==7.0',
-        'colorclass',
-        'idna',
-        'jmespath',
-        'prompt-toolkit==2.0.10',
-        'Pygments',
-        'python-dateutil',
-        'PyYAML',
-        'regex',
-        'requests>=2.23.0',
-        's3transfer',
-        'six',
-        'termcolor',
-        'terminaltables',
-        'tqdm',
-        'urllib3',
-        'wcwidth']
-if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
-    reqs.append('loguru')
-else:
-    reqs.append('coloredlogs')
+reqs = open("requirements.txt", 'r').readlines()
+
 long_desc = open("README.md", 'r').read()
 setup(
     name='TWCC-CLI',
-    author="TWCC SREr",
+    author="TWS TWCC-CLI Team",
     author_email="isupport@twcc.ai",
     description="TWCC-CLI is a toolkit for operating TWCC resources.",
     long_description=long_desc,
@@ -99,9 +73,10 @@ setup(
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     zip_safe=True,
 )
