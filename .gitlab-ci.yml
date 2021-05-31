@@ -98,7 +98,7 @@ deploy Beta to GITHUB:
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - git diff
-    - git push
+    - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common
     - apt-add-repository https://cli.github.com/packages
