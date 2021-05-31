@@ -93,7 +93,6 @@ deploy Beta to GITHUB:
     - git fetch upstream
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-    - git checkout -b $TWCC_CLI_VER
     - git merge upstream/master --no-commit --no-ff --allow-unrelated-histories
     - git push -u upstream HEAD:$TWCC_CLI_VER
     - ls -alh
