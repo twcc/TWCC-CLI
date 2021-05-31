@@ -1,6 +1,6 @@
 __TWCC_CLI_MAJOR__ = "0"
 __TWCC_CLI_MINOR__ = "5"
-__TWCC_CLI_BATCH__ = "17"
+__TWCC_CLI_BATCH__ = "17.1a"
 __TWCC_CLI_STAGE__ = ""
 if len(__TWCC_CLI_STAGE__)==0:
     __version__ = "{}.{}.{}".format(
