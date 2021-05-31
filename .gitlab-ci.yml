@@ -88,13 +88,13 @@ manual deploy to GITHUB:
 deploy Beta to GITHUB:
   stage: deploy
   script:
-    - export TWCC_CLI_VER="`python ../twccli/version.py`"
+    - export TWCC_CLI_VER="`python ../twccli/version.py`"; echo $TWCC_CLI_VER
     - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
     - git fetch upstream
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/master --no-commit --no-ff --allow-unrelated-histories
-    - git push -u upstream HEAD:$TWCC_CLI_VER
+    - git push -u upstream "HEAD:$TWCC_CLI_VER"
     - ls -alh
       #- apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
       #- apt update && apt install -y software-properties-common
