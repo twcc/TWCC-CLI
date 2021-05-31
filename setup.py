@@ -17,12 +17,12 @@ except ImportError:
         from pip.req import parse_requirements
 
 here = os.path.abspath(os.path.dirname(__file__))
+print(here)
 
 TWCC_CONFIG = {}
 ver_path = convert_path('twccli/version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), TWCC_CONFIG)
-
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
@@ -32,18 +32,7 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-try:
-    # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:
-    # for pip <= 9.0.3
-    from pip.req import parse_requirements
-
-def load_requirements(fname):
-    reqs = parse_requirements(fname, session="test")
-    return [str(ir.req) for ir in reqs]
-
-reqs = open("requirements.txt", 'r').readlines()
+reqs = open(convert_path("requirements.txt"), 'r').readlines()
 
 long_desc = open("README.md", 'r').read()
 setup(
