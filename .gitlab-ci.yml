@@ -1,12 +1,10 @@
-image: python
-
 .sonar_template: &sonarqube_temp
     stage: analysis
     image: ciricihq/gitlab-sonar-scanner       
 
 stages:
     - analysis
-    - test
+    # - test
     - deploy
 
 #before_script:
@@ -45,18 +43,17 @@ python36:
   only:
     - master
 
-# sonarqube-reports:
-#     <<: *sonarqube_temp
-#     variables:
-#         SONAR_URL: $SONAR_HOST_URL
-#         SONAR_ANALYSIS_MODE: publish
-#         SONAR_BRANCH: $CI_COMMIT_BRANCH
-#         GIT_DEPTH: 0
-#     script:
-#         - gitlab-sonar-scanner -Dsonar.branch.name=$CI_COMMIT_REF_NAME
+sonarqube-reports:
+    <<: *sonarqube_temp
+    variables:
+        SONAR_URL: $SONAR_HOST_URL
+        SONAR_ANALYSIS_MODE: publish
+        SONAR_BRANCH: $CI_COMMIT_BRANCH
+        GIT_DEPTH: 0
+    script:
+        - gitlab-sonar-scanner -Dsonar.branch.name=$CI_COMMIT_REF_NAME
 
 sonar-preview:
-  stage: analysis
   <<: *sonarqube_temp
   variables:
     SONAR_ANALYSIS_MODE: issues
