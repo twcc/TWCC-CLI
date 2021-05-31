@@ -110,6 +110,6 @@ deploy Beta to GITHUB:
     - bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
     - export GITHUB_TOKEN=$GITHUB_APIKEY
   only:
-    - dev
+    - 327-fix-pipeline-in-v0-5-17-1
   when: manual
   allow_failure: false
