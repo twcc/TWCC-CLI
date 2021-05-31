@@ -80,8 +80,36 @@ manual deploy to GITHUB:
     - export GITHUB_TOKEN=$GITHUB_APIKEY
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
     - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
-
   only:
     - master
+  when: manual
+  allow_failure: false
+
+deploy Beta to GITHUB:
+  stage: deploy
+  script:
+    - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
+    - cd TWCC-CLI/
+    - export TWCC_CLI_VER="`python ../twccli/version.py`"
+    - git checkout -b $TWCC_CLI_VER
+    - git remote add upstream $CI_REPOSITORY_URL
+    - git fetch upstream
+    - git config --global user.email "August.Chao@twsc.io"
+    - git config --global user.name $GITHUB_USRERNAME
+    - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
+    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
+    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - git add twccli/version.py
+    - git commit -m "TWCC-CLI Release for v$TWCC_CLI_VER"
+    - git push --set-upstream origin $TWCC_CLI_VER
+    - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+    - apt update && apt install -y software-properties-common
+    - apt-add-repository https://cli.github.com/packages
+    - apt update && apt install -y gh
+    - bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
+    - export GITHUB_TOKEN=$GITHUB_APIKEY
+  only:
+    - dev
   when: manual
   allow_failure: false
