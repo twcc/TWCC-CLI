@@ -5,8 +5,8 @@ image: python
     image: ciricihq/gitlab-sonar-scanner       
 
 stages:
-    - test
     - analysis
+    - test
     - deploy
 
 #before_script:
