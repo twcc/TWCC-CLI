@@ -52,8 +52,8 @@ sonarqube-reports:
         GIT_DEPTH: 0
     script:
         - gitlab-sonar-scanner -Dsonar.branch.name=$CI_COMMIT_REF_NAME
-    only:
-      - dev
+    # only:
+    #   - dev
 
 sonar-preview:
   <<: *sonarqube_temp
