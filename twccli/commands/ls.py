@@ -8,7 +8,7 @@ import datetime
 import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -56,6 +56,44 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
 
+def list_fixed_ips(site_ids_or_names, column, is_all, is_table):
+    fip = Fixedip()
+    ans = []
+    if len(site_ids_or_names) > 0:
+        if column == '':
+            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
+        for fixip_id in site_ids_or_names:
+            ans.append(fip.list(fixip_id))
+    else:
+        if column == '':
+            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
+        ans = fip.list()
+    # jpp(ans)
+    # sys.exit()
+    for each_ans in ans:
+        each_ans['occupied_resource_type_id'] = jmespath.search('occupied_resource.type', each_ans) +':'+jmespath.search('occupied_resource.id', each_ans)
+    
+    if len(ans) > 0:
+        if is_table:
+            table_layout("IP Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
@@ -528,10 +566,11 @@ def cli():
               help="Show information in Table view or JSON view.")
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
+@click.pass_context
 # @click.pass_context ctx,
 # @logger.catch
 # @exception(logger)
-def vcs(env, res_property, site_ids_or_names, name, column, is_table, is_all):
+def vcs(ctx, env, res_property, site_ids_or_names, name, column, is_table, is_all):
     """Command line for List VCS
     Function list :
     1. list port
@@ -907,6 +946,36 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     ids_or_names = mk_names(vlb_id, ids_or_names)
     list_load_balances(ids_or_names, column, is_all, is_table)
 
+@click.option('-id', '--Fip-id', 'Fip_id', type=int,
+              help="Index of the volume.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the load balancers.")
+@click.option('-col',
+              '--column',
+              'column',
+              default='',
+              help='User define table column. ex: twccli ls vlb -col pools[0].members')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your fixed ips.")
+@click.pass_context
+def Fip(ctx, Fip_id, ids_or_names, column, is_all, is_table):
+    """Command line for list vds
+
+    :param Fip_id: Enter id for your fixed ips.
+    :type Fip_id: string
+    :param ids_or_names: Enter more than one id for your fixed ip.
+    :type ids_or_names: string
+
+    """
+    ids_or_names = mk_names(Fip_id, ids_or_names)
+    list_fixed_ips(ids_or_names, column, is_all, is_table)
 
 cli.add_command(vcs)
 cli.add_command(cos)
@@ -915,6 +984,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
+cli.add_command(Fip)
 
 
 def main():
