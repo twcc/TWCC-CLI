@@ -171,7 +171,7 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
-@click.option('-fxip', '--need-floating-ip', 'fxip',
+@click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
