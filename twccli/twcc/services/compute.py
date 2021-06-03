@@ -562,15 +562,16 @@ class Fixedip(CpuService):
         self._func_ = "ips"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+    def create(self, private_net, desc = None):
         self.http_verb = 'post'
-        self.data_dic = {'name': vlb_name, 'private_net': vnet_id,
-                         'pools': pools, 'listeners': listeners, 'desc': vlb_desc}
+        self.data_dic = {'private_net': private_net, 'desc' : desc}
         return self._do_api()
     
-    def list(self, fixed_id=None, isAll=False):
+    def list(self, fixed_id=None, filter = None, isAll=False):
         if isNone(fixed_id):
             self.ext_get = {'project': self._project_id}
+            if not isNone(filter) and not filter == 'ALL':
+                self.ext_get.update({'type': filter.upper()})
             all_fixedips = self._do_api()
             my_username = Session2().twcc_username
             return [x for x in all_fixedips if x["user"]['username'] == my_username]

@@ -56,12 +56,14 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
 
-def list_fixed_ips(site_ids_or_names, column, is_all, is_table):
+def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
     fip = Fixedip()
+    net = Networks()
     ans = []
+    vnet_id2name = {}
     if len(site_ids_or_names) > 0:
         if column == '':
-            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id']
+            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
         else:
             cols = column.split(',')
             if not 'id' in cols:
@@ -72,19 +74,30 @@ def list_fixed_ips(site_ids_or_names, column, is_all, is_table):
             ans.append(fip.list(fixip_id))
     else:
         if column == '':
-            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id']
+            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
         else:
             cols = column.split(',')
             if not 'id' in cols:
                 cols.append('id')
             if not 'name' in cols:
                 cols.append('name')
-        ans = fip.list()
-    # jpp(ans)
-    # sys.exit()
+        ans = fip.list(filter = filter_type)
+    # if not filter_type == 'ALL':
+    #     ans = [eachans for eachans in ans if eachans['type'].lower() == filter_type.lower()]
     for each_ans in ans:
-        each_ans['occupied_resource_type_id'] = jmespath.search('occupied_resource.type', each_ans) +':'+jmespath.search('occupied_resource.id', each_ans)
-    
+        occupied_resource_type = jmespath.search('occupied_resource.type', each_ans)
+        occupied_resource_type_id = jmespath.search('occupied_resource.id', each_ans)
+        if isNone(occupied_resource_type_id) or isNone(occupied_resource_type):
+            each_ans['occupied_resource_type_id'] = ''
+        else:
+            each_ans['occupied_resource_type_id'] =  occupied_resource_type+':'+occupied_resource_type_id
+        vnet_name = ''
+        if not each_ans['private_net'] in vnet_id2name:
+            vnet_name = net.queryById(each_ans['private_net'])['name']
+            vnet_id2name[each_ans['private_net']] = vnet_name
+        else:
+            vnet_name = vnet_id2name[each_ans['private_net']]
+        each_ans['vnet'] = vnet_name
     if len(ans) > 0:
         if is_table:
             table_layout("IP Results",
@@ -948,6 +961,7 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
 
 @click.option('-id', '--Fip-id', 'Fip_id', type=int,
               help="Index of the volume.")
+@click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
 @click.option('-all',
               '--show-all',
               'is_all',
@@ -965,7 +979,7 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your fixed ips.")
 @click.pass_context
-def Fip(ctx, Fip_id, ids_or_names, column, is_all, is_table):
+def Fip(ctx, Fip_id, filter_type, ids_or_names, column, is_all, is_table):
     """Command line for list vds
 
     :param Fip_id: Enter id for your fixed ips.
@@ -975,7 +989,7 @@ def Fip(ctx, Fip_id, ids_or_names, column, is_all, is_table):
 
     """
     ids_or_names = mk_names(Fip_id, ids_or_names)
-    list_fixed_ips(ids_or_names, column, is_all, is_table)
+    list_fixed_ips(ids_or_names, column, filter_type, is_all, is_table)
 
 cli.add_command(vcs)
 cli.add_command(cos)
