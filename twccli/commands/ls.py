@@ -61,29 +61,17 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
     net = Networks()
     ans = []
     vnet_id2name = {}
+    cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
+    if not column == '':
+        cols = column.split(',')
+        cols.append('id')
+        cols.append('address')
+        cols = list(set(cols))
     if len(site_ids_or_names) > 0:
-        if column == '':
-            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
-        else:
-            cols = column.split(',')
-            if not 'id' in cols:
-                cols.append('id')
-            if not 'address' in cols:
-                cols.append('address')
         for ip_id in site_ids_or_names:
             ans.append(fxip.list(ip_id = ip_id))
     else:
-        if column == '':
-            cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
-        else:
-            cols = column.split(',')
-            if not 'id' in cols:
-                cols.append('id')
-            if not 'address' in cols:
-                cols.append('address')
         ans = fxip.list(filter = filter_type)
-    # if not filter_type == 'ALL':
-    #     ans = [eachans for eachans in ans if eachans['type'].lower() == filter_type.lower()]
     for each_ans in ans:
         occupied_resource_type = jmespath.search('occupied_resource.type', each_ans)
         occupied_resource_type_id = jmespath.search('occupied_resource.id', each_ans)
