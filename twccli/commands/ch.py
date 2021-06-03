@@ -6,7 +6,7 @@ import click
 import json
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer
+from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer, change_ip
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 
@@ -228,11 +228,26 @@ def cos(env, name, okey, is_public, mime, versioning):
         set_versioning(name, versioning)
 
 
+@click.option('-id', '--private-net-id', 'ip_id', type=int,
+              help="Index of the IP.")
+@click.option('-d', '--IP-description', 'desc', type=str, default=None,
+              help="Description of the IP.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Update desc of your IP.")
+@click.pass_context
+def fxip(ctx, ip_id, desc, ids_or_names, is_table):
+    ids_or_names = mk_names(ip_id, ids_or_names)
+    change_ip(ids_or_names, desc, is_table)
+
+
 cli.add_command(vcs)
 cli.add_command(vds)
 cli.add_command(vlb)
 cli.add_command(cos)
-
+cli.add_command(fxip)
 
 def main():
     cli()

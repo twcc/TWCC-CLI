@@ -567,8 +567,8 @@ class Fixedip(CpuService):
         self.data_dic = {'private_net': private_net, 'desc' : desc}
         return self._do_api()
     
-    def list(self, fixed_id=None, filter = None, isAll=False):
-        if isNone(fixed_id):
+    def list(self, ip_id=None, filter = None, isAll=False):
+        if isNone(ip_id):
             self.ext_get = {'project': self._project_id}
             if not isNone(filter) and not filter == 'ALL':
                 self.ext_get.update({'type': filter.upper()})
@@ -579,8 +579,14 @@ class Fixedip(CpuService):
         else:
             self.http_verb = 'get'
             self.res_type = 'json'
-            self.url_dic = {"ips": fixed_id}
+            self.url_dic = {"ips": ip_id}
             return self._do_api()
+
+    def patch_desc(self, ip_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'ips': ip_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
 
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):

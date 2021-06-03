@@ -57,7 +57,7 @@ def handle_exception(cmd, info_name, exc):
     click.echo(':: Raised error: {}'.format(exc))
 
 def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
-    fip = Fixedip()
+    fxip = Fixedip()
     net = Networks()
     ans = []
     vnet_id2name = {}
@@ -68,10 +68,10 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
             cols = column.split(',')
             if not 'id' in cols:
                 cols.append('id')
-            if not 'name' in cols:
-                cols.append('name')
-        for fixip_id in site_ids_or_names:
-            ans.append(fip.list(fixip_id))
+            if not 'address' in cols:
+                cols.append('address')
+        for ip_id in site_ids_or_names:
+            ans.append(fxip.list(ip_id = ip_id))
     else:
         if column == '':
             cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
@@ -79,9 +79,9 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
             cols = column.split(',')
             if not 'id' in cols:
                 cols.append('id')
-            if not 'name' in cols:
-                cols.append('name')
-        ans = fip.list(filter = filter_type)
+            if not 'address' in cols:
+                cols.append('address')
+        ans = fxip.list(filter = filter_type)
     # if not filter_type == 'ALL':
     #     ans = [eachans for eachans in ans if eachans['type'].lower() == filter_type.lower()]
     for each_ans in ans:
@@ -959,7 +959,7 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     ids_or_names = mk_names(vlb_id, ids_or_names)
     list_load_balances(ids_or_names, column, is_all, is_table)
 
-@click.option('-id', '--Fip-id', 'Fip_id', type=int,
+@click.option('-id', '--fxip-id', 'ip_id', type=int,
               help="Index of the volume.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
 @click.option('-all',
@@ -977,18 +977,18 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
-@click.command(help="List your fixed ips.")
+@click.command(help="List your ips.")
 @click.pass_context
-def Fip(ctx, Fip_id, filter_type, ids_or_names, column, is_all, is_table):
+def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_all, is_table):
     """Command line for list vds
 
-    :param Fip_id: Enter id for your fixed ips.
-    :type Fip_id: string
+    :param ip_id: Enter id for your fixed ips.
+    :type ip_id: string
     :param ids_or_names: Enter more than one id for your fixed ip.
     :type ids_or_names: string
 
     """
-    ids_or_names = mk_names(Fip_id, ids_or_names)
+    ids_or_names = mk_names(ip_id, ids_or_names)
     list_fixed_ips(ids_or_names, column, filter_type, is_all, is_table)
 
 cli.add_command(vcs)
@@ -998,7 +998,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(Fip)
+cli.add_command(fxip)
 
 
 def main():

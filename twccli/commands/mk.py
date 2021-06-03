@@ -36,8 +36,8 @@ def create_fixedip(private_net, desc, is_table):
     :param vol_name: Enter volume name
     :type vol_name: string
     """
-    fip = Fixedip()
-    ans = fip.create(private_net,desc=desc)
+    fxip = Fixedip()
+    ans = fxip.create(private_net,desc=desc)
     if is_table:
         cols = ["id", "address", "desc", "create_time","type"]
         table_layout("IPs", ans, cols, isPrint=True)
@@ -171,7 +171,7 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
-@click.option('-fip', '--need-floating-ip', 'fip',
+@click.option('-fxip', '--need-floating-ip', 'fxip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
 @click.option('-img', '--img_name', 'img_name', default=None, type=str,
@@ -214,7 +214,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, password, env_keys, env_values, is_table):
+        flavor, img_name, wait, network, snapshot, sol, fxip, password, env_keys, env_values, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -240,8 +240,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
     :type sol: string
     :param pwd: Password of the win images
     :type pwd: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
+    :param fxip: Set this flag for applying a floating IP
+    :type fxip: bool
     :param is_table: Set this flag table view or json view
     :type is_table: bool
     :param ids_or_names: Enter ids or names
@@ -301,7 +301,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env = env_dict,)
+                         fxip=fxip, password=password, env = env_dict,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -562,7 +562,7 @@ def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_des
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your fixed ips.")
 @click.pass_context
-def Fip(ctx, Fip_id, desc, is_table):
+def fxip(ctx, Fip_id, desc, is_table):
     """Command line for list vds
 
     :param Fip_id: Enter id for your fixed ips.
@@ -580,7 +580,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(Fip)
+cli.add_command(fxip)
 
 def main():
     cli()
