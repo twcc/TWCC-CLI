@@ -7,7 +7,7 @@
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
     - git checkout upstream/master
-    - git merge dev
+    - git merge origin/dev
     - git push -u upstream "HEAD:$TWCC_CLI_VER"
     - ls -alh
 
