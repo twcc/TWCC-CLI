@@ -73,7 +73,6 @@ def refactor_ip_detail(ans,vnet_id2name):
         each_ans['vnet'] = vnet_name
 def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
     fxip = Fixedip()
-    
     ans = []
     vnet_id2name = {}
     cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
