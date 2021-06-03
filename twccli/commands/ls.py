@@ -55,23 +55,8 @@ def handle_exception(cmd, info_name, exc):
     # send error info to rollbar, etc, here
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
-
-def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
-    fxip = Fixedip()
+def refactor_ip_detail(ans,vnet_id2name):
     net = Networks()
-    ans = []
-    vnet_id2name = {}
-    cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
-    if not column == '':
-        cols = column.split(',')
-        cols.append('id')
-        cols.append('address')
-        cols = list(set(cols))
-    if len(site_ids_or_names) > 0:
-        for ip_id in site_ids_or_names:
-            ans.append(fxip.list(ip_id = ip_id))
-    else:
-        ans = fxip.list(filter = filter_type)
     for each_ans in ans:
         occupied_resource_type = jmespath.search('occupied_resource.type', each_ans)
         occupied_resource_type_id = jmespath.search('occupied_resource.id', each_ans)
@@ -86,6 +71,23 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
         else:
             vnet_name = vnet_id2name[each_ans['private_net']]
         each_ans['vnet'] = vnet_name
+def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
+    fxip = Fixedip()
+    
+    ans = []
+    vnet_id2name = {}
+    cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
+    if not column == '':
+        cols = column.split(',')
+        cols.append('id')
+        cols.append('address')
+        cols = list(set(cols))
+    if len(site_ids_or_names) > 0:
+        for ip_id in site_ids_or_names:
+            ans.append(fxip.list(ip_id = ip_id))
+    else:
+        ans = fxip.list(filter = filter_type)
+    refactor_ip_detail(ans,vnet_id2name)
     if len(ans) > 0:
         if is_table:
             table_layout("IP Results",
