@@ -1,3 +1,17 @@
+.deliver_github_template: &standard_deploy_github
+  stage: deploy
+  before_script:
+    - export TWCC_CLI_VER="`python twccli/version.py`"; echo $TWCC_CLI_VER
+    - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
+    - git fetch upstream
+    - git config --global user.email "August.Chao@twsc.io"
+    - git config --global user.name $GITHUB_USRERNAME
+    - git checkout upstream/master
+    - git merge dev
+    - git push -u upstream "HEAD:$TWCC_CLI_VER"
+    - ls -alh
+
+
 image: python
 
 stages:
@@ -86,15 +100,10 @@ manual deploy to GITHUB:
   allow_failure: false
 
 deploy Beta to GITHUB:
+  <<: *standard_deploy_github
   stage: deploy
   script:
-    - export TWCC_CLI_VER="`python twccli/version.py`"; echo $TWCC_CLI_VER
-    - git remote add upstream https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
-    - git fetch upstream
-    - git config --global user.email "August.Chao@twsc.io"
-    - git config --global user.name $GITHUB_USRERNAME
-    - git push -u upstream "HEAD:$TWCC_CLI_VER"
-    - ls -alh
+      - ls -alh
       #- apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
       #- apt update && apt install -y software-properties-common
       #- apt-add-repository https://cli.github.com/packages
