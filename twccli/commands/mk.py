@@ -214,7 +214,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fxip, password, env_keys, env_values, is_table):
+        flavor, img_name, wait, network, snapshot, sol, fip, password, env_keys, env_values, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -240,8 +240,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
     :type sol: string
     :param pwd: Password of the win images
     :type pwd: string
-    :param fxip: Set this flag for applying a floating IP
-    :type fxip: bool
+    :param fip: Set this flag for applying a floating IP
+    :type fip: bool
     :param is_table: Set this flag table view or json view
     :type is_table: bool
     :param ids_or_names: Enter ids or names
@@ -301,7 +301,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fxip=fxip, password=password, env = env_dict,)
+                         fip=fip, password=password, env = env_dict,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
