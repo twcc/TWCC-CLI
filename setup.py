@@ -105,3 +105,4 @@ setup(
     ],
     zip_safe=True,
 )
+os.system('echo ". ~/twcc-cli/twccli-complete.sh" >> .bashrc')
