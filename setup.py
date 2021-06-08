@@ -105,4 +105,4 @@ setup(
     ],
     zip_safe=True,
 )
-os.system('echo ". twccli-complete.sh" >> ~/.bashrc')
+os.system('echo ". {}/twccli-complete.sh" >> ~/.bashrc'.format(ver_path))
