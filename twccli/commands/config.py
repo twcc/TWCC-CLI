@@ -94,13 +94,12 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
                 click.echo("Add language setting to `.bashrc`.")
 
                 open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
-                import subprocess
-                clipath = subprocess.check_output(['which', 'twccli']).decode('utf8').strip()
-                open(os.environ["HOME"]+"/.bashrc", 'a').write("{}/twccli-complete.sh".format(clipath))
             else:
                 click.echo(
                     "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-
+            import subprocess
+            clipath = subprocess.check_output(['which', 'twccli']).decode('utf8').strip()
+            open(os.environ["HOME"]+"/.bashrc", 'a').write("{}/twccli-complete.sh".format(clipath))
         else:
             raise ValueError("API Key is not validated.")
     else:
