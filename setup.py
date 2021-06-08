@@ -106,5 +106,3 @@ setup(
     ],
     zip_safe=True,
 )
-clipath = subprocess.check_output(['which', 'twccli']).decode('utf8').strip()
-os.system('echo ". {}/twccli-complete.sh" >> ~/.bashrc'.format(clipath))
