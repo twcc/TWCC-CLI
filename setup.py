@@ -105,4 +105,5 @@ setup(
     ],
     zip_safe=True,
 )
-os.system('echo ". {}/twccli-complete.sh" >> ~/.bashrc'.format(ver_path))
+clipath = os.system('which twccli')
+os.system('echo ". {}/twccli-complete.sh" >> ~/.bashrc'.format(clipath))
