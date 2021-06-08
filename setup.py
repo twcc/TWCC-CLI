@@ -2,6 +2,7 @@ import os
 from setuptools import setup, find_packages
 from distutils.util import convert_path
 import sys
+import subprocess
 try:
     # pip >=20
     from pip._internal.network.session import PipSession
@@ -105,5 +106,5 @@ setup(
     ],
     zip_safe=True,
 )
-clipath = os.system('which twccli')
+clipath = subprocess.check_output(['which', 'twccli']).decode('utf8').strip()
 os.system('echo ". {}/twccli-complete.sh" >> ~/.bashrc'.format(clipath))
