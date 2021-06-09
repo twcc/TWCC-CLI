@@ -71,7 +71,7 @@ def refactor_ip_detail(ans,vnet_id2name):
         else:
             vnet_name = vnet_id2name[each_ans['private_net']]
         each_ans['vnet'] = vnet_name
-def list_fixed_ips(site_ids_or_names, column, filter_type, is_all, is_table):
+def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
     fxip = Fixedip()
     ans = []
     vnet_id2name = {}
@@ -951,12 +951,12 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
 @click.option('-id', '--fxip-id', 'ip_id', type=int,
               help="Index of the volume.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
-@click.option('-all',
-              '--show-all',
-              'is_all',
-              is_flag=True,
-              type=bool,
-              help="List all the load balancers.")
+# @click.option('-all',
+#               '--show-all',
+#               'is_all',
+#               is_flag=True,
+#               type=bool,
+#               help="List all the load balancers.")
 @click.option('-col',
               '--column',
               'column',
@@ -968,7 +968,7 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ips.")
 @click.pass_context
-def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_all, is_table):
+def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
     """Command line for list vds
 
     :param ip_id: Enter id for your fixed ips.
@@ -978,7 +978,7 @@ def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_all, is_table):
 
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
-    list_fixed_ips(ids_or_names, column, filter_type, is_all, is_table)
+    list_fixed_ips(ids_or_names, column, filter_type, is_table)
 
 cli.add_command(vcs)
 cli.add_command(cos)
