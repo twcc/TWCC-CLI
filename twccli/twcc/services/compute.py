@@ -313,7 +313,7 @@ class VcsSite(CpuService):
                     (177, "centos"),
                     (322, "winserver"),
                     (319, "win10"),]
-        if os.path.exists('{}/backdoor.ini'):
+        if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
             with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
             if not isNone(config):
