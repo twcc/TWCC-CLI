@@ -556,6 +556,42 @@ class VcsServer(CpuService):
                         'site': site_id}
         return self._do_api()
 
+class Fixedip(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "ips"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, private_net_id, desc = None):
+        self.http_verb = 'post'
+        self.data_dic = {'private_net': private_net_id, 'desc' : desc}
+        return self._do_api()
+    
+    def list(self, ip_id=None, filter = None, isAll=False):
+        if isNone(ip_id):
+            self.ext_get = {'project': self._project_id}
+            if not isNone(filter) and not filter == 'ALL':
+                self.ext_get.update({'type': filter.upper()})
+            all_fixedips = self._do_api()
+            my_username = Session2().twcc_username
+            return [x for x in all_fixedips if x["user"]['username'] == my_username]
+
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"ips": ip_id}
+            return self._do_api()
+
+    def patch_desc(self, ip_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'ips': ip_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
+
+    def deleteById(self, ip_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"ips": ip_id}
+        return self._do_api()
 
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
