@@ -1,11 +1,13 @@
 import re
 import time
 import json
+from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator, timezone2local
 from prompt_toolkit.shortcuts import yes_no_dialog
+from twccli.twcc.services.solutions import solutions
 
 
 def getConfirm(res_name, entity_name, isForce, ext_txt=""):
@@ -400,3 +402,50 @@ def doSiteStable(site_id, site_type='cntr'):
             wait_ready = True
         time.sleep(5)
     return site_id
+
+
+def create_ccs(cntr_name, gpu, sol_name, sol_img, env_dict):
+    """Create container
+       Create container by default value
+       Create container by set vaule of name, solution name, gpu number, solution number
+    """
+    def_header = Sites.getGpuDefaultHeader(gpu)
+    a = solutions()
+    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
+                  if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
+    if len(cntrs) > 0:
+        sol_id = cntrs[sol_name]
+    else:
+        raise ValueError(
+            "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
+    b = Sites(debug=False)
+    imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
+
+    if type(sol_img) == type(None) or len(sol_name) == 0:
+        def_header['x-extra-property-image'] = imgs[0]
+    else:
+        if sol_img in imgs:
+            def_header['x-extra-property-image'] = sol_img
+        else:
+            raise ValueError(
+                "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+            
+    if not isNone(env_dict) and len(env_dict)>0: 
+        def_header['x-extra-property-env-list'] = json.dumps([env_dict])
+    else:
+        def_header['x-extra-property-env'] = ""
+
+    if not name_validator(cntr_name):
+        raise ValueError(
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
+    res = b.create(cntr_name, sol_id, def_header)
+    if 'id' not in res.keys():
+        if 'message' in res:
+            raise ValueError(
+                "Can't find id, please check error message : {}".format(res['message']))
+        if 'detail' in res:
+            raise ValueError(
+                "Can't find id, please check error message : {}".format(res['detail']))
+    else:
+        return res

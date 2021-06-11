@@ -8,14 +8,12 @@ import click
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId
-from twccli.twcc.services.solutions import solutions
-from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator, timezone2local, window_password_validater
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
-from twccli.twcc import GupSiteBlockSet, Session2
+from twccli.twcc import Session2
 from twccli.twcc.services.network import Networks
-from twccli.twcc.services.compute_util import doSiteStable, create_vcs
+from twccli.twcc.services.compute_util import doSiteStable, create_vcs, create_ccs
 from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
 
@@ -89,54 +87,6 @@ def create_bucket(bucket_name):
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(bucket_name))
     s3 = S3()
     s3.create_bucket(bucket_name)
-
-
-def create_cntr(cntr_name, gpu, sol_name, sol_img, env_dict):
-    """Create container
-       Create container by default value
-       Create container by set vaule of name, solution name, gpu number, solution number
-    """
-    def_header = Sites.getGpuDefaultHeader(gpu)
-    a = solutions()
-    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
-                  if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
-    if len(cntrs) > 0:
-        sol_id = cntrs[sol_name]
-    else:
-        raise ValueError(
-            "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
-
-    b = Sites(debug=False)
-    imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
-
-    if type(sol_img) == type(None) or len(sol_name) == 0:
-        def_header['x-extra-property-image'] = imgs[0]
-    else:
-        if sol_img in imgs:
-            def_header['x-extra-property-image'] = sol_img
-        else:
-            raise ValueError(
-                "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
-            
-    if not isNone(env_dict) and len(env_dict)>0: 
-        def_header['x-extra-property-env-list'] = json.dumps([env_dict])
-    else:
-        def_header['x-extra-property-env'] = ""
-
-    if not name_validator(cntr_name):
-        raise ValueError(
-            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
-    res = b.create(cntr_name, sol_id, def_header)
-    if 'id' not in res.keys():
-        if 'message' in res:
-            raise ValueError(
-                "Can't find id, please check error message : {}".format(res['message']))
-        if 'detail' in res:
-            raise ValueError(
-                "Can't find id, please check error message : {}".format(res['detail']))
-    else:
-        return res
-
 
 def mk_env_dict(env_keys, env_values):
     env_dict = {}
@@ -399,7 +349,7 @@ def ccs(env, name, gpu, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(siteId, dup_tag)
     else:
-        ans = create_cntr(name, gpu, sol, img_name,
+        ans = create_ccs(name, gpu, sol, img_name,
                           mk_env_dict(env_keys, env_values))
         if wait:
             doSiteStable(ans['id'])
