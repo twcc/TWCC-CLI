@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import re
-import click
-import time
 import sys
+import json
+import time
+import click
 from datetime import datetime
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId
@@ -68,7 +69,8 @@ def create_volume(vol_name, size, dtype, is_table):
         raise ValueError(
             "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
     vol = Volumes()
-    ans = vol.create(vol_name, size, desc="CLI create Disk", volume_type=dtype.lower())
+    ans = vol.create(vol_name, size, desc="CLI create Disk",
+                     volume_type=dtype.lower())
     if is_table:
         cols = ["id", "name", "size", "volume_type"]
         table_layout("Volumes", ans, cols, isPrint=True)
@@ -89,15 +91,10 @@ def create_bucket(bucket_name):
     s3.create_bucket(bucket_name)
 
 
-def create_cntr(cntr_name, gpu, sol_name, sol_img):
+def create_cntr(cntr_name, gpu, sol_name, sol_img, env_dict):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
-
-    :param cntr_name: Enter container name
-    :type cntr_name: string
-    :param sol_img: Enter solution image
-    :type sol_img: string
     """
     def_header = Sites.getGpuDefaultHeader(gpu)
     a = solutions()
@@ -120,6 +117,11 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
         else:
             raise ValueError(
                 "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+            
+    if not isNone(env_dict) and len(env_dict)>0: 
+        def_header['x-extra-property-env-list'] = json.dumps([env_dict])
+    else:
+        def_header['x-extra-property-env'] = ""
 
     if not name_validator(cntr_name):
         raise ValueError(
@@ -134,6 +136,19 @@ def create_cntr(cntr_name, gpu, sol_name, sol_img):
                 "Can't find id, please check error message : {}".format(res['detail']))
     else:
         return res
+
+
+def mk_env_dict(env_keys, env_values):
+    env_dict = {}
+    if not env_keys == None:
+        env_keys = list(set(env_keys))
+    if not env_keys == None and not env_values == None:
+        if len(env_keys) == len(env_values):
+            for key, val in zip(env_keys, env_values):
+                env_dict.update({key: val})
+        else:
+            raise ValueError("env_keys and env_values length is different")
+    return env_dict
 
 # end original function ==================================================
 
@@ -171,9 +186,9 @@ def cli():
               help="Name of the network.")
 @click.option('-pwd', '--password', 'password', default=None, type=str,
               help="Password of the win images.")
-@click.option('-envk', '--env_key', 'env_keys',  show_default=False, multiple=True,
+@click.option('-envk', '--environment-keys', 'env_keys',  show_default=False, multiple=True,
               help="The keys of the environment parameters of instances.")
-@click.option('-envv', '--env_val', 'env_values',  show_default=False, multiple=True,
+@click.option('-envv', '--environment-values', 'env_values',  show_default=False, multiple=True,
               help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
               help="Name of the image type.")
@@ -203,7 +218,8 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, password, env_keys, env_values, is_table):
+        flavor, img_name, wait, network, snapshot, sol, fip, password,
+        env_keys, env_values, is_table):
     """Command line for create VCS
 
     :param keypair: Delete existing keypair(s)
@@ -277,20 +293,13 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
-        env_dict = {}
-        if not env_keys == None:
-            env_keys = list(set(env_keys))
-        if not env_keys == None and not env_values == None:
-            if len(env_keys) == len(env_values):
-                for key,val in zip(env_keys,env_values):
-                    env_dict.update({key:val})
-            else:
-                raise ValueError("env_keys and env_values length is different")
+        env_dict = mk_env_dict(env_keys, env_values)
+
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env = env_dict,)
+                         fip=fip, password=password, env=env_dict,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -364,6 +373,10 @@ def key(env, name):
               help="Required number of GPU.")
 @click.option('-img', '--image-name', 'img_name', default=None, type=str,
               help="Name of the image.")
+@click.option('-envk', '--environment-keys', 'env_keys',  show_default=False, multiple=True,
+              help="The keys of the environment parameters of instances.")
+@click.option('-envv', '--environment-values', 'env_values',  show_default=False, multiple=True,
+              help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
               help="Name of the image type.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
@@ -376,20 +389,8 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table):
-    """Command line for create ccs
-
-    :param name: Enter name for your resources.
-    :type name: string
-    :param gpu: Enter desire number for GPU.
-    :type gpu: integer
-    :param sol: Enter TWCC solution name.
-    :type sol: string
-    :param img_name: Enter image name. Please check through `twccli ls t cos -img`
-    :type img_name: string
-    :param wait: Wait until resources are provisioned.
-    :type wait: bool
-    """
+def ccs(env, name, gpu, sol, img_name,
+        env_keys, env_values, wait, req_dup, siteId, dup_tag, is_table):
     if req_dup:
         if isNone(siteId):
             raise ValueError("`-s` is required for duplication")
@@ -398,7 +399,8 @@ def ccs(env, name, gpu, sol, img_name, wait, req_dup, siteId, dup_tag, is_table)
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(siteId, dup_tag)
     else:
-        ans = create_cntr(name, gpu, sol, img_name)
+        ans = create_cntr(name, gpu, sol, img_name,
+                          mk_env_dict(env_keys, env_values))
         if wait:
             doSiteStable(ans['id'])
             b = Sites(debug=False)
@@ -473,8 +475,8 @@ def vds(name, disk_type, disk_size, is_table):
     :param disk_size: Enter size for your resources.
     :type disk_size: int
     """
-    if name=="twccli":
-        name="twccli%s%s"%(disk_size, disk_type.lower())
+    if name == "twccli":
+        name = "twccli%s%s" % (disk_size, disk_type.lower())
     create_volume(name, disk_size, disk_type, is_table)
 
 
