@@ -284,7 +284,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         if len(name) >= 1:
             name = name[0]
         if name == 'twccli':
-            name = "{}{}".format(name, flavor.replace(".", ''))
+            name = "{}{}".format(name, flavor.replace(".", '').replace("super", ''))
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
