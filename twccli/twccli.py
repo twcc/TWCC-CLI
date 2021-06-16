@@ -100,6 +100,7 @@ class TWCCLI(click.MultiCommand):
 
         code = compile(txt, fn, 'exec')
         eval(code, ns, ns)
+        ns['cli'].name = name
         return ns['cli']
 
 

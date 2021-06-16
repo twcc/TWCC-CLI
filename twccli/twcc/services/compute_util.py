@@ -3,7 +3,7 @@ import time
 import json
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator, timezone2local
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -164,7 +164,6 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] =  password
-
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
@@ -297,6 +296,22 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         else:
             jpp(ans)
 
+def change_ip(ids_or_names,desc,is_table):
+    fxip = Fixedip()
+    cols = ['id', 'address',  'create_time', 'status', 'type', 'desc']
+    if len(ids_or_names) > 0:
+        for ip_id in ids_or_names:
+            if not isNone(desc):
+                ans = fxip.patch_desc(ip_id, desc)
+    if len(ans) > 0:
+        if is_table:
+            table_layout("IP Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 
 def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     vcs = VcsSite()

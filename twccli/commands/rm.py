@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from twccli.commands.mk import fxip
 import click
 import re
 import sys
@@ -7,7 +8,7 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isF
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
+from twccli.twcc.services.compute import Fixedip, GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.services.generic import GenericService
 from twccli.twcc.services.network import Networks
@@ -163,16 +164,33 @@ def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
                               ext_txt="Resource id: {}\nSecurity Group Rule id: {}".format(ele['id'], rule['id'])):
                     secg.deleteRule(rule['id'])
 
-
-def del_load_balancer(ids_or_names, isForce=False):
-    """Delete volume by volume id
+def del_ip(ids_or_names, isForce=False):
+    """Delete ip by ip id
 
     :param ids_or_names: name for deleting object.
     :type ids_or_names: string
     :param force: Force to delete any resources at your own cost.
     :type force: bool
-    :param site_id: resources for vcs id
-    :type site_id: int
+    """
+    fxip = Fixedip()
+    for ip_id in ids_or_names:
+        ans = fxip.list(ip_id)
+        txt = "You about to delete ip \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ip_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("IP", ip_id, isForce, txt):
+            fxip.deleteById(ip_id)
+            print("Successfully remove {}".format(ip_id))
+        else:
+            print("No delete operations.")
+
+
+def del_load_balancer(ids_or_names, isForce=False):
+    """Delete vlb by vlb id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
 
     """
     vlb = LoadBalancers()
@@ -416,6 +434,23 @@ def vlb(ctx, vlb_id, ids_or_names, force):
     del_load_balancer(ids_or_names, force)
 
 
+@click.option('-id', '--ip-id', 'ip_id',
+              help="Index of the private-net.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your IPs.")
+@click.pass_context
+def fxip(ctx, ip_id, ids_or_names, force):
+    """Command line for delete fxip
+
+    :param ip_id: Enter id for your fxip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ip_id, ids_or_names)
+    del_ip(ids_or_names, force)
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -423,6 +458,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
+cli.add_command(fxip)
 
 
 def main():
