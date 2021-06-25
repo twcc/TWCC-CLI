@@ -97,6 +97,7 @@ sonar-preview:
 
 manual MAJOR version:
   stage: deploy
+  image: python:3.9
   variables:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
@@ -114,6 +115,7 @@ manual MAJOR version:
 
 manual deploy to GITHUB:
   stage: deploy
+  image: python:3.9
   script:
     - git clone https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI 
     - cd TWCC-CLI/
