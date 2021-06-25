@@ -18,6 +18,7 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 
 ## :point_down: Release Notes :point_down:
+
 ### v0.5.18 Release Note
 ![img](https://media.giphy.com/media/zh4bSE7Gu71cCGgidY/giphy.gif)
 
