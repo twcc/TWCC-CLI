@@ -11,6 +11,21 @@ stages:
 #    - python -V
 #    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
 
+python39:
+  stage: test
+  image: python:3.9
+  variables:
+    TWCC_CICD_STAGE: 'minor'
+  script: 
+    - python -V
+    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - echo $TWCC_CICD_STAGE
+    - pip install tox
+    - export TWCC_SHOW_DEPRECATED=False
+    - tox -e py37
+  only:
+    - merge_requests
+
 python37:
   stage: test
   image: python:3.7
@@ -24,7 +39,6 @@ python37:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-    - merge_requests
     - dev
 
 python36:
