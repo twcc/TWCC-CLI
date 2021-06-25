@@ -419,42 +419,54 @@ def doSiteStable(site_id, site_type='cntr'):
     return site_id
 
 
+def format_ccs_env_dict(env_dict):
+    if not isNone(env_dict) and len(env_dict)>0:
+        return json.dumps([env_dict])
+    else:
+        return ""
+
+def get_ccs_sol_id(sol_name):
+    a = solutions()
+    sol_name = sol_name.lower()
+    cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
+                  if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower() == sol_name])
+    if len(cntrs) > 0:
+        return cntrs[sol_name]
+    else:
+        raise ValueError(
+            "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
+def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
+    ccs_site = Sites(debug=False)
+    imgs = ccs_site.getAvblImg(sol_id, sol_name, latest_first=True)
+
+    if isNone(sol_img) or len(sol_name) == 0:
+        return imgs[0]
+    else:
+        if sol_img in imgs:
+            return sol_img
+        else:
+            raise ValueError(
+                "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
 def create_ccs(cntr_name, gpu, sol_name, sol_img, env_dict):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
     """
+
     def_header = Sites.getGpuDefaultHeader(gpu)
-    a = solutions()
-    cntrs = dict([(cntr['name'], cntr['id']) for cntr in a.list()
-                  if not cntr['id'] in GupSiteBlockSet and cntr['name'] == sol_name])
-    if len(cntrs) > 0:
-        sol_id = cntrs[sol_name]
-    else:
-        raise ValueError(
-            "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
-
-    b = Sites(debug=False)
-    imgs = b.getAvblImg(sol_id, sol_name, latest_first=True)
-
-    if type(sol_img) == type(None) or len(sol_name) == 0:
-        def_header['x-extra-property-image'] = imgs[0]
-    else:
-        if sol_img in imgs:
-            def_header['x-extra-property-image'] = sol_img
-        else:
-            raise ValueError(
-                "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
-            
-    if not isNone(env_dict) and len(env_dict)>0: 
-        def_header['x-extra-property-env-list'] = json.dumps([env_dict])
-    else:
-        def_header['x-extra-property-env'] = ""
+    sol_id = get_ccs_sol_id(sol_name)
+    def_header['x-extra-property-image'] = get_ccs_img(sol_id, sol_name, sol_img, gpu)
+    def_header['x-extra-property-env'] = format_ccs_env_dict(env_dict)
 
     if not name_validator(cntr_name):
         raise ValueError(
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
-    res = b.create(cntr_name, sol_id, def_header)
+
+    ccs_site = Sites(debug=False)
+    res = ccs_site.create(cntr_name, sol_id, def_header)
+
     if 'id' not in res.keys():
         if 'message' in res:
             raise ValueError(
