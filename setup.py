@@ -2,6 +2,7 @@ import os
 from setuptools import setup, find_packages
 from distutils.util import convert_path
 import sys
+import subprocess
 try:
     # pip >=20
     from pip._internal.network.session import PipSession

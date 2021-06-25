@@ -1,12 +1,30 @@
-image: python
+.sonar_template: &sonarqube_temp
+    stage: analysis
+    image: ciricihq/gitlab-sonar-scanner       
 
 stages:
+    - analysis
     - test
     - deploy
 
-before_script:
+#before_script:
+#    - python -V
+#    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+
+python39:
+  stage: test
+  image: python:3.9
+  variables:
+    TWCC_CICD_STAGE: 'minor'
+  script: 
     - python -V
     - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - echo $TWCC_CICD_STAGE
+    - pip install tox
+    - export TWCC_SHOW_DEPRECATED=False
+    - tox -e py37
+  only:
+    - merge_requests
 
 python37:
   stage: test
@@ -14,12 +32,13 @@ python37:
   variables:
     TWCC_CICD_STAGE: 'minor'
   script: 
+    - python -V
+    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
     - echo $TWCC_CICD_STAGE
     - pip install tox
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py37
   only:
-    - merge_requests
     - dev
 
 python36:
@@ -28,6 +47,8 @@ python36:
   variables:
     TWCC_CICD_STAGE: 'MAJOR'
   script: 
+    - python -V
+    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
     - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
     - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
     - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
@@ -35,6 +56,43 @@ python36:
     - tox -e py36
   only:
     - master
+
+sonarqube-reports:
+    <<: *sonarqube_temp
+    variables:
+        SONAR_URL: $SONAR_HOST_URL
+        SONAR_ANALYSIS_MODE: publish
+        SONAR_BRANCH: $CI_COMMIT_BRANCH
+        GIT_DEPTH: 0
+    script:
+        - gitlab-sonar-scanner -Dsonar.branch.name=$CI_COMMIT_REF_NAME
+    # only:
+    #   - dev
+
+sonar-preview:
+  <<: *sonarqube_temp
+  variables:
+    SONAR_ANALYSIS_MODE: issues
+    SONAR_URL: $SONAR_HOST_URL
+    SONAR_BRANCH: $CI_COMMIT_BRANCH
+    GIT_DEPTH: 0
+  except:
+    - master
+  script:
+    #- echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - apk add git
+    - git config --global user.email "leo.chen@twsc.io"
+    - git config --global user.name "Leo Chen"
+    - git checkout dev
+    - git merge $CI_COMMIT_SHA --no-commit --no-ff
+    - gitlab-sonar-scanner \
+      -Dsonar.analysis.mode=preview \
+      -Dsonar.host.url=$SONAR_URL \
+      -Dsonar.login=$SONAR_TOKEN \
+      -Dsonar.gitlab.project_id=$CI_PROJECT_ID \
+      -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA \
+      -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME \
+      -Dsonar.branch.name=$CI_COMMIT_REF_NAME
 
 
 manual MAJOR version:
@@ -97,12 +155,7 @@ deploy Beta to GITHUB:
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
-    - git add twccli/version.py
-    - git commit -m "TWCC-CLI Release for v$TWCC_CLI_VER"
-    - git push --set-upstream origin $TWCC_CLI_VER
+    - git diff
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common
     - apt-add-repository https://cli.github.com/packages
