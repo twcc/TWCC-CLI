@@ -6,8 +6,7 @@ The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
 
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) | [![PyPI version](https://badge.fury.io/py/TWCC-CLI.svg)](https://badge.fury.io/py/TWCC-CLI) | [![Documentation Status](https://readthedocs.org/projects/twcc-cli/badge/?version=latest)](https://twcc-cli.readthedocs.io/en/latest/?badge=latest)
- | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PyPI version](https://badge.fury.io/py/TWCC-CLI.svg)](https://badge.fury.io/py/TWCC-CLI.svg) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC resources. 
 
@@ -19,6 +18,17 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 
 ## :point_down: Release Notes :point_down:
+
+### v0.5.18 Release Note
+![img](https://media.giphy.com/media/zh4bSE7Gu71cCGgidY/giphy.gif)
+
+**Feature**
+- We support auto-complete for TWCC-CLI :sparkles::sparkles:
+- We support Python 3.9 :sparkles:
+- We enable environment parameters in CCS
+
+**Bug Fix**
+- fix some bugs
 
 ### v0.5.17 Release Note
 ![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
