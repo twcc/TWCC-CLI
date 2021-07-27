@@ -247,6 +247,41 @@ def list_gpu_flavor(is_table=True):
     else:
         jpp(ans)
 
+def list_gpu_flavor_online(solution_name, is_table=True):
+    gpu = GpuSite()
+    inv_sols = {v: k for k, v in gpu.getSolList().items()}
+    try:
+        sol_id = inv_sols[solution_name]
+    except:
+        raise ValueError("Solution name:'{0}' is not available.".format(solution_name))
+    avb_flv = gpu.getAvblFlv(sol_id)
+    flvs = gpu.getFlavors()
+    name2id = {}
+    for each_flv in flvs.values():
+        if each_flv['name']in avb_flv:
+            name2id[each_flv['name']] = each_flv['id']
+    # print(name2id)
+    solid2iservice_product = gpu.getIsrvFlavors()
+    desc2id = {}
+    for gsol_id ,each_prod in solid2iservice_product.items():
+        if gsol_id in name2id.values():
+            desc2id[each_prod['desc']] = gsol_id
+    # print(desc2id)
+    gpu_tag2spec = []
+    inv_name2id = {v: k for k, v in name2id.items()}
+    for desc, sol_id in desc2id.items():
+        gpu_tag2spec.append((desc,inv_name2id[sol_id]))
+    # print(gpu_tag2spec)
+    gpu_tag2spec = dict(gpu_tag2spec)
+    formated_ans = [{"`-gpu` tag": x, "description": gpu_tag2spec[x]} for x in gpu_tag2spec]
+    if is_table:
+        table_layout("Existing `-gpu` flavor",
+                     formated_ans,
+                     isPrint=True,
+                     isWrap=False)
+    else:
+        jpp(gpu_tag2spec)
+
 
 def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
@@ -779,22 +814,13 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
         if not product_type:
             list_all_img(site_ids_or_names, is_table)
         else:
-            # res = self.list_solution(sol_id, isShow=False)
-            gpu = GpuSite()
-            sols = gpu.getSolList()
-            sol_id = None
-            
             if site_ids_or_names == ():
                 print('please input img')
             else:
                 if len(site_ids_or_names) == 1:
-                    solution_name = site_ids_or_names[0]
-                    for gsol_id, sol_name in gpu.getSolList().items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
-                        if solution_name == sol_name:
-                            sol_id = gsol_id
-                    if sol_id == None:
-                        raise ValueError('Image not exist')
-                    ans = gpu.getAvblFlv(sol_id, solution_name)
+                    list_gpu_flavor_online(site_ids_or_names[0])
+                else:
+                    print('ls flavor by one image')
     if res_property == 'commit':
         list_commit()
 

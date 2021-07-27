@@ -127,13 +127,36 @@ class GpuSite(GpuService):
             return buckets
         elif mtype == 'dict':
             return dict([(x, "/mnt/s3/%s" % (x)) for x in buckets])
-    def getAvblFlv(self, sol_id, sol_name, latest_first=True):
+    
+    def getIsrvFlavors(self, name_or_id="flavor_id"):
+        isrv = iservice()
+
+        def filter_flavor_id(x):
+            try:
+                other_content_json = json.loads(x['other_content'])
+            except ValueError as e:
+                return False
+            if "flavor_id" in  other_content_json:
+                return True
+            else:
+                return False
+
+        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
+
+        fid_desc = dict([(get_flavor_id(x), x)
+                         for x in isrv.getProducts() if filter_flavor_id(x)])
+        if name_or_id == "flavor_id":
+            return fid_desc
+        else:
+            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+
+    def getAvblFlv(self, sol_id):
 
         self.proj = projects()
         self.proj._csite_ = self._csite_
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
-        print('inin',ans)
+        return ans['site_extra_prop']['flavor']
         
     def getAvblImg(self, sol_id, sol_name, latest_first=True):
         if sol_id:
@@ -205,6 +228,10 @@ class GpuSite(GpuService):
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
         table_info = ans['site_extra_prop']
         self._cache_sol_[sol_id] = table_info
+
+    def getFlavors(self):
+        flv = Flavors(self._csite_)
+        return dict([(x['id'], x) for x in flv.list()])
 
     def getConnInfo(self, site_id, ssh_info=False):
         info_gen = self.queryById(site_id)
