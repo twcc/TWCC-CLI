@@ -127,7 +127,14 @@ class GpuSite(GpuService):
             return buckets
         elif mtype == 'dict':
             return dict([(x, "/mnt/s3/%s" % (x)) for x in buckets])
+    def getAvblFlv(self, sol_id, sol_name, latest_first=True):
 
+        self.proj = projects()
+        self.proj._csite_ = self._csite_
+
+        ans = self.proj.getProjectSolution(self._project_id, sol_id)
+        print('inin',ans)
+        
     def getAvblImg(self, sol_id, sol_name, latest_first=True):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)

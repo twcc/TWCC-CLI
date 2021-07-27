@@ -717,6 +717,12 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
               'res_property',
               flag_value='flavor',
               help='List CCS available GPU environments.')
+@click.option('-ptype',
+              '--product-type',
+              is_flag=True,
+              default=False,
+              help="List CCS available product types (hardware configuration)."
+              )
 @click.option(
     '-gjpnb',
     '--get-jupyter-notebook',
@@ -757,7 +763,7 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 # @click.pass_context ctx,
-def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
+def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_all,
         show_ports, get_info):
     """Command line for List Container
        Functions:
@@ -770,8 +776,25 @@ def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
         list_gpu_flavor(is_table)
 
     if res_property == 'image':
-        list_all_img(site_ids_or_names, is_table)
-
+        if not product_type:
+            list_all_img(site_ids_or_names, is_table)
+        else:
+            # res = self.list_solution(sol_id, isShow=False)
+            gpu = GpuSite()
+            sols = gpu.getSolList()
+            sol_id = None
+            
+            if site_ids_or_names == ():
+                print('please input img')
+            else:
+                if len(site_ids_or_names) == 1:
+                    solution_name = site_ids_or_names[0]
+                    for gsol_id, sol_name in gpu.getSolList().items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+                        if solution_name == sol_name:
+                            sol_id = gsol_id
+                    if sol_id == None:
+                        raise ValueError('Image not exist')
+                    ans = gpu.getAvblFlv(sol_id, solution_name)
     if res_property == 'commit':
         list_commit()
 
