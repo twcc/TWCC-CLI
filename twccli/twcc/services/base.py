@@ -228,6 +228,7 @@ class projects(GenericService):
 
     def getS3ProjId(self, proj_code):
         projs = self.list()
+
         for proj in projs:
             if proj['name'] == proj_code:
                 return proj['id']

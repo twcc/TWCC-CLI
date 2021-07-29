@@ -227,14 +227,19 @@ class CredentialHandler():
         if path.exists(self.old_credential):
             with open(self.old_credential, 'r') as stream:
                 try:
-                    cnf = yaml.safe_load(stream)
+                    yaml_cnt = stream.read()
+                    if len(yaml_cnt) == 0:
+                        return False
+                        
+                    cnf = yaml.safe_load(yaml_cnt)
+                    
                     self.old_api = cnf['_default']['twcc_api_key']
                     self.prj_code = cnf['_default']['twcc_proj_code']
                     self.old_version = cnf['_meta']['cli_version']
-                    
+
                     _env_ver_ = self.old_version.split('.')
                     _cli_ver_ = self.cli_version.split('.')
-                    
+
                     if _env_ver_[0] == _cli_ver_[0] and _env_ver_[1] == _cli_ver_[1]:
                         if int(_env_ver_[2]) < int(_cli_ver_[2]):
                             return True

@@ -489,8 +489,7 @@ def list_secg(ids_or_names, is_table=True):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-# @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
-@click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
+@click.group(context_settings=CONTEXT_SETTINGS, help="List your TWCC resources.")
 def cli():
     try:
         ga = GenericService()
