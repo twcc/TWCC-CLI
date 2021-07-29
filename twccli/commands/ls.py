@@ -788,12 +788,6 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
               'res_property',
               flag_value='flavor',
               help='List CCS available GPU environments.')
-@click.option('-ptype',
-              '--product-type',
-              is_flag=True,
-              default=False,
-              help="List CCS available product types (hardware configuration)."
-              )
 @click.option(
     '-gjpnb',
     '--get-jupyter-notebook',
@@ -824,6 +818,12 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
               default=None,
               flag_value='solution',
               help='List all CCS image types.')
+@click.option('-ptype',
+              '--product-type',
+              is_flag=True,
+              default=False,
+              help="List CCS available product types (hardware configuration)."
+              )
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
