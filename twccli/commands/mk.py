@@ -342,6 +342,8 @@ def key(env, name):
               help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
               help="Name of the image type.")
+@click.option('-ptype', '--product-type', 'flavor', default=None, type=str,
+              help="The product types (hardware configuration).")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -352,7 +354,7 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, sol, img_name,
+def ccs(env, name, gpu, flavor, sol, img_name,
         env_keys, env_values, wait, req_dup, siteId, dup_tag, is_table):
     if req_dup:
         if isNone(siteId):
@@ -362,7 +364,7 @@ def ccs(env, name, gpu, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(siteId, dup_tag)
     else:
-        ans = create_ccs(name, gpu, sol, img_name,
+        ans = create_ccs(name, gpu, flavor, sol, img_name,
                           mk_env_dict(env_keys, env_values))
         if wait:
             doSiteStable(ans['id'])

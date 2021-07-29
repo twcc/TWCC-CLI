@@ -425,7 +425,7 @@ def format_ccs_env_dict(env_dict):
     else:
         return ""
 
-def get_ccs_sol_id(sol_name):
+def get_ccs_sol_id(sol_img, sol_name):
     a = solutions()
     sol_name = sol_name.lower()
     cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
@@ -439,7 +439,6 @@ def get_ccs_sol_id(sol_name):
 def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
     ccs_site = Sites(debug=False)
     imgs = ccs_site.getAvblImg(sol_id, sol_name, latest_first=True)
-
     if isNone(sol_img) or len(sol_name) == 0:
         return imgs[0]
     else:
@@ -449,14 +448,13 @@ def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
             raise ValueError(
                 "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
-def create_ccs(cntr_name, gpu, sol_name, sol_img, env_dict):
+def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
     """
-
-    def_header = Sites.getGpuDefaultHeader(gpu)
-    sol_id = get_ccs_sol_id(sol_name)
+    sol_id = get_ccs_sol_id(sol_img, sol_name)
+    def_header = Sites.getGpuDefaultHeader(flavor, sol_name, gpu)
     def_header['x-extra-property-image'] = get_ccs_img(sol_id, sol_name, sol_img, gpu)
     def_header['x-extra-property-env'] = format_ccs_env_dict(env_dict)
 

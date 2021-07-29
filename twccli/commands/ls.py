@@ -262,28 +262,29 @@ def list_gpu_flavor_online(solution_name, is_table=True):
     inv_sols = {v: k for k, v in gpu.getSolList().items()}
     try:
         sol_id = inv_sols[solution_name]
+        avb_flv = gpu.getAvblFlv(sol_id)
     except:
-        raise ValueError(
-            "Image Type (itype) name:'{0}' is not available.".format(solution_name))
-    avb_flv = gpu.getAvblFlv(sol_id)
-    flvs = gpu.getFlavors()
-    name2id = {}
-    for each_flv in flvs.values():
-        if each_flv['name'] in avb_flv:
-            name2id[each_flv['name']] = each_flv['id']
-    # print(name2id)
-    solid2iservice_product = gpu.getIsrvFlavors()
-    desc2id = {}
-    for gsol_id, each_prod in solid2iservice_product.items():
-        if gsol_id in name2id.values():
-            desc2id[each_prod['desc']] = gsol_id
-    # print(desc2id)
-    gpu_tag2spec = []
-    inv_name2id = {v: k for k, v in name2id.items()}
-    for desc, sol_id in desc2id.items():
-        gpu_tag2spec.append((desc, inv_name2id[sol_id]))
-    # print(gpu_tag2spec)
-    gpu_tag2spec = dict(gpu_tag2spec)
+        # raise ValueError(
+        #     "Image Type (itype) name:'{0}' is not available.".format(solution_name))
+        avb_flv = None
+    # flvs = gpu.getFlavors()
+    # name2id = {}
+    # for each_flv in flvs.values():
+    #     # if each_flv['name'] in avb_flv:
+    #     name2id[each_flv['name']] = each_flv['id']
+    # solid2iservice_product = gpu.getIsrvFlavors()
+    # desc2id = {}
+    # for gsol_id, each_prod in solid2iservice_product.items():
+    #     if gsol_id in name2id.values():
+    #         desc2id[each_prod['desc']] = gsol_id
+    # gpu_tag2spec = []
+    # inv_name2id = {v: k for k, v in name2id.items()}
+    # for desc, sol_id in desc2id.items():
+    #     gpu_tag2spec.append((desc, inv_name2id[sol_id]))
+    # gpu_tag2spec = dict(gpu_tag2spec)
+    gpu_tag2spec = GpuSite.getGpuListOnline()
+    if not avb_flv == None:
+        gpu_tag2spec = {k:v for k,v in gpu_tag2spec.items() if v in avb_flv}
     formated_ans = [{"`-gpu` tag": x, "description": gpu_tag2spec[x]}
                     for x in gpu_tag2spec]
     if is_table:
@@ -537,11 +538,10 @@ def list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_t
         if not product_type:
             list_all_img(site_ids_or_names, is_table)
         else:
-            if site_ids_or_names == ():
-                click.echo('please input image name')
+            if len(site_ids_or_names) == 1:
+                list_gpu_flavor_online(site_ids_or_names[0])
             else:
-                if len(site_ids_or_names) == 1:
-                    list_gpu_flavor_online(site_ids_or_names[0])
+                list_gpu_flavor_online('all')
 
     if res_property == 'commit':
         list_commit()
@@ -848,8 +848,9 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
     if res_property in ['flavor', 'image', 'commit', 'solution', 'log']:
         list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_table)
     elif isNone(res_property):
-
-        if show_ports:
+        if product_type:
+            list_gpu_flavor_online('all')
+        elif show_ports:
             if len(site_ids_or_names) == 1:
                 list_port(site_ids_or_names[0], is_table)
             else:
