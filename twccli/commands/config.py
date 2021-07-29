@@ -97,7 +97,7 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
             else:
                 click.echo(
                     "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli-complete.sh".format(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0])))))
+            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli-complete.sh".format([cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
         else:
             raise ValueError("API Key is not validated.")
     else:
