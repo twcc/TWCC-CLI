@@ -184,10 +184,9 @@ def cli():
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
-        data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, password,
-        env_keys, env_values, is_apikey, is_table):
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, 
+    data_vol, data_vol_size, flavor, img_name, wait, network, snapshot, 
+    sol, fip, password, env_keys, env_values, is_apikey, is_table):
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
@@ -316,6 +315,8 @@ def key(env, name):
               help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
               help="Name of the image type.")
+@click.option('-ptype', '--product-type', 'flavor', default=None, type=str,
+              help="The product types (hardware configuration).")
 @click.option('-apikey / -nokey', '--pass-apikey / --no-pass-apikey', 'is_apikey',
               is_flag=True, default=True, show_default=True,
               help="Transfer TWCC API Key to new environment.")
@@ -329,8 +330,8 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, sol, img_name,
-        env_keys, env_values, wait, req_dup, siteId, dup_tag, is_apikey, is_table):
+def ccs(env, name, gpu, flavor, sol, img_name, 
+    env_keys, env_values, wait, req_dup, siteId, dup_tag, is_apikey, is_table):
 
     if req_dup:
         if isNone(siteId):
@@ -340,7 +341,7 @@ def ccs(env, name, gpu, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(siteId, dup_tag)
     else:
-        ans = create_ccs(name, gpu, sol, img_name,
+        ans = create_ccs(name, gpu, flavor, sol, img_name,
                          mk_env_dict(env_keys, env_values), is_apikey)
         if wait:
             doSiteStable(ans['id'])

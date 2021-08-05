@@ -452,17 +452,15 @@ def get_pass_api_key_params(is_apikey, env_dict):
         click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
 
 
-
-def create_ccs(cntr_name, gpu, sol_name, sol_img, env_dict, is_apikey):
+def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
     """
 
     get_pass_api_key_params(is_apikey, env_dict)
-    # print(env_dict)
 
-    def_header = Sites.getGpuDefaultHeader(gpu)
+    def_header = Sites.getGpuDefaultHeader(flavor, sol_name, gpu)
     sol_id = get_ccs_sol_id(sol_name)
     def_header['x-extra-property-image'] = get_ccs_img(
         sol_id, sol_name, sol_img, gpu)
