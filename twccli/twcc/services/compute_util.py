@@ -115,30 +115,8 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password=None, env=None):
-    """Create vcs
-    create vcs by set solution, image name, flavor
-    create vcs by default value
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None):
 
-    :param sys_vol: Chose system volume disk type
-    :type sys_vol: string
-    :param data_vol: Volume type of the data volume.
-    :type data_vol: int
-    :param data_vol_size: Size of the data volume in (GB).
-    :type data_vol_size: int
-    :param flavor: Choose hardware configuration
-    :type flavor: string
-    :param img_name: Enter image name.Enter image name
-    :type img_name: string
-    :param network: Enter network name
-    :type network: string
-    :param sol: Enter TWCC solution name
-    :type sol: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
-    :param name: Enter name
-    :type name: string
-    """
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -179,6 +157,10 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
                                                                              ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
+
+        get_pass_api_key_params(pass_api, env)
+        print("!! >> env params: ", env)
+        
         if not (env == {} or env == None):
             required['x-extra-property-env'] = json.dumps(env)
         else:

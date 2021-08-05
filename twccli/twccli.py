@@ -214,12 +214,6 @@ class CredentialHandler():
         self.backup_credential = path.join(
             _TWCC_DATA_DIR_, "credential.bakup_"+datetime.now().strftime("%m%d%H%M"))
 
-        # import os
-        # ver_fn = path.join(path.dirname(path.abspath(__file__)), 'version.py')
-        # print(ver_fn)
-        # version_cnt = open(ver_fn, 'r').read()
-        # print(version_cnt)
-        # eval(version_cnt)
         from .version import __version__
         self.cli_version = __version__
 
