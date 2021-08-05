@@ -427,7 +427,6 @@ def get_ccs_sol_id(sol_name):
 def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
     ccs_site = Sites(debug=False)
     imgs = ccs_site.getAvblImg(sol_id, sol_name, latest_first=True)
-
     if isNone(sol_img) or len(sol_name) == 0:
         return imgs[0]
     else:
