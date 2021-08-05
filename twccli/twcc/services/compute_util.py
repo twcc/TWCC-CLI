@@ -159,8 +159,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-keypair'] = keypair
 
         get_pass_api_key_params(pass_api, env)
-        print("!! >> env params: ", env)
-        
+
         if not (env == {} or env == None):
             required['x-extra-property-env'] = json.dumps(env)
         else:
@@ -441,6 +440,7 @@ def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
 
 def get_pass_api_key_params(is_apikey, env_dict):
     if not isNone(is_apikey) and is_apikey:
+        import click
         import socket
         from twccli.twcc.session import Session2
 
@@ -449,6 +449,9 @@ def get_pass_api_key_params(is_apikey, env_dict):
         env_dict['_TWCC_CLI_GA_'] = "1"
         env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
         env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
+
+        click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+
 
 
 def create_ccs(cntr_name, gpu, sol_name, sol_img, env_dict, is_apikey):
