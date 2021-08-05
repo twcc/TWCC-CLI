@@ -11,7 +11,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Vo
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator, timezone2local, window_password_validater
+from twccli.twcc.util import pp, table_layout, isNone, jpp, mk_names, isFile, name_validator, window_password_validater
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import Session2
 from twccli.twcc.services.network import Networks
@@ -342,6 +342,9 @@ def key(env, name):
               help="The values of the environment parameters of instances.")
 @click.option('-itype', '--image-type-name', 'sol', default="TensorFlow", type=str,
               help="Name of the image type.")
+@click.option('-apikey / -nokey', '--pass-apikey / --no-pass-apikey', 'is_apikey',
+              is_flag=True, default=True, show_default=True,
+              help="Transfer TWCC API Key to new environment.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -353,7 +356,8 @@ def key(env, name):
               help='Wait until your container to be provisioned.')
 @pass_environment
 def ccs(env, name, gpu, sol, img_name,
-        env_keys, env_values, wait, req_dup, siteId, dup_tag, is_table):
+        env_keys, env_values, wait, req_dup, siteId, dup_tag, is_apikey, is_table):
+    
     if req_dup:
         if isNone(siteId):
             raise ValueError("`-s` is required for duplication")
@@ -363,7 +367,7 @@ def ccs(env, name, gpu, sol, img_name,
         create_commit(siteId, dup_tag)
     else:
         ans = create_ccs(name, gpu, sol, img_name,
-                          mk_env_dict(env_keys, env_values))
+                          mk_env_dict(env_keys, env_values), is_apikey)
         if wait:
             doSiteStable(ans['id'])
             b = Sites(debug=False)

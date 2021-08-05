@@ -345,7 +345,6 @@ def window_password_validater(password):
         return False
 
 
-def get_environment_params(param_key, def_val=None):
+def get_environment_params(param_key, def_val):
     if param_key in os.environ and len(os.environ[param_key]) > 0:
-        return os.environ[param_key]
-    return def_val
+        def_val = os.environ[param_key]
