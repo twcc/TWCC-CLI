@@ -449,9 +449,6 @@ def get_pass_api_key_params(is_apikey, env_dict):
         env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
         env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
 
-        click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
-
-
 def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
     """Create container
        Create container by default value

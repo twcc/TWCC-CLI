@@ -143,7 +143,7 @@ def cli():
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
-@click.option('-img', '--img_name', 'img_name', default=None, type=str,
+@click.option('-img', '--image-name', 'img_name', default=None, type=str,
               help="Name of the image.")
 @click.option('-key', '--keypair', 'keypair',
               help="Name of the key pair for access your instance.")
@@ -248,6 +248,9 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         table_layout_title = "VCS Site"
     if is_table:
         cols = ["id", "name", "status"]
+        if is_apikey:
+            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+
         table_layout(table_layout_title, ans, cols, isPrint=True)
     else:
         jpp(ans)
@@ -349,8 +352,10 @@ def ccs(env, name, gpu, flavor, sol, img_name,
             ans = b.queryById(ans['id'])
         if is_table:
             cols = ["id", "name", "status"]
-            table_layout("CCS Site:{}".format(
-                ans['id']), ans, cols, isPrint=True)
+        if is_apikey:
+            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+
+            table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
         else:
             jpp(ans)
 
