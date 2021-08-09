@@ -264,24 +264,8 @@ def list_gpu_flavor_online(solution_name, is_table=True):
         sol_id = inv_sols[solution_name]
         avb_flv = gpu.getAvblFlv(sol_id)
     except:
-        # raise ValueError(
-        #     "Image Type (itype) name:'{0}' is not available.".format(solution_name))
         avb_flv = None
-    # flvs = gpu.getFlavors()
-    # name2id = {}
-    # for each_flv in flvs.values():
-    #     # if each_flv['name'] in avb_flv:
-    #     name2id[each_flv['name']] = each_flv['id']
-    # solid2iservice_product = gpu.getIsrvFlavors()
-    # desc2id = {}
-    # for gsol_id, each_prod in solid2iservice_product.items():
-    #     if gsol_id in name2id.values():
-    #         desc2id[each_prod['desc']] = gsol_id
-    # gpu_tag2spec = []
-    # inv_name2id = {v: k for k, v in name2id.items()}
-    # for desc, sol_id in desc2id.items():
-    #     gpu_tag2spec.append((desc, inv_name2id[sol_id]))
-    # gpu_tag2spec = dict(gpu_tag2spec)
+
     gpu_tag2spec = GpuSite.getGpuListOnline()
     if not avb_flv == None:
         gpu_tag2spec = {k:v for k,v in gpu_tag2spec.items() if v in avb_flv}
