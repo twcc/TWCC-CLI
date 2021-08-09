@@ -302,7 +302,7 @@ def key(env, name):
 @click.command(help="‘Create’ your CCS (Container Computer Service) containers.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of the container.")
-@click.option('-s', '--site-id', 'siteId', type=int,
+@click.option('-s', '--site-id', 'site_id', type=int,
               default=None,
               help='The source container ID to create the duplicate from.')
 @click.option('-dup', '--request-duplication', 'req_dup',
@@ -334,15 +334,15 @@ def key(env, name):
               help='Wait until your container to be provisioned.')
 @pass_environment
 def ccs(env, name, gpu, flavor, sol, img_name, 
-    env_keys, env_values, wait, req_dup, siteId, dup_tag, is_apikey, is_table):
+    env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
 
     if req_dup:
-        if isNone(siteId):
+        if isNone(site_id):
             raise ValueError("`-s` is required for duplication")
         if isNone(dup_tag):
             dup_tag = "twccli_{}".format(
                 datetime.now().strftime("_%m%d%H%M"))
-        create_commit(siteId, dup_tag)
+        create_commit(site_id, dup_tag)
     else:
         ans = create_ccs(name, gpu, flavor, sol, img_name,
                          mk_env_dict(env_keys, env_values), is_apikey)
