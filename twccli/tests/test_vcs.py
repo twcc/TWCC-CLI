@@ -88,9 +88,9 @@ class TestVcsLifecyc:
                 f.write('  - !!python/tuple [4044,dedi]\n')
         paras = ["mk", "vcs",
                  "--name",           self.key_name,
-                 "--image-type-name", self.sol,
+                 "--image-type-name",self.sol,
                  "--product-type",   self.flv,
-                 "--image-name",     self.img,
+                 "-img",             self.img,
                  "--keypair",        self.key_name,
                  "--system-volume-type", self.sys_vol,
                  "-wait", "-json"
