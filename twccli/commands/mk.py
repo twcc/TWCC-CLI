@@ -6,6 +6,7 @@ import json
 import time
 import click
 from datetime import datetime
+from collections import defaultdict
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId, Fixedip
 from twccli.twcc.services.solutions import solutions
@@ -103,16 +104,31 @@ def create_bucket(bucket_name):
     s3.create_bucket(bucket_name)
 
 
+def get_params_seq(argv_list, argv_key):
+    # process seq problems
+    argv_envk = defaultdict(str)
+    for idx in range(len(argv_list)):
+        if argv_list[idx] == argv_key and idx + 1 < len(argv_list):
+            argv_envk[idx] = argv_list[idx + 1]
+    return argv_envk
+
+
 def mk_env_dict(env_keys, env_values):
+
+    arg_envk = "-envk"
+    arg_envv = "-envv"
+    env_keys = get_params_seq(sys.argv, arg_envk).values()
+    env_values = get_params_seq(sys.argv, arg_envv).values()
+
     env_dict = {}
-    if not env_keys == None:
-        env_keys = list(set(env_keys))
     if not env_keys == None and not env_values == None:
         if len(env_keys) == len(env_values):
             for key, val in zip(env_keys, env_values):
                 env_dict.update({key: val})
         else:
             raise ValueError("env_keys and env_values length is different")
+    # fix for #344
+    env_dict["BUFFER"] = json.dumps(env_dict)
     return env_dict
 
 # end original function ==================================================
@@ -229,6 +245,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
+
+        # due to seq will not be in order
         env_dict = mk_env_dict(env_keys, env_values)
 
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
