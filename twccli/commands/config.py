@@ -58,10 +58,10 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     """
     if not Session2._isValidSession():
         if isNone(apikey):
-            if 'TWCC_API_KEY' in os.environ:
-                apikey = os.environ['TWCC_API_KEY']
+            if '_TWCC_API_KEY_' in os.environ:
+                apikey = os.environ['_TWCC_API_KEY_']
         else:
-            os.environ['TWCC_API_KEY'] = apikey
+            os.environ['_TWCC_API_KEY_'] = apikey
         if not isNone(user_agent):
             os.environ['User_Agent'] = user_agent
         if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:

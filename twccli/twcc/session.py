@@ -282,8 +282,8 @@ class Session2(object):
 
     @staticmethod
     def _getApiKey(twcc_api_key):
-        if 'TWCC_API_KEY' in os.environ and len(os.environ['TWCC_API_KEY']) > 0:
-            return os.environ['TWCC_API_KEY']
+        if '_TWCC_API_KEY_' in os.environ and len(os.environ['_TWCC_API_KEY_']) > 0:
+            return os.environ['_TWCC_API_KEY_']
         else:
             if Session2._isValidSession():
                 return Session2._isValidSession(isConfig=True)['_default']['twcc_api_key']

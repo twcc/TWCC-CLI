@@ -8,8 +8,8 @@ from ..twccli import cli
 class TestSessionLifecyc:
     def _loadParams(self):
         self.runner = CliRunner()
-        self.apikey = os.environ['TWCC_API_KEY']
-        self.pcode = os.environ['TWCC_PROJ_CODE']
+        self.apikey = os.environ['_TWCC_API_KEY_']
+        self.pcode = os.environ['_TWCC_PROJECT_CODE_']
         pass
 
     def _init(self):
