@@ -75,7 +75,6 @@ sonar-preview:
   except:
     - master
   script:
-    #- echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - apk add git
     - git config --global user.email "leo.chen@twsc.io"
     - git config --global user.name "Leo Chen"
@@ -132,6 +131,6 @@ manual deploy to GITHUB:
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
     - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
   only:
-    - master
+    - 347-test-cd-flow-to-github
   when: manual
   allow_failure: false
