@@ -201,38 +201,6 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size,
         flavor, img_name, wait, network, snapshot, sol, fip, password,
         env_keys, env_values, is_table):
-    """Command line for create VCS
-
-    :param keypair: Delete existing keypair(s)
-    :type keypair: string
-    :param name: Enter name for your resources
-    :type name: string
-    :param sys_vol: Chose system volume disk type
-    :type sys_vol: string
-    :param data_vol: Volume type of the data volume.
-    :type data_vol: int
-    :param data_vol_size: Size of the data volume in (GB).
-    :type data_vol_size: int
-    :type flavor: string
-    :param img_name: Enter image name.Enter image name
-    :type img_name: string
-    :param wait: Wait until resources are provisioned
-    :type wait: bool
-    :param snapshot: create snapshot list for some VCS
-    :type snapshot: bool
-    :param network: Enter network name
-    :type network: string
-    :param sol: Enter TWCC solution name
-    :type sol: string
-    :param pwd: Password of the win images
-    :type pwd: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
-    :param is_table: Set this flag table view or json view
-    :type is_table: bool
-    :param ids_or_names: Enter ids or names
-    :type ids_or_names: string or tuple
-    """
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
