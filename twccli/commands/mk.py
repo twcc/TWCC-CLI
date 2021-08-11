@@ -108,9 +108,8 @@ def get_params_seq(argv_list, argv_key):
     # process seq problems
     argv_envk = defaultdict(str)
     for idx in range(len(argv_list)):
-        if argv_list[idx] == argv_key:
-            if idx + 1 < len(argv_list):
-                argv_envk[idx] = argv_list[idx + 1]
+        if argv_list[idx] == argv_key and idx + 1 < len(argv_list):
+            argv_envk[idx] = argv_list[idx + 1]
     return argv_envk
 
 
