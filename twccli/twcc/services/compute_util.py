@@ -5,12 +5,12 @@ from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator, timezone2local
+from twccli.twcc.util import jpp, table_layout, isNone, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.services.solutions import solutions
 
 
-def getConfirm(res_name, entity_name, isForce, ext_txt=""):
+def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
 
     :param res_name: name for deleting object.
@@ -20,8 +20,8 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     :param ext_txt: extra text
     :type ext_txt: string
     """
-    if isForce:
-        return isForce
+    if is_force:
+        return is_force
     import sys
     str_title = u'Confirm delete {}:[{}]'.format(res_name, entity_name)
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
@@ -29,10 +29,11 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     # if py3
     if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
-    else:
-        import click
-        click.echo(click.style(str_title, bg='blue', fg='white', blink=True, bold=True))
-        return click.confirm(str_text, default=True)
+
+    import click
+    click.echo(click.style(str_title, bg='blue',
+                fg='white', blink=True, bold=True))
+    return click.confirm(str_text, default=True)
 
 
 def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
@@ -55,8 +56,10 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
                     'private_network', 'create_time', 'status']
         else:
             cols = column.split(',')
-            if not 'id' in cols: cols.append('id')
-            if not 'name' in cols: cols.append('name')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
 
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
@@ -83,12 +86,12 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
         ans = vcs.list(is_all)
 
     for each_vcs in ans:
-        if each_vcs['status']=="NotReady":
-            each_vcs['status']="Stopped"
-        if each_vcs['status']=="Shelving":
-            each_vcs['status']="Stopping"
-        if each_vcs['status']=="Unshelving":
-            each_vcs['status']="Starting"
+        if each_vcs['status'] == "NotReady":
+            each_vcs['status'] = "Stopped"
+        if each_vcs['status'] == "Shelving":
+            each_vcs['status'] = "Stopping"
+        if each_vcs['status'] == "Unshelving":
+            each_vcs['status'] = "Starting"
     ans = sorted(ans, key=lambda k: k['create_time'])
     if len(ans) > 0:
         if not is_print:
@@ -112,7 +115,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password = None, env = None):
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None):
 
 
     vcs = VcsSite()
@@ -141,19 +144,22 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         img_name = "Ubuntu 20.04"
     required['x-extra-property-image'] = img_name
     if not isNone(password):
-        required['x-extra-property-password'] =  password
+        required['x-extra-property-password'] = password
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
 
     if isNone(password):
-    # x-extra-property-keypair
+        # x-extra-property-keypair
         if isNone(keypair):
             raise ValueError("Missing parameter: `-key`.")
         if not keypair in set(extra_props['x-extra-property-keypair']):
             raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
-                                                                            ", ".join(extra_props['x-extra-property-keypair'])))
+                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
         required['x-extra-property-keypair'] = keypair
+
+        get_pass_api_key_params(pass_api, env)
+
         if not (env == {} or env == None):
             required['x-extra-property-env'] = json.dumps(env)
         else:
@@ -274,7 +280,8 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         else:
             jpp(ans)
 
-def change_ip(ids_or_names,desc,is_table):
+
+def change_ip(ids_or_names, desc, is_table):
     fxip = Fixedip()
     cols = ['id', 'address',  'create_time', 'status', 'type', 'desc']
     if len(ids_or_names) > 0:
@@ -290,6 +297,7 @@ def change_ip(ids_or_names,desc,is_table):
                          isWrap=False)
         else:
             jpp(ans)
+
 
 def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     vcs = VcsSite()
@@ -344,15 +352,15 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
             jpp(ans)
 
 
-def del_vcs(ids_or_names, isForce=False):
+def del_vcs(ids_or_names, is_force=False):
     """delete a vcs
 
     :param ids_or_names: name for deleting object.
     :type ids_or_names: string
-    :param isForce: Force to delete any resources at your own cost.
-    :type isForce: bool
+    :param is_force: Force to delete any resources at your own cost.
+    :type is_force: bool
     """
-    if getConfirm("VCS", ",".join(ids_or_names), isForce):
+    if getConfirm("VCS", ",".join(ids_or_names), is_force):
         vsite = VcsSite()
         if len(ids_or_names) > 0:
             for ele in ids_or_names:
@@ -398,12 +406,13 @@ def doSiteStable(site_id, site_type='cntr'):
 
 
 def format_ccs_env_dict(env_dict):
-    if not isNone(env_dict) and len(env_dict)>0:
+    if not isNone(env_dict) and len(env_dict) > 0:
         return json.dumps([env_dict])
     else:
         return ""
 
-def get_ccs_sol_id(sol_img, sol_name):
+
+def get_ccs_sol_id(sol_name):
     a = solutions()
     sol_name = sol_name.lower()
     cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
@@ -412,7 +421,8 @@ def get_ccs_sol_id(sol_img, sol_name):
         return cntrs[sol_name]
     else:
         raise ValueError(
-            "Solution name '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+            "Solution name '{0}' is not valid.".format(sol_name))
+
 
 def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
     ccs_site = Sites(debug=False)
@@ -426,14 +436,31 @@ def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
             raise ValueError(
                 "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
 
-def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict):
+
+def get_pass_api_key_params(is_apikey, env_dict):
+    if not isNone(is_apikey) and is_apikey:
+        import click
+        import socket
+        from twccli.twcc.session import Session2
+
+        sess = Session2()
+        env_dict['_TWCC_API_KEY_'] = sess.twcc_api_key
+        env_dict['_TWCC_CLI_GA_'] = "1"
+        env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
+        env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
+
+def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
     """
-    sol_id = get_ccs_sol_id(sol_img, sol_name)
+
+    get_pass_api_key_params(is_apikey, env_dict)
+
     def_header = Sites.getGpuDefaultHeader(flavor, sol_name, gpu)
-    def_header['x-extra-property-image'] = get_ccs_img(sol_id, sol_name, sol_img, gpu)
+    sol_id = get_ccs_sol_id(sol_name)
+    def_header['x-extra-property-image'] = get_ccs_img(
+        sol_id, sol_name, sol_img, gpu)
     def_header['x-extra-property-env'] = format_ccs_env_dict(env_dict)
 
     if not name_validator(cntr_name):
