@@ -17,8 +17,8 @@ class TestVcsLifecyc:
         (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "centos", "CentOS 7.9", "HDD") #self.sol=ubuntu
         self.ext_port = "81"
         self.ext_port_range = "3000-3010"
-        self.apikey = os.environ['TWCC_API_KEY']
-        self.pcode = os.environ['TWCC_PROJ_CODE']
+        self.apikey = os.environ['_TWCC_API_KEY_']
+        self.pcode = os.environ['_TWCC_PROJECT_CODE_']
 
     def _loadSession(self):
         self.runner = CliRunner()

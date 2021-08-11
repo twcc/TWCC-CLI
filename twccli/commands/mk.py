@@ -11,7 +11,7 @@ from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Vo
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, jpp, mk_names, isFile, name_validator, timezone2local, window_password_validater
+from twccli.twcc.util import pp, table_layout, isNone, jpp, mk_names, isFile, name_validator, window_password_validater
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import Session2
 from twccli.twcc.services.network import Networks
@@ -38,12 +38,13 @@ def create_fixedip(private_net_id, desc, is_table):
     :type vol_name: string
     """
     fxip = Fixedip()
-    ans = fxip.create(private_net_id,desc=desc)
+    ans = fxip.create(private_net_id, desc=desc)
     if is_table:
-        cols = ["id", "address", "desc", "create_time","type"]
+        cols = ["id", "address", "desc", "create_time", "type"]
         table_layout("IPs", ans, cols, isPrint=True)
     else:
         jpp(ans)
+
 
 def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
     """Create load balance by name
@@ -101,6 +102,7 @@ def create_bucket(bucket_name):
     s3 = S3()
     s3.create_bucket(bucket_name)
 
+
 def mk_env_dict(env_keys, env_values):
     env_dict = {}
     if not env_keys == None:
@@ -141,7 +143,7 @@ def cli():
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
-@click.option('-img', '--img_name', 'img_name', default=None, type=str,
+@click.option('-img', '--image-name', 'img_name', default=None, type=str,
               help="Name of the image.")
 @click.option('-key', '--keypair', 'keypair',
               help="Name of the key pair for access your instance.")
@@ -158,6 +160,9 @@ def cli():
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
               show_default=True,
               help="The product types (hardware configuration).")
+@click.option('-apikey / -nokey', '--pass-apikey / --no-pass-apikey', 'is_apikey',
+              is_flag=True, default=True, show_default=True,
+              help="Transfer TWCC API Key to new environment.")
 @click.option('-cus-img', '--custom-image', 'snapshot', is_flag=True,
               default=False,
               help="Create a custom image for an instance. `-s` is required!")
@@ -179,42 +184,9 @@ def cli():
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
-        data_vol, data_vol_size,
-        flavor, img_name, wait, network, snapshot, sol, fip, password,
-        env_keys, env_values, is_table):
-    """Command line for create VCS
-
-    :param keypair: Delete existing keypair(s)
-    :type keypair: string
-    :param name: Enter name for your resources
-    :type name: string
-    :param sys_vol: Chose system volume disk type
-    :type sys_vol: string
-    :param data_vol: Volume type of the data volume.
-    :type data_vol: int
-    :param data_vol_size: Size of the data volume in (GB).
-    :type data_vol_size: int
-    :type flavor: string
-    :param img_name: Enter image name.Enter image name
-    :type img_name: string
-    :param wait: Wait until resources are provisioned
-    :type wait: bool
-    :param snapshot: create snapshot list for some VCS
-    :type snapshot: bool
-    :param network: Enter network name
-    :type network: string
-    :param sol: Enter TWCC solution name
-    :type sol: string
-    :param pwd: Password of the win images
-    :type pwd: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
-    :param is_table: Set this flag table view or json view
-    :type is_table: bool
-    :param ids_or_names: Enter ids or names
-    :type ids_or_names: string or tuple
-    """
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, 
+    data_vol, data_vol_size, flavor, img_name, wait, network, snapshot, 
+    sol, fip, password, env_keys, env_values, is_apikey, is_table):
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
@@ -252,7 +224,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         if len(name) >= 1:
             name = name[0]
         if name == 'twccli':
-            name = "{}{}".format(name, flavor.replace(".", '').replace("super", ''))
+            name = "{}{}".format(name, flavor.replace(
+                ".", '').replace("super", ''))
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'
@@ -262,7 +235,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env=env_dict,)
+                         fip=fip, password=password, env=env_dict, pass_api=is_apikey)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -275,6 +248,9 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         table_layout_title = "VCS Site"
     if is_table:
         cols = ["id", "name", "status"]
+        if is_apikey:
+            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+
         table_layout(table_layout_title, ans, cols, isPrint=True)
     else:
         jpp(ans)
@@ -326,7 +302,7 @@ def key(env, name):
 @click.command(help="‘Create’ your CCS (Container Computer Service) containers.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of the container.")
-@click.option('-s', '--site-id', 'siteId', type=int,
+@click.option('-s', '--site-id', 'site_id', type=int,
               default=None,
               help='The source container ID to create the duplicate from.')
 @click.option('-dup', '--request-duplication', 'req_dup',
@@ -344,6 +320,9 @@ def key(env, name):
               help="Name of the image type.")
 @click.option('-ptype', '--product-type', 'flavor', default=None, type=str,
               help="The product types (hardware configuration).")
+@click.option('-apikey / -nokey', '--pass-apikey / --no-pass-apikey', 'is_apikey',
+              is_flag=True, default=True, show_default=True,
+              help="Transfer TWCC API Key to new environment.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -354,26 +333,29 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, flavor, sol, img_name,
-        env_keys, env_values, wait, req_dup, siteId, dup_tag, is_table):
+def ccs(env, name, gpu, flavor, sol, img_name, 
+    env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
+
     if req_dup:
-        if isNone(siteId):
+        if isNone(site_id):
             raise ValueError("`-s` is required for duplication")
         if isNone(dup_tag):
             dup_tag = "twccli_{}".format(
                 datetime.now().strftime("_%m%d%H%M"))
-        create_commit(siteId, dup_tag)
+        create_commit(site_id, dup_tag)
     else:
         ans = create_ccs(name, gpu, flavor, sol, img_name,
-                          mk_env_dict(env_keys, env_values))
+                         mk_env_dict(env_keys, env_values), is_apikey)
         if wait:
             doSiteStable(ans['id'])
             b = Sites(debug=False)
             ans = b.queryById(ans['id'])
         if is_table:
             cols = ["id", "name", "status"]
-            table_layout("CCS Site:{}".format(
-                ans['id']), ans, cols, isPrint=True)
+        if is_apikey:
+            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+
+            table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
         else:
             jpp(ans)
 
@@ -509,6 +491,7 @@ def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_des
     create_load_balance(
         vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
 
+
 @click.option('-netid', '--private-net-id', type=int,
               help="Index of the private-net.")
 @click.option('-d', '--IP-description', 'desc', type=str, default='generated by cli',
@@ -528,6 +511,7 @@ def fxip(private_net_id, desc, is_table):
     """
     create_fixedip(private_net_id, desc, is_table)
 
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -536,6 +520,7 @@ cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 cli.add_command(fxip)
+
 
 def main():
     cli()
