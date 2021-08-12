@@ -10,3 +10,6 @@
 dist/*
 .coverage
 build/*
+*,cover
+coverage.xml
+docs/_build

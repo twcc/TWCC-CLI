@@ -16,8 +16,8 @@ class TestCntrLifecyc:
     def _loadParams(self):
         test_env = "cicd_pytorch"
         env_pick = env_options[test_env]
-        self.apikey = os.environ['TWCC_API_KEY']
-        self.pcode = os.environ['TWCC_PROJ_CODE']
+        self.apikey = os.environ['_TWCC_API_KEY_']
+        self.pcode = os.environ['_TWCC_PROJECT_CODE_']
         self.cntr_name = test_env
         (self.gpu_num, self.sol, self.img_name) = env_pick
 
@@ -42,7 +42,7 @@ class TestCntrLifecyc:
 
     def _list(self):
         assert type(int(self.site_id)) == type(1)
-        cmd_list = "ls ccs {} ".format(self.site_id)
+        cmd_list = "ls ccs -s {}".format(self.site_id)
         self.list_out = self.__run(cmd_list.split(" "))
 
     def _listDetail(self, isatt=True):

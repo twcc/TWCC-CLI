@@ -2,10 +2,14 @@ import threading
 import sys
 import os
 import re
+import click
+import json
 import time
 import pytz
+import jmespath
 import datetime
 import unicodedata
+import requests as rq
 from twccli.twccli import pass_environment
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
@@ -27,6 +31,7 @@ def jpp(inobj):
     import json
     print(json.dumps(inobj, ensure_ascii=False,
                      sort_keys=True, indent=4, separators=(',', ': ')))
+
 
 @pass_environment
 def isDebug(env):
@@ -59,12 +64,11 @@ def isFile(fn):
     return True if os.path.isfile(fn) else False
 
 
-def resource_id_validater(id):
+def resource_id_validater(mid):
+    return mid.isdigit()
 
-    return id.isdigit()
 
-
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False):
+def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False, captionInOrder=False):
     from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
@@ -80,25 +84,40 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
             caption_row = list(row.keys())
     heading_cap = set(['id', 'name'])
 
-    intersect = set(caption_row).intersection(heading_cap)
-
-    if len(intersect) > 0:
-        new_caption = []
-        for ele in sorted(intersect):
-            new_caption.append(ele)
-            caption_row.remove(ele)
-        new_caption.extend(sorted(caption_row))
-        caption_row = new_caption
-
+    if captionInOrder == True:
+        pass
+    else:
+        intersect = set(caption_row).intersection(heading_cap)
+        if len(intersect) > 0:
+            new_caption = []
+            for ele in sorted(intersect):
+                new_caption.append(ele)
+                caption_row.remove(ele)
+            new_caption.extend(sorted(caption_row))
+            caption_row = new_caption
     start_time = time.time()
 
     table_info = []
     table_info.append(
         [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
-
     for ele in json_obj:
-        table_info.append([ele[cap] for cap in caption_row if cap in ele])
-    table = AsciiTable(table_info, " {} ".format(title))
+        row_data = []
+        for cap in caption_row:
+            try:
+                val = jmespath.search(cap, ele)
+            except jmespath.exceptions.ParseError:
+                if cap in ele:
+                    val = ele[cap]
+                else:
+                    val = ''
+            if val == None:
+                val = ''
+            if val == 'Error' or val == "ERROR":
+                row_data.append(Color("{autored}%s{/autored}" % val))
+            else:
+                row_data.append(val)
+        table_info.append(row_data)
+    table = AsciiTable(table_info, title=" {} ".format(title))
 
     for idy in range(len(table.table_data)):
         for idx in range(len(table.table_data[idy])):
@@ -131,10 +150,35 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
     if debug:
         cprint("- %.3f seconds" %
                (time.time() - start_time), 'red', attrs=['bold'])
+
     if isPrint:
         print(table.table)
     else:
         return table.table
+
+
+def send_ga(event_name, cid, params):
+
+    if isNone(cid) or len(cid) == 0:
+        return True
+
+    measurement_id = 'G-6S0562GHKE'
+    api_secret = 'wNf5Se9QSP2YdvgIjfAHiw'
+    host = 'https://www.google-analytics.com'
+    uri = '/mp/collect?measurement_id={}&api_secret={}'.format(
+        measurement_id, api_secret)
+    payload = {"client_id": cid, "non_personalized_ads": "false",
+               "events": [{"name": event_name[:39], "params":params}]}
+    headers = {'content-type': 'application/json'}
+
+    if isDebug():
+        from ..twccli import logger
+        logger_info = {'payload': payload,
+                       'headers': headers,
+                       'endpoint': host+uri}
+        logger.info(logger_info)
+
+    res = rq.post(host+uri, data=json.dumps(payload), headers=headers)
 
 
 def dic_seperator(d):
@@ -158,7 +202,12 @@ def dic_seperator(d):
 
 
 def timezone2local(time_str):
-    ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+    if '.' in time_str:
+        time_str = time_str[:-8]+'Z'
+    if 'T' in time_str and 'Z' in time_str:
+        ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+    elif 'T' in time_str:
+        ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
     return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
 
 
@@ -249,8 +298,10 @@ def sizeof_fmt(num, suffix='B'):
 
 
 def validate(apikey):
-    return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
-
+    try:
+        return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
+    except:
+        return False
 
 def name_validator(name):
     """
@@ -265,7 +316,36 @@ def name_validator(name):
         return True
     return False
 
+
 def mkCcsHostName(ip_addr):
-    return "%s.ccs.twcc.ai"%("-".join(ip_addr.split(".")))
+    return "%s.ccs.twcc.ai" % ("-".join(ip_addr.split(".")))
 
 
+def window_password_validater(password):
+    import re
+    if len(password) >= 17 and len(password) <= 72:
+        result = True
+        if not re.search("[A-Z]", password):
+            click.echo("For Windows upper case latter is needed, [A-Z].")
+            result = False
+        if result and not re.search("[a-z]", password):
+            click.echo("For Windows upper case latter is needed,[a-z].")
+            result = False
+        if result and not re.search("[0-9]", password):
+            click.echo("For Windows numeric latter is needed, [0-9].")
+            result = False
+        if result and not re.search("[@$!%*?&]", password):
+            click.echo(
+                "For Windows special character is needed, [@$!%*?&].")
+            result = False
+        return result
+    else:
+        click.echo(
+            "Your password is too long or too short, length: %s" % (len(password)))
+        return False
+
+
+def get_environment_params(param_key, def_val):
+    if param_key in os.environ and len(os.environ[param_key]) > 0:
+        def_val = os.environ[param_key]
+    return def_val

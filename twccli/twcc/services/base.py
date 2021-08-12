@@ -2,7 +2,7 @@
 from __future__ import print_function
 from twccli.twcc.session import Session2
 from collections import defaultdict
-from twccli.twcc.util import isNone, table_layout
+from twccli.twcc.util import isNone, jpp, table_layout
 from twccli.twcc.services.generic import GenericService
 
 
@@ -10,13 +10,36 @@ class Users(GenericService):
     def __init__(self, api_key=None):
         # raw_input("in users "+api_key)
         GenericService.__init__(self, skip_session=True, api_key=api_key)
-
+        self._func_ = 'users'
         self._csite_ = "goc"
         if not isNone(api_key):
             self._api_key_ = api_key
 
     def getInfo(self):
         return self.list()
+
+    def getHFS(self, is_table):
+        info = self.list()
+        if len(info) > 0:
+            info = info[0]
+            detail = self.queryById(info['id'])
+            gpfs = detail['gpfs']
+            total_gpfs = []
+            for key in gpfs.keys():
+                gpfs[key]['dictionary'] = key
+                total_gpfs.append((gpfs[key]))
+            cols = ['dictionary', 'usage', 'default_quota',
+                    'extra_quota', 'expired_date', 'last_updated_time']
+            if is_table:
+                table_layout("HFS Result",
+                             total_gpfs,
+                             cols,
+                             isPrint=True,
+                             isWrap=False)
+            else:
+                jpp(total_gpfs)
+        else:
+            raise KeyError("Account for API not found.")
 
     def getAccountInfo(self):
         info = self.list()
@@ -61,6 +84,7 @@ class image_commit(GenericService):
         self.res_type = "txt"
         self._do_api()
 
+
 class ApiKey(GenericService):
     def __init__(self, api_key=None):
 
@@ -75,7 +99,6 @@ class ApiKey(GenericService):
         self.http_verb = 'get'
         self.res_type = 'json'
         return self._do_api()
-
 
 
 class acls(GenericService):
@@ -145,24 +168,67 @@ class projects(GenericService):
         self.url_dic = {'projects': proj_id, 'solutions': sol_id}
         return self.list()
 
-    def getProjects(self):
+    def getProjects(self, isAll=False, is_table=True, is_print=True):
         s = iservice(api_key=self._api_key_)
-        res = s.getAllProjects()
-
         my_prj = {}
-        for prj in res['wallet']:
+        total_prj = []
+        cols = ['prj_name', 'prj_code', 'prj_avbl_cr']
+        if isAll == True:
+            res = s.getProjects(isAll)
+            if 'wallet' in res:
+                for prj in res['wallet']:
+                    prj_code = prj[u"計畫系統代碼"]
+                    prj_avbl_cr = float(prj[u"錢包餘額"])
+                    prj_name = prj[u"計畫名稱"]
+                    prj_ele = {
+                        # 'su_qouta':prj['su_qouta'],
+                        # 'obtained_su':prj['obtained_su'],
+                        'prj_code': prj_code,
+                        'prj_avbl_cr': prj_avbl_cr,
+                        'prj_name': prj_name}
+                    total_prj.append(prj_ele)
+                    my_prj[prj_code] = prj_ele
+            if not is_print:
+                return my_prj
+            my_prj = total_prj
+            res = res['wallet']
+        else:
+            res_all = s.getProjects(isAll=True)
+            res = s.getProjects()
+            wallet_code = res['wallet_code']
+            my_prj = {}
+            my_prj_otherinfo = {}
+            for prj in res_all['wallet']:
+                if prj[u'錢包ID'] == wallet_code:
+                    my_prj = {
+                        'prj_name': prj[u"計畫名稱"],
+                        'prj_code': prj[u"計畫系統代碼"],
+                        'time': prj[u"計畫開始時間"]+'-'+prj[u"計畫結束時間"],
+                        'wallet_owner': prj[u"錢包擁有者"],
+                        'person_quota': int(float(res['su_qouta'])),
+                        'person_Tquota': int(float(res['obtained_su'])),
+                        'project_quota': int(float(res['prj_su_quota'])),
+                        'project_Tquota': int(float(res['prj_obtained_su']))
 
-            prj_code = prj[u"計畫系統代碼"]
-            prj_avbl_cr = float(prj[u"錢包餘額"])
-            prj_name = prj[u"計畫名稱"]
-            prj_ele = {'prj_code': prj_code,
-                       'prj_avbl_cr': prj_avbl_cr,
-                       'prj_name': prj_name}
-            my_prj[prj_code] = prj_ele
-        return my_prj
+                    }
+
+            # my_prj['one'] = res
+            # my_prj['all'] = res_all
+            res['prj_code'] = my_prj['prj_code']
+            cols = ['prj_name', 'prj_code', 'time', 'person_quota',
+                    'person_Tquota', 'project_quota', 'project_Tquota', 'wallet_owner']
+        if is_table:
+            table_layout("Project Result",
+                         my_prj,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(res)
 
     def getS3ProjId(self, proj_code):
         projs = self.list()
+
         for proj in projs:
             if proj['name'] == proj_code:
                 return proj['id']
@@ -171,6 +237,7 @@ class projects(GenericService):
         proj_id = self.getS3ProjId(proj_code)
         self.url_dic = {'projects': proj_id, 'key': ''}
         return self.list()
+
 
 class api_key(GenericService):
     def __init__(self, debug=False):
@@ -187,12 +254,15 @@ class iservice(GenericService):
     def __init__(self, api_key=None):
         GenericService.__init__(self, api_key=api_key, skip_session=True)
 
-    def getAllProjects(self):
-        self.url_dic = {"iservice": "user/all_wallet"}
+    def getProjects(self, isAll=False):
+        if isAll:
+            self.url_dic = {"iservice": "user/all_wallet"}
+        else:
+            self.url_dic = {"iservice": "user/wallet"}
         return self.list()
 
     def getProducts(self):
-        self.ext_get = {"product_system_code":"AI"}
+        self.ext_get = {"product_system_code": "AI"}
         self.url_dic = {"iservice": "products"}
         return self.list()
 
@@ -204,3 +274,5 @@ class Flavors(GenericService):
         self._csite_ = csite
         if not isNone(api_key):
             self._api_key_ = api_key
+
+

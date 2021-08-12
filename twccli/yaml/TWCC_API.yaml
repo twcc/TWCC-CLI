@@ -40,6 +40,7 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
+        - 'patch'
         - 'post'
         - 'put'
         - 'delete'
@@ -74,6 +75,14 @@ avalible_funcs:
       url_type: "/{FUNCTION}/"
       http_verb:
         - 'get'
+    -
+      name: "ips"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+        - 'patch'
     -
       name: "images"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
@@ -153,6 +162,11 @@ avalible_funcs:
     -
       name: "api_key"
       url_type: "/{FUNCTION}/"
+      http_verb:
+        - 'get'
+    -
+      name: "project_quotas"
+      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
     -

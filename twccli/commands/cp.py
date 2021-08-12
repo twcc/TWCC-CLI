@@ -5,6 +5,7 @@ import click
 import threading
 import math
 import sys
+import re
 from os.path import relpath, abspath, join, isdir, dirname
 from glob import glob
 from itertools import chain
@@ -12,6 +13,7 @@ from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import isNone, mkdir_p
 from botocore.exceptions import ClientError
+from twccli.twcc.services.generic import GenericService
 
 
 class ProgressPercentage(object):
@@ -101,6 +103,13 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help="Upload / Download files")
 def cli():
+    try:
+        ga = GenericService()
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
+        ga._send_ga(func_call)
+    except Exception as e:
+        logger.warning(e)
     pass
 
 

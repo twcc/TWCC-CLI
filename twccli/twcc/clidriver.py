@@ -116,27 +116,28 @@ class ServiceOperation:
             self._to_curl(t_api, t_headers, t_data, mtype)
 
         start_time = time.time()
+        ssl_verify_mode = True
 
         if mtype == 'get':
-            r = requests.get(t_api, headers=t_headers, verify=False)
+            r = requests.get(t_api, headers=t_headers, verify=ssl_verify_mode)
 
         elif mtype == 'post':
             r = requests.post(t_api,
                               headers=t_headers,
                               data=json.dumps(t_data),
-                              verify=False)
+                              verify=ssl_verify_mode)
         elif mtype == "delete":
-            r = requests.delete(t_api, headers=t_headers, verify=False)
+            r = requests.delete(t_api, headers=t_headers, verify=ssl_verify_mode)
         elif mtype == "patch":
             r = requests.patch(t_api,
                                headers=t_headers,
                                data=json.dumps(t_data),
-                               verify=False)
+                               verify=ssl_verify_mode)
         elif mtype == "put":
             r = requests.put(t_api,
                              headers=t_headers,
                              data=json.dumps(t_data),
-                             verify=False)
+                             verify=ssl_verify_mode)
         else:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
@@ -144,7 +145,7 @@ class ServiceOperation:
             logger.info(t_api)
             logger.info(t_headers)
             logger.info("--- URL: %s, Status: %s, (%.3f sec) ---" %
-                    (t_api, r.status_code, time.time() - start_time))
+                        (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
 
     def doAPI(self,
@@ -172,14 +173,15 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(http))
 
         mkAPIUrl_v3 = False
-        if http == 'get':
+        if http == 'get' or http == 'put' or http == 'patch':
             mkAPIUrl_v3 = True
-        t_url = self.mkAPIUrl(site_sn, api_host, func, url_dict=url_dict, is_v3=mkAPIUrl_v3)
+        t_url = self.mkAPIUrl(site_sn, api_host, func,
+                              url_dict=url_dict, is_v3=mkAPIUrl_v3)
         t_header = self.mkHeader(site_sn=site_sn,
                                  key_tag=key_tag,
                                  api_host=api_host,
                                  api_key=api_key,
-                                 user_agent = user_agent,
+                                 user_agent=user_agent,
                                  ctype=ctype)
         if not isNone(url_ext_get):
             t_url += "?"
@@ -192,11 +194,11 @@ class ServiceOperation:
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 try:
-                    return res[0].json()
+                    return res[0].json(), t_url
                 except:
-                    return res[0].content
+                    return res[0].content, t_url
             elif res_type == 'txt':
-                return res[0].content
+                return res[0].content, t_url
 
     def mkHeader(self,
                  site_sn=None,
@@ -256,12 +258,12 @@ class ServiceOperation:
         self._i = logging.info
         self._d = logging.debug
         self._w = logging.warning
-        
-
 
     def show(self):
-        logger.info("-" * 10 + "=" * 10 + " [info] BEGIN " + "=" * 10 + "-" * 10)
-        logger.info("-" * 10 + "=" * 10 + " [info] ENDS  " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 +
+                    " [info] BEGIN " + "=" * 10 + "-" * 10)
+        logger.info("-" * 10 + "=" * 10 +
+                    " [info] ENDS  " + "=" * 10 + "-" * 10)
 
     def mkAPIUrl(self, site_sn=None, api_host=None, func=None, url_dict=None, is_v3=True):
 
@@ -307,17 +309,17 @@ class ServiceOperation:
 
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and url_parts[
-                    'FUNCTION'] == 'sites':
+                'PLATFORM'] == "openstack-taichung-default-2" and 'sites' in url_parts['FUNCTION']:
             if is_v3:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
 
+
 def isV3(fun_str):
-    if  fun_str == "sites":
+    if fun_str == "sites":
         return True
     if "sites" in fun_str and "action" in fun_str:
         return True
-    if len(set(fun_str.split("/")).intersection(set(['images', 'save'])))==2:
+    if len(set(fun_str.split("/")).intersection(set(['images', 'save']))) == 2:
         return True
     return False

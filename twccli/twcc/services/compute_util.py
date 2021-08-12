@@ -1,13 +1,16 @@
 import re
 import time
+import json
+from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, name_validator
+from twccli.twcc.util import jpp, table_layout, isNone, name_validator
 from prompt_toolkit.shortcuts import yes_no_dialog
+from twccli.twcc.services.solutions import solutions
 
 
-def getConfirm(res_name, entity_name, isForce, ext_txt=""):
+def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
 
     :param res_name: name for deleting object.
@@ -17,8 +20,8 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     :param ext_txt: extra text
     :type ext_txt: string
     """
-    if isForce:
-        return isForce
+    if is_force:
+        return is_force
     import sys
     str_title = u'Confirm delete {}:[{}]'.format(res_name, entity_name)
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
@@ -26,17 +29,38 @@ def getConfirm(res_name, entity_name, isForce, ext_txt=""):
     # if py3
     if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
         return yes_no_dialog(title=str_title, text=str_text)
-    else:
-        return yes_no_dialog(title=str_title, text=str_text).run()
+
+    import click
+    click.echo(click.style(str_title, bg='blue',
+                fg='white', blink=True, bold=True))
+    return click.confirm(str_text, default=True)
 
 
-def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
+def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
     vcs = VcsSite()
     ans = []
 
+    # check if using name
+    if len(ids_or_names) == 1 and type("") == type(ids_or_names[0]) and not ids_or_names[0].isnumeric():
+        site_name_based = ids_or_names[0]
+
+        # reset input ids_or_names
+        ans_ids = vcs.list(is_all)
+        ans_ids = [x for x in ans_ids if x['name'] == ids_or_names[0]]
+        if len(ans_ids) == 1:
+            ids_or_names = [ans_ids[0][u'id']]
+
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'private_ip',
-                'private_network', 'create_time', 'status']
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'private_ip',
+                    'private_network', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
+
         for i, site_id in enumerate(ids_or_names):
             site_id = ids_or_names[i]
             ans.extend([vcs.queryById(site_id)])
@@ -51,15 +75,24 @@ def list_vcs(ids_or_names, is_table, is_all=False, is_print=True):
                     ans[i]['private_network'] = ""
                     ans[i]['private_ip'] = ""
     else:
-        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        if column == '':
+            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        else:
+            cols = column.split(',')
+            if not 'id' in cols:
+                cols.append('id')
+            if not 'name' in cols:
+                cols.append('name')
         ans = vcs.list(is_all)
+
     for each_vcs in ans:
-        if each_vcs['status']=="NotReady":
-            each_vcs['status']="Stopped"
-        if each_vcs['status']=="Shelving":
-            each_vcs['status']="Stopping"
-        if each_vcs['status']=="Unshelving":
-            each_vcs['status']="Starting"
+        if each_vcs['status'] == "NotReady":
+            each_vcs['status'] = "Stopped"
+        if each_vcs['status'] == "Shelving":
+            each_vcs['status'] = "Stopping"
+        if each_vcs['status'] == "Unshelving":
+            each_vcs['status'] = "Starting"
+    ans = sorted(ans, key=lambda k: k['create_time'])
     if len(ans) > 0:
         if not is_print:
             return ans
@@ -82,30 +115,8 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None):
-    """Create vcs
-    create vcs by set solution, image name, flavor
-    create vcs by default value
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None):
 
-    :param sys_vol: Chose system volume disk type
-    :type sys_vol: string
-    :param data_vol: Volume type of the data volume.
-    :type data_vol: int
-    :param data_vol_size: Size of the data volume in (GB).
-    :type data_vol_size: int
-    :param flavor: Choose hardware configuration
-    :type flavor: string
-    :param img_name: Enter image name.Enter image name
-    :type img_name: string
-    :param network: Enter network name
-    :type network: string
-    :param sol: Enter TWCC solution name
-    :type sol: string
-    :param fip: Set this flag for applying a floating IP
-    :type fip: bool
-    :param name: Enter name
-    :type name: string
-    """
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -132,19 +143,27 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     if isNone(img_name):
         img_name = "Ubuntu 20.04"
     required['x-extra-property-image'] = img_name
-
-    # x-extra-property-private-network
+    if not isNone(password):
+        required['x-extra-property-password'] = password
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
 
-    # x-extra-property-keypair
-    if isNone(keypair):
-        raise ValueError("Missing parameter: `-key`.")
-    if not keypair in set(extra_props['x-extra-property-keypair']):
-        raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
-                                                                         ", ".join(extra_props['x-extra-property-keypair'])))
-    required['x-extra-property-keypair'] = keypair
+    if isNone(password):
+        # x-extra-property-keypair
+        if isNone(keypair):
+            raise ValueError("Missing parameter: `-key`.")
+        if not keypair in set(extra_props['x-extra-property-keypair']):
+            raise ValueError("keypair: {} is not validated. Avbl: {}".format(keypair,
+                                                                             ", ".join(extra_props['x-extra-property-keypair'])))
+        required['x-extra-property-keypair'] = keypair
+
+        get_pass_api_key_params(pass_api, env)
+
+        if not (env == {} or env == None):
+            required['x-extra-property-env'] = json.dumps(env)
+        else:
+            required['x-extra-property-env'] = ""
 
     # x-extra-property-floating-ip
     required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
@@ -204,6 +223,19 @@ def change_loadbalancer(vlb_id, members, lb_method, is_table):
 
     cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
             'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
+    if 'detail' in ans:
+        is_table = False
+    else:
+        ans['private_net_name'] = ans['private_net']['name']
+        ans['pools_method'] = ','.join(
+            [ans_pool['method'] for ans_pool in ans['pools']])
+        for ans_pool in ans['pools']:
+            ans['members_IP,status'] = ['({}:{},{})'.format(ans_pool_members['ip'], ans_pool_members['port'],
+                                                            ans_pool_members['status']) for ans_pool_members in ans_pool['members']]
+
+        ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(
+            ans_listeners['name'], ans_listeners['protocol'], ans_listeners['protocol_port'], ans_listeners['status']) for ans_listeners in ans['listeners']]
+
     if len(ans) > 0:
         if is_table:
             table_layout("Load Balancers Info.:", ans,
@@ -221,8 +253,9 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         for vol_id in ids_or_names:
             srvid = getServerId(site_id) if not isNone(site_id) else None
             this_ans = vol.list(vol_id)
-            if this_ans['volume_type'] =='ssd':
-                ans.append({"detail": "Invalid volume: SSD Volume could not to extend"})
+            if this_ans['volume_type'] == 'ssd':
+                ans.append(
+                    {"detail": "Invalid volume: SSD Volume could not to extend"})
                 is_table = False
                 continue
             this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
@@ -238,7 +271,8 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
                     the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         raise ValueError
-    cols = ['id', 'name', 'size', 'create_time','volume_type' , 'status', 'mountpoint']
+    cols = ['id', 'name', 'size', 'create_time',
+            'volume_type', 'status', 'mountpoint']
     if len(ans) > 0:
         if is_table:
             table_layout("Volumes" if not len(ids_or_names) == 1 else "Volume Info.: {}".format(
@@ -247,13 +281,31 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
             jpp(ans)
 
 
-def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
+def change_ip(ids_or_names, desc, is_table):
+    fxip = Fixedip()
+    cols = ['id', 'address',  'create_time', 'status', 'type', 'desc']
+    if len(ids_or_names) > 0:
+        for ip_id in ids_or_names:
+            if not isNone(desc):
+                ans = fxip.patch_desc(ip_id, desc)
+    if len(ans) > 0:
+        if is_table:
+            table_layout("IP Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
+
+
+def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
     vcs = VcsSite()
     ans = []
 
     if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip','create_time', 'status']
-
+        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        show_desc_flag = False
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
@@ -265,6 +317,13 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
                 vcs.stop(site_id)
             elif status == 'ready':
                 vcs.start(site_id)
+            else:
+                pass
+            if not desc == '':
+                vcs.patch_desc(site_id, desc)
+                show_desc_flag = True
+        if show_desc_flag:
+            cols.append('desc')
     else:
         raise ValueError
     if wait and status == 'stop':
@@ -278,12 +337,12 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
         for each_vcs in ans:
-            if each_vcs['status']=="NotReady":
-                each_vcs['status']="Stopped"
-            if each_vcs['status']=="Shelving":
-                each_vcs['status']="Stopping"
-            if each_vcs['status']=="Unshelving":
-                each_vcs['status']="Starting"
+            if each_vcs['status'] == "NotReady":
+                each_vcs['status'] = "Stopped"
+            if each_vcs['status'] == "Shelving":
+                each_vcs['status'] = "Stopping"
+            if each_vcs['status'] == "Unshelving":
+                each_vcs['status'] = "Starting"
         if not is_print:
             return ans
         if is_table:
@@ -293,15 +352,15 @@ def change_vcs(ids_or_names, status, is_table, wait, is_print=True):
             jpp(ans)
 
 
-def del_vcs(ids_or_names, isForce=False):
+def del_vcs(ids_or_names, is_force=False):
     """delete a vcs
 
     :param ids_or_names: name for deleting object.
     :type ids_or_names: string
-    :param isForce: Force to delete any resources at your own cost.
-    :type isForce: bool
+    :param is_force: Force to delete any resources at your own cost.
+    :type is_force: bool
     """
-    if getConfirm("VCS", ",".join(ids_or_names), isForce):
+    if getConfirm("VCS", ",".join(ids_or_names), is_force):
         vsite = VcsSite()
         if len(ids_or_names) > 0:
             for ele in ids_or_names:
@@ -336,7 +395,7 @@ def doSiteStable(site_id, site_type='cntr'):
     elif site_type == 'vlb':
         b = LoadBalancers()
     else:
-        ValueError("Error")
+        raise ValueError("Error")
 
     wait_ready = False
     while not wait_ready:
@@ -344,3 +403,79 @@ def doSiteStable(site_id, site_type='cntr'):
             wait_ready = True
         time.sleep(5)
     return site_id
+
+
+def format_ccs_env_dict(env_dict):
+    if not isNone(env_dict) and len(env_dict) > 0:
+        return json.dumps([env_dict])
+    else:
+        return ""
+
+
+def get_ccs_sol_id(sol_name):
+    a = solutions()
+    sol_name = sol_name.lower()
+    cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
+                  if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower() == sol_name])
+    if len(cntrs) > 0:
+        return cntrs[sol_name]
+    else:
+        raise ValueError(
+            "Solution name '{0}' is not valid.".format(sol_name))
+
+
+def get_ccs_img(sol_id, sol_name, sol_img, gpu=1):
+    ccs_site = Sites(debug=False)
+    imgs = ccs_site.getAvblImg(sol_id, sol_name, latest_first=True)
+    if isNone(sol_img) or len(sol_name) == 0:
+        return imgs[0]
+    else:
+        if sol_img in imgs:
+            return sol_img
+        else:
+            raise ValueError(
+                "Container image '{0}' for '{1}' is not valid.".format(sol_img, sol_name))
+
+
+def get_pass_api_key_params(is_apikey, env_dict):
+    if not isNone(is_apikey) and is_apikey:
+        import click
+        import socket
+        from twccli.twcc.session import Session2
+
+        sess = Session2()
+        env_dict['_TWCC_API_KEY_'] = sess.twcc_api_key
+        env_dict['_TWCC_CLI_GA_'] = "1"
+        env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
+        env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
+
+def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
+    """Create container
+       Create container by default value
+       Create container by set vaule of name, solution name, gpu number, solution number
+    """
+
+    get_pass_api_key_params(is_apikey, env_dict)
+
+    def_header = Sites.getGpuDefaultHeader(flavor, sol_name, gpu)
+    sol_id = get_ccs_sol_id(sol_name)
+    def_header['x-extra-property-image'] = get_ccs_img(
+        sol_id, sol_name, sol_img, gpu)
+    def_header['x-extra-property-env'] = format_ccs_env_dict(env_dict)
+
+    if not name_validator(cntr_name):
+        raise ValueError(
+            "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
+
+    ccs_site = Sites(debug=False)
+    res = ccs_site.create(cntr_name, sol_id, def_header)
+
+    if 'id' not in res.keys():
+        if 'message' in res:
+            raise ValueError(
+                "Can't find id, please check error message : {}".format(res['message']))
+        if 'detail' in res:
+            raise ValueError(
+                "Can't find id, please check error message : {}".format(res['detail']))
+    else:
+        return res

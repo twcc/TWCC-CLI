@@ -1,29 +1,92 @@
 ###### tags: `twcc`, `twccli`
 
-[![CircleCI](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5.svg?style=shield)](https://circleci.com/gh/TW-NCHC/TWCC-CLI/tree/v0.5)
-
-
 # TWCC-CLI Project
 
-The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC services. The current version of the TWCC CLI is **v0.5**. (New version coming soon! Please checkout **New Features** below.)
+The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
-**NOTICE**
-If you want to use ansible, please set $ANSIBLE_LIBRARY to your environment.
-```
-export ANSIBLE_LIBRARY=
-```
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
 
-Remeber to set locale in environment
-```
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
-export PYTHONIOENCODING=UTF-8
-```
+[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PyPI version](https://badge.fury.io/py/TWCC-CLI.svg)](https://badge.fury.io/py/TWCC-CLI.svg)  [![Documentation Status](https://readthedocs.org/projects/twcc-cli/badge/?version=latest)](https://twcc-cli.readthedocs.io/en/latest/?badge=latest) [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
 
-## INDEX: 
-1. [TWCC-CLI α for v0.5](https://github.com/TW-NCHC/TWCC-CLI/tree/v0.5) | [@PYPI](https://pypi.org/project/TWCC-CLI/) | [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC resources. 
 
-1. Release Notes :point_down:
+![TWCC_Resources](images/TWCC_resources.png)
+
+If you have any questions, please email us at: iservice@twcc.ai for account support, and isupport@twcc.ai for technical support
+
+ ❗ ❗ Always try to upgrade your TWCC-CLI by using `pip3 install -U TWCC-CLI`. ❗ ❗ ❗
+
+
+## :point_down: Release Notes :point_down:
+
+### v0.5.18 Release Note
+![img](https://media.giphy.com/media/zh4bSE7Gu71cCGgidY/giphy.gif)
+
+**Feature**
+- We support auto-complete for TWCC-CLI :sparkles::sparkles:
+- We support Python 3.9 :sparkles:
+- We enable environment parameters in CCS
+
+**Bug Fix**
+- fix some bugs
+
+### v0.5.17 Release Note
+![img](https://media.giphy.com/media/XymXANrzgI4k6FL6zr/giphy.gif)
+
+**Feature**
+- We add sonarqube for better software quality.
+- VCS `snapshot` be renamed to `custom-image` in TWCC.
+- BSS(block storage service) has been renamed to [VDS(virtual disk service)](https://man.twcc.ai/@twccdocs/r1DhqHdpN) in TWCC.
+- Enable envoronment variables for VCS, check out `twccli mk vcs -h`.
+
+**Bug Fix**
+- fix bug in `mk key`
+- fix bug in `ls -itype`
+- fix exception bug
+- Update AIML Pipeline scripts.
+
+### v0.5.16.2 Release Note
+
+**Feature**
+- Users can create VCS with windows img
+
+**Bug Fix**
+- fix some bugs
+
+### v0.5.16.1 Release Note
+
+**Bug Fix**
+- fix some bugs
+
+### v0.5.16 Release Note
+
+![img](https://media.giphy.com/media/3o6Ztk7NosfLVRqcpy/giphy.gif)
+
+**Feature**
+- CLI is now collected users operating information by GA. If you don't want to be collect, just keep your `ga_cid` value **EMPTY** in `$HOME/.twcc_data/credential`.
+- Users can turn on/off COS bucket version control feature and create public access URL for specific objects.
+- Users can checkout [HFS](https://man.twcc.ai/@twccdocs/rypYCr_TN) info with CLI
+- Users can list CCS log, and show more information.
+- CLI now can renew your credential file automatically, keep it up-to-date.
+
+**Bug Fix**
+- fix bug in `net vcs`
+
+### v0.5.15 Release Note
+
+![img](https://media.giphy.com/media/VSRSd6I6OTw8ywt6Xt/giphy.gif)
+
+**Feature**
+- BSS(Block Storage Service) is officially renamed as VDS(Virtual Disk Service).
+- Users can list personal resource of VDS & [VLB](https://www.twcc.ai/doc?page=load_balancer).
+- Users can create multi listener over [VLB](https://www.twcc.ai/doc?page=load_balancer).
+- Users can change VCS descrption with `-d`.
+- Users can multiply name their SnapShot wile createing.
+
+**Bug Fix**
+- fix #9
+- fix timezone problem
+- fix error response for snapshot
 
 ### v0.5.14 Release Note
 ![img](https://media.giphy.com/media/c4AldScPlPi5uGFux2/giphy.gif)
@@ -193,3 +256,6 @@ for Mar. 20th ,2020 (v0.5.2)
 If you have any questions, please email us at: 
 - iservice@narlabs.org.tw for account support
 - isupport@narlabs.org.tw for technical support
+
+
+![TWS](images/TWS-Logo.png) | ![TWS TWCC-CLI Team](images/tws-twccli-team.jpeg)

@@ -1,3 +1,6 @@
 recursive-include twccli *.py
 recursive-include twccli *.yaml
 recursive-include twccli *.sh
+include twccli-complete.sh
+include requirements.txt
+
