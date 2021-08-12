@@ -18,6 +18,7 @@ except ImportError:
         from pip.req import parse_requirements
 
 here = os.path.abspath(os.path.dirname(__file__))
+print(here)
 
 TWCC_CONFIG = {}
 ver_path = convert_path('twccli/version.py')

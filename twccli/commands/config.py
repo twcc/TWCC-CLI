@@ -109,6 +109,7 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         click.echo(Session2())
 
 
+
 @click.command(help='Show this version.')
 @pass_environment
 def version(ctx):
