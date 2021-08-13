@@ -19,6 +19,19 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.19 Release Note
+
+![img](https://media.giphy.com/media/2wh5JJnWKjs7coMOXR/giphy.gif)
+
+**Feature**
+- Users can use `-ptype` to create customized CCS.
+- Users can transport your credentials to your new resources. You can switch off by providing `-nokey` while `twcc mk [ccs|vcs]`.
+
+**Bug Fix**
+- fix auto migrating bugs
+- fix typo error
+- fix some bugs
+
 ### v0.5.18 Release Note
 ![img](https://media.giphy.com/media/zh4bSE7Gu71cCGgidY/giphy.gif)
 
