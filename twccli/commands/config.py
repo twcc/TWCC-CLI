@@ -4,7 +4,6 @@ import click
 import os
 import sys
 import uuid
-from twccli.twcc.util import validate, isNone
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.util import *
@@ -57,27 +56,30 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     :type rc_setting: bool
     """
     if not Session2._isValidSession():
-        if isNone(apikey):
-            if 'TWCC_API_KEY' in os.environ:
-                apikey = os.environ['TWCC_API_KEY']
-        else:
-            os.environ['TWCC_API_KEY'] = apikey
+        
+        # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
+        get_environment_params('TWCC_API_KEY', apikey)
+        get_environment_params('_TWCC_API_KEY_', apikey)
+
+        get_environment_params('TWCC_PROJ_CODE', proj_code)
+        get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
+        
+        get_environment_params('_TWCC_CLI_GA_', ga_flag)
+
         if not isNone(user_agent):
             os.environ['User_Agent'] = user_agent
-        if isNone(proj_code) and 'TWCC_PROJ_CODE' in os.environ:
-            proj_code = os.environ['TWCC_PROJ_CODE']
-
-        if isNone(apikey) or len(apikey) == 0:
-            apikey = click.prompt('Please enter TWCC APIKEY', type=str)
 
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
-                'Please enter TWCC project code', type=str)
+                'Please enter TWCC Project Code', type=str)
+            
         if validate(apikey):
             proj_code = proj_code.upper()
             if env.verbose:
-                logger.info("Receiving Project Code: {}".format(proj_code))
-                logger.info("Receiving API Key: {}".format(apikey))
+                logger.info("Receiving TWCC Project Code: {}".format(proj_code))
+                logger.info("Receiving TWCC API Key: {}".format(apikey))
+                logger.info("Receiving TWCC CLI GA: {}".format(ga_flag))
+
             if not ga_flag == None:
                 cid = str(uuid.uuid1()) if ga_flag else None
             else:
@@ -97,14 +99,14 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
             else:
                 click.echo(
                     "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli-complete.sh".format(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0])))))
+            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format([cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
         else:
             raise ValueError("API Key is not validated.")
     else:
         if env.verbose:
             logger.info("load credential from {}".format(
                 Session2()._getSessionFile()))
-        print(Session2())
+        click.echo(Session2())
 
 
 @click.command(help='Show this version.')
