@@ -99,7 +99,6 @@ manual MAJOR version:
   script:
     - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
     - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload --verbose dist/*
