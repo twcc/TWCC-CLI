@@ -113,10 +113,8 @@ def get_params_seq(argv_list, argv_key):
     return argv_envk
 
 
-def mk_env_dict(env_keys, env_values):
+def mk_env_dict(arg_envk="-envk", arg_envv="-envv"):
 
-    arg_envk = "-envk"
-    arg_envv = "-envv"
     env_keys = get_params_seq(sys.argv, arg_envk).values()
     env_values = get_params_seq(sys.argv, arg_envv).values()
 
@@ -200,9 +198,9 @@ def cli():
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, 
-    data_vol, data_vol_size, flavor, img_name, wait, network, snapshot, 
-    sol, fip, password, env_keys, env_values, is_apikey, is_table):
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
+        data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
+        sol, fip, password, env_keys, env_values, is_apikey, is_table):
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
@@ -246,14 +244,11 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 if window_password_validater(password):
                     name = name+'win'
 
-        # due to seq will not be in order
-        env_dict = mk_env_dict(env_keys, env_values)
-
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env=env_dict, pass_api=is_apikey)
+                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -267,7 +262,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
     if is_table:
         cols = ["id", "name", "status"]
         if is_apikey:
-            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+            click.echo(click.style("Passing current credential information to new computing resources.",
+                       bg='blue', fg='white', blink=False, bold=True))
 
         table_layout(table_layout_title, ans, cols, isPrint=True)
     else:
@@ -351,8 +347,8 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, flavor, sol, img_name, 
-    env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
+def ccs(env, name, gpu, flavor, sol, img_name,
+        env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
 
     if req_dup:
         if isNone(site_id):
@@ -363,7 +359,7 @@ def ccs(env, name, gpu, flavor, sol, img_name,
         create_commit(site_id, dup_tag)
     else:
         ans = create_ccs(name, gpu, flavor, sol, img_name,
-                         mk_env_dict(env_keys, env_values), is_apikey)
+                         mk_env_dict(), is_apikey)
         if wait:
             doSiteStable(ans['id'])
             b = Sites(debug=False)
@@ -371,9 +367,11 @@ def ccs(env, name, gpu, flavor, sol, img_name,
         if is_table:
             cols = ["id", "name", "status"]
         if is_apikey:
-            click.echo(click.style("Passing current credential information to new computing resources.", bg='blue', fg='white', blink=False, bold=True))
+            click.echo(click.style("Passing current credential information to new computing resources.",
+                       bg='blue', fg='white', blink=False, bold=True))
 
-            table_layout("CCS Site:{}".format(ans['id']), ans, cols, isPrint=True)
+            table_layout("CCS Site:{}".format(
+                ans['id']), ans, cols, isPrint=True)
         else:
             jpp(ans)
 
