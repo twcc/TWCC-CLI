@@ -298,8 +298,10 @@ def sizeof_fmt(num, suffix='B'):
 
 
 def validate(apikey):
-    return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
-
+    try:
+        return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
+    except:
+        return False
 
 def name_validator(name):
     """
@@ -339,5 +341,11 @@ def window_password_validater(password):
         return result
     else:
         click.echo(
-                "Your password is too long or too short, length: %s"%(len(password)))
+            "Your password is too long or too short, length: %s" % (len(password)))
         return False
+
+
+def get_environment_params(param_key, def_val):
+    if param_key in os.environ and len(os.environ[param_key]) > 0:
+        def_val = os.environ[param_key]
+    return def_val

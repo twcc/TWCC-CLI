@@ -179,9 +179,8 @@ class Session2(object):
     @staticmethod
     def _getDefaultProject(twcc_proj_code=None):
         if isNone(twcc_proj_code):
-            # raw_input((isNone(os.environ['TWCC_PROJ_CODE']), os.environ['TWCC_PROJ_CODE']))
-            if "TWCC_PROJ_CODE" in os.environ and not isNone(os.environ['TWCC_PROJ_CODE']):
-                return os.environ["TWCC_PROJ_CODE"]
+            if "_TWCC_PROJECT_CODE_" in os.environ and not isNone(os.environ['_TWCC_PROJECT_CODE_']):
+                return os.environ["_TWCC_PROJECT_CODE_"]
             if Session2._isValidSession():
                 return Session2._isValidSession(isConfig=True)['_default']['twcc_proj_code']
             raise ValueError("input project code")
@@ -282,8 +281,8 @@ class Session2(object):
 
     @staticmethod
     def _getApiKey(twcc_api_key):
-        if 'TWCC_API_KEY' in os.environ and len(os.environ['TWCC_API_KEY']) > 0:
-            return os.environ['TWCC_API_KEY']
+        if '_TWCC_API_KEY_' in os.environ and len(os.environ['_TWCC_API_KEY_']) > 0:
+            return os.environ['_TWCC_API_KEY_']
         else:
             if Session2._isValidSession():
                 return Session2._isValidSession(isConfig=True)['_default']['twcc_api_key']
@@ -339,6 +338,8 @@ class Session2(object):
         from datetime import datetime
 
         key_values = [
+            {"key": "_TWCC_API_KEY_", "value": self.twcc_api_key},
+            {"key": "_TWCC_PROJECT_CODE_", "value": self.twcc_proj_code},
             {"key": "session_created_time", "value":
                 self.sessConf['_meta']['ctime']},
             {"key": "twcc_cli_version",
@@ -346,11 +347,9 @@ class Session2(object):
             {"key": "twcc_apikey_owner", "value": Session2._whoami(self.twcc_api_key)[
                 'display_name']},
             {"key": "twcc_data_path", "value": self.twcc_data_path},
-            {"key": "twcc_api_key", "value": self.twcc_api_key},
             {"key": "package_yaml", "value": self.package_yaml},
             {"key": "twcc_file_session", "value": self.twcc_file_session},
             {"key": "twcc_file_resources", "value": self.twcc_file_resources},
-            {"key": "twcc_proj_code", "value": self.twcc_proj_code},
         ]
         # return ""
         return table_layout("parameters", key_values, ['key', 'value'], isPrint=False, isWrap=False)
