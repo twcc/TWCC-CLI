@@ -132,6 +132,6 @@ manual deploy to GITHUB:
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
     - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
   only:
-    - 347-test-cd-flow-to-github
+    - master
   when: manual
   allow_failure: false
