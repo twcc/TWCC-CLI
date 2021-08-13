@@ -366,9 +366,10 @@ def ccs(env, name, gpu, flavor, sol, img_name,
             ans = b.queryById(ans['id'])
         if is_table:
             cols = ["id", "name", "status"]
-        if is_apikey:
-            click.echo(click.style("Passing current credential information to new computing resources.",
-                       bg='blue', fg='white', blink=False, bold=True))
+
+            if is_apikey:
+                click.echo(click.style("Passing current credential information to new computing resources.",
+                                       bg='blue', fg='white', blink=False, bold=True))
 
             table_layout("CCS Site:{}".format(
                 ans['id']), ans, cols, isPrint=True)

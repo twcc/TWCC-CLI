@@ -75,7 +75,6 @@ sonar-preview:
   except:
     - master
   script:
-    #- echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - apk add git
     - git config --global user.email "leo.chen@twsc.io"
     - git config --global user.name "Leo Chen"
@@ -122,6 +121,7 @@ manual deploy to GITHUB:
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
+    - git commit . -m "-- Release $TWCC_CLI_VER --"
     - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common
