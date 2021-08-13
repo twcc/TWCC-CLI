@@ -14,11 +14,12 @@ import uuid
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        (self.flv, self.sol, self.img, self.sys_vol) =  ("v.super", "centos", "CentOS 7.9", "HDD") #self.sol=ubuntu
+        (self.flv, self.sol, self.img, self.sys_vol) = (
+            "v.super", "centos", "CentOS 7.9", "HDD")  # self.sol=ubuntu
         self.ext_port = "81"
         self.ext_port_range = "3000-3010"
-        self.apikey = os.environ['TWCC_API_KEY']
-        self.pcode = os.environ['TWCC_PROJ_CODE']
+        self.apikey = os.environ['_TWCC_API_KEY_']
+        self.pcode = os.environ['_TWCC_PROJECT_CODE_']
 
     def _loadSession(self):
         self.runner = CliRunner()
@@ -55,20 +56,23 @@ class TestVcsLifecyc:
 
     def _create_vnet(self):
         vnet_name = 'twccli_{}'.format(str(uuid.uuid1()).split("-")[0])
-        cmd_list = "mk vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.1 -json -wait".format(vnet_name)
+        cmd_list = "mk vnet -n {} -cidr 10.0.0.0/24 -gw 10.0.0.1 -json -wait".format(
+            vnet_name)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         self.vnet_id = json.loads(out)['id']
 
     def _create_vlb(self):
-        cmd_list = "mk vlb --load_balance_name {} -wait -json".format('twccli_vlb')
+        cmd_list = "mk vlb --load_balance_name {} -wait -json".format(
+            'twccli_vlb')
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
         self.vlb_id = json.loads(out)['id']
 
     def _add_member_vlb(self):
-        cmd_list = "ch vlb --member {} {} -id {}".format('192.168.10.10:8080','192.168.11.11:9090',self.vlb_id)
+        cmd_list = "ch vlb --member {} {} -id {}".format(
+            '192.168.10.10:8080', '192.168.11.11:9090', self.vlb_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
@@ -80,18 +84,18 @@ class TestVcsLifecyc:
 
     def _create_vcs(self):
         if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__)))):
-            with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__))),'a') as f:
+            with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(__file__))), 'a') as f:
                 f.write('  - !!python/tuple [4044,dedi]\n')
         paras = ["mk", "vcs",
-                "--name",           self.key_name,
-                "--image-type-name",self.sol,
-                "--product-type",   self.flv,
-                "--img_name",       self.img,
-                "--keypair",        self.key_name,
-                "--system-volume-type", self.sys_vol,
-                "-wait", "-json"
-                ]
-        print("Using Params: %s"%" ".join(paras))
+                 "--name",           self.key_name,
+                 "--image-type-name",self.sol,
+                 "--product-type",   self.flv,
+                 "-img",             self.img,
+                 "--keypair",        self.key_name,
+                 "--system-volume-type", self.sys_vol,
+                 "-wait", "-json"
+                 ]
+        print("Using Params: %s" % " ".join(paras))
         out = self.__run(paras)
         print(out)
         print(json.loads(out))
@@ -124,13 +128,14 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg_range(self):
-        cmd_list = "net vcs -prange {} -s {}".format(self.ext_port_range, self.vcs_id)
+        cmd_list = "net vcs -prange {} -s {}".format(
+            self.ext_port_range, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg_range_and_port(self):
         cmd_list = "net vcs -prange {} -p {} -s {}".format(self.ext_port_range,
-                self.ext_port, self.vcs_id)
+                                                           self.ext_port, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
@@ -156,8 +161,10 @@ class TestVcsLifecyc:
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
+
     def _del_secg(self):
-        cmd_list = "rm vcs -secg --force {} --site-id {}".format(self.secg_id, self.vcs_id)
+        cmd_list = "rm vcs -secg --force {} --site-id {}".format(
+            self.secg_id, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
         print(out)
@@ -188,8 +195,8 @@ class TestVcsLifecyc:
         self._add_secg_range_and_port()
         self._add_secg_without_range_and_port()
         self._list_vcs()
-        #self._stop_vcs()
-        #self._start_vcs()
+        # self._stop_vcs()
+        # self._start_vcs()
         self._add_secg()
         self._list_secg()
         self._del_secg()
