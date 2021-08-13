@@ -45,9 +45,6 @@ python36:
   script: 
     - python -V
     - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install tox
     - tox -e py36
   only:
@@ -97,9 +94,6 @@ manual MAJOR version:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload --verbose dist/*
