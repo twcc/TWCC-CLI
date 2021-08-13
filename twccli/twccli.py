@@ -132,7 +132,7 @@ def exception(logger):
 cli = TWCCLI(help="""
         Welcome to TWCC, TaiWan Computing Cloud.
 
-        https://github.com/tws/TWCC-CLI
+        https://github.com/twcc/TWCC-CLI
 
         -- You Succeed, We Succeed!! --
 
@@ -150,7 +150,7 @@ def cli(env, verbose, show_and_verbose):
     """
         Welcome to TWCC, TaiWan Computing Cloud.
 
-        https://github.com/tws/TWCC-CLI
+        https://github.com/twcc/TWCC-CLI
 
         -- You Succeed, We Succeed!! --
 
@@ -214,12 +214,6 @@ class CredentialHandler():
         self.backup_credential = path.join(
             _TWCC_DATA_DIR_, "credential.bakup_"+datetime.now().strftime("%m%d%H%M"))
 
-        # import os
-        # ver_fn = path.join(path.dirname(path.abspath(__file__)), 'version.py')
-        # print(ver_fn)
-        # version_cnt = open(ver_fn, 'r').read()
-        # print(version_cnt)
-        # eval(version_cnt)
         from .version import __version__
         self.cli_version = __version__
 
@@ -227,15 +221,33 @@ class CredentialHandler():
         if path.exists(self.old_credential):
             with open(self.old_credential, 'r') as stream:
                 try:
-                    cnf = yaml.safe_load(stream)
+                    yaml_cnt = stream.read()
+                    if len(yaml_cnt) == 0:
+                        return False
+                        
+                    cnf = yaml.safe_load(yaml_cnt)
+                    
                     self.old_api = cnf['_default']['twcc_api_key']
                     self.prj_code = cnf['_default']['twcc_proj_code']
                     self.old_version = cnf['_meta']['cli_version']
-                    return False if cnf['_meta']['cli_version'] == self.cli_version else True
+
+                    _env_ver_ = self.old_version.split('.')
+                    _cli_ver_ = self.cli_version.split('.')
+
+                    if _env_ver_[0] == _cli_ver_[0] and _env_ver_[1] == _cli_ver_[1]:
+                        if int(_env_ver_[2]) < int(_cli_ver_[2]):
+                            return True
+                        else:
+                            return False
+                    else:
+                        raise ValueError("Major/Minor version mismatch!")
                 except yaml.YAMLError as exc:
                     print(exc)
 
     def renew(self):
+        """When seeing old version, we need to create a new credential file.
+        """
+
         self._backup()
         self._removeOld()
 
