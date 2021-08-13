@@ -153,7 +153,8 @@ class GpuSite(GpuService):
         else:
             return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
-    def getGpuListOnline(self):
+    @staticmethod
+    def getGpuListOnline():
         gpu = GpuSite()
         flvs = gpu.getFlavors()
         name2id = {}
