@@ -122,6 +122,7 @@ manual deploy to GITHUB:
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
+    - git commit . -m "-- Release $TWCC_CLI_VER" --"
     - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common
