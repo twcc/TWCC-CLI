@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from click.testing import CliRunner
 from ..twcc.util import name_validator, resource_id_validater, window_password_validater
-from ..version import __TWCC_CLI_STAGE__
 
 
 def test_name_validator():

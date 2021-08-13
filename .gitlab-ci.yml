@@ -7,10 +7,6 @@ stages:
     - test
     - deploy
 
-#before_script:
-#    - python -V
-#    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
-
 python39:
   stage: test
   image: python:3.9
@@ -18,7 +14,7 @@ python39:
     TWCC_CICD_STAGE: 'minor'
   script: 
     - python -V
-    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
     - echo $TWCC_CICD_STAGE
     - pip install tox
     - export TWCC_SHOW_DEPRECATED=False
@@ -33,7 +29,7 @@ python37:
     TWCC_CICD_STAGE: 'minor'
   script: 
     - python -V
-    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
+    - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
     - echo $TWCC_CICD_STAGE
     - pip install tox
     - export TWCC_SHOW_DEPRECATED=False
@@ -48,10 +44,7 @@ python36:
     TWCC_CICD_STAGE: 'MAJOR'
   script: 
     - python -V
-    - echo $TWCC_API_KEY, $TWCC_PROJ_CODE
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
+    - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
     - pip install tox
     - tox -e py36
   only:
@@ -79,7 +72,6 @@ sonar-preview:
   except:
     - master
   script:
-    #- echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - apk add git
     - git config --global user.email "leo.chen@twsc.io"
     - git config --global user.name "Leo Chen"
@@ -102,9 +94,6 @@ manual MAJOR version:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
-    - grep '__TWCC_CLI_STAGE__ =' twccli/version.py
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload --verbose dist/*
@@ -126,6 +115,7 @@ manual deploy to GITHUB:
     - git merge upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
+    - git commit . -m "-- Release $TWCC_CLI_VER --"
     - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common

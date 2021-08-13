@@ -48,12 +48,12 @@ class GpuSite(GpuService):
     @staticmethod
     def getSolList(mtype='dict', name_only=False, reverse=False):
         sol_list = [(4, "TensorFlow"),
-                    (9, "Caffe2"),
+                    (9, "PyTorch"),
                     (10, "Caffe"),
                     (13, "CNTK"),
                     (16, "CUDA"),
                     (19, "MXNet"),
-                    (24, "PyTorch"),
+                    (24, "Caffe2"),
                     # (29, "TensorRT"), # not avalible for now
                     # (35, "TensorRT_Server"), # not avalible for now
                     (42, "Theano"),
@@ -84,11 +84,14 @@ class GpuSite(GpuService):
         return self._do_api()
 
     @staticmethod
-    def getGpuDefaultHeader(gpus="1"):
-        gpu_list = GpuSite.getGpuList()
+    def getGpuDefaultHeader(flavor, sol_name, gpus="1"):
+        if not flavor == None:
+            gpus = flavor
+            gpu_list = GpuSite.getGpuListOnline()
+        else:
+            gpu_list = GpuSite.getGpuList()
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
-
         gpu_default = {
             'command': "whoami; sleep 600;",
             'flavor': gpu_list[gpus],
@@ -127,7 +130,58 @@ class GpuSite(GpuService):
             return buckets
         elif mtype == 'dict':
             return dict([(x, "/mnt/s3/%s" % (x)) for x in buckets])
+    
+    def getIsrvFlavors(self, name_or_id="flavor_id"):
+        isrv = iservice()
 
+        def filter_flavor_id(x):
+            try:
+                other_content_json = json.loads(x['other_content'])
+            except ValueError as e:
+                return False
+            if "flavor_id" in  other_content_json:
+                return True
+            else:
+                return False
+
+        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
+
+        fid_desc = dict([(get_flavor_id(x), x)
+                         for x in isrv.getProducts() if filter_flavor_id(x)])
+        if name_or_id == "flavor_id":
+            return fid_desc
+        else:
+            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+
+    @staticmethod
+    def getGpuListOnline():
+        gpu = GpuSite()
+        flvs = gpu.getFlavors()
+        name2id = {}
+        for each_flv in flvs.values():
+            # if each_flv['name'] in avb_flv:
+            name2id[each_flv['name']] = each_flv['id']
+        solid2iservice_product = gpu.getIsrvFlavors()
+        desc2id = {}
+        for gsol_id, each_prod in solid2iservice_product.items():
+            if gsol_id in name2id.values():
+                desc2id[each_prod['desc']] = gsol_id
+        gpu_tag2spec = []
+        inv_name2id = {v: k for k, v in name2id.items()}
+        for desc, sol_id in desc2id.items():
+            
+            gpu_tag2spec.append((re.findall('(c.+super)',desc)[0], inv_name2id[sol_id]))
+        gpu_tag2spec = dict(gpu_tag2spec)
+        return gpu_tag2spec
+
+    def getAvblFlv(self, sol_id):
+
+        self.proj = projects()
+        self.proj._csite_ = self._csite_
+
+        ans = self.proj.getProjectSolution(self._project_id, sol_id)
+        return ans['site_extra_prop']['flavor']
+        
     def getAvblImg(self, sol_id, sol_name, latest_first=True):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)
@@ -198,6 +252,10 @@ class GpuSite(GpuService):
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
         table_info = ans['site_extra_prop']
         self._cache_sol_[sol_id] = table_info
+
+    def getFlavors(self):
+        flv = Flavors(self._csite_)
+        return dict([(x['id'], x) for x in flv.list()])
 
     def getConnInfo(self, site_id, ssh_info=False):
         info_gen = self.queryById(site_id)

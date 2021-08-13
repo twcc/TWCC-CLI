@@ -55,15 +55,20 @@ def handle_exception(cmd, info_name, exc):
     # send error info to rollbar, etc, here
     click.echo(':: Command line: {} {}'.format(info_name, cmd._original_args))
     click.echo(':: Raised error: {}'.format(exc))
-def refactor_ip_detail(ans,vnet_id2name):
+
+
+def refactor_ip_detail(ans, vnet_id2name):
     net = Networks()
     for each_ans in ans:
-        occupied_resource_type = jmespath.search('occupied_resource.type', each_ans)
-        occupied_resource_type_id = jmespath.search('occupied_resource.id', each_ans)
+        occupied_resource_type = jmespath.search(
+            'occupied_resource.type', each_ans)
+        occupied_resource_type_id = jmespath.search(
+            'occupied_resource.id', each_ans)
         if isNone(occupied_resource_type_id) or isNone(occupied_resource_type):
             each_ans['occupied_resource_type_id'] = ''
         else:
-            each_ans['occupied_resource_type_id'] =  occupied_resource_type+':'+occupied_resource_type_id
+            each_ans['occupied_resource_type_id'] = occupied_resource_type + \
+                ':'+occupied_resource_type_id
         vnet_name = ''
         if not each_ans['private_net'] in vnet_id2name:
             vnet_name = net.queryById(each_ans['private_net'])['name']
@@ -71,11 +76,14 @@ def refactor_ip_detail(ans,vnet_id2name):
         else:
             vnet_name = vnet_id2name[each_ans['private_net']]
         each_ans['vnet'] = vnet_name
+
+
 def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
     fxip = Fixedip()
     ans = []
     vnet_id2name = {}
-    cols = ['id', 'address',  'create_time', 'status', 'type', 'occupied_resource_type_id','vnet']
+    cols = ['id', 'address',  'create_time', 'status',
+            'type', 'occupied_resource_type_id', 'vnet']
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -83,10 +91,10 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
         cols = list(set(cols))
     if len(site_ids_or_names) > 0:
         for ip_id in site_ids_or_names:
-            ans.append(fxip.list(ip_id = ip_id))
+            ans.append(fxip.list(ip_id=ip_id))
     else:
-        ans = fxip.list(filter = filter_type)
-    refactor_ip_detail(ans,vnet_id2name)
+        ans = fxip.list(filter=filter_type)
+    refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
             table_layout("IP Results",
@@ -96,6 +104,7 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
                          isWrap=False)
         else:
             jpp(ans)
+
 
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
@@ -246,6 +255,29 @@ def list_gpu_flavor(is_table=True):
                      isWrap=False)
     else:
         jpp(ans)
+
+
+def list_gpu_flavor_online(solution_name, is_table=True):
+    gpu = GpuSite()
+    inv_sols = {v: k for k, v in gpu.getSolList().items()}
+    try:
+        sol_id = inv_sols[solution_name]
+        avb_flv = gpu.getAvblFlv(sol_id)
+    except:
+        avb_flv = None
+
+    gpu_tag2spec = GpuSite.getGpuListOnline()
+    if not avb_flv == None:
+        gpu_tag2spec = {k:v for k,v in gpu_tag2spec.items() if v in avb_flv}
+    formated_ans = [{"`-gpu` tag": x, "description": gpu_tag2spec[x]}
+                    for x in gpu_tag2spec]
+    if is_table:
+        table_layout("Existing `-gpu` flavor",
+                     formated_ans,
+                     isPrint=True,
+                     isWrap=False)
+    else:
+        jpp(gpu_tag2spec)
 
 
 def list_vcs_flavor(is_table=True):
@@ -482,15 +514,37 @@ def list_secg(ids_or_names, is_table=True):
         return True
 
 
-# end orginal function ====================================
+def list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_table=True):
+    if res_property == 'flavor':
+        list_gpu_flavor(is_table)
 
+    if res_property == 'image':
+        if not product_type:
+            list_all_img(site_ids_or_names, is_table)
+        else:
+            if len(site_ids_or_names) == 1:
+                list_gpu_flavor_online(site_ids_or_names[0])
+            else:
+                list_gpu_flavor_online('all')
+
+    if res_property == 'commit':
+        list_commit()
+
+    if res_property == "solution":
+        avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
+        click.echo("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
+
+    if res_property == 'log':
+        list_gpu_log(site_ids_or_names)
+
+
+# end orginal function ====================================
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-# @click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.", cls=CatchAllExceptions(click.Command, handler=handle_exception))
-@click.group(context_settings=CONTEXT_SETTINGS, help="LiSt your TWCC resources.")
+@click.group(context_settings=CONTEXT_SETTINGS, help="List your TWCC resources.")
 def cli():
     try:
         ga = GenericService()
@@ -747,6 +801,12 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
               default=None,
               flag_value='solution',
               help='List all CCS image types.')
+@click.option('-ptype',
+              '--product-type',
+              is_flag=True,
+              default=False,
+              help="List CCS available product types (hardware configuration)."
+              )
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -757,7 +817,7 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 # @click.pass_context ctx,
-def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
+def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_all,
         show_ports, get_info):
     """Command line for List Container
        Functions:
@@ -766,26 +826,14 @@ def ccs(env, res_property, name, site_ids_or_names, is_table, is_all,
        3. list image copy
        4. list solution
     """
-    if res_property == 'flavor':
-        list_gpu_flavor(is_table)
 
-    if res_property == 'image':
-        list_all_img(site_ids_or_names, is_table)
-
-    if res_property == 'commit':
-        list_commit()
-
-    if res_property == "solution":
-        avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
-        print("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
-
-    if res_property == 'log':
-        site_ids_or_names = mk_names(name, site_ids_or_names)
-        list_gpu_log(site_ids_or_names)
-
-    if not res_property:
-        site_ids_or_names = mk_names(name, site_ids_or_names)
-        if show_ports:
+    site_ids_or_names = mk_names(name, site_ids_or_names)
+    if res_property in ['flavor', 'image', 'commit', 'solution', 'log']:
+        list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_table)
+    elif isNone(res_property):
+        if product_type:
+            list_gpu_flavor_online('all')
+        elif show_ports:
             if len(site_ids_or_names) == 1:
                 list_port(site_ids_or_names[0], is_table)
             else:
@@ -948,6 +996,7 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     ids_or_names = mk_names(vlb_id, ids_or_names)
     list_load_balances(ids_or_names, column, is_all, is_table)
 
+
 @click.option('-id', '--fxip-id', 'ip_id', type=int,
               help="Index of the volume.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
@@ -979,6 +1028,7 @@ def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
     list_fixed_ips(ids_or_names, column, filter_type, is_table)
+
 
 cli.add_command(vcs)
 cli.add_command(cos)

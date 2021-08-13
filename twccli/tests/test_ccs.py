@@ -16,8 +16,8 @@ class TestCntrLifecyc:
     def _loadParams(self):
         test_env = "cicd_pytorch"
         env_pick = env_options[test_env]
-        self.apikey = os.environ['TWCC_API_KEY']
-        self.pcode = os.environ['TWCC_PROJ_CODE']
+        self.apikey = os.environ['_TWCC_API_KEY_']
+        self.pcode = os.environ['_TWCC_PROJECT_CODE_']
         self.cntr_name = test_env
         (self.gpu_num, self.sol, self.img_name) = env_pick
 
