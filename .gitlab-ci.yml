@@ -45,8 +45,6 @@ python36:
   script: 
     - python -V
     - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
-    - echo "REMOVE __TWCC_CLI_STAGE__ VALUE"
-    - sed -i 's/__TWCC_CLI_STAGE__ = "."/__TWCC_CLI_STAGE__ = ""/g'  twccli/version.py
     - pip install tox
     - tox -e py36
   only:
