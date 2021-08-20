@@ -351,7 +351,7 @@ def key(env, name):
 @pass_environment
 def ccs(env, name, gpu, cmd, flavor, sol, img_name,
         env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
-    print('in')
+
     if req_dup:
         if isNone(site_id):
             raise ValueError("`-s` is required for duplication")
