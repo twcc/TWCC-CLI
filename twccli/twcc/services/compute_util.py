@@ -137,11 +137,12 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         raise ValueError(
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(name))
 
-    extra_props = vcs.getExtraProp(exists_sol[sol])
+    extra_props = vcs.getExtraProp(exists_sol[sol.lower()])
 
     # x-extra-property-image
     if isNone(img_name):
-        img_name = "Ubuntu 20.04"
+        # img_name = "Ubuntu 20.04"
+        img_name = sorted(extra_props['x-extra-property-image'], reverse=True)[0]
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] = password
