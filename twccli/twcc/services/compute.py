@@ -397,7 +397,7 @@ class VcsSite(CpuService):
 
     def getFlavors(self):
         flv = Flavors(self._csite_)
-        return dict([(x['id'], x) for x in flv.list()])
+        return dict([(str(x['id']), x) for x in flv.list()])
 
     @staticmethod
     def getAvblImg(sol_name=None):
@@ -422,9 +422,9 @@ class VcsSite(CpuService):
         def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
-        tflvs = dict([(flvs[x]['id'], flvs[x])
+        tflvs = dict([(str(flvs[x]['id']), flvs[x])
                       for x in flvs if filter_flv(flvs[x]['name'])])
-        name2id = dict([(tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
+        name2id = dict([(tflvs[x]['name'], str(tflvs[x]['id'])) for x in tflvs])
         tflvs_keys = tflvs.keys()
 
         products = self.getIsrvFlavors()
@@ -462,7 +462,7 @@ class VcsSite(CpuService):
             else:
                 return False
 
-        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
+        def get_flavor_id(x): return json.loads(x['other_content'])['flavor_id']
 
         fid_desc = dict([(get_flavor_id(x), x)
                          for x in isrv.getProducts() if filter_flavor_id(x)])
