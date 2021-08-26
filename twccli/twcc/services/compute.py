@@ -417,24 +417,8 @@ class VcsSite(CpuService):
                 if x['image-type'] == sol_name[0]:
                     return x
 
-    def getExtraProp(self, sol_id):
-        extra_prop = self._do_list_solution(sol_id)
-
-        # processing flavors
-        extra_flv = set(extra_prop['flavor']
-                        ) if 'flavor' in extra_prop else set([])
-
-        # # for testing
-        # extra_flv.add('v.super')
-        # print("Testing adding 'v.super' in extra_prop, extra_flv: %s"%(", ".join(extra_flv)))
-
-        def filter_flv(x): return True if x in extra_flv else False
-
-        flvs = self.getFlavors()
-
-        flv_in_sol = set([flvs[x]['name']
-                         for x in flvs if filter_flv(flvs[x]['name'])])
-
+    @staticmethod
+    def extend_vcs_flavor(name2id, flv_in_sol):
         # before production names sync w/ BMS, we need to make sure all portions types are
         # available for users.
 
@@ -445,11 +429,28 @@ class VcsSite(CpuService):
                              'v.8xsuper': ['v.8xsuper', '32_vCPU_256GB_MEM_100GB_HDD', '32vCPU_256GB_MEM_LIC']}
         alt_name = set(alternative_names.keys())
 
-        wanted_name2id = dict([(x, x) for x in flv_in_sol])
         for flv_lv in alt_name:
             for flv_lv2 in sorted(alternative_names[flv_lv], reverse=True):
-                if flv_lv2 in flv_in_sol and flv_lv not in wanted_name2id.keys():
-                    wanted_name2id[flv_lv] = flv_lv2
+                if flv_lv2 in flv_in_sol and flv_lv not in name2id:
+                    name2id[flv_lv] = flv_lv2
+
+    def getExtraProp(self, sol_id):
+
+        extra_prop = self._do_list_solution(sol_id)
+
+        # processing flavors
+
+        extra_flv = set(extra_prop['flavor']
+                        ) if 'flavor' in extra_prop else set([])
+
+        def filter_flv(x): return True if x in extra_flv else False
+
+        flvs = self.getFlavors()
+
+        flv_in_sol = set([flvs[x]['name'] for x in flvs if filter_flv(flvs[x]['name'])])
+
+        wanted_name2id = dict([(x, x) for x in flv_in_sol])
+        VcsSite.extend_vcs_flavor(wanted_name2id, flv_in_sol)
 
         res = {}
         for ele in extra_prop:
