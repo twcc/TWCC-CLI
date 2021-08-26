@@ -451,6 +451,11 @@ class VcsSite(CpuService):
                 if flv_lv2 in flv_in_sol:
                     wanted_name2id[flv_lv] = flv_lv2
                     break
+        
+        # need to include default values
+        for flv_name in flv_in_sol:
+            if flv_name not in wanted_name2id:
+                wanted_name2id[flv_name] = flv_name
 
         res = {}
         for ele in extra_prop:
