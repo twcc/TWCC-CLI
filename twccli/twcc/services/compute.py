@@ -432,8 +432,8 @@ class VcsSite(CpuService):
 
         flvs = self.getFlavors()
 
-        flv_in_sol = set([flvs[x]['name'] for x in flvs if filter_flv(flvs[x]['name'])])
-
+        flv_in_sol = set([flvs[x]['name']
+                         for x in flvs if filter_flv(flvs[x]['name'])])
 
         # before production names sync w/ BMS, we need to make sure all portions types are
         # available for users.
@@ -445,17 +445,11 @@ class VcsSite(CpuService):
                              'v.8xsuper': ['v.8xsuper', '32_vCPU_256GB_MEM_100GB_HDD', '32vCPU_256GB_MEM_LIC']}
         alt_name = set(alternative_names.keys())
 
-        wanted_name2id = {}
+        wanted_name2id = dict([(x, x) for x in flv_in_sol])
         for flv_lv in alt_name:
-            for flv_lv2 in alternative_names[flv_lv]:
-                if flv_lv2 in flv_in_sol:
+            for flv_lv2 in sorted(alternative_names[flv_lv], reverse=True):
+                if flv_lv2 in flv_in_sol and flv_lv not in wanted_name2id.keys():
                     wanted_name2id[flv_lv] = flv_lv2
-                    break
-        
-        # need to include default values
-        for flv_name in flv_in_sol:
-            if flv_name not in wanted_name2id:
-                wanted_name2id[flv_name] = flv_name
 
         res = {}
         for ele in extra_prop:
