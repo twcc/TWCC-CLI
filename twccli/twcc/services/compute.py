@@ -130,7 +130,7 @@ class GpuSite(GpuService):
             return buckets
         elif mtype == 'dict':
             return dict([(x, "/mnt/s3/%s" % (x)) for x in buckets])
-    
+
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         isrv = iservice()
 
@@ -139,12 +139,13 @@ class GpuSite(GpuService):
                 other_content_json = json.loads(x['other_content'])
             except ValueError as e:
                 return False
-            if "flavor_id" in  other_content_json:
+            if "flavor_id" in other_content_json:
                 return True
             else:
                 return False
 
-        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
+        def get_flavor_id(x): return int(
+            json.loads(x['other_content'])['flavor_id'])
 
         fid_desc = dict([(get_flavor_id(x), x)
                          for x in isrv.getProducts() if filter_flavor_id(x)])
@@ -169,8 +170,9 @@ class GpuSite(GpuService):
         gpu_tag2spec = []
         inv_name2id = {v: k for k, v in name2id.items()}
         for desc, sol_id in desc2id.items():
-            
-            gpu_tag2spec.append((re.findall('(c.+super)',desc)[0], inv_name2id[sol_id]))
+
+            gpu_tag2spec.append(
+                (re.findall('(c.+super)', desc)[0], inv_name2id[sol_id]))
         gpu_tag2spec = dict(gpu_tag2spec)
         return gpu_tag2spec
 
@@ -181,7 +183,7 @@ class GpuSite(GpuService):
 
         ans = self.proj.getProjectSolution(self._project_id, sol_id)
         return ans['site_extra_prop']['flavor']
-        
+
     def getAvblImg(self, sol_id, sol_name, latest_first=True):
         if sol_id:
             res = self.list_solution(sol_id, isShow=False)
@@ -370,7 +372,7 @@ class VcsSite(CpuService):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"),
                     (322, "winserver"),
-                    (319, "win10"),]
+                    (319, "win10"), ]
         if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
             with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
@@ -392,19 +394,20 @@ class VcsSite(CpuService):
     def _do_list_solution(self, sol_id):
         self.proj = projects()
         self.proj._csite_ = self._csite_
-        getProjectSolution = self.proj.getProjectSolution(self._project_id, sol_id)
+        getProjectSolution = self.proj.getProjectSolution(
+            self._project_id, sol_id)
         return getProjectSolution['site_extra_prop'] if 'site_extra_prop' in getProjectSolution else []
 
     def getFlavors(self):
         flv = Flavors(self._csite_)
-        return dict([(x['id'], x) for x in flv.list()])
+        return dict([(str(x['id']), x) for x in flv.list()])
 
     @staticmethod
     def getAvblImg(sol_name=None):
         avbl_imgs = [{"image-type": u"ubuntu", "image": [u'Ubuntu 16.04', u'Ubuntu 18.04', u'Ubuntu 20.04']},
                      {"image-type": u"centos", "image": [
                          u'CentOS 7.9', 'CentOS 8.2'
-                         ]}
+                     ]}
                      ]
         res = []
         if isNone(sol_name) or len(sol_name) == 0:
@@ -414,29 +417,45 @@ class VcsSite(CpuService):
                 if x['image-type'] == sol_name[0]:
                     return x
 
+    @staticmethod
+    def extend_vcs_flavor(name2id, flv_in_sol):
+        # before production names sync w/ BMS, we need to make sure all portions types are
+        # available for users.
+
+        alternative_names = {'v.super': ['v.super', '02_vCPU_016GB_MEM_100GB_HDD', '02vCPU_016GB_MEM_LIC'],
+                             'v.xsuper': ['v.xsuper', '04_vCPU_032GB_MEM_100GB_HDD', '04vCPU_032GB_MEM_LIC'],
+                             'v.2xsuper': ['v.2xsuper', '08_vCPU_064GB_MEM_100GB_HDD', '08vCPU_064GB_MEM_LIC'],
+                             'v.4xsuper': ['v.4xsuper', '16_vCPU_128GB_MEM_100GB_HDD', '16vCPU_128GB_MEM_LIC'],
+                             'v.8xsuper': ['v.8xsuper', '32_vCPU_256GB_MEM_100GB_HDD', '32vCPU_256GB_MEM_LIC']}
+        alt_name = set(alternative_names.keys())
+
+        for flv_lv in alt_name:
+            for flv_lv2 in sorted(alternative_names[flv_lv], reverse=True):
+                if flv_lv2 in flv_in_sol and flv_lv not in name2id:
+                    name2id[flv_lv] = flv_lv2
+
     def getExtraProp(self, sol_id):
+
         extra_prop = self._do_list_solution(sol_id)
 
         # processing flavors
-        extra_flv = set(extra_prop['flavor']) if 'flavor' in extra_prop else set([])
+
+        extra_flv = set(extra_prop['flavor']
+                        ) if 'flavor' in extra_prop else set([])
+
         def filter_flv(x): return True if x in extra_flv else False
 
         flvs = self.getFlavors()
-        tflvs = dict([(flvs[x]['id'], flvs[x])
-                      for x in flvs if filter_flv(flvs[x]['name'])])
-        name2id = dict([(tflvs[x]['name'], tflvs[x]['id']) for x in tflvs])
-        tflvs_keys = tflvs.keys()
 
-        products = self.getIsrvFlavors()
-        wanted_pro = dict([(x, products[x]['desc'])
-                           for x in products if x in tflvs_keys])
-        name2isrv = dict([(wanted_pro[name2id[x]], x)
-                         for x in name2id if not wanted_pro[name2id[x]] == 'v.12xsuper'])
+        flv_in_sol = set([flvs[x]['name'] for x in flvs if filter_flv(flvs[x]['name'])])
+
+        wanted_name2id = dict([(x, x) for x in flv_in_sol])
+        VcsSite.extend_vcs_flavor(wanted_name2id, flv_in_sol)
 
         res = {}
         for ele in extra_prop:
             if ele == 'flavor':
-                res["x-extra-property-{}".format(ele)] = name2isrv
+                res["x-extra-property-{}".format(ele)] = wanted_name2id
             elif ele == 'image':
                 res["x-extra-property-{}".format(ele)] = [x.split(")")[1]
                                                           for x in extra_prop[ele] if re.search('public', x)]
@@ -449,30 +468,14 @@ class VcsSite(CpuService):
 
         return res
 
-    def getIsrvFlavors(self, name_or_id="flavor_id"):
-        isrv = iservice()
+    # def getIsrvFlavors(self, name_or_id="flavor_id"):
+    #     # will not work after discuss
+    #     # flavor_id in solution, need to be sync with api call
+    #     # flavor_id only display its own name according to api gateway return
 
-        def filter_flavor_id(x):
-            try:
-                other_content_json = json.loads(x['other_content'])
-            except ValueError as e:
-                return False
-            if "flavor_id" in  other_content_json:
-                return True
-            else:
-                return False
-
-        def get_flavor_id(x): return int(json.loads(x['other_content'])['flavor_id'])
-
-        fid_desc = dict([(get_flavor_id(x), x)
-                         for x in isrv.getProducts() if filter_flavor_id(x)])
-        if name_or_id == "flavor_id":
-            return fid_desc
-        else:
-            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+    #     return None
 
     def create(self, name, sol_id, extra_prop):
-
         self.twcc.header_extra = extra_prop
         self.http_verb = 'post'
         self.data_dic = {"name": name,
@@ -614,18 +617,19 @@ class VcsServer(CpuService):
                         'site': site_id}
         return self._do_api()
 
+
 class Fixedip(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
         self._func_ = "ips"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, private_net_id, desc = None):
+    def create(self, private_net_id, desc=None):
         self.http_verb = 'post'
-        self.data_dic = {'private_net': private_net_id, 'desc' : desc}
+        self.data_dic = {'private_net': private_net_id, 'desc': desc}
         return self._do_api()
-    
-    def list(self, ip_id=None, filter = None, isAll=False):
+
+    def list(self, ip_id=None, filter=None, isAll=False):
         if isNone(ip_id):
             self.ext_get = {'project': self._project_id}
             if not isNone(filter) and not filter == 'ALL':
@@ -650,6 +654,7 @@ class Fixedip(CpuService):
         self.http_verb = 'delete'
         self.url_dic = {"ips": ip_id}
         return self._do_api()
+
 
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
