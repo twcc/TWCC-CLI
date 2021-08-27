@@ -58,7 +58,8 @@ class GpuSite(GpuService):
                     # (35, "TensorRT_Server"), # not avalible for now
                     (42, "Theano"),
                     (49, "Torch"),
-                    (52, "DIGITS")]
+                    (52, "DIGITS"),]
+                    # (339, "AIFS"),]
 
         ext_cntr_sol = set(['Preemptive GPU', 'Custom Image',
                            u'Preemptive GPU(Custom Image)'])

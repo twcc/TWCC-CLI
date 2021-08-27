@@ -450,7 +450,7 @@ def get_pass_api_key_params(is_apikey, env_dict):
         env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
         env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
 
-def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
+def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, cmd, env_dict, is_apikey):
     """Create container
        Create container by default value
        Create container by set vaule of name, solution name, gpu number, solution number
@@ -463,7 +463,8 @@ def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, env_dict, is_apikey):
     def_header['x-extra-property-image'] = get_ccs_img(
         sol_id, sol_name, sol_img, gpu)
     def_header['x-extra-property-env'] = format_ccs_env_dict(env_dict)
-
+    if not cmd == None:
+        def_header['x-extra-property-command'] = cmd
     if not name_validator(cntr_name):
         raise ValueError(
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(cntr_name))
