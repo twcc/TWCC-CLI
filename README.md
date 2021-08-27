@@ -19,6 +19,15 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.20 Release Note
+![img](https://media.giphy.com/media/U3D5dmP3LRWLWbSKlj/giphy.gif?cid=ecf05e47obtqmtc96pjk26vdqfynu37tbobn31bu3xlq1lel&rid=giphy.gif&ct=g)
+
+**Feature**
+- Users can pass any command to your CCS by using `-cmd` or `--command` right after it right after your CCS ready
+
+**Bug Fix**
+- fix some bugs while using vcs
+
 ### v0.5.19 Release Note
 
 ![img](https://media.giphy.com/media/2wh5JJnWKjs7coMOXR/giphy.gif)
