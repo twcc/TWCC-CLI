@@ -324,6 +324,8 @@ def key(env, name):
               help='Request duplicating a container.')
 @click.option('-gpu', '--gpu-number', 'gpu', default='1', type=str,
               help="Required number of GPU.")
+@click.option('-cmd', '--command', 'cmd', default=None, type=str,
+              help="The command for the container.")
 @click.option('-img', '--image-name', 'img_name', default=None, type=str,
               help="Name of the image.")
 @click.option('-envk', '--environment-keys', 'env_keys',  show_default=False, multiple=True,
@@ -347,7 +349,7 @@ def key(env, name):
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @pass_environment
-def ccs(env, name, gpu, flavor, sol, img_name,
+def ccs(env, name, gpu, cmd, flavor, sol, img_name,
         env_keys, env_values, wait, req_dup, site_id, dup_tag, is_apikey, is_table):
 
     if req_dup:
@@ -358,7 +360,7 @@ def ccs(env, name, gpu, flavor, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(site_id, dup_tag)
     else:
-        ans = create_ccs(name, gpu, flavor, sol, img_name,
+        ans = create_ccs(name, gpu, flavor, sol, img_name, cmd,
                          mk_env_dict(), is_apikey)
         if wait:
             doSiteStable(ans['id'])
