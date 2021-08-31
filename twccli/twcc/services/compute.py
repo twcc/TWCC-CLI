@@ -368,6 +368,12 @@ class VcsSite(CpuService):
         self.http_verb = 'put'
         return self._do_api()
 
+    def reboot(self, site_id):
+        self.data_dic = {"status": "reboot"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
@@ -511,6 +517,12 @@ class VcsServerNet(CpuService):
 
     def deAssociateIP(self, site_id):
         self.action(site_id, is_bind=False)
+
+    def reboot(self, server_id):
+        self.http_verb = 'put'
+        self.url_dic = {self._func_: server_id, 'action': ""}
+        self.data_dic = {"action": "reboot"}
+        self._do_api()
 
     def action(self, site_id, is_bind=True):
         server_id = getServerId(site_id)
