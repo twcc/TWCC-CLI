@@ -1,4 +1,5 @@
 import re
+import click
 import time
 import json
 from twccli.twcc import GupSiteBlockSet
@@ -300,7 +301,7 @@ def change_ip(ids_or_names, desc, is_table):
             jpp(ans)
 
 
-def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
+def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     vcs = VcsSite()
     ans = []
 
@@ -323,6 +324,8 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
             if not desc == '':
                 vcs.patch_desc(site_id, desc)
                 show_desc_flag = True
+            if not keep == None:
+                vcs.patch_keep(site_id, keep)
         if show_desc_flag:
             cols.append('desc')
     else:
@@ -365,8 +368,13 @@ def del_vcs(ids_or_names, is_force=False):
         vsite = VcsSite()
         if len(ids_or_names) > 0:
             for ele in ids_or_names:
-                vsite.delete(ele)
-                print("VCS resources {} deleted.".format(ele))
+                site_info = vsite.queryById(ele)
+                if site_info['termination_protection']:
+                    click.echo(click.style("Delete fail! VCS resources {} is protected.".format(ele), bg='red', fg='white', blink=True, bold=True))
+                    continue
+                else:
+                    vsite.delete(ele)
+                    print("VCS resources {} deleted.".format(ele))
 
 
 def doSiteStopped(site_id):

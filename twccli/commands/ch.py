@@ -63,9 +63,10 @@ def cli():
 
 @click.command(
     help="'Change' details of your VCS (Virtual Compute Service) instances.")
+@click.option('-d', '--site-desc', 'desc', type=str, default='', help="Description of the instance.")
 @click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
 @click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop'], case_sensitive=False), help="Status of the instance.")
-@click.option('-d', '--site-desc', 'desc', type=str, default='', help="Description of the instance.")
+@click.option('-keep/-nokeep', '--keep/--nokeep', 'keep', is_flag=True, default=None, help="Termination protection of the instance.")
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -79,7 +80,7 @@ def cli():
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
+def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, keep, is_table, wait):
     """Command line for Change VCS
 
     :param name: Enter name for your resources.
@@ -95,7 +96,7 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     change_vcs(site_ids_or_names, str(
-        vcs_status).lower(), is_table, desc, wait)
+        vcs_status).lower(), is_table, desc, keep, wait)
 
 
 @click.option('-s', '--site-id', type=str, help="ID of the instance.")

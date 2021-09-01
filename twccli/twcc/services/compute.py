@@ -491,6 +491,12 @@ class VcsSite(CpuService):
         self.data_dic = {"desc": desc}
         return self._do_api()
 
+    def patch_keep(self, site_id, keep):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"termination_protection": keep}
+        return self._do_api()
+
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready" or site_info['status'] == "Error"
