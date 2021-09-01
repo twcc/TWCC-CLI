@@ -72,7 +72,10 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
-            
+                
+        if isNone(apikey) or len(apikey) == 0:
+            apikey = click.prompt('Please enter TWCC APIKEY', type=str)
+
         if validate(apikey):
             proj_code = proj_code.upper()
             if env.verbose:
