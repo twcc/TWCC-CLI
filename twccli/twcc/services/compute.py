@@ -235,6 +235,18 @@ class GpuSite(GpuService):
         self.url_dic = {"sites": site_id}
         return self._do_api()
 
+    def patch_desc(self, site_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
+
+    def patch_keep(self, site_id, keep):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"termination_protection": keep}
+        return self._do_api()
+
     def list_solution(self, sol_id, isShow=True):
         if sol_id in self._cache_sol_:
             ans = self._cache_sol_[sol_id]
