@@ -1,4 +1,5 @@
 import re
+import click
 import time
 import json
 from twccli.twcc import GupSiteBlockSet
@@ -299,8 +300,39 @@ def change_ip(ids_or_names, desc, is_table):
         else:
             jpp(ans)
 
+def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
+    ccs = Sites()
+    ans = []
 
-def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
+    if len(ids_or_names) > 0:
+        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+        show_desc_flag = False
+        for i, site_id in enumerate(ids_or_names):
+            ans.extend([ccs.queryById(site_id)])           
+            if not desc == '':
+                ccs.patch_desc(site_id, desc)
+                show_desc_flag = True
+            if not keep == None:
+                ccs.patch_keep(site_id, keep)
+        if show_desc_flag:
+            cols.append('desc')
+    else:
+        raise ValueError
+    
+    if len(ans) > 0:
+        ans = []
+        for i, site_id in enumerate(ids_or_names):
+            ans.extend([ccs.queryById(site_id)])
+        if not is_print:
+            return ans
+        if is_table:
+            table_layout("GpuSites" if not len(ids_or_names) == 1 else "GpuSite Info.: {}".format(
+                site_id), ans, cols, isPrint=True)
+        else:
+            jpp(ans)
+
+
+def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     vcs = VcsSite()
     ans = []
 
@@ -325,6 +357,8 @@ def change_vcs(ids_or_names, status, is_table, desc, wait, is_print=True):
             if not desc == '':
                 vcs.patch_desc(site_id, desc)
                 show_desc_flag = True
+            if not keep == None:
+                vcs.patch_keep(site_id, keep)
         if show_desc_flag:
             cols.append('desc')
     else:
@@ -367,8 +401,16 @@ def del_vcs(ids_or_names, is_force=False):
         vsite = VcsSite()
         if len(ids_or_names) > 0:
             for ele in ids_or_names:
-                vsite.delete(ele)
-                print("VCS resources {} deleted.".format(ele))
+                site_info = vsite.queryById(ele)
+                if 'detail' in site_info:
+                    click.echo(click.style(site_info['detail'], bg='red', fg='white', bold=True))
+                else:
+                    if site_info['termination_protection']:
+                        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(ele), bg='red', fg='white', blink=True, bold=True))
+                        continue
+                    else:
+                        vsite.delete(ele)
+                        print("VCS resources {} deleted.".format(ele))
 
 
 def doSiteStopped(site_id):
