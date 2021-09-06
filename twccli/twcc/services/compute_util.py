@@ -350,6 +350,8 @@ def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
                 vcs.stop(site_id)
             elif status == 'ready':
                 vcs.start(site_id)
+            elif status == 'reboot':
+                VcsServerNet().reboot(srvid)
             else:
                 pass
             if not desc == '':

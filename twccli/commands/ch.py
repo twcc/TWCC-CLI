@@ -65,8 +65,9 @@ def cli():
     help="'Change' details of your VCS (Virtual Compute Service) instances.")
 @click.option('-d', '--site-desc', 'desc', type=str, default='', help="Description of the instance.")
 @click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
-@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop'], case_sensitive=False), help="Status of the instance.")
 @click.option('-keep/-nokeep', '--keep/--nokeep', 'keep', is_flag=True, default=None, help="Termination protection of the instance.")
+@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop', 'Reboot'], case_sensitive=False), help="Status of the instance.")
+
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
