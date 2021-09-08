@@ -299,96 +299,106 @@ def change_ip(ids_or_names, desc, is_table):
                          isWrap=False)
         else:
             jpp(ans)
-
-def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
-    ccs = Sites()
+def patch_ccs(ccs, ids_or_names, desc, keep):
     ans = []
+    show_col = []
+    for i, site_id in enumerate(ids_or_names):
+        ans.extend([ccs.queryById(site_id)])    
+        if not desc == '':
+            ccs.patch_desc(site_id, desc)
+            show_col.append('desc')
+        if not keep == None:
+            ccs.patch_keep(site_id, keep)
+            show_col.append('termination_protection')
+    return ans, show_col
 
-    if len(ids_or_names) > 0:
-        cols = ['id', 'name', 'public_ip', 'create_time', 'status']
-        show_desc_flag = False
-        for i, site_id in enumerate(ids_or_names):
-            ans.extend([ccs.queryById(site_id)])           
-            if not desc == '':
-                ccs.patch_desc(site_id, desc)
-                show_desc_flag = True
-            if not keep == None:
-                ccs.patch_keep(site_id, keep)
-        if show_desc_flag:
-            cols.append('desc')
-    else:
-        raise ValueError
-    
+def display_changed_sites(ans, ids_or_names, site, cols, is_print, is_table, titles):
     if len(ans) > 0:
         ans = []
         for i, site_id in enumerate(ids_or_names):
-            ans.extend([ccs.queryById(site_id)])
+            ans.extend([site.queryById(site_id)])
         if not is_print:
             return ans
         if is_table:
-            table_layout("GpuSites" if not len(ids_or_names) == 1 else "GpuSite Info.: {}".format(
+            table_layout(titles[0] if not len(ids_or_names) == 1 else ": {}".format(titles[1],
                 site_id), ans, cols, isPrint=True)
         else:
             jpp(ans)
 
-
-def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
-    vcs = VcsSite()
-    ans = []
-
+def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
+    ccs = Sites()
+    ans, show_col = patch_ccs(ccs, ids_or_names, desc, keep)
     if len(ids_or_names) > 0:
         cols = ['id', 'name', 'public_ip', 'create_time', 'status']
-        show_desc_flag = False
+        if show_col:
+            cols.extend(list(set(show_col)))
+    else:
+        raise ValueError
+    display_changed_sites(ans, ids_or_names, ccs, cols, is_print, is_table, ["GpuSites", "GpuSite Info."])
+    
+
+def vcs_status_mapping(ans):
+    for each_vcs in ans:
+        if each_vcs['status'] == "NotReady":
+            each_vcs['status'] = "Stopped"
+        if each_vcs['status'] == "Shelving":
+            each_vcs['status'] = "Stopping"
+        if each_vcs['status'] == "Unshelving":
+            each_vcs['status'] = "Starting"
+
+def action_by_status(status, ans, site_id, srvid, vcs):
+    if status == 'stop':
+        # Free public IP
+        if not isNone(srvid):
+            if re.findall('[0-9.]+', ans[i]['public_ip']):
+                VcsServerNet().deAssociateIP(site_id)
+        vcs.stop(site_id)
+    elif status == 'ready':
+        vcs.start(site_id)
+    elif status == 'reboot':
+        VcsServerNet().reboot(srvid)
+    else:
+        pass
+    
+def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
+    ans = []
+    if len(ids_or_names) > 0:
+        show_col = []
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
-            if status == 'stop':
-                # Free public IP
-                if not isNone(srvid):
-                    if re.findall('[0-9.]+', ans[i]['public_ip']):
-                        VcsServerNet().deAssociateIP(site_id)
-                vcs.stop(site_id)
-            elif status == 'ready':
-                vcs.start(site_id)
-            elif status == 'reboot':
-                VcsServerNet().reboot(srvid)
-            else:
-                pass
+            action_by_status(status, ans, site_id, srvid, vcs)
             if not desc == '':
                 vcs.patch_desc(site_id, desc)
-                show_desc_flag = True
+                show_col.append('desc')
             if not keep == None:
                 vcs.patch_keep(site_id, keep)
-        if show_desc_flag:
-            cols.append('desc')
+                show_col.append('termination_protection')
     else:
         raise ValueError
+    return ans, show_col
+
+def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
+    vcs = VcsSite()
+    ans, show_col = do_ch_vcs(ids_or_names, vcs, status, desc, keep)
+    cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+    if show_col:
+        cols.extend(list(set(show_col)))
     if wait and status == 'stop':
         for i, site_id in enumerate(ids_or_names):
             doSiteStopped(site_id)
     if wait and status == 'ready':
         for i, site_id in enumerate(ids_or_names):
             doSiteStable(site_id, site_type='vcs')
-    if len(ans) > 0:
-        ans = []
-        for i, site_id in enumerate(ids_or_names):
-            ans.extend([vcs.queryById(site_id)])
-        for each_vcs in ans:
-            if each_vcs['status'] == "NotReady":
-                each_vcs['status'] = "Stopped"
-            if each_vcs['status'] == "Shelving":
-                each_vcs['status'] = "Stopping"
-            if each_vcs['status'] == "Unshelving":
-                each_vcs['status'] = "Starting"
-        if not is_print:
-            return ans
-        if is_table:
-            table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
-                site_id), ans, cols, isPrint=True)
-        else:
-            jpp(ans)
+    display_changed_sites(ans, ids_or_names, vcs, cols, is_print, is_table, ["VCS VMs", "VCS Info."])
 
-
+def check_proteced(site_info,vsite,ele):
+    if site_info['termination_protection']:
+        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(ele), bg='red', fg='white', blink=True, bold=True))
+    else:
+        vsite.delete(ele)
+        print("VCS resources {} deleted.".format(ele))
+    
 def del_vcs(ids_or_names, is_force=False):
     """delete a vcs
 
@@ -405,12 +415,7 @@ def del_vcs(ids_or_names, is_force=False):
                 if 'detail' in site_info:
                     click.echo(click.style(site_info['detail'], bg='red', fg='white', bold=True))
                 else:
-                    if site_info['termination_protection']:
-                        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(ele), bg='red', fg='white', blink=True, bold=True))
-                        continue
-                    else:
-                        vsite.delete(ele)
-                        print("VCS resources {} deleted.".format(ele))
+                    check_proteced(site_info,vsite,ele)
 
 
 def doSiteStopped(site_id):
