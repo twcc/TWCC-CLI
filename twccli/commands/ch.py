@@ -81,7 +81,7 @@ def cli():
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, keep, is_table, wait):
+def vcs(desc, site_ids_or_names, name, vcs_status, keep, is_table, wait):
     """Command line for Change VCS
 
     :param name: Enter name for your resources.
