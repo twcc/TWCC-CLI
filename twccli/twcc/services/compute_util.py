@@ -346,6 +346,20 @@ def vcs_status_mapping(ans):
         if each_vcs['status'] == "Unshelving":
             each_vcs['status'] = "Starting"
 
+def action_by_status(status, ans, site_id, srvid, vcs):
+    if status == 'stop':
+        # Free public IP
+        if not isNone(srvid):
+            if re.findall('[0-9.]+', ans[i]['public_ip']):
+                VcsServerNet().deAssociateIP(site_id)
+        vcs.stop(site_id)
+    elif status == 'ready':
+        vcs.start(site_id)
+    elif status == 'reboot':
+        VcsServerNet().reboot(srvid)
+    else:
+        pass
+    
 def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
     ans = []
     if len(ids_or_names) > 0:
@@ -353,18 +367,7 @@ def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
-            if status == 'stop':
-                # Free public IP
-                if not isNone(srvid):
-                    if re.findall('[0-9.]+', ans[i]['public_ip']):
-                        VcsServerNet().deAssociateIP(site_id)
-                vcs.stop(site_id)
-            elif status == 'ready':
-                vcs.start(site_id)
-            elif status == 'reboot':
-                VcsServerNet().reboot(srvid)
-            else:
-                pass
+            action_by_status(status, ans, site_id, srvid, vcs)
             if not desc == '':
                 vcs.patch_desc(site_id, desc)
                 show_col.append('desc')
@@ -374,7 +377,7 @@ def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
     else:
         raise ValueError
     return ans, show_col
-    
+
 def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     vcs = VcsSite()
     ans, show_col = do_ch_vcs(ids_or_names, vcs, status, desc, keep)
