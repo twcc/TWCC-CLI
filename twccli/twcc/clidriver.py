@@ -129,7 +129,6 @@ class ServiceOperation:
         elif mtype == "delete":
             r = requests.delete(t_api, headers=t_headers, verify=ssl_verify_mode)
         elif mtype == "patch":
-            print(t_api, t_headers)
             r = requests.patch(t_api,
                                headers=t_headers,
                                data=json.dumps(t_data),
