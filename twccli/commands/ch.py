@@ -6,7 +6,7 @@ import click
 import json
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_volume, change_loadbalancer, change_ip
+from twccli.twcc.services.compute_util import change_vcs, change_ccs, change_volume, change_loadbalancer, change_ip
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 
@@ -63,9 +63,11 @@ def cli():
 
 @click.command(
     help="'Change' details of your VCS (Virtual Compute Service) instances.")
-@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
-@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop'], case_sensitive=False), help="Status of the instance.")
 @click.option('-d', '--site-desc', 'desc', type=str, default='', help="Description of the instance.")
+@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
+@click.option('-keep/-nokeep', '--keep/--nokeep', 'keep', is_flag=True, default=None, help="Termination protection of the instance.")
+@click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop', 'Reboot'], case_sensitive=False), help="Status of the instance.")
+
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -79,7 +81,7 @@ def cli():
 @click.argument('site_ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
+def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, keep, is_table, wait):
     """Command line for Change VCS
 
     :param name: Enter name for your resources.
@@ -95,7 +97,29 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, is_table, wait):
     """
     site_ids_or_names = mk_names(name, site_ids_or_names)
     change_vcs(site_ids_or_names, str(
-        vcs_status).lower(), is_table, desc, wait)
+        vcs_status).lower(), is_table, desc, keep, wait)
+
+@click.command(
+    help="'Change' details of your CCS (Container Computer Service) containers.")
+@click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
+@click.option('-d', '--site-desc', 'desc', type=str, default='', help="Description of the instance.")
+@click.option('-keep/-nokeep', '--keep/--nokeep', 'keep', is_flag=True, default=None, help="Termination protection of the instance.")
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
+@click.pass_context
+def ccs(ctx, env, desc, site_ids_or_names, name, keep, is_table):
+    """Command line for Change CCS
+
+    """
+    site_ids_or_names = mk_names(name, site_ids_or_names)
+    change_ccs(site_ids_or_names, is_table, desc, keep)
 
 
 @click.option('-s', '--site-id', type=str, help="ID of the instance.")
@@ -244,6 +268,7 @@ def fxip(ctx, ip_id, desc, ids_or_names, is_table):
 
 
 cli.add_command(vcs)
+cli.add_command(ccs)
 cli.add_command(vds)
 cli.add_command(vlb)
 cli.add_command(cos)

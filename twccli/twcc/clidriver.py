@@ -309,7 +309,7 @@ class ServiceOperation:
 
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] == "openstack-taichung-default-2" and 'sites' in url_parts['FUNCTION']:
+                'PLATFORM'] in ["openstack-taichung-default-2","k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
             if is_v3:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
