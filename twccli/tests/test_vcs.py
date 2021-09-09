@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
-from click.testing import CliRunner
-from ..twcc import Session2
-from ..twcc.util import isNone
-from ..twccli import cli
-import os
-import re
-import click
-import json
-import pytest
+
+import random
 import uuid
+import pytest
+import json
+import click
+import re
+import os
+from ..twccli import cli
+from ..twcc.util import isNone
+from ..twcc import Session2
+from click.testing import CliRunner
+
+
+def get_private_ip_with_port():
+    return "%s:%s" % (".".join(["192", "168", "%s" % random.randrange(100, 200), "%s" % random.randrange(100, 200)]), random.randrange(1000, 2000))
 
 
 class TestVcsLifecyc:
@@ -72,7 +78,7 @@ class TestVcsLifecyc:
 
     def _add_member_vlb(self):
         cmd_list = "ch vlb --member {} {} -id {}".format(
-            '192.168.10.10:8080', '192.168.11.11:9090', self.vlb_id)
+            get_private_ip_with_port(), get_private_ip_with_port(), self.vlb_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
@@ -85,7 +91,7 @@ class TestVcsLifecyc:
     def _create_vcs(self):
         paras = ["mk", "vcs",
                  "--name",           self.key_name,
-                 "--image-type-name",self.sol,
+                 "--image-type-name", self.sol,
                  "--product-type",   self.flv,
                  "-img",             self.img,
                  "--keypair",        self.key_name,
