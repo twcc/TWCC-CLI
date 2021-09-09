@@ -19,7 +19,20 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.21 Release Note
+
+![img](https://media.giphy.com/media/xULW8N9O5WD32L5052/giphy.gif?cid=ecf05e47fn0suu7aajxb8e3c9q750r2h67is7fz558d03dok&rid=giphy.gif&ct=g)
+
+**Feature**
+- Users can protect your sites from not expected remove, check out `-keep` while `twcc ch [ccs|vcs]`.
+- Enable VCS reboot, check out `-sts Reboot` while `twccli ch vcs`
+
+**Bug Fix**
+- fix ValueError: APIKEY is not validated, while `config init` , related [#34](https://github.com/twcc/TWCC-CLI/issues/34)
+- fix some bugs
+
 ### v0.5.20 Release Note
+
 ![img](https://media.giphy.com/media/U3D5dmP3LRWLWbSKlj/giphy.gif?cid=ecf05e47obtqmtc96pjk26vdqfynu37tbobn31bu3xlq1lel&rid=giphy.gif&ct=g)
 
 **Feature**
