@@ -349,9 +349,8 @@ def vcs_status_mapping(ans):
 def action_by_status(status, ans, site_id, srvid, vcs):
     if status == 'stop':
         # Free public IP
-        if not isNone(srvid):
-            if re.findall('[0-9.]+', ans[i]['public_ip']):
-                VcsServerNet().deAssociateIP(site_id)
+        if not isNone(srvid) and re.findall('[0-9.]+', ans['public_ip']):
+            VcsServerNet().deAssociateIP(site_id)
         vcs.stop(site_id)
     elif status == 'ready':
         vcs.start(site_id)
@@ -367,7 +366,7 @@ def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
         for i, site_id in enumerate(ids_or_names):
             ans.extend([vcs.queryById(site_id)])
             srvid = getServerId(site_id)
-            action_by_status(status, ans, site_id, srvid, vcs)
+            action_by_status(status, ans[i], site_id, srvid, vcs)
             if not desc == '':
                 vcs.patch_desc(site_id, desc)
                 show_col.append('desc')
