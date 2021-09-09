@@ -235,6 +235,18 @@ class GpuSite(GpuService):
         self.url_dic = {"sites": site_id}
         return self._do_api()
 
+    def patch_desc(self, site_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
+
+    def patch_keep(self, site_id, keep):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"termination_protection": keep}
+        return self._do_api()
+
     def list_solution(self, sol_id, isShow=True):
         if sol_id in self._cache_sol_:
             ans = self._cache_sol_[sol_id]
@@ -368,6 +380,12 @@ class VcsSite(CpuService):
         self.http_verb = 'put'
         return self._do_api()
 
+    def reboot(self, site_id):
+        self.data_dic = {"status": "reboot"}
+        self.url_dic = {'sites': site_id, 'action': ""}
+        self.http_verb = 'put'
+        return self._do_api()
+
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
         sol_list = [(60, "ubuntu"),
@@ -491,6 +509,12 @@ class VcsSite(CpuService):
         self.data_dic = {"desc": desc}
         return self._do_api()
 
+    def patch_keep(self, site_id, keep):
+        self.http_verb = 'patch'
+        self.url_dic = {'sites': site_id}
+        self.data_dic = {"termination_protection": keep}
+        return self._do_api()
+
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
         return site_info['status'] == "Ready" or site_info['status'] == "Error"
@@ -511,6 +535,12 @@ class VcsServerNet(CpuService):
 
     def deAssociateIP(self, site_id):
         self.action(site_id, is_bind=False)
+
+    def reboot(self, server_id):
+        self.http_verb = 'put'
+        self.url_dic = {self._func_: server_id, 'action': ""}
+        self.data_dic = {"action": "reboot"}
+        self._do_api()
 
     def action(self, site_id, is_bind=True):
         server_id = getServerId(site_id)
