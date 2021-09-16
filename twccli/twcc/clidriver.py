@@ -163,10 +163,6 @@ class ServiceOperation:
               http='get',
               res_type='json'):
 
-        if not res_type in self.res_type_valid:
-            raise ValueError(
-                "Response type Error:'{0}' is not valid, available options: {1}"
-                .format(res_type, ", ".join(self.res_type_valid)))
 
         if not self.isFunValid(func):
             raise ValueError("Function for:'{0}' is not valid".format(func))
@@ -194,11 +190,14 @@ class ServiceOperation:
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
 
         import sys
-        if 'click' in sys.modules.keys():
-            if res[0].status_code >= 400:
+        if 'click' in sys.modules.keys() and res[0].status_code >= 400:
                 twcc_error_echo(res[0].json()['detail'])
                 sys.exit(1)
 
+        return self._std_output_(res, t_url, res_type)
+
+
+    def _std_output_(self, res, t_url, res_type):
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 try:
@@ -207,6 +206,11 @@ class ServiceOperation:
                     return res[0].content, t_url
             elif res_type == 'txt':
                 return res[0].content, t_url
+        else: 
+            raise ValueError(
+                "Response type Error:'{0}' is not valid, available options: {1}"
+                .format(res_type, ", ".join(self.res_type_valid)))
+        return res
 
     def mkHeader(self,
                  site_sn=None,
