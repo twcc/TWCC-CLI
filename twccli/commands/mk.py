@@ -295,9 +295,6 @@ def key(env, name):
     """
     keyring = Keypairs()
 
-    if 'name' in keyring.queryById(name):
-        raise ValueError("Duplicated name for keypair")
-
     wfn = "{}/{}.pem".format(Session2._getTwccDataPath(), name)
     if isFile(wfn):
         print("Keypairs exists in {}".format(wfn))
