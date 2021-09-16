@@ -9,7 +9,7 @@ import logging
 from twccli.twccli import pass_environment, logger
 import os
 from .session import Session2
-from .util import parsePtn, isNone, isDebug, pp
+from .util import parsePtn, isNone, isDebug, pp, twcc_error_echo
 import urllib3
 urllib3.disable_warnings()
 
@@ -127,7 +127,8 @@ class ServiceOperation:
                               data=json.dumps(t_data),
                               verify=ssl_verify_mode)
         elif mtype == "delete":
-            r = requests.delete(t_api, headers=t_headers, verify=ssl_verify_mode)
+            r = requests.delete(t_api, headers=t_headers,
+                                verify=ssl_verify_mode)
         elif mtype == "patch":
             r = requests.patch(t_api,
                                headers=t_headers,
@@ -191,6 +192,13 @@ class ServiceOperation:
                                                   url_ext_get[param_key]))
             t_url += "&".join(t_url_tmp)
         res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
+
+        import sys
+        if 'click' in sys.modules.keys():
+            if res[0].status_code >= 400:
+                twcc_error_echo(res[0].json()['detail'])
+                sys.exit(1)
+
         if res_type in self.res_type_valid:
             if res_type == 'json':
                 try:
@@ -309,7 +317,7 @@ class ServiceOperation:
 
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] in ["openstack-taichung-default-2","k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
+                'PLATFORM'] in ["openstack-taichung-default-2", "k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
             if is_v3:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
