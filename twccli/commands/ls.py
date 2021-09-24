@@ -282,6 +282,7 @@ def list_gpu_flavor_online(solution_name, is_table=True):
 
 def list_vcs_flavor(is_table=True):
     ans = VcsSite().getIsrvFlavors()
+    print(ans)
     wanted_ans = []
     for x in ans:
         if re.search(r'^v\..+super$', ans[x]['desc']):
