@@ -824,5 +824,5 @@ def getSecGroupList(site_id):
     secg_list = secg.list(server_id=server_id)
     if len(secg_list) > 0:
         return secg_list[0]
-    else: #secg_list = []
+    else:
         return []
