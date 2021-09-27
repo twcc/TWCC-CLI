@@ -326,13 +326,10 @@ class Session2(object):
         
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
-        print('get s3key finish')
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
         resources = Session2._getTwccResourses()
-        print('get resources finish')
         projects = Session2._getAvblProjs(twcc_api_key)
-        print('get projects finish')
         for proj in projects:
             proj_codes = dict()
             for res in resources:
