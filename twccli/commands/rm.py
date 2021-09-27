@@ -158,6 +158,8 @@ def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
     found = []
     for ele in sites:
         secg_list = getSecGroupList(ele['id'])
+        if not 'security_group_rules' in secg_list:
+            continue
         for rule in secg_list['security_group_rules']:
             if re.search(secg_id, rule['id']):
                 if getConfirm("Security Group", ",".join(ids_or_names), isForce,

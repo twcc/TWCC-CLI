@@ -487,12 +487,33 @@ class VcsSite(CpuService):
 
         return res
 
-    # def getIsrvFlavors(self, name_or_id="flavor_id"):
+    def getIsrvFlavors(self, name_or_id="flavor_id"):
     #     # will not work after discuss
     #     # flavor_id in solution, need to be sync with api call
     #     # flavor_id only display its own name according to api gateway return
-
     #     return None
+        isrv = iservice()
+
+        def filter_flavor_id(x):
+            try:
+                other_content_json = json.loads(x['other_content'])
+            except ValueError as e:
+                return False
+            if "flavor_id" in other_content_json:
+                return True
+            else:
+                return False
+
+        def get_flavor_id(x): return int(
+            json.loads(x['other_content'])['flavor_id'])
+
+        fid_desc = dict([(get_flavor_id(x), x)
+                         for x in isrv.getProducts() if filter_flavor_id(x)])
+        if name_or_id == "flavor_id":
+            return fid_desc
+        else:
+            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+    
 
     def create(self, name, sol_id, extra_prop):
         self.twcc.header_extra = extra_prop
@@ -797,8 +818,11 @@ def getServerId(site_id):
 
 def getSecGroupList(site_id):
     server_id = getServerId(site_id)
+    if server_id == None:
+        return []
     secg = VcsSecurityGroup()
     secg_list = secg.list(server_id=server_id)
-
     if len(secg_list) > 0:
         return secg_list[0]
+    else:
+        return []
