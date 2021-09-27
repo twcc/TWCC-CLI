@@ -3,8 +3,10 @@ import copy
 import os
 import re
 import yaml
+import click
 import shutil
 import datetime
+import requests
 from collections import defaultdict
 from twccli.twcc.util import isNone, isFile, mkdir_p, table_layout, send_ga
 from twccli.version import __version__
@@ -73,9 +75,12 @@ class Session2(object):
         session_path = os.path.abspath(os.path.dirname(self.twcc_file_session))
         mkdir_p(session_path)
         with open(self.twcc_file_session, 'w') as fn:
-            documents = yaml.safe_dump(
-                Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code, self.twcc_cid), fn, encoding='utf-8', allow_unicode=True)
-                
+            try:
+                documents = yaml.safe_dump(
+                    Session2._getSessionData(self.twcc_api_key, self.twcc_proj_code, self.twcc_cid), fn, encoding='utf-8', allow_unicode=True)
+            except requests.exceptions.ConnectionError:
+                raise ValueError(click.style("Please check Project Code and APIKEY", bg='red', fg='white', blink=True, bold=True))
+
             from os import sys, path
             sys.path.append(path.dirname(path.abspath(__file__)))
             from services.generic import GenericService
@@ -318,12 +323,16 @@ class Session2(object):
         user_agent = Session2._getUserAgent()
         if not isNone(user_agent):
             sessionData["_meta"]['user_agent'] = user_agent
+        
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
+        print('get s3key finish')
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']
         sessionData["_default"]['twcc_s3_secret_key'] = s3keys['public']['secret_key']
         resources = Session2._getTwccResourses()
+        print('get resources finish')
         projects = Session2._getAvblProjs(twcc_api_key)
+        print('get projects finish')
         for proj in projects:
             proj_codes = dict()
             for res in resources:
