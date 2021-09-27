@@ -68,6 +68,13 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
 
         if not isNone(user_agent):
             os.environ['User_Agent'] = user_agent
+            
+        if not ga_flag == None:
+                cid = str(uuid.uuid1()) if ga_flag else None
+        else:
+            ga_agree_flag = click.confirm(
+                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+            cid = str(uuid.uuid1()) if ga_agree_flag else None
 
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
@@ -78,16 +85,12 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
 
         if validate(apikey):
             proj_code = proj_code.upper()
-            if not ga_flag == None:
-                cid = str(uuid.uuid1()) if ga_flag else None
-            else:
-                ga_agree_flag = click.confirm(
-                    'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-                cid = str(uuid.uuid1()) if ga_agree_flag else None
             if env.verbose:
                 logger.info("Receiving TWCC Project Code: {}".format(proj_code))
                 logger.info("Receiving TWCC API Key: {}".format(apikey))
                 logger.info("Receiving TWCC CLI GA: {}".format(ga_flag))
+
+            
             Session2(twcc_api_key=apikey, twcc_project_code=proj_code,
                      user_agent=user_agent, twcc_cid=cid)
 
