@@ -58,8 +58,8 @@ class GpuSite(GpuService):
                     # (35, "TensorRT_Server"), # not avalible for now
                     (42, "Theano"),
                     (49, "Torch"),
-                    (52, "DIGITS"),]
-                    # (339, "AIFS"),]
+                    (52, "DIGITS"), ]
+        # (339, "AIFS"),]
 
         ext_cntr_sol = set(['Preemptive GPU', 'Custom Image',
                            u'Preemptive GPU(Custom Image)'])
@@ -86,13 +86,11 @@ class GpuSite(GpuService):
 
     @staticmethod
     def getGpuDefaultHeader(flavor, sol_name, gpus="1"):
-        if not flavor == None:
-            gpus = flavor
-            gpu_list = GpuSite.getGpuListOnline()
-        else:
-            gpu_list = GpuSite.getGpuList()
+        gpu_list = GpuSite.getGpuList()
+
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
+
         gpu_default = {
             'command': "whoami; sleep 600;",
             'flavor': gpu_list[gpus],
@@ -132,49 +130,62 @@ class GpuSite(GpuService):
         elif mtype == 'dict':
             return dict([(x, "/mnt/s3/%s" % (x)) for x in buckets])
 
+    # @todo, this is duplicated with L419
     def getIsrvFlavors(self, name_or_id="flavor_id"):
-        isrv = iservice()
+        pass
+        # wanted_ans = {
 
-        def filter_flavor_id(x):
-            try:
-                other_content_json = json.loads(x['other_content'])
-            except ValueError as e:
-                return False
-            if "flavor_id" in other_content_json:
-                return True
-            else:
-                return False
+        # }
+        # isrv = iservice()
 
-        def get_flavor_id(x): return int(
-            json.loads(x['other_content'])['flavor_id'])
+        # def filter_flavor_id(x):
+        #     try:
+        #         other_content_json = json.loads(x['other_content'])
+        #     except ValueError as e:
+        #         return False
+        #     if "flavor_id" in other_content_json:
+        #         return True
+        #     else:
+        #         return False
 
-        fid_desc = dict([(get_flavor_id(x), x)
-                         for x in isrv.getProducts() if filter_flavor_id(x)])
-        if name_or_id == "flavor_id":
-            return fid_desc
-        else:
-            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
+        # def get_flavor_id(x): return int(
+        #     json.loads(x['other_content'])['flavor_id'])
+
+        # fid_desc = dict([(get_flavor_id(x), x)
+        #                  for x in isrv.getProducts() if filter_flavor_id(x)])
+        # if name_or_id == "flavor_id":
+        #     return fid_desc
+        # else:
+        #     return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
     @staticmethod
     def getGpuListOnline():
-        gpu = GpuSite()
-        flvs = gpu.getFlavors()
-        name2id = {}
-        for each_flv in flvs.values():
-            # if each_flv['name'] in avb_flv:
-            name2id[each_flv['name']] = each_flv['id']
-        solid2iservice_product = gpu.getIsrvFlavors()
-        desc2id = {}
-        for gsol_id, each_prod in solid2iservice_product.items():
-            if gsol_id in name2id.values():
-                desc2id[each_prod['desc']] = gsol_id
-        gpu_tag2spec = []
-        inv_name2id = {v: k for k, v in name2id.items()}
-        for desc, sol_id in desc2id.items():
+        gpu_tag2spec = {
+            '1': '1 GPU + 04 cores + 090GB memory',
+            '1': '1 GPU + 04 cores + 090GB memory',
+            '1': '1 GPU + 04 cores + 090GB memory',
+            '1': '1 GPU + 04 cores + 090GB memory',
+        }
+        # gpu = GpuSite()
+        # flvs = gpu.getFlavors()
+        # print(flvs)
+        # name2id = {}
+        # for each_flv in flvs.values():
+        #     # if each_flv['name'] in avb_flv:
+        #     name2id[each_flv['name']] = each_flv['id']
+        # solid2iservice_product = gpu.getIsrvFlavors()
 
-            gpu_tag2spec.append(
-                (re.findall('(c.+super)', desc)[0], inv_name2id[sol_id]))
-        gpu_tag2spec = dict(gpu_tag2spec)
+        # desc2id = {}
+        # for gsol_id, each_prod in solid2iservice_product.items():
+        #     if gsol_id in name2id.values():
+        #         desc2id[each_prod['desc']] = gsol_id
+        # gpu_tag2spec = []
+        # inv_name2id = {v: k for k, v in name2id.items()}
+        # for desc, sol_id in desc2id.items():
+
+        #     gpu_tag2spec.append(
+        #         (re.findall('(c.+super)', desc)[0], inv_name2id[sol_id]))
+        # gpu_tag2spec = dict(gpu_tag2spec)
         return gpu_tag2spec
 
     def getAvblFlv(self, sol_id):
@@ -466,7 +477,8 @@ class VcsSite(CpuService):
 
         flvs = self.getFlavors()
 
-        flv_in_sol = set([flvs[x]['name'] for x in flvs if filter_flv(flvs[x]['name'])])
+        flv_in_sol = set([flvs[x]['name']
+                         for x in flvs if filter_flv(flvs[x]['name'])])
 
         wanted_name2id = dict([(x, x) for x in flv_in_sol])
         VcsSite.extend_vcs_flavor(wanted_name2id, flv_in_sol)
@@ -487,33 +499,29 @@ class VcsSite(CpuService):
 
         return res
 
-    def getIsrvFlavors(self, name_or_id="flavor_id"):
-    #     # will not work after discuss
-    #     # flavor_id in solution, need to be sync with api call
-    #     # flavor_id only display its own name according to api gateway return
-    #     return None
-        isrv = iservice()
+    def getIsrvFlavors(self, value_type="list_vcs_ptype"):
 
-        def filter_flavor_id(x):
-            try:
-                other_content_json = json.loads(x['other_content'])
-            except ValueError as e:
-                return False
-            if "flavor_id" in other_content_json:
-                return True
-            else:
-                return False
+        if value_type == "list_vcs_ptype":
+            return dict([(x['spec'].split("(")[0].strip(), x['spec'].split("(")[1].strip().replace(")", "")) for x in iservice().getVCSProducts()])
+        return {}
 
-        def get_flavor_id(x): return int(
-            json.loads(x['other_content'])['flavor_id'])
+        # def get_flavor_dict(isrv_products):
+        #     for x in isrv_products:
+        #         print(x)
+        #         print(x['other_content'])
+        #     # dict([(get_flavor_id(x), x)
+        #     #              for x in isrv.getProducts() if filter_flavor_id(x)])
 
-        fid_desc = dict([(get_flavor_id(x), x)
-                         for x in isrv.getProducts() if filter_flavor_id(x)])
-        if name_or_id == "flavor_id":
-            return fid_desc
-        else:
-            return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
-    
+        #     # return int(
+        #     # json.loads(x['other_content'])['flavor_id'])
+        #     return dict()
+
+        # fid_desc = get_flavor_dict(isrv.getProducts())
+
+        # if name_or_id == "flavor_id":
+        #     return fid_desc
+        # else:
+        #     return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
     def create(self, name, sol_id, extra_prop):
         self.twcc.header_extra = extra_prop
