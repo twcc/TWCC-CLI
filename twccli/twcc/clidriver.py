@@ -206,7 +206,7 @@ class ServiceOperation:
                     return res[0].content, t_url
             elif res_type == 'txt':
                 return res[0].content, t_url
-        else: 
+        else:
             raise ValueError(
                 "Response type Error:'{0}' is not valid, available options: {1}"
                 .format(res_type, ", ".join(self.res_type_valid)))
@@ -321,11 +321,7 @@ class ServiceOperation:
 
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-<<<<<<< HEAD
-                'PLATFORM'] in ["openstack-taichung-default-2","k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
-=======
                 'PLATFORM'] in ["openstack-taichung-default-2", "k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
->>>>>>> upstream/master
             if is_v3:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url
