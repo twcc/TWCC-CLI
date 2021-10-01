@@ -6,7 +6,7 @@ import sys
 import yaml
 import traceback
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, isNone, isDebug, timezone2local, send_ga
+from twccli.twcc.util import isNone, isDebug, timezone2local, send_ga
 from twccli.twcc.clidriver import ServiceOperation
 from twccli.twccli import logger
 
@@ -71,9 +71,10 @@ class GenericService(object):
     def _isAlive(self):
         return self.twcc.try_alive()
 
-    def _send_ga(self, event_name, t_url = None):
+    def _send_ga(self, event_name, t_url=None):
         twcc_file_session = Session2._getSessionFile()
-        sessConf = yaml.load(open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
+        sessConf = yaml.load(
+            open(twcc_file_session, "r").read(), Loader=yaml.SafeLoader)
 
         if not sessConf == None and 'ga_cid' in sessConf['_meta']:
             func_call_stack = []
@@ -84,12 +85,15 @@ class GenericService(object):
 
             ua = '' if self._user_agent == None else self._user_agent
             country = sessConf['_meta']['ga_country'] if 'ga_country' in sessConf['_meta'] else ''
-            func_list = ','.join(func_call_stack)[','.join(func_call_stack).rindex('invoke'):].split(',')[1:-3]
-            ga_params = {'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
+            func_list = ','.join(func_call_stack)[','.join(
+                func_call_stack).rindex('invoke'):].split(',')[1:-3]
+            ga_params = {'geoid': country, 'ua': ua, "version": sessConf['_meta']['cli_version'], "func": '-'.join(
+                func_list), "p_version": sys.version.split(' ')[0]}
 
             if event_name == 'do_api':
-                ga_params = {'func':','.join(func_list),'url':t_url,'geoid':country, 'ua':ua,"version":sessConf['_meta']['cli_version'],"func":'-'.join(func_list),"p_version":sys.version.split(' ')[0]}
-            send_ga(event_name, sessConf['_meta']['ga_cid'],ga_params)
+                ga_params = {'func': ','.join(func_list), 'url': t_url, 'geoid': country, 'ua': ua,
+                             "version": sessConf['_meta']['cli_version'], "func": '-'.join(func_list), "p_version": sys.version.split(' ')[0]}
+            send_ga(event_name, sessConf['_meta']['ga_cid'], ga_params)
 
     def _do_api(self):
         if self._debug_:
@@ -113,8 +117,8 @@ class GenericService(object):
             res_type=self.res_type)
 
         if self._debug_:
-            logger.info({'res':res})
-            self._send_ga('do_api',t_url=t_url)
+            logger.info({'res': res})
+            self._send_ga('do_api', t_url=t_url)
 
         if type(res) == type([]):
             for eachone in res:
@@ -170,12 +174,13 @@ class CpuService(GenericService):
     def getQuota(self, isAll=False):
         if isAll:
             self._func_ = "projects"
-            self.url_dic = {"projects": "%s/user_quotas"%(self._project_id)}
+            self.url_dic = {"projects": "%s/user_quotas" % (self._project_id)}
         else:
             self._func_ = "project_quotas"
-            self.url_dic = {"project_quotas":""}
-            self.ext_get = {"project":self._project_id}
+            self.url_dic = {"project_quotas": ""}
+            self.ext_get = {"project": self._project_id}
         return self.list()
+
 
 class GpuService(GenericService):
     def __init__(self):
@@ -186,9 +191,9 @@ class GpuService(GenericService):
     def getQuota(self, isAll=False):
         if isAll:
             self._func_ = "projects"
-            self.url_dic = {"projects": "%s/user_quotas"%(self._project_id)}
+            self.url_dic = {"projects": "%s/user_quotas" % (self._project_id)}
         else:
             self._func_ = "project_quotas"
-            self.url_dic = {"project_quotas":""}
-            self.ext_get = {"project":self._project_id}
+            self.url_dic = {"project_quotas": ""}
+            self.ext_get = {"project": self._project_id}
         return self.list()

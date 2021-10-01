@@ -67,8 +67,8 @@ def del_ccs(ids_or_names, isForce=False):
     if getConfirm(u"Delete CCS", ", ".join(ids_or_names), isForce):
         ccs = GpuSite()
         for con_id in ids_or_names:
-            ans = ccs.delete(con_id)
-            print("Successfully remove {}".format(con_id))
+            if ccs.delete(con_id):
+                print("Successfully remove {}".format(con_id))
     else:
         print("No delete operations.")
 
@@ -165,6 +165,7 @@ def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
                 if getConfirm("Security Group", ",".join(ids_or_names), isForce,
                               ext_txt="Resource id: {}\nSecurity Group Rule id: {}".format(ele['id'], rule['id'])):
                     secg.deleteRule(rule['id'])
+
 
 def del_ip(ids_or_names, isForce=False):
     """Delete ip by ip id
@@ -452,6 +453,7 @@ def fxip(ctx, ip_id, ids_or_names, force):
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
     del_ip(ids_or_names, force)
+
 
 cli.add_command(vcs)
 cli.add_command(cos)
