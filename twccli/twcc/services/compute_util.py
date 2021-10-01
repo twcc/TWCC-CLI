@@ -33,7 +33,7 @@ def getConfirm(res_name, entity_name, is_force, ext_txt=""):
 
     import click
     click.echo(click.style(str_title, bg='blue',
-                fg='white', blink=True, bold=True))
+                           fg='white', blink=True, bold=True))
     return click.confirm(str_text, default=True)
 
 
@@ -118,7 +118,6 @@ def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
                data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None):
 
-
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
 
@@ -143,7 +142,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     # x-extra-property-image
     if isNone(img_name):
         # img_name = "Ubuntu 20.04"
-        img_name = sorted(extra_props['x-extra-property-image'], reverse=True)[0]
+        img_name = sorted(
+            extra_props['x-extra-property-image'], reverse=True)[0]
     required['x-extra-property-image'] = img_name
     if not isNone(password):
         required['x-extra-property-password'] = password
@@ -299,6 +299,7 @@ def change_ip(ids_or_names, desc, is_table):
                          isWrap=False)
         else:
             jpp(ans)
+
 def patch_ccs(ccs, ids_or_names, desc, keep):
     ans = []
     show_col = []
@@ -321,9 +322,10 @@ def display_changed_sites(ans, ids_or_names, site, cols, is_print, is_table, tit
             return ans
         if is_table:
             table_layout(titles[0] if not len(ids_or_names) == 1 else ": {}".format(titles[1],
-                site_id), ans, cols, isPrint=True)
+                                                                                    site_id), ans, cols, isPrint=True)
         else:
             jpp(ans)
+
 
 def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
     ccs = Sites()
@@ -334,8 +336,8 @@ def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
             cols.extend(list(set(show_col)))
     else:
         raise ValueError
-    display_changed_sites(ans, ids_or_names, ccs, cols, is_print, is_table, ["GpuSites", "GpuSite Info."])
-
+    display_changed_sites(ans, ids_or_names, ccs, cols,
+                          is_print, is_table, ["GpuSites", "GpuSite Info."])
 
 def vcs_status_mapping(ans):
     for each_vcs in ans:
@@ -389,7 +391,17 @@ def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     if wait and status == 'ready':
         for i, site_id in enumerate(ids_or_names):
             doSiteStable(site_id, site_type='vcs')
-    display_changed_sites(ans, ids_or_names, vcs, cols, is_print, is_table, ["VCS VMs", "VCS Info."])
+    display_changed_sites(ans, ids_or_names, vcs, cols,
+                          is_print, is_table, ["VCS VMs", "VCS Info."])
+
+
+def check_proteced(site_info, vsite, ele):
+    if site_info['termination_protection']:
+        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(
+            ele), bg='red', fg='white', blink=True, bold=True))
+    else:
+        vsite.delete(ele)
+        print("VCS resources {} deleted.".format(ele))
 
 def check_proteced(site_info,vsite,ele):
     if site_info['termination_protection']:
@@ -411,10 +423,11 @@ def del_vcs(ids_or_names, is_force=False):
         if len(ids_or_names) > 0:
             for ele in ids_or_names:
                 site_info = vsite.queryById(ele)
-                if 'detail' in site_info:
-                    click.echo(click.style(site_info['detail'], bg='red', fg='white', bold=True))
+                if site_info and 'detail' in site_info:
+                    click.echo(click.style(
+                        site_info['detail'], bg='red', fg='white', bold=True))
                 else:
-                    check_proteced(site_info,vsite,ele)
+                    check_proteced(site_info, vsite, ele)
 
 
 def doSiteStopped(site_id):

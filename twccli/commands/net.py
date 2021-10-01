@@ -118,30 +118,34 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             "Protocol is not valid. available: {}.".format(avbl_proto))
     # case 1: floating ip operations
     site_ids = mk_names(siteId, site_ids)
-    sites = list_vcs(site_ids, False, is_print=False)
-    if len(sites) == 0:
+    if len(site_ids) == 0:
         raise ValueError("Error: VCS id: {} is not found.".format(siteId))
-    for i, site_info in enumerate(sites):
-        # site_info = sites[0]
+        
+    site_infos = list_vcs(site_ids, False, is_print=False)
 
+    for site_info in site_infos:
+        
         errorFlg = True
         if len(site_info['public_ip']) > 0 and fip == False:
-            VcsServerNet().deAssociateIP(site_ids[i])
+            VcsServerNet().deAssociateIP(site_info['id'])
             errorFlg = False
 
         if len(site_info['public_ip']) == 0 and fip == True:
-            VcsServerNet().associateIP(site_ids[i])
+            VcsServerNet().associateIP(site_info['id'])
             errorFlg = False
 
         # case 2: port setting
         from netaddr import IPNetwork
         IPNetwork(cidr)
+
+        secg_list = getSecGroupList(site_info['id'])
+        secg_id = secg_list['id']
+
         if not isNone(portrange):
             if re.findall('[^0-9-]', portrange):
                 raise ValueError('port range should be digital-digital')
 
-            secg_list = getSecGroupList(site_ids[i])
-            secg_id = secg_list['id']
+
             port_list = portrange.split('-')
             if len(port_list) == 2:
                 port_min, port_max = [int(mport) for mport in port_list]
@@ -159,9 +163,6 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             errorFlg = False
 
         if not isNone(port):
-            secg_list = getSecGroupList(site_ids[i])
-            secg_id = secg_list['id']
-
             secg = VcsSecurityGroup()
             secg.addSecurityGroup(secg_id, port, port, cidr, protocol,
                                   "ingress" if isIngress else "egress")

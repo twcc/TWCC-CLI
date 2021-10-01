@@ -114,6 +114,10 @@ def get_params_seq(argv_list, argv_key):
 
 
 def mk_env_dict(arg_envk="-envk", arg_envv="-envv"):
+    """
+    這個函式是用來處理參數的，可以讓使用者輸入多個參數，並且可以讓使用者輸入多個參數，並且可以讓使用者輸入多個參數。
+    因為需要確認參數排序，所以直接使用 sys.argv 去比對處理，從而不處理 -envk -envv 的傳入資料。
+    """
 
     env_keys = get_params_seq(sys.argv, arg_envk).values()
     env_values = get_params_seq(sys.argv, arg_envv).values()
@@ -294,9 +298,6 @@ def key(env, name):
     :type name: string
     """
     keyring = Keypairs()
-
-    if 'name' in keyring.queryById(name):
-        raise ValueError("Duplicated name for keypair")
 
     wfn = "{}/{}.pem".format(Session2._getTwccDataPath(), name)
     if isFile(wfn):

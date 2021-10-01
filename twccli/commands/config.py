@@ -56,18 +56,23 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     :type rc_setting: bool
     """
     if not Session2._isValidSession():
-
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
         get_environment_params('TWCC_API_KEY', apikey)
         get_environment_params('_TWCC_API_KEY_', apikey)
 
         get_environment_params('TWCC_PROJ_CODE', proj_code)
         get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
-
         get_environment_params('_TWCC_CLI_GA_', ga_flag)
 
         if not isNone(user_agent):
             os.environ['User_Agent'] = user_agent
+
+        if not ga_flag == None:
+                cid = str(uuid.uuid1()) if ga_flag else None
+        else:
+            ga_agree_flag = click.confirm(
+                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+            cid = str(uuid.uuid1()) if ga_agree_flag else None
 
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
@@ -83,12 +88,6 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
                 logger.info("Receiving TWCC API Key: {}".format(apikey))
                 logger.info("Receiving TWCC CLI GA: {}".format(ga_flag))
 
-            if not ga_flag == None:
-                cid = str(uuid.uuid1()) if ga_flag else None
-            else:
-                ga_agree_flag = click.confirm(
-                    'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-                cid = str(uuid.uuid1()) if ga_agree_flag else None
             Session2(twcc_api_key=apikey, twcc_project_code=proj_code,
                      user_agent=user_agent, twcc_cid=cid)
 

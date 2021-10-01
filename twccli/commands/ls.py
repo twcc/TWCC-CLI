@@ -258,17 +258,7 @@ def list_gpu_flavor(is_table=True):
 
 
 def list_gpu_flavor_online(solution_name, is_table=True):
-    gpu = GpuSite()
-    inv_sols = {v: k for k, v in gpu.getSolList().items()}
-    try:
-        sol_id = inv_sols[solution_name]
-        avb_flv = gpu.getAvblFlv(sol_id)
-    except:
-        avb_flv = None
-
-    gpu_tag2spec = GpuSite.getGpuListOnline()
-    if not avb_flv == None:
-        gpu_tag2spec = {k:v for k,v in gpu_tag2spec.items() if v in avb_flv}
+    gpu_tag2spec = GpuSite().getGpuList()
     formated_ans = [{"`-gpu` tag": x, "description": gpu_tag2spec[x]}
                     for x in gpu_tag2spec]
     if is_table:
@@ -281,15 +271,13 @@ def list_gpu_flavor_online(solution_name, is_table=True):
 
 
 def list_vcs_flavor(is_table=True):
-    ans = VcsSite().getIsrvFlavors()
-    wanted_ans = []
-    for x in ans:
-        if re.search(r'^v\..+super$', ans[x]['desc']):
-            wanted_ans.append({
-                "flavor name": ans[x]['desc'],
-                "spec": ans[x]['spec']
-            })
-    wanted_ans = sorted(wanted_ans, key=lambda x: x['spec'], reverse=True)
+    wanted_ans = [
+        {"flavor name": "v.super", "spec": "02vCPU+016gMEM+100gHDD"},
+        {"flavor name": "v.xsuper", "spec": "04vCPU+032gMEM+100gHDD"},
+        {"flavor name": "v.2xsuper", "spec": "08vCPU+064gMEM+100gHDD"},
+        {"flavor name": "v.4xsuper", "spec": "16vCPU+128gMEM+100gHDD"},
+        {"flavor name": "v.8xsuper", "spec": "32vCPU+256gMEM+100gHDD"},
+    ]
     if is_table:
         table_layout("VCS Product Types",
                      wanted_ans, ['flavor name', 'spec'],
@@ -532,11 +520,14 @@ def list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_t
 
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
-        click.echo("Avalible Image types for CCS: {}".format(", ".join(avbl_sols)))
+        click.echo("Avalible Image types for CCS: {}".format(
+            ", ".join(avbl_sols)))
 
     if res_property == 'log':
         list_gpu_log(site_ids_or_names)
 
+
+# end orginal function ====================================
 
 # end orginal function ====================================
 
@@ -829,7 +820,8 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
 
     site_ids_or_names = mk_names(name, site_ids_or_names)
     if res_property in ['flavor', 'image', 'commit', 'solution', 'log']:
-        list_ccs_with_properties(res_property, site_ids_or_names, product_type, is_table)
+        list_ccs_with_properties(
+            res_property, site_ids_or_names, product_type, is_table)
     elif isNone(res_property):
         if product_type:
             list_gpu_flavor_online('all')
