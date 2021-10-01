@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import re
 from twccli.twcc.session import Session2
 from collections import defaultdict
 from twccli.twcc.util import isNone, jpp, table_layout
@@ -262,9 +263,20 @@ class iservice(GenericService):
         return self.list()
 
     def getProducts(self):
-        self.ext_get = {"product_system_code": "AI"}
-        self.url_dic = {"iservice": "products"}
+        # self.ext_get = {}
+        self.url_dic = {"iservice": "projects/products/AI"}
         return self.list()
+
+    def getVCSProducts(self):
+        """先不處理這個功能，因為產品/價格還沒穩定
+
+        """
+        prod = self.getProducts()
+
+        def filter(x):
+            return True if re.search("^v\..*super", x['spec']) and not re.search("^v\.12", x['spec']) else False
+
+        return [x for x in prod if filter(x)]
 
 
 class Flavors(GenericService):
@@ -274,5 +286,3 @@ class Flavors(GenericService):
         self._csite_ = csite
         if not isNone(api_key):
             self._api_key_ = api_key
-
-

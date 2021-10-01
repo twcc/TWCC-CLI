@@ -349,3 +349,15 @@ def get_environment_params(param_key, def_val):
     if param_key in os.environ and len(os.environ[param_key]) > 0:
         def_val = os.environ[param_key]
     return def_val
+
+
+def twcc_error_echo(msg):
+    """twcc standard error echo
+
+    Args:
+        msg (string): error message
+    """
+    import click
+
+    click.echo(click.style('[TWCC-CLI] Error-', fg='bright_red'), nl=False)
+    click.echo(msg)
