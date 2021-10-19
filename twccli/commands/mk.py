@@ -290,8 +290,9 @@ def cos(env, name):
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of your instance.")
+@click.option('-pub', '--public_key', 'public_key', default=None, type=str, help="Public key for your new key.")
 @pass_environment
-def key(env, name):
+def key(env, name, public_key):
     """Command line for create key
 
     :param name: Enter name for your resources.
@@ -303,7 +304,7 @@ def key(env, name):
     if isFile(wfn):
         print("Keypairs exists in {}".format(wfn))
     else:
-        ans = keyring.createKeyPair(name)
+        ans = keyring.createKeyPair(name, public_key)
         with open(wfn, "wb") as fp:
             fp.write(ans)
         import os
