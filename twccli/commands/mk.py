@@ -290,8 +290,9 @@ def cos(env, name):
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of your instance.")
+@click.option('-pub', '--public-key', 'public_key', default=None, type=str, help="Public key for your new key.")
 @pass_environment
-def key(env, name):
+def key(env, name, public_key):
     """Command line for create key
 
     :param name: Enter name for your resources.
@@ -303,7 +304,7 @@ def key(env, name):
     if isFile(wfn):
         print("Keypairs exists in {}".format(wfn))
     else:
-        ans = keyring.createKeyPair(name)
+        ans = keyring.createKeyPair(name, public_key)
         with open(wfn, "wb") as fp:
             fp.write(ans)
         import os
@@ -361,7 +362,7 @@ def ccs(env, name, gpu, cmd, flavor, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(site_id, dup_tag)
     else:
-        ans = create_ccs(name, gpu, flavor, sol, img_name, cmd, 
+        ans = create_ccs(name, gpu, flavor, sol, img_name, cmd,
                          mk_env_dict(), is_apikey)
         if wait:
             doSiteStable(ans['id'])
