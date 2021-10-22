@@ -255,11 +255,6 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
         for vol_id in ids_or_names:
             srvid = getServerId(site_id) if not isNone(site_id) else None
             this_ans = vol.list(vol_id)
-            # if this_ans['volume_type'] == 'ssd' and vol_status == 'extend':
-            #     ans.append(
-            #         {"detail": "Invalid volume: SSD Volume could not to extend"})
-            #     is_table = False
-            #     continue
             this_ans = vol.update(vol_id, vol_status, srvid, size, wait)
             # if detach with wrong site_id, return b'', but with correct site_id, return b'' ...
             if vol_status in ['attach', 'extend'] and 'detail' in this_ans:
