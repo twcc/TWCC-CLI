@@ -173,7 +173,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'detail' in the_vol:
                 is_table = False
                 continue
-            if len(the_vol['name']) > 15:
+            if len(the_vol['name']) > 15 and is_table:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
@@ -184,7 +184,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'detail' in the_vol:
                 is_table = False
                 continue
-            if len(the_vol['name']) > 15:
+            if len(the_vol['name']) > 15 and is_table:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
