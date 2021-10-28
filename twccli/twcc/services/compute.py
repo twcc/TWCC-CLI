@@ -780,11 +780,11 @@ class Secrets(CpuService):
         self.url_dic = {"secrets": sys_vol_id}
         return self._do_api()
     
-    def list(self, ssl_id=None, isAll=False):
+    def list(self, ssl_id=None, isall=False):
         if isNone(ssl_id):
             self.http_verb = 'get'
             self.res_type = 'json'
-            if isAll:
+            if isall:
                 self.ext_get = {'project': self._project_id}
                 all_volumes = self._do_api()
                 return all_volumes

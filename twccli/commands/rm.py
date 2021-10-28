@@ -186,7 +186,7 @@ def del_ip(ids_or_names, isForce=False):
         else:
             print("No delete operations.")
 
-def del_ssl(ids_or_names, isForce=False):
+def del_ssl(ids_or_names, isforce=False):
     """Delete ssl by ip id
 
     :param ids_or_names: name for deleting object.
@@ -199,7 +199,7 @@ def del_ssl(ids_or_names, isForce=False):
         ans = ssl.list(ssl_id)
         txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
             ssl_id, ans['user']['display_name'], ans['create_time'])
-        if getConfirm("SSL", ssl_id, isForce, txt):
+        if getConfirm("SSL", ssl_id, isforce, txt):
             ssl.deleteById(ssl_id)
             print("Successfully remove {}".format(ssl_id))
         else:

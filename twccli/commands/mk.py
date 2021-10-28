@@ -540,7 +540,7 @@ def fxip(private_net_id, desc, is_table):
               help="Server certfile for your openssl.")
 @click.option('-inkey', '--inkey', 'inkey', default=None, type=str,
               help="Server key for your openssl.")
-@click.option('-ica', '--intermediate-CA', 'intermediate_CA', default=None, type=str,
+@click.option('-ica', '--intermediate-CA', 'intermediate_ca', default=None, type=str,
               help="Intermediate CA for your openssl.")
 @click.option('-pf', '--payload-file', 'payload_file', default=None, type=str,
               help="Base64 file path of your SSL.")
@@ -549,17 +549,15 @@ def fxip(private_net_id, desc, is_table):
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-
-#
 @pass_environment
-def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, inkey, intermediate_CA, is_table):
+def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, inkey, intermediate_ca, is_table):
     """Command line for create SSL
 
     :param name: Enter name for your resources.
     :type name: string
     """
     
-    if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_CA)):
+    if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
         import subprocess, os
         command = 'openssl pkcs12 -export -nodes -out server.p12 -inkey {} -in {} -certfile {} -passout pass: ; openssl base64 -in server.p12 -out server.txt'.format(inkey, sercer_certfile, intermediate_CA)
         subprocess.check_output(command, shell=True,stderr=subprocess.STDOUT).decode('utf8').strip()
