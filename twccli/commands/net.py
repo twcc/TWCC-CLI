@@ -84,7 +84,7 @@ def ccs(env, siteId, port, isAttach):
     '--port-range',
     'portrange',
     type=str,
-    help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010.'
+    help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010. Only supported for TCP, UDP, UDPLITE, SCTP and DCCP'
 )
 @click.option('-proto',
               '--protocol',
@@ -112,10 +112,14 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
-    avbl_proto = ['tcp', 'udp', 'icmp']
+    avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp', 'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
     if not protocol in avbl_proto:
-        raise ValueError(
-            "Protocol is not valid. available: {}.".format(avbl_proto))
+        pronum = re.findall('^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$',protocol)
+        if pronum:
+            protocol = str(int(pronum[0]))
+        else:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
     # case 1: floating ip operations
     site_ids = mk_names(siteId, site_ids)
     if len(site_ids) == 0:
