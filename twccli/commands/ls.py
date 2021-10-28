@@ -8,7 +8,7 @@ import datetime
 import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -105,6 +105,30 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
         else:
             jpp(ans)
 
+def list_ssls(site_ids_or_names, column, is_table):
+    ssl = Secrets()
+    ans = []
+    
+    cols = ['id', 'name',  'create_time', 'status',]
+    if not column == '':
+        cols = column.split(',')
+        cols.append('id')
+        cols.append('name')
+        cols = list(set(cols))
+    if len(site_ids_or_names) > 0:
+        for ssl_id in site_ids_or_names:
+            ans.append(ssl.list(ssl_id=ssl_id))
+    else:
+        ans = ssl.list()
+    if len(ans) > 0:
+        if is_table:
+            table_layout("SSL Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
 
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
@@ -733,7 +757,6 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
                    is_public=is_public, is_table=is_table)
 
 
-# end object ==================================================
 @click.command(
     help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p',
@@ -1020,6 +1043,31 @@ def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
     list_fixed_ips(ids_or_names, column, filter_type, is_table)
 
 
+@click.option('-id', '--ssl-id', 'ssl_id', type=int,
+              help="Index of the ssl.")
+@click.option('-col',
+              '--column',
+              'column',
+              default='',
+              help='User define table column. ex: twccli ls ssl -col desc')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your ssls.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, column, is_table):
+    """Command line for create SSL
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    list_ssls(ids_or_names, column, is_table)
+    
+
+# end object ==================================================
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -1028,6 +1076,7 @@ cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
 cli.add_command(fxip)
+cli.add_command(ssl)
 
 
 def main():

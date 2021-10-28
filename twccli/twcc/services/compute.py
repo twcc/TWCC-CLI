@@ -761,7 +761,43 @@ class LoadBalancers(CpuService):
         self.url_dic = {"loadbalancers": vlb_id}
         return self._do_api()
 
+class Secrets(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "secrets"
+        self._csite_ = Session2._getClusterName("VCS")
 
+    def create(self, name, desc="", payload="", expire_time = ""):
+        self.http_verb = 'post'
+        self.data_dic = {'project': self._project_id, "name": name,
+                         "desc": desc, "payload": payload}
+        if not isNone(expire_time):
+            self.data_dic.update({'expire_time':expire_time})
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"secrets": sys_vol_id}
+        return self._do_api()
+    
+    def list(self, ssl_id=None, isAll=False):
+        if isNone(ssl_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isAll:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                my_username = Session2().twcc_username
+                return [x for x in all_volumes if x["user"]['username'] == my_username]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"secrets": ssl_id}
+            return self._do_api()
 class Volumes(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)

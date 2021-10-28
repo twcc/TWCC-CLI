@@ -191,7 +191,7 @@ class ServiceOperation:
 
         import sys
         if 'click' in sys.modules.keys() and res[0].status_code >= 400:
-            twcc_error_echo(res[0].json()['detail'])
+            twcc_error_echo(res[0].json())
             sys.exit(1)
 
         return self._std_output_(res, t_url, res_type)
