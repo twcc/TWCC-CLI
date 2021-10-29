@@ -43,7 +43,7 @@ class Session2(object):
         Returns:
             [type] -- [description]
         """
-        self.twcc_api_key = twcc_api_key
+        self.twcc_api_key = Session2._getDefaultAPIKey(twcc_api_key)
         self.twcc_cid = twcc_cid
         self.twcc_data_path = Session2._getTwccDataPath(twcc_data_path)
         self.twcc_file_session = Session2._getSessionFile(twcc_file_session)
@@ -180,6 +180,15 @@ class Session2(object):
 
     def getIsrvProjs(self):
         return Session2._getIsrvProjs(api_key=self.twcc_api_key)
+
+    @staticmethod
+    def _getDefaultAPIKey(twcc_api_key=None):
+        if isNone(twcc_api_key):
+            if '_TWCC_API_KEY_' in os.environ:
+                return os.environ['_TWCC_API_KEY_']
+            else:
+                return os.path.dirname(os.path.realpath(__file__))
+        return twcc_api_key
 
     @staticmethod
     def _getDefaultProject(twcc_proj_code=None):
