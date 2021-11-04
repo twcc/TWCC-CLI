@@ -684,9 +684,9 @@ class Fixedip(CpuService):
         self._func_ = "ips"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, private_net_id, desc=None):
+    def create(self, desc=None):
         self.http_verb = 'post'
-        self.data_dic = {'private_net': private_net_id, 'desc': desc}
+        self.data_dic = {'project': self._project_id, 'desc': desc}
         return self._do_api()
 
     def list(self, ip_id=None, filter=None, isAll=False):

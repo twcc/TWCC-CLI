@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twccli.commands.mk import fxip
+from twccli.commands.mk import eip
 import click
 import re
 import sys
@@ -175,13 +175,13 @@ def del_ip(ids_or_names, isForce=False):
     :param force: Force to delete any resources at your own cost.
     :type force: bool
     """
-    fxip = Fixedip()
+    eip = Fixedip()
     for ip_id in ids_or_names:
-        ans = fxip.list(ip_id)
+        ans = eip.list(ip_id)
         txt = "You about to delete ip \n- id: {}\n- created by: {}\n- created time: {}".format(
             ip_id, ans['user']['display_name'], ans['create_time'])
         if getConfirm("IP", ip_id, isForce, txt):
-            fxip.deleteById(ip_id)
+            eip.deleteById(ip_id)
             print("Successfully remove {}".format(ip_id))
         else:
             print("No delete operations.")
@@ -464,10 +464,10 @@ def vlb(ctx, vlb_id, ids_or_names, force):
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="Delete your IPs.")
 @click.pass_context
-def fxip(ctx, ip_id, ids_or_names, force):
-    """Command line for delete fxip
+def eip(ctx, ip_id, ids_or_names, force):
+    """Command line for delete eip
 
-    :param ip_id: Enter id for your fxip.
+    :param ip_id: Enter id for your eip.
     :type ip_id: string
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
@@ -482,9 +482,9 @@ def fxip(ctx, ip_id, ids_or_names, force):
 @click.command(help="Delete your SSLs.")
 @click.pass_context
 def ssl(ctx, ssl_id, ids_or_names, force):
-    """Command line for delete fxip
+    """Command line for delete eip
 
-    :param ip_id: Enter id for your fxip.
+    :param ip_id: Enter id for your eip.
     :type ip_id: string
     """
     ids_or_names = mk_names(ssl_id, ids_or_names)
@@ -498,7 +498,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
 cli.add_command(ssl)
 
 

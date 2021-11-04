@@ -70,20 +70,21 @@ def refactor_ip_detail(ans, vnet_id2name):
             each_ans['occupied_resource_type_id'] = occupied_resource_type + \
                 ':'+occupied_resource_type_id
         vnet_name = ''
-        if not each_ans['private_net'] in vnet_id2name:
-            vnet_name = net.queryById(each_ans['private_net'])['name']
-            vnet_id2name[each_ans['private_net']] = vnet_name
-        else:
-            vnet_name = vnet_id2name[each_ans['private_net']]
-        each_ans['vnet'] = vnet_name
+        
+        # if not each_ans['private_net'] in vnet_id2name:
+        #     vnet_name = net.queryById(each_ans['private_net'])['name']
+        #     vnet_id2name[each_ans['private_net']] = vnet_name
+        # else:
+        #     vnet_name = vnet_id2name[each_ans['private_net']]
+        # each_ans['vnet'] = vnet_name
 
 
 def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
-    fxip = Fixedip()
+    eip = Fixedip()
     ans = []
     vnet_id2name = {}
     cols = ['id', 'address',  'create_time', 'status',
-            'type', 'occupied_resource_type_id', 'vnet']
+            'type', 'occupied_resource_type_id']
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -91,9 +92,9 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
         cols = list(set(cols))
     if len(site_ids_or_names) > 0:
         for ip_id in site_ids_or_names:
-            ans.append(fxip.list(ip_id=ip_id))
+            ans.append(eip.list(ip_id=ip_id))
     else:
-        ans = fxip.list(filter=filter_type)
+        ans = eip.list(filter=filter_type)
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
@@ -1010,8 +1011,8 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     list_load_balances(ids_or_names, column, is_all, is_table)
 
 
-@click.option('-id', '--fxip-id', 'ip_id', type=int,
-              help="Index of the volume.")
+@click.option('-id', '--eip-id', 'ip_id', type=int,
+              help="Index of the eip.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
 # @click.option('-all',
 #               '--show-all',
@@ -1023,15 +1024,15 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
               '--column',
               'column',
               default='',
-              help='User define table column. ex: twccli ls vlb -col pools[0].members')
+              help='User define table column. ex: twccli ls eip -col type')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ips.")
 @click.pass_context
-def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
-    """Command line for list vds
+def eip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
+    """Command line for list eip
 
     :param ip_id: Enter id for your fixed ips.
     :type ip_id: string
@@ -1075,7 +1076,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
 cli.add_command(ssl)
 
 
