@@ -72,6 +72,13 @@ def ccs(env, siteId, port, isAttach):
               default=None,
               show_default=False,
               help='Configure your instance with or without a floating IP.')
+@click.option('-ip',
+              '--eip',
+              'eip',
+              type=str,
+              default=None,
+              show_default=False,
+              help='Configure your instance with a EIP.')
 @click.option('-in/-out',
               '--ingress/--egress',
               'isIngress',
@@ -95,7 +102,7 @@ def ccs(env, siteId, port, isAttach):
               show_default=True)
 @click.argument('site_ids', nargs=-1)
 @pass_environment
-def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
+def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange, eip):
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
     :type portrange: string
@@ -134,9 +141,13 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange):
             VcsServerNet().deAssociateIP(site_info['id'])
             errorFlg = False
 
-        if len(site_info['public_ip']) == 0 and fip == True:
-            VcsServerNet().associateIP(site_info['id'])
-            errorFlg = False
+        if len(site_info['public_ip']) == 0:
+            if not isNone(eip):
+                VcsServerNet().associateIP(site_info['id'], eip_id = eip)
+                errorFlg = False
+            elif fip == True:
+                VcsServerNet().associateIP(site_info['id'])
+                errorFlg = False
 
         # case 2: port setting
         from netaddr import IPNetwork
