@@ -58,7 +58,6 @@ def handle_exception(cmd, info_name, exc):
 
 
 def refactor_ip_detail(ans, vnet_id2name):
-    net = Networks()
     for each_ans in ans:
         occupied_resource_type = jmespath.search(
             'occupied_resource.type', each_ans)
