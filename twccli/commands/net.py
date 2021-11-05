@@ -49,6 +49,46 @@ def ccs(env, siteId, port, isAttach):
     else:
         b.unbindPort(siteId, port)
 
+def net_vcs_protocol_check(protocol):
+    avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp', 'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
+    if not protocol in avbl_proto:
+        pronum = re.findall('^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$',protocol)
+        if pronum:
+            protocol = str(int(pronum[0]))
+        else:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
+
+def public_ip_assignee(site_info, fip, eip):
+    errorFlg = True
+    if len(site_info['public_ip']) > 0 and fip == False:
+        VcsServerNet().deAssociateIP(site_info['id'])
+        errorFlg = False
+
+    if len(site_info['public_ip']) == 0:
+        if not isNone(eip):
+            VcsServerNet().associateIP(site_info['id'], eip_id = eip)
+            errorFlg = False
+        elif fip == True:
+            VcsServerNet().associateIP(site_info['id'])
+            errorFlg = False
+    return errorFlg
+
+def max_min_port_check(portrange):
+    if re.findall('[^0-9-]', portrange):
+        raise ValueError('port range should be digital-digital')
+
+    port_list = portrange.split('-')
+    if len(port_list) == 2:
+        port_min, port_max = [int(mport) for mport in port_list]
+        if port_min < 0 or port_max < 0:
+            raise ValueError('port range must bigger than 0')
+        elif port_min > port_max:
+            raise ValueError(
+                'port_range_min must be <= port_range_max')
+    else:
+        raise ValueError('port range set error')
+    return port_min, port_max
 
 @click.command(help='Manage VCS (Virtual Compute Service) security groups.')
 @click.option('-p', '--port', 'port', type=int, help='Port number.')
@@ -119,14 +159,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange, 
     :param isIngress: Applying security group directions.
     :type isIngress: bool
     """
-    avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp', 'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
-    if not protocol in avbl_proto:
-        pronum = re.findall('^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$',protocol)
-        if pronum:
-            protocol = str(int(pronum[0]))
-        else:
-            raise ValueError(
-                "Protocol is not valid. available: {}.".format(avbl_proto))
+    net_vcs_protocol_check(protocol)
     # case 1: floating ip operations
     site_ids = mk_names(siteId, site_ids)
     if len(site_ids) == 0:
@@ -135,19 +168,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange, 
     site_infos = list_vcs(site_ids, False, is_print=False)
 
     for site_info in site_infos:
-        
-        errorFlg = True
-        if len(site_info['public_ip']) > 0 and fip == False:
-            VcsServerNet().deAssociateIP(site_info['id'])
-            errorFlg = False
-
-        if len(site_info['public_ip']) == 0:
-            if not isNone(eip):
-                VcsServerNet().associateIP(site_info['id'], eip_id = eip)
-                errorFlg = False
-            elif fip == True:
-                VcsServerNet().associateIP(site_info['id'])
-                errorFlg = False
+        errorFlg = public_ip_assignee(site_info, fip, eip)
 
         # case 2: port setting
         from netaddr import IPNetwork
@@ -157,20 +178,7 @@ def vcs(env, site_ids, siteId, port, cidr, protocol, isIngress, fip, portrange, 
         secg_id = secg_list['id']
 
         if not isNone(portrange):
-            if re.findall('[^0-9-]', portrange):
-                raise ValueError('port range should be digital-digital')
-
-
-            port_list = portrange.split('-')
-            if len(port_list) == 2:
-                port_min, port_max = [int(mport) for mport in port_list]
-                if port_min < 0 or port_max < 0:
-                    raise ValueError('port range must bigger than 0')
-                elif port_min > port_max:
-                    raise ValueError(
-                        'port_range_min must be <= port_range_max')
-            else:
-                raise ValueError('port range set error')
+            port_min, port_max = max_min_port_check(portrange)
 
             secg = VcsSecurityGroup()
             secg.addSecurityGroup(secg_id, port_min, port_max, cidr, protocol,
