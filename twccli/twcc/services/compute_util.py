@@ -168,7 +168,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             required['x-extra-property-env'] = ""
 
     # x-extra-property-floating-ip
-    if not isNone(eip_id):
+    if not isNone(eip):
         required['x-extra-property-floating-ip'] = 'floating'
         required['x-extra-property-static-ip'] = eip
     else:
