@@ -438,14 +438,21 @@ class VcsSite(CpuService):
                      {"image-type": u"centos", "image": [
                          u'CentOS 7.9', 'CentOS 8.2'
                      ]}
-                     ]
-        res = []
+                     ]        
+        vcs = VcsSite()
+        exists_sol = vcs.getSolList(mtype='dict', reverse=True)
         if isNone(sol_name) or len(sol_name) == 0:
-            return avbl_imgs
+            data = []
+            for solname, solid in exists_sol.items():
+                data.append({"image-type": solname, "image":[x.split(")")[1] for x in vcs._do_list_solution(solid)['image']]})
+            return data
         else:
             for x in avbl_imgs:
                 if x['image-type'] == sol_name[0]:
                     return x
+        
+        extra_prop = vcs._do_list_solution(exists_sol[sol_name[0].lower()])
+        return {"image-type": sol_name[0], "image":[x.split(")")[1] for x in extra_prop['image']]}
 
     @staticmethod
     def extend_vcs_flavor(name2id, flv_in_sol):
@@ -467,7 +474,6 @@ class VcsSite(CpuService):
     def getExtraProp(self, sol_id):
 
         extra_prop = self._do_list_solution(sol_id)
-
         # processing flavors
 
         extra_flv = set(extra_prop['flavor']
