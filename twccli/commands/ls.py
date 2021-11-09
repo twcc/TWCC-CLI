@@ -513,13 +513,12 @@ def list_secg(ids_or_names, is_table=True):
 
     if len(ids_or_names) == 1:
         secg_list = getSecGroupList(ids_or_names[0])
-        secg_id = secg_list['id']
         secg_detail = secg_list['security_group_rules']
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail,
                          caption_row=[
-                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
+                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction', 'protocol'],
                          isPrint=True, captionInOrder=True)
         else:
             jpp(secg_detail)
