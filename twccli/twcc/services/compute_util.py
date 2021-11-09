@@ -116,7 +116,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None):
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip = None):
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -168,7 +168,11 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             required['x-extra-property-env'] = ""
 
     # x-extra-property-floating-ip
-    required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
+    if not isNone(eip_id):
+        required['x-extra-property-floating-ip'] = 'floating'
+        required['x-extra-property-static-ip'] = eip
+    else:
+        required['x-extra-property-floating-ip'] = 'floating' if fip else 'nofloating'
 
     # x-extra-property-flavor
     if not flavor in extra_props['x-extra-property-flavor'].keys():

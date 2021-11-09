@@ -158,6 +158,9 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
+@click.option('-eip', '--eip', 'eip',
+              default=None, , type=str,
+              help='Assign a EIP to the instance by EIP id.')
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
@@ -204,7 +207,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
-        sol, fip, password, env_keys, env_values, is_apikey, is_table):
+        sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
@@ -252,7 +255,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey)
+                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey, eip = eip,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
