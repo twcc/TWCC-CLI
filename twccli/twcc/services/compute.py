@@ -559,8 +559,9 @@ class VcsServerNet(CpuService):
         self._func_ = "servers"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def associateIP(self, site_id):
-        self.action(site_id, is_bind=True)
+    def associateIP(self, site_id, eip_id = None):
+        self.action(site_id, is_bind=True, eip_id = eip_id)
+        
 
     def deAssociateIP(self, site_id):
         self.action(site_id, is_bind=False)
@@ -571,13 +572,15 @@ class VcsServerNet(CpuService):
         self.data_dic = {"action": "reboot"}
         self._do_api()
 
-    def action(self, site_id, is_bind=True):
+    def action(self, site_id, is_bind=True, eip_id = None):
         server_id = getServerId(site_id)
         self.http_verb = 'put'
         self.url_dic = {self._func_: server_id, 'action': ""}
         self.data_dic = {
             "action": "associateIP" if is_bind else "disassociateIP"
         }
+        if not isNone(eip_id):
+            self.data_dic.update({'ip':int(eip_id)})
         self._do_api()
 
 
@@ -684,9 +687,9 @@ class Fixedip(CpuService):
         self._func_ = "ips"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, private_net_id, desc=None):
+    def create(self, desc=None):
         self.http_verb = 'post'
-        self.data_dic = {'private_net': private_net_id, 'desc': desc}
+        self.data_dic = {'project': self._project_id, 'desc': desc}
         return self._do_api()
 
     def list(self, ip_id=None, filter=None, isAll=False):
@@ -696,7 +699,10 @@ class Fixedip(CpuService):
                 self.ext_get.update({'type': filter.upper()})
             all_fixedips = self._do_api()
             my_username = Session2().twcc_username
-            return [x for x in all_fixedips if x["user"]['username'] == my_username]
+            if isAll:
+                return all_fixedips
+            else:
+                return [x for x in all_fixedips if x["user"]['username'] == my_username]
 
         else:
             self.http_verb = 'get'

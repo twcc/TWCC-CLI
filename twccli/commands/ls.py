@@ -58,7 +58,6 @@ def handle_exception(cmd, info_name, exc):
 
 
 def refactor_ip_detail(ans, vnet_id2name):
-    net = Networks()
     for each_ans in ans:
         occupied_resource_type = jmespath.search(
             'occupied_resource.type', each_ans)
@@ -69,21 +68,17 @@ def refactor_ip_detail(ans, vnet_id2name):
         else:
             each_ans['occupied_resource_type_id'] = occupied_resource_type + \
                 ':'+occupied_resource_type_id
-        vnet_name = ''
-        if not each_ans['private_net'] in vnet_id2name:
-            vnet_name = net.queryById(each_ans['private_net'])['name']
-            vnet_id2name[each_ans['private_net']] = vnet_name
-        else:
-            vnet_name = vnet_id2name[each_ans['private_net']]
-        each_ans['vnet'] = vnet_name
+        user = jmespath.search(
+            'user.display_name', each_ans)
+        each_ans['user'] = user
 
 
-def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
-    fxip = Fixedip()
+def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
+    eip = Fixedip()
     ans = []
     vnet_id2name = {}
     cols = ['id', 'address',  'create_time', 'status',
-            'type', 'occupied_resource_type_id', 'vnet']
+            'type', 'occupied_resource_type_id', 'user']
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -91,9 +86,9 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
         cols = list(set(cols))
     if len(site_ids_or_names) > 0:
         for ip_id in site_ids_or_names:
-            ans.append(fxip.list(ip_id=ip_id))
+            ans.append(eip.list(ip_id=ip_id))
     else:
-        ans = fxip.list(filter=filter_type)
+        ans = eip.list(filter=filter_type, isAll = is_all)
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
@@ -1009,28 +1004,28 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     list_load_balances(ids_or_names, column, is_all, is_table)
 
 
-@click.option('-id', '--fxip-id', 'ip_id', type=int,
-              help="Index of the volume.")
+@click.option('-id', '--eip-id', 'ip_id', type=int,
+              help="Index of the eip.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
-# @click.option('-all',
-#               '--show-all',
-#               'is_all',
-#               is_flag=True,
-#               type=bool,
-#               help="List all the load balancers.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the load balancers.")
 @click.option('-col',
               '--column',
               'column',
               default='',
-              help='User define table column. ex: twccli ls vlb -col pools[0].members')
+              help='User define table column. ex: twccli ls eip -col type')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ips.")
 @click.pass_context
-def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
-    """Command line for list vds
+def eip(ctx, ip_id, filter_type, ids_or_names, column, is_table, is_all):
+    """Command line for list eip
 
     :param ip_id: Enter id for your fixed ips.
     :type ip_id: string
@@ -1039,7 +1034,7 @@ def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
 
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
-    list_fixed_ips(ids_or_names, column, filter_type, is_table)
+    list_fixed_ips(ids_or_names, column, filter_type, is_table, is_all)
 
 
 @click.option('-id', '--ssl-id', 'ssl_id', type=int,
@@ -1074,7 +1069,7 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
 cli.add_command(ssl)
 
 

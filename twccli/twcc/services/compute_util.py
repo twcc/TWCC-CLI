@@ -278,7 +278,7 @@ def change_volume(ids_or_names, vol_status, site_id, is_table, size, wait, is_pr
             jpp(ans)
 
 
-def change_ip(ids_or_names, desc, is_table):
+def ch_ip_desc(ids_or_names, desc, is_table):
     fxip = Fixedip()
     cols = ['id', 'address',  'create_time', 'status', 'type', 'desc']
     if len(ids_or_names) > 0:
