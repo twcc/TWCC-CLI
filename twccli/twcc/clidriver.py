@@ -170,7 +170,7 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(http))
 
         mkAPIUrl_v3 = False
-        if http == 'get' or http == 'put' or http == 'patch':
+        if http == 'get' or http == 'put' or http == 'patch' or http == 'delete':
             mkAPIUrl_v3 = True
         t_url = self.mkAPIUrl(site_sn, api_host, func,
                               url_dict=url_dict, is_v3=mkAPIUrl_v3)
