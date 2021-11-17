@@ -376,7 +376,7 @@ def list_all_img(solution_name, is_table=True):
         jpp(output)
 
 
-def list_ccs(site_ids_or_names, is_table, isAll):
+def list_ccs(site_ids_or_names, is_table, is_all=False):
     """List container by site ids in table/json format or list all containers
 
     :param site_ids_or_names: list of site id
@@ -390,7 +390,7 @@ def list_ccs(site_ids_or_names, is_table, isAll):
     a = GpuSite()
 
     if len(site_ids_or_names) == 0:
-        my_GpuSite = a.list(isAll=isAll)
+        my_GpuSite = a.list(is_all=is_all)
     else:
         col_name = ['id', 'name', 'create_time', 'status', 'flavor', 'image']
         my_GpuSite = []
