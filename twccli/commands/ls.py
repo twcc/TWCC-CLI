@@ -7,7 +7,7 @@ import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, protection_desc
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
@@ -88,7 +88,7 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
         for ip_id in site_ids_or_names:
             ans.append(eip.list(ip_id=ip_id))
     else:
-        ans = eip.list(filter=filter_type, isAll = is_all)
+        ans = eip.list(filter=filter_type, isAll=is_all)
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
@@ -100,11 +100,12 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
         else:
             jpp(ans)
 
+
 def list_ssls(site_ids_or_names, column, is_table):
     ssl = Secrets()
     ans = []
-    
-    cols = ['id', 'name',  'create_time', 'status',]
+
+    cols = ['id', 'name',  'create_time', 'status', ]
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -124,6 +125,7 @@ def list_ssls(site_ids_or_names, column, is_table):
                          isWrap=False)
         else:
             jpp(ans)
+
 
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
@@ -374,7 +376,7 @@ def list_all_img(solution_name, is_table=True):
         jpp(output)
 
 
-def list_cntr(site_ids_or_names, is_table, isAll):
+def list_ccs(site_ids_or_names, is_table, isAll):
     """List container by site ids in table/json format or list all containers
 
     :param site_ids_or_names: list of site id
@@ -406,13 +408,18 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
         if isAll:
-            col_name.append('user')
+            for idx in range(len(my_GpuSite)):
+                my_GpuSite[idx]['owner'] = my_GpuSite[idx]['user']['username']
+                my_GpuSite[idx]['Protected'] = protection_desc(my_GpuSite[idx])
+                
+            col_name.append('owner')
+            col_name.append('Protected')
 
         if is_table:
             table_layout('GpuSite',
                          my_GpuSite,
                          caption_row=col_name,
-                         isPrint=True)
+                         isPrint=True, captionInOrder=True)
         else:
             jpp(my_GpuSite)
     else:
@@ -866,7 +873,7 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
                            (hostname, ssh_port, access_token))
 
         else:
-            list_cntr(site_ids_or_names, is_table, is_all)
+            list_ccs(site_ids_or_names, is_table, is_all)
 
 
 @click.command(help='List your keypairs in VCS.')
@@ -1058,7 +1065,7 @@ def ssl(ctx, ssl_id, ids_or_names, column, is_table):
     """
     ids_or_names = mk_names(ssl_id, ids_or_names)
     list_ssls(ids_or_names, column, is_table)
-    
+
 
 # end object ==================================================
 
