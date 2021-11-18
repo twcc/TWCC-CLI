@@ -375,6 +375,14 @@ def list_all_img(solution_name, is_table=True):
     else:
         jpp(output)
 
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
+
+def get_img_from_json(json_str):
+    ans_image = jmespath.search('Pod[0].container[0].image', json_str)
+    return ans_image.split('/')[-1] if not ans_image == None and '/' in ans_image else ""
+
 
 def list_ccs(site_ids_or_names, is_table, is_all=False):
     """List container by site ids in table/json format or list all containers
@@ -389,6 +397,7 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
+
     if len(site_ids_or_names) == 0:
         my_GpuSite = a.list(is_all=is_all)
     else:
@@ -398,16 +407,15 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans_flavor = jmespath.search('Pod[0].flavor', ans_info)
-            if not ans_flavor == None:
-                ans['flavor'] = ans_flavor
-            ans_image = jmespath.search('Pod[0].container[0].image', ans_info)
-            if not ans_image == None and '/' in ans_image:
-                ans['image'] = ans_image.split('/')[-1]
+
+            ans['flavor'] = get_flv_from_json(ans_info)
+            ans['image'] = get_img_from_json(ans_info)
+
             my_GpuSite.append(ans)
+
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
-        if isAll:
+        if is_all:
             for idx in range(len(my_GpuSite)):
                 my_GpuSite[idx]['owner'] = my_GpuSite[idx]['user']['username']
                 my_GpuSite[idx]['Protected'] = protection_desc(my_GpuSite[idx])
