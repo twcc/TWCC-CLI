@@ -1,8 +1,8 @@
 .sonar_template: &sonarqube_temp
-  stage: analysis
-   image: ciricihq/gitlab-sonar-scanner       
-  only:
-    - merge_requests
+    stage: analysis
+    image: ciricihq/gitlab-sonar-scanner       
+    only:
+      - merge_requests
 
 stages:
     - analysis
