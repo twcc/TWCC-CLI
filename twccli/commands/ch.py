@@ -167,10 +167,12 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
                       site_id, is_table, vol_size, wait)
 
 
-@click.option('-m', '--member', type=str,
-              help="Change members of load balancer, ex: twccli ch vlb -id {$vlbid} -m 192.168.100.1:80 192.168.100.2:80")
+@click.option('-m', '--members', type=str, default=None,
+              help="Change members of load balancer, ex: twccli ch vlb -id {$vlbid} -m 192.168.100.1:80,192.168.100.2:80")
 @click.option('-id', '--vlb-id', 'vlb_id', type=str,
               help="Index of the load balancer.")
+@click.option('-ip', '--eip-id', 'eip_id', type=str, default=None,
+              help="Index of the EIP.")
 @click.option('-lm', '--lb_method', type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
               help="Method of the load balancer.")
 # @click.option('-ln', '--listener-name', 'listener_name', type=str,multiple=True,
@@ -181,10 +183,9 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.argument('more_members', nargs=-1)
 @click.command(help="Update status of your vlb.")
 @pass_environment
-def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table):  # listener_name
+def vlb(env, vlb_id, members, lb_method, eip_id, wait, is_table):  # listener_name
     """Command line for list vlb
 
     :param vlb_id: Enter id for your load balancer.
@@ -202,9 +203,11 @@ def vlb(env, vlb_id, member, more_members, lb_method, wait, is_table):  # listen
 
     example: 'twccli ch vlb -m 1.1.1.1:80  2.2.2.2:50'
     """
-
-    members = mk_names(member, more_members)
-    change_loadbalancer(vlb_id, members, lb_method, is_table)
+    if members == None:
+        members = []
+    else:
+        members = members.split(',')
+    change_loadbalancer(vlb_id, members, lb_method, eip_id, is_table,)
 
 
 @click.option('-bkt',

@@ -201,7 +201,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     return vcs.create(name, exists_sol[sol], required)
 
 
-def change_loadbalancer(vlb_id, members, lb_method, is_table):
+def change_loadbalancer(vlb_id, members, lb_method, eip_id, is_table):
     # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
 
     vlb = LoadBalancers()
@@ -222,7 +222,7 @@ def change_loadbalancer(vlb_id, members, lb_method, is_table):
         listener['pool_name'] = pools_name
         del listener['default_tls_container_ref']
         del listener['sni_container_refs']
-    ans = vlb.update(vlb_id, vlb_ans_listeners, pools)
+    ans = vlb.update(vlb_id, vlb_ans_listeners, pools, eip_id = eip_id)
     # for this_ans_pool in ans['pools']:
     #     this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
     # this_ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(this_ans_listeners['name'],this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]

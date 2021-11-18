@@ -734,16 +734,22 @@ class LoadBalancers(CpuService):
         self._func_ = "loadbalancers"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc, json_data = None, eip_id = None):
         self.http_verb = 'post'
         self.data_dic = {'name': vlb_name, 'private_net': vnet_id,
                          'pools': pools, 'listeners': listeners, 'desc': vlb_desc}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
+        if not isNone(json_data):
+            self.data_dic = json_data
         return self._do_api()
 
-    def update(self, vlb_id, listeners, pools):
+    def update(self, vlb_id, listeners, pools, eip_id = None):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
         self.data_dic = {'pools': pools, 'listeners': listeners}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
         return self._do_api()
 
     def isStable(self, site_id):
