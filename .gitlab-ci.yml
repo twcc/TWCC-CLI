@@ -52,6 +52,7 @@ python36:
 
 sonarqube-reports:
     <<: *sonarqube_temp
+    needs: [sonar-preview]
     variables:
         SONAR_URL: $SONAR_HOST_URL
         SONAR_ANALYSIS_MODE: publish
