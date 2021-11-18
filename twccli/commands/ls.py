@@ -430,11 +430,7 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
                          isPrint=True, captionInOrder=True)
         else:
             jpp(my_GpuSite)
-    else:
-        if is_table:
-            table_layout('GpuSite', [], caption_row=col_name, isPrint=True)
-        else:
-            jpp([])
+
 
 
 def list_buckets(is_table, versioning):
