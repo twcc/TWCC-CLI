@@ -1,9 +1,9 @@
 .sonar_template: &sonarqube_temp
-    stage: analysis
+    stage: build
     image: ciricihq/gitlab-sonar-scanner       
 
 stages:
-    - analysis
+    - build
     - test
     - deploy
 
