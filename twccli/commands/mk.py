@@ -483,7 +483,7 @@ def vds(name, disk_type, disk_size, is_table):
               help="Name of the load balance.")
 @click.option('-id', '--vlb-id', 'vlb_id', type=int,  default=None,
               help="Index of the volume.")
-@click.option('-ip', '--eip-id', 'eip_id', type=int,  default=None,
+@click.option('-ip', '--eip', 'eip', type=str,  default=None,
               help="Index of the EIP.")
 @click.option('-lm', '--lb_method', 'lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False), multiple=True,
               help="Method of the load balancer.")
@@ -507,7 +507,7 @@ def vds(name, disk_type, disk_size, is_table):
 @click.option('-byjson', '--byjson', 'json_file', default="", show_default=False, type=str,
               help="Create load balance by json file.")  
 @click.command(help="Create your Load Balancer.")
-def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, members, is_table, wait, template, json_file, eip_id):
+def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, members, is_table, wait, template, json_file, eip):
     """Command line for create load balancer
 
     :param vlb_name: Enter name for your load balancer.
@@ -527,6 +527,9 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
 
     """
     
+    eip_id = Fixedip().get_id_by_ip(eip)
+    if not isNone(eip) and eip_id is None:
+        raise ValueError("EIP not avalible")
     if template:
         json_template = {"name": "TestLBS (required)",
             "desc": "This LBS is for .... (optional)",

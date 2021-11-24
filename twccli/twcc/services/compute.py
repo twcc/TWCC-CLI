@@ -727,7 +727,14 @@ class Fixedip(CpuService):
         self.url_dic = {"ips": ip_id}
         return self._do_api()
 
-
+    def get_id_by_ip(self, eip):
+        self.ext_get = {'project': self._project_id}
+        self.ext_get.update({'type': 'STATIC'})
+        all_fixedips = self._do_api()
+        for ips in all_fixedips:
+            if ips['address'] == eip and ips['status'] == 'AVAILABLE':
+                return ips['id']
+        return None
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
