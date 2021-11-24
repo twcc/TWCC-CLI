@@ -48,6 +48,7 @@ def create_fixedip(desc, is_table):
 
 def mk_temp_by_vlb_id(json_template, vlb_id):
     if not isNone(vlb_id):
+        vlb = LoadBalancers()
         exist_vlb_json = vlb.list(vlb_id)
         json_template["name"] = exist_vlb_json["name"]
         json_template["private_net"] = exist_vlb_json["private_net"]["id"]
@@ -62,14 +63,15 @@ def mk_temp_by_vlb_id(json_template, vlb_id):
     return json_template
 
 def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
+    json_data = None
     if json_file:
         with open(json_file, 'r') as fn:
             json_data = json.load(fn)
     elif not members == ():
-        if not len(listener_ports) == len(listener_types) == len(lb_methods) == len(members):
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods) == len(members)):
             raise ValueError('the number of listener_ports, listener_types, lb_methods should be the same')
     else:
-        if not len(listener_ports) == len(listener_types) == len(lb_methods):
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods)):
             raise ValueError('the number of listener_ports, listener_types should be the same')
     return json_data
 def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait, json_data = None, eip_id = None):
@@ -526,7 +528,6 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
     """
     
     if template:
-        vlb = LoadBalancers()
         json_template = {"name": "TestLBS (required)",
             "desc": "This LBS is for .... (optional)",
             "private_net": "The ID of the network on which to allocate the VIP (required)",
@@ -557,7 +558,6 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
             json.dump(json_template, fn)
         click.echo("Create template vlb json file successfully.")
     else:
-        json_data = None
         json_data = check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file)
         
         net = Networks()

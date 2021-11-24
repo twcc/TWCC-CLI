@@ -200,32 +200,45 @@ def create_vcs(name, sol=None, img_name=None, network=None,
 
     return vcs.create(name, exists_sol[sol], required)
 
-
-def change_loadbalancer(vlb_id, members, lb_method, eip_id, is_table):
+def get_ch_json_by_vlbid(vlb_id):
+    vlb = LoadBalancers()
+    json_template = vlb.ch_vlb_temp_json
+    exist_vlb_json = vlb.list(vlb_id)
+    
+    json_template["pools"] = exist_vlb_json["pools"]
+    json_template["listeners"] = exist_vlb_json["listeners"]
+    pool_id2name = {}
+    for pool in json_template["pools"]:
+        pool_id2name[pool["id"]] = pool["name"]
+        del pool["id"]
+        del pool["status"]
+        pool['delay'] = pool['monitor']['delay']
+        pool['max_retries'] = pool['monitor']['max_retries']
+        pool['timeout'] = pool['monitor']['timeout']
+        pool['monitor_type'] = pool['monitor']['monitor_type']   
+        pool['expected_codes'] = pool['monitor']['expected_codes'] 
+        pool['http_method'] = pool['monitor']['http_method']
+        pool['url_path'] = pool['monitor']['url_path']
+        del pool["monitor"]
+        print(pool['monitor_type'])
+    for ln in json_template["listeners"]:
+        ln['pool_name'] = pool_id2name[ln['pool']]
+        del ln["status"]
+        del ln["pool"]
+    
+    return json_template
+    
+def change_loadbalancer(vlb_id, eip_id, json_data, wait, is_table):
     # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
 
     vlb = LoadBalancers()
-    vlb_ans = vlb.list(vlb_id)
-    member_list = []
-    for member in members:
-        member_list.append(
-            {'ip': member.split(':')[0], 'port': member.split(':')[1], 'weight': 1})
-    before_pools = vlb_ans['pools']
-    pools_id = before_pools[0]['id']
-    pools_name = before_pools[0]['name']
-    pools_protocol = before_pools[0]['protocol']
-    lb_method = lb_method if not lb_method == None else before_pools[0]['method']
-    pools = [{'name': pools_name, 'method': lb_method,
-              'protocol': pools_protocol, 'members': member_list}]
-    vlb_ans_listeners = vlb_ans['listeners']
-    for listener in vlb_ans_listeners:
-        listener['pool_name'] = pools_name
-        del listener['default_tls_container_ref']
-        del listener['sni_container_refs']
-    ans = vlb.update(vlb_id, vlb_ans_listeners, pools, eip_id = eip_id)
-    # for this_ans_pool in ans['pools']:
-    #     this_ans['members_IP,status'] = ['({}:{},{})'.format(this_ans_pool_members['ip'],this_ans_pool_members['port'],this_ans_pool_members['status']) for this_ans_pool_members in this_ans_pool['members']]
-    # this_ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(this_ans_listeners['name'],this_ans_listeners['protocol'],this_ans_listeners['protocol_port'],this_ans_listeners['status']) for this_ans_listeners in this_ans['listeners']]
+    if isNone(json_data):
+        json_data = get_ch_json_by_vlbid(vlb_id)
+    ans = vlb.update(vlb_id, json_data['listeners'], json_data['pools'],eip_id = eip_id)
+    
+    if wait:
+        doSiteStable(ans['id'], site_type='vlb')
+        ans = vlb.list(ans['id'])
 
     cols = ['id', 'name',  'create_time', 'status', 'vip', 'pools_method',
             'members_IP,status', 'listeners_name,protocol,port,status', 'private_net_name']
@@ -241,7 +254,6 @@ def change_loadbalancer(vlb_id, members, lb_method, eip_id, is_table):
 
         ans['listeners_name,protocol,port,status'] = ['{},{},{},{}'.format(
             ans_listeners['name'], ans_listeners['protocol'], ans_listeners['protocol_port'], ans_listeners['status']) for ans_listeners in ans['listeners']]
-
     if len(ans) > 0:
         if is_table:
             table_layout("Load Balancers Info.:", ans,

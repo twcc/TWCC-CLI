@@ -6,7 +6,7 @@ import click
 import json
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_ccs, change_volume, change_loadbalancer, ch_ip_desc
+from twccli.twcc.services.compute_util import change_vcs, change_ccs, change_volume, change_loadbalancer, ch_ip_desc, get_ch_json_by_vlbid
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 
@@ -43,6 +43,10 @@ def set_versioning(bkt, versioning):
     else:
         s3.disable_versioning(bkt)
 
+def create_ch_template_vlb(vlb_id):
+    if not isNone(vlb_id):
+        ch_json = get_ch_json_by_vlbid(vlb_id)
+    return ch_json
 
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -167,25 +171,25 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
                       site_id, is_table, vol_size, wait)
 
 
-@click.option('-m', '--members', type=str, default=None,
-              help="Change members of load balancer, ex: twccli ch vlb -id {$vlbid} -m 192.168.100.1:80,192.168.100.2:80")
+
 @click.option('-id', '--vlb-id', 'vlb_id', type=str,
               help="Index of the load balancer.")
 @click.option('-ip', '--eip-id', 'eip_id', type=str, default=None,
               help="Index of the EIP.")
-@click.option('-lm', '--lb_method', type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False),
-              help="Method of the load balancer.")
-# @click.option('-ln', '--listener-name', 'listener_name', type=str,multiple=True,
-#               help="listener name of the load balancer.")
+@click.option('-temp', '--template', 'template',
+              is_flag=True, default=False, flag_value=True,
+              help='Create template vlb json file.')
 @click.option('-wait', '--wait', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your instance to be provisioned.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
-@click.command(help="Update status of your vlb.")
+@click.option('-byjson', '--byjson', 'json_file', default="", show_default=False, type=str,
+              help="Change load balancer by json file.")  
+@click.command(help="Update status of your vlb by listener.")
 @pass_environment
-def vlb(env, vlb_id, members, lb_method, eip_id, wait, is_table):  # listener_name
+def vlb(env, vlb_id,  eip_id, template, json_file, wait, is_table): 
     """Command line for list vlb
 
     :param vlb_id: Enter id for your load balancer.
@@ -203,11 +207,17 @@ def vlb(env, vlb_id, members, lb_method, eip_id, wait, is_table):  # listener_na
 
     example: 'twccli ch vlb -m 1.1.1.1:80  2.2.2.2:50'
     """
-    if members == None:
-        members = []
+    if template:
+        ch_json = create_ch_template_vlb(vlb_id)
+        with open('vlb_ch_template', 'w') as fn:
+            json.dump(ch_json, fn)
+        click.echo("Create ch template vlb json file successfully.")
     else:
-        members = members.split(',')
-    change_loadbalancer(vlb_id, members, lb_method, eip_id, is_table,)
+        json_data = None
+        if json_file:
+            with open(json_file, 'r') as fn:
+                json_data = json.load(fn)
+        change_loadbalancer(vlb_id, eip_id, json_data , wait, is_table,)
 
 
 @click.option('-bkt',
