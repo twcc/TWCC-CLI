@@ -6,9 +6,10 @@ from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import jpp, table_layout, isNone, name_validator
+from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc
 from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.services.solutions import solutions
+
 
 
 def getConfirm(res_name, entity_name, is_force, ext_txt=""):
@@ -77,7 +78,8 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
                     ans[i]['private_ip'] = ""
     else:
         if column == '':
-            cols = ['id', 'name', 'public_ip', 'create_time', 'status']
+            cols = ['id', 'name', 'public_ip', 'create_time',
+                    'status', 'Protected']
         else:
             cols = column.split(',')
             if not 'id' in cols:
@@ -99,8 +101,10 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
             return ans
 
         if is_table:
+            for idx in range(len(ans)):
+                ans[idx]["Protected"] = protection_desc(ans[idx])
             table_layout("VCS VMs" if not len(ids_or_names) == 1 else "VCS Info.: {}".format(
-                site_id), ans, cols, isPrint=True)
+                site_id), ans, cols, isPrint=True, captionInOrder=True)
         else:
             jpp(ans)
 
@@ -116,7 +120,7 @@ def list_vcs_img(sol_name, is_table):
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip = None):
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None):
 
     vcs = VcsSite()
     exists_sol = vcs.getSolList(mtype='dict', reverse=True)
@@ -333,11 +337,17 @@ def display_changed_sites(ans, ids_or_names, site, cols, is_print, is_table, tit
         ans = []
         for i, site_id in enumerate(ids_or_names):
             ans.extend([site.queryById(site_id)])
+
+        for idx in range(len(ans)):
+            ans[idx]['Protected'] = protection_desc(ans[idx])
+
         if not is_print:
             return ans
         if is_table:
+            cols.append('Protected')
+            cols.remove('termination_protection')
             table_layout(titles[0] if not len(ids_or_names) == 1 else ": {}".format(titles[1],
-                                                                                    site_id), ans, cols, isPrint=True)
+                                                                                    site_id), ans, cols, isPrint=True, captionInOrder=True)
         else:
             jpp(ans)
 

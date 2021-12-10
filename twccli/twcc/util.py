@@ -361,3 +361,6 @@ def twcc_error_echo(msg):
 
     click.echo(click.style('[TWCC-CLI] Error-', fg='bright_red'), nl=False)
     click.echo(msg)
+
+def protection_desc(x):
+    return "    Y" if x['termination_protection'] else " "

@@ -131,6 +131,6 @@ class TestCosLifecyc:
         self._loadSession()
         self._loadParams()
         self._create_bucket(self.bk_name)
-        self._chk_bkt_versioning()
+        #self._chk_bkt_versioning()
         self._del_bucket(self.bk_name)
         self._list_bucket_after_delete()

@@ -7,7 +7,7 @@ import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, protection_desc
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
@@ -88,7 +88,7 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
         for ip_id in site_ids_or_names:
             ans.append(eip.list(ip_id=ip_id))
     else:
-        ans = eip.list(filter=filter_type, isAll = is_all)
+        ans = eip.list(filter=filter_type, isAll=is_all)
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
@@ -100,11 +100,12 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
         else:
             jpp(ans)
 
+
 def list_ssls(site_ids_or_names, column, is_table):
     ssl = Secrets()
     ans = []
-    
-    cols = ['id', 'name',  'create_time', 'status',]
+
+    cols = ['id', 'name',  'create_time', 'status', ]
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -124,6 +125,7 @@ def list_ssls(site_ids_or_names, column, is_table):
                          isWrap=False)
         else:
             jpp(ans)
+
 
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
@@ -373,8 +375,16 @@ def list_all_img(solution_name, is_table=True):
     else:
         jpp(output)
 
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
 
-def list_cntr(site_ids_or_names, is_table, isAll):
+def get_img_from_json(json_str):
+    ans_image = jmespath.search('Pod[0].container[0].image', json_str)
+    return ans_image.split('/')[-1] if not ans_image == None and '/' in ans_image else ""
+
+
+def list_ccs(site_ids_or_names, is_table, is_all=False):
     """List container by site ids in table/json format or list all containers
 
     :param site_ids_or_names: list of site id
@@ -387,8 +397,9 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
+
     if len(site_ids_or_names) == 0:
-        my_GpuSite = a.list(isAll=isAll)
+        my_GpuSite = a.list(is_all=is_all)
     else:
         col_name = ['id', 'name', 'create_time', 'status', 'flavor', 'image']
         my_GpuSite = []
@@ -396,30 +407,30 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans_flavor = jmespath.search('Pod[0].flavor', ans_info)
-            if not ans_flavor == None:
-                ans['flavor'] = ans_flavor
-            ans_image = jmespath.search('Pod[0].container[0].image', ans_info)
-            if not ans_image == None and '/' in ans_image:
-                ans['image'] = ans_image.split('/')[-1]
+
+            ans['flavor'] = get_flv_from_json(ans_info)
+            ans['image'] = get_img_from_json(ans_info)
+
             my_GpuSite.append(ans)
+
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
-        if isAll:
-            col_name.append('user')
+        if is_all:
+            for idx in range(len(my_GpuSite)):
+                my_GpuSite[idx]['owner'] = my_GpuSite[idx]['user']['username']
+                my_GpuSite[idx]['Protected'] = protection_desc(my_GpuSite[idx])
+                
+            col_name.append('owner')
+            col_name.append('Protected')
 
         if is_table:
             table_layout('GpuSite',
                          my_GpuSite,
                          caption_row=col_name,
-                         isPrint=True)
+                         isPrint=True, captionInOrder=True)
         else:
             jpp(my_GpuSite)
-    else:
-        if is_table:
-            table_layout('GpuSite', [], caption_row=col_name, isPrint=True)
-        else:
-            jpp([])
+
 
 
 def list_buckets(is_table, versioning):
@@ -866,7 +877,7 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
                            (hostname, ssh_port, access_token))
 
         else:
-            list_cntr(site_ids_or_names, is_table, is_all)
+            list_ccs(site_ids_or_names, is_table, is_all)
 
 
 @click.command(help='List your keypairs in VCS.')
@@ -1058,7 +1069,7 @@ def ssl(ctx, ssl_id, ids_or_names, column, is_table):
     """
     ids_or_names = mk_names(ssl_id, ids_or_names)
     list_ssls(ids_or_names, column, is_table)
-    
+
 
 # end object ==================================================
 

@@ -207,8 +207,8 @@ class GpuSite(GpuService):
             raise ValueError(
                 "Solution name:'{0}' is not available.".format(sol_name))
 
-    def list(self, isAll=False):
-        if isAll:
+    def list(self, is_all=False):
+        if is_all:
             self.ext_get = {'project': self._project_id,
                             "all_users": 1}
         elif not self.url_dic == None and self.url_dic['container'] == "":
