@@ -176,6 +176,8 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
               help="Index of the load balancer.")
 @click.option('-ip', '--eip-id', 'eip_id', type=str, default=None,
               help="Index of the EIP.")
+@click.option('-ms', '--members', type=str, default=None,
+              help="Change members of load balancer, default pools[0], ex: twccli ch vlb -id {$vlbid} -m 192.168.100.1:80,192.168.100.2:80")
 @click.option('-temp', '--template', 'template',
               is_flag=True, default=False, flag_value=True,
               help='Create template vlb json file.')
@@ -189,7 +191,7 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
               help="Change load balancer by json file.")  
 @click.command(help="Update status of your vlb by listener.")
 @pass_environment
-def vlb(env, vlb_id,  eip_id, template, json_file, wait, is_table): 
+def vlb(env, vlb_id,  members, eip_id, template, json_file, wait, is_table): 
     """Command line for list vlb
 
     :param vlb_id: Enter id for your load balancer.
@@ -217,7 +219,7 @@ def vlb(env, vlb_id,  eip_id, template, json_file, wait, is_table):
         if json_file:
             with open(json_file, 'r') as fn:
                 json_data = json.load(fn)
-        change_loadbalancer(vlb_id, eip_id, json_data , wait, is_table,)
+        change_loadbalancer(vlb_id, eip_id, json_data ,members, wait, is_table,)
 
 
 @click.option('-bkt',

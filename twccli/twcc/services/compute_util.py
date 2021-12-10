@@ -200,7 +200,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
 
     return vcs.create(name, exists_sol[sol], required)
 
-def get_ch_json_by_vlbid(vlb_id):
+def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
     json_template = vlb.ch_vlb_temp_json
     exist_vlb_json = vlb.list(vlb_id)
@@ -225,15 +225,17 @@ def get_ch_json_by_vlbid(vlb_id):
         ln['pool_name'] = pool_id2name[ln['pool']]
         del ln["status"]
         del ln["pool"]
-    
+    if not members == None:
+        for ip_port in members.split(','):
+            json_template["pools"][0]["members"].append({"ip": ip_port.split(':')[0], "port": ip_port.split(':')[1]})
     return json_template
     
-def change_loadbalancer(vlb_id, eip_id, json_data, wait, is_table):
+def change_loadbalancer(vlb_id, eip_id, json_data, members, wait, is_table):
     # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
 
     vlb = LoadBalancers()
     if isNone(json_data):
-        json_data = get_ch_json_by_vlbid(vlb_id)
+        json_data = get_ch_json_by_vlbid(vlb_id, members = members)
     ans = vlb.update(vlb_id, json_data['listeners'], json_data['pools'],eip_id = eip_id)
     
     if wait:
