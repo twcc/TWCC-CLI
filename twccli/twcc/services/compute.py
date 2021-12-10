@@ -727,23 +727,78 @@ class Fixedip(CpuService):
         self.url_dic = {"ips": ip_id}
         return self._do_api()
 
-
+    def get_id_by_ip(self, eip):
+        self.ext_get = {'project': self._project_id}
+        self.ext_get.update({'type': 'STATIC'})
+        all_fixedips = self._do_api()
+        for ips in all_fixedips:
+            if ips['address'] == eip and ips['status'] == 'AVAILABLE':
+                return ips['id']
+        return None
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
         self._func_ = "loadbalancers"
         self._csite_ = Session2._getClusterName("VCS")
-
-    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+        self.ch_vlb_temp_json = {
+            "pools": [
+                {
+                "name": "TestPool (required)",
+                "protocol": "TCP, HTTP, or HTTPS (required)",
+                "members": [
+                    {
+                    "ip": "string",
+                    "port": 0,
+                    "weight": 0
+                    }
+                ],
+                "method": "ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP (required)",
+                "delay": "5 (optional)",
+                "max_retries": "from 1 to 10 (optional)",
+                "timeout": "5 (optional)",
+                "monitor_type": "HTTP, HTTPS, PING, or TCP (optional)",
+                "expected_codes": "200, 200,202 or 200-204 (optional)",
+                "http_method": "CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, or TRACE (optional)",
+                "url_path": "/ (optional)"
+                }
+            ],
+            "listeners": [
+                {
+                "name": "TestListener (required)",
+                "pool_name": "TestPool (required)",
+                "protocol": "TCP, HTTP, HTTPS, or TERMINATED_HTTPS (required)",
+                "protocol_port": "from 0 to 65535 (required)",
+                "default_tls_container_ref": "The ID of a secret required by the listener if the listener uses TERMINATED_HTTPS protocol (optional)",
+                "sni_container_refs": [
+                    "A list of ID of secrets required by the listener if the listener uses TERMINATED_HTTPS protocol (optional)"
+                ]
+                }
+            ]
+        }
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc, json_data = None, eip_id = None):
         self.http_verb = 'post'
         self.data_dic = {'name': vlb_name, 'private_net': vnet_id,
                          'pools': pools, 'listeners': listeners, 'desc': vlb_desc}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
+        if not isNone(json_data):
+            self.data_dic = json_data
         return self._do_api()
 
-    def update(self, vlb_id, listeners, pools):
+    def update(self, vlb_id, listeners, pools, eip_id = None):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
+        for pool in pools:
+            for col in ['expected_codes', 'http_method', 'url_path']:
+                if isNone(pool[col]):
+                    del pool[col]
+        for listener in listeners:
+            for col in ['default_tls_container_ref', 'sni_container_refs']:
+                if isNone(listener[col]) or listener[col] == []:
+                    del listener[col]
         self.data_dic = {'pools': pools, 'listeners': listeners}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
         return self._do_api()
 
     def isStable(self, site_id):
