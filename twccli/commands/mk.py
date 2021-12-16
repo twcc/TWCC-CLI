@@ -189,7 +189,7 @@ def cli():
               help="ID of the instance.")
 @click.option('-eip', '--eip', 'eip',
               default=None, type=str,
-              help='Assign a EIP to the instance by EIP id.')
+              help='Assign a EIP to the instance.')
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
