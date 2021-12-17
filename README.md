@@ -19,6 +19,18 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.23 Release Note
+
+![img](https://media.giphy.com/media/VKwspRV2pafJu/giphy.gif)
+
+**Feature**
+- Users can set Elastic IP(Check more in [@twccdocs/vcs-eip](https://man.twcc.ai/@twccdocs/doc-vcs-main-zh/https%3A%2F%2Fman.twcc.ai%2F%40twccdocs%2Fguide-vcs-eip-zh)) for VCS, by `twccli [ls|mk|rm|ch] eip`
+- Users can import your owned public key, check more in `mk key`
+
+**Bug Fix**
+- fix some bugs
+- fix some error message discription
+
 ### v0.5.22 Release Note
 
 ![img](https://media.giphy.com/media/9oQDaDO15i4jvtDAQO/giphy.gif)
