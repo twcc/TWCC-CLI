@@ -59,7 +59,7 @@ class S3():
                         to_zone).strftime("%m/%d/%Y %H:%M:%S")
                 else:
                     ele[y] = x[y]
-                    
+
                 if show_versioning:
                     if u'Name' in ele:
                         ans = self.get_versioning(ele[u'Name'])
@@ -67,7 +67,7 @@ class S3():
                             ele[u'Versioning'] = ans[u'Status']
                         else:
                             ele[u'Versioning'] = "Suspended"
-                    
+
             res.append(ele)
         return res
 
@@ -158,7 +158,7 @@ class S3():
         tmp = []
         to_zone = tz.tzlocal()
         for res in res_list:
-            
+
             if not 'Contents' in res:
                 continue
             else:
