@@ -143,9 +143,11 @@ class Keypairs(GenericService):
     def list(self):
         return self._do_api()
 
-    def createKeyPair(self, keyPairName):
+    def createKeyPair(self, keyPairName, public_key):
         self.http_verb = "post"
         self.data_dic = {"name": keyPairName}
+        if not isNone(public_key):
+            self.data_dic.update({'public_key':public_key})
         self.res_type = "txt"
         res = self._do_api()
         return res

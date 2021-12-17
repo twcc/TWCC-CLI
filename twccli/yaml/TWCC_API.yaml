@@ -15,7 +15,7 @@ production:
 avalible_funcs:
     -
       name: "servers"
-      url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'put'
         - 'get'
@@ -57,6 +57,14 @@ avalible_funcs:
         - 'post'
         - 'delete'
         - 'patch'
+    -
+      name: "secrets"
+      url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+      http_verb:
+        - 'get'
+        - 'post'
+        - 'delete'
+        
     -
       name: "snapshots"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
