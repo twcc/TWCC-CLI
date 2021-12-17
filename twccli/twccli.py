@@ -54,7 +54,7 @@ class Environment(object):
         """Logs a message to stderr."""
         if args:
             msg %= args
-        click.echo("[TWCCLI] "+msg, file=sys.stderr)
+        click.echo("[TWCCLI] "+msg, file=sys.stdout)
 
     def vlog(self, msg, *args):
         """Logs a message to stderr only if verbose is enabled."""

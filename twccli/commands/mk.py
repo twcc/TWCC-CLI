@@ -8,7 +8,7 @@ import click
 from datetime import datetime
 from collections import defaultdict
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId, Fixedip
+from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId, Fixedip, Secrets
 from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
@@ -32,22 +32,49 @@ def create_commit(site_id, tag, isAll=False):
         return c.createCommit(site_id, tag, img_name)
 
 
-def create_fixedip(private_net_id, desc, is_table):
+def create_fixedip(desc, is_table):
     """Create volume by name
 
     :param vol_name: Enter volume name
     :type vol_name: string
     """
-    fxip = Fixedip()
-    ans = fxip.create(private_net_id, desc=desc)
+    eip = Fixedip()
+    ans = eip.create(desc=desc)
     if is_table:
         cols = ["id", "address", "desc", "create_time", "type"]
         table_layout("IPs", ans, cols, isPrint=True)
     else:
         jpp(ans)
 
+def mk_temp_by_vlb_id(json_template, vlb_id):
+    if not isNone(vlb_id):
+        vlb = LoadBalancers()
+        exist_vlb_json = vlb.list(vlb_id)
+        json_template["name"] = exist_vlb_json["name"]
+        json_template["private_net"] = exist_vlb_json["private_net"]["id"]
+        json_template["pools"] = []
+        pool_id2name = {}
+        for pool in exist_vlb_json["pools"]:
+            json_template["pools"].append({"name": pool["name"], "protocol": pool["protocol"], "members": pool["members"], "method": pool["method"]})
+            pool_id2name[pool["id"]] = pool["name"]
+        json_template["listeners"] = []
+        for listener in exist_vlb_json["listeners"]:
+            json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]], "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
+    return json_template
 
-def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait):
+def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
+    json_data = None
+    if json_file:
+        with open(json_file, 'r') as fn:
+            json_data = json.load(fn)
+    elif not members == ():
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods) == len(members)):
+            raise ValueError('the number of listener_ports, listener_types, lb_methods should be the same')
+    else:
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods)):
+            raise ValueError('the number of listener_ports, listener_types should be the same')
+    return json_data
+def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait, json_data = None, eip_id = None):
     """Create load balance by name
 
     :param vlb_name: Enter Load Balancer name
@@ -55,10 +82,12 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     """
     vlb = LoadBalancers()
     allvlb = vlb.list()
+    if not isNone(json_data):
+        vlb_name = json_data['name']
     if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
-    ans = vlb.create(vlb_name, pools, vnet_id, listeners, vlb_desc)
+    ans = vlb.create(vlb_name, pools, vnet_id, listeners, vlb_desc, json_data = json_data, eip_id=eip_id)
     if 'detail' in ans:
         is_table = False
     else:
@@ -158,6 +187,9 @@ def cli():
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
+@click.option('-eip', '--eip', 'eip',
+              default=None, type=str,
+              help='Assign a EIP to the instance.')
 @click.option('-fip', '--need-floating-ip', 'fip',
               is_flag=True, default=False,  flag_value=True,
               help='Assign a floating IP to the instance.')
@@ -204,7 +236,7 @@ def cli():
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
-        sol, fip, password, env_keys, env_values, is_apikey, is_table):
+        sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):
 
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
@@ -252,7 +284,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey)
+                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey, eip = eip,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -290,8 +322,9 @@ def cos(env, name):
 @click.command(help="Create your key pairs.")
 @click.option('-n', '--name', 'name', default="twccli", type=str,
               help="Name of your instance.")
+@click.option('-pub', '--public-key', 'public_key', default=None, type=str, help="Public key for your new key.")
 @pass_environment
-def key(env, name):
+def key(env, name, public_key):
     """Command line for create key
 
     :param name: Enter name for your resources.
@@ -303,15 +336,12 @@ def key(env, name):
     if isFile(wfn):
         print("Keypairs exists in {}".format(wfn))
     else:
-        ans = keyring.createKeyPair(name)
+        ans = keyring.createKeyPair(name, public_key)
         with open(wfn, "wb") as fp:
             fp.write(ans)
         import os
         os.chmod(wfn, 0o600)
         print("Your keypair is in `{}` with mode 600".format(wfn))
-
-
-# end object ===============================================================
 
 
 @click.command(help="‘Create’ your CCS (Container Computer Service) containers.")
@@ -361,7 +391,7 @@ def ccs(env, name, gpu, cmd, flavor, sol, img_name,
                 datetime.now().strftime("_%m%d%H%M"))
         create_commit(site_id, dup_tag)
     else:
-        ans = create_ccs(name, gpu, flavor, sol, img_name, cmd, 
+        ans = create_ccs(name, gpu, flavor, sol, img_name, cmd,
                          mk_env_dict(), is_apikey)
         if wait:
             doSiteStable(ans['id'])
@@ -451,22 +481,33 @@ def vds(name, disk_type, disk_size, is_table):
               help="Description of the load balance.")
 @click.option('-n', '--load_balance_name', 'vlb_name', default="twccli_lb", type=str,
               help="Name of the load balance.")
+@click.option('-id', '--vlb-id', 'vlb_id', type=int,  default=None,
+              help="Index of the volume.")
+@click.option('-ip', '--eip', 'eip', type=str,  default=None,
+              help="Index of the EIP.")
 @click.option('-lm', '--lb_method', 'lb_methods', required=True, default=["ROUND_ROBIN"], type=click.Choice(['SOURCE_IP', 'LEAST_CONNECTIONS', 'ROUND_ROBIN'], case_sensitive=False), multiple=True,
               help="Method of the load balancer.")
 @click.option('-lt', '--listener_type', 'listener_types',   default=["APP_LB"], show_default=True, type=click.Choice(['APP_LB', 'NETWORK_LB'], case_sensitive=False), multiple=True,
               help="The type of the listener of balancer.")
 @click.option('-lp', '--listener_port', 'listener_ports',  default=["80"], show_default=True, multiple=True,
               help="The port of the listener of balancer.")
+@click.option('-ms', '--members', 'members', type=str, multiple=True, default=None,
+              help="The members for each listener, using ',' to seperate. ex: 192.168.1.1:80,192.168.1.2:80")
 @click.option('-vnn', '--virtual_network_name', 'vnet_name', default="default_network", show_default=True, required=True, type=str,
               help="Virtual Network id")
+@click.option('-temp', '--template', 'template',
+              is_flag=True, default=False, flag_value=True,
+              help='Create template vlb json file.')
 @click.option('-wait', '--wait-ready', 'wait',
               is_flag=True, default=False, flag_value=True,
               help='Wait until your container to be provisioned.')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-byjson', '--byjson', 'json_file', default="", show_default=False, type=str,
+              help="Create load balance by json file.")  
 @click.command(help="Create your Load Balancer.")
-def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, is_table, wait):
+def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, members, is_table, wait, template, json_file, eip):
     """Command line for create load balancer
 
     :param vlb_name: Enter name for your load balancer.
@@ -485,42 +526,74 @@ def vlb(vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_des
     :type wait: bool
 
     """
-    if not len(listener_ports) == len(listener_types):
-        raise ValueError('the number of listener setting is not correct')
-    net = Networks()
-    nets = net.list()
-    net_name2id = {}
-    [net_name2id.setdefault(net['name'], net['id']) for net in nets]
-    if not vnet_name in net_name2id:
-        raise ValueError('the virtual network name not exist')
+    
+    eip_id = Fixedip().get_id_by_ip(eip)
+    if not isNone(eip) and eip_id is None:
+        raise ValueError("EIP not avalible")
+    if template:
+        json_template = {"name": "TestLBS (required)",
+            "desc": "This LBS is for .... (optional)",
+            "private_net": "The ID of the network on which to allocate the VIP (required)",
+            "pools": [{
+                    "name": "TestPool (required)",
+                    "protocol": "TCP, HTTP, or HTTPS (required)",
+                    "members": [
+                        {
+                        "ip": "string",
+                        "port": 0,
+                        "weight": 0
+                        }
+                    ],
+                    "method": "ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP (required)",
+                    }
+                ],
+                "listeners": [
+                    {
+                    "name": "TestListener (required)",
+                    "pool_name": "TestPool (required)",
+                    "protocol": "TCP, HTTP, HTTPS, or TERMINATED_HTTPS (required)",
+                    "protocol_port": "from 0 to 65535 (required)",                    
+                    }
+                ]
+            }
+        json_template = mk_temp_by_vlb_id(json_template, vlb_id)
+        with open('vlb_template', 'w') as fn:
+            json.dump(json_template, fn)
+        click.echo("Create template vlb json file successfully.")
+    else:
+        json_data = check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file)
+        
+        net = Networks()
+        nets = net.list()
+        net_name2id = {}
+        [net_name2id.setdefault(net['name'], net['id']) for net in nets]
+        if not vnet_name in net_name2id:
+            raise ValueError('the virtual network name not exist')
 
-    listeners = []
-    listener_index = 0
-    listener_types_mapping = {'APP_LB': 'HTTP', 'NETWORK_LB': 'TCP'}
-    protocol = ''
-    for listener_type, listener_port in zip(listener_types, listener_ports):
-        listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port,
-                         'name': "listener-{}".format(listener_index), 'pool_name': "pool-0"})
-        listener_index += 1
-    pools = []
-    if len(lb_methods) > 1:
-        raise ValueError('not support yet')
-    for i, lb_method in enumerate(lb_methods):
-        pools.append({'method': lb_method, 'protocol': "HTTP",
-                     'name': "pool-{}".format(i)})
-    create_load_balance(
-        vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait)
+        listeners = []
+        pools = []
+        listener_index = 0
+        listener_types_mapping = {'APP_LB': 'HTTP', 'NETWORK_LB': 'TCP'}
+        for listener_type, listener_port, lb_method in zip(listener_types, listener_ports, lb_methods):
+            listeners.append({'protocol': listener_types_mapping[listener_type], 'protocol_port': listener_port,
+                            'name': "listener-{}".format(listener_index), 'pool_name': "pool-{}".format(listener_index)})
+            pools.append({'method': lb_method, 'protocol': listener_types_mapping[listener_type],
+                        'name': "pool-{}".format(listener_index)})
+            listener_index += 1
+        
+        create_load_balance(
+            vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait, json_data = json_data, eip_id = eip_id)
 
 
-@click.option('-netid', '--private-net-id', type=int,
-              help="Index of the private-net.")
+# @click.option('-netid', '--private-net-id', type=int,
+#               help="Index of the private-net.")
 @click.option('-d', '--IP-description', 'desc', type=str, default='generated by cli',
-              help="Index of the private-net.")
+              help="Description of the private-net.")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your fixed ips.")
-def fxip(private_net_id, desc, is_table):
+def eip(desc, is_table):
     """Command line for list vds
 
     :param ip_id: Enter id for your fixed ips.
@@ -529,8 +602,57 @@ def fxip(private_net_id, desc, is_table):
     :type ids_or_names: string
 
     """
-    create_fixedip(private_net_id, desc, is_table)
+    create_fixedip(desc, is_table)
 
+@click.command(help="Create your SSL certificates.")
+@click.option('-d', '--SSL-description', 'desc', type=str, default='generated by cli',
+              help="Description of the SSL certificate.")
+@click.option('-n', '--name', 'name', default="twccli", type=str,
+              help="Name of your SSL.")
+@click.option('-p', '--payload', 'payload', default=None, type=str,
+              help="Base64 encoding of your SSL.")
+@click.option('-sca', '--sercer-certfile', 'sercer_certfile', default=None, type=str,
+              help="Server certfile for your openssl.")
+@click.option('-inkey', '--inkey', 'inkey', default=None, type=str,
+              help="Server key for your openssl.")
+@click.option('-ica', '--intermediate-CA', 'intermediate_ca', default=None, type=str,
+              help="Intermediate CA for your openssl.")
+@click.option('-pf', '--payload-file', 'payload_file', default=None, type=str,
+              help="Base64 file path of your SSL.")
+@click.option('-et', '--expire-time', 'expire_time', default=None, type=str,
+              help="Expire-time of your SSL.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@pass_environment
+def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, inkey, intermediate_ca, is_table):
+    """Command line for create SSL
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    
+    if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
+        import subprocess, os
+        command = 'openssl pkcs12 -export -nodes -out server.p12 -inkey {} -in {} -certfile {} -passout pass: ; openssl base64 -in server.p12 -out server.txt'.format(inkey, sercer_certfile, intermediate_CA)
+        subprocess.check_output(command, shell=True,stderr=subprocess.STDOUT).decode('utf8').strip()
+        payload_file = os.path.join(os.getcwd(),'server.txt')
+    ssl = Secrets()
+    if not isNone(payload_file):
+        with open(payload_file,'r') as f:
+            payload = f.read()
+    ans = ssl.create(name, desc, payload, expire_time)
+    ans = ssl.list(ans['id'])
+    if is_table:
+        cols = ["id", "name", "status", "create_time"]
+        table_layout("IPs", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
+    
+
+    
+
+# end object ===============================================================
 
 cli.add_command(vcs)
 cli.add_command(cos)
@@ -539,7 +661,8 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
+cli.add_command(ssl)
 
 
 def main():
