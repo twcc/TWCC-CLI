@@ -42,7 +42,7 @@ class TestCosLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _list_bucket_after_delete(self):
-        cmd_list = "-sv ls cos -json"
+        cmd_list = "ls cos -json"
         print(cmd_list)
         self.list_out = self.__run(cmd_list.split(" "))
         print(self.list_out)

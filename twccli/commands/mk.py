@@ -433,11 +433,11 @@ def vnet(env, name, getway, cidr, is_table, wait):
     net = Networks()
     # TODO varify getway and cidr @Leo
     import re
-    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" getway):
+    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$", getway):
         raise ValueError("Getway format error")
     if not '/' in cidr:
         raise ValueError("CIDR format error")
-    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" cidr.split('/')[0]):
+    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$", cidr.split('/')[0]):
         raise ValueError("CIDR format error")
     ans = net.create(name, getway, cidr)
     if wait:
