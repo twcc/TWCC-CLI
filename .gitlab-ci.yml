@@ -11,7 +11,7 @@ stages:
 
 python39:
   stage: test
-  image: python:3.6
+  image: python:3.9
   needs: [sonarqube-reports]
   variables:
     TWCC_CICD_STAGE: 'minor'
@@ -21,9 +21,9 @@ python39:
     - echo $TWCC_CICD_STAGE
     - pip install tox
     - export TWCC_SHOW_DEPRECATED=False
-    - tox -e py36
+    - tox -e py39
   only:
-    - merge_requests
+    - master
 
 python37:
   stage: test
@@ -51,7 +51,7 @@ python36:
     - pip install tox
     - tox -e py36
   only:
-    - master
+    - merge_requests
 
 sonarqube-reports:
     <<: *sonarqube_temp
