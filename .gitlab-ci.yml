@@ -11,7 +11,7 @@ stages:
 
 python39:
   stage: test
-  image: python:3.9
+  image: python:3.6
   needs: [sonarqube-reports]
   variables:
     TWCC_CICD_STAGE: 'minor'
