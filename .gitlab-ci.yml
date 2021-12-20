@@ -23,7 +23,7 @@ python39:
     - export TWCC_SHOW_DEPRECATED=False
     - tox -e py39
   only:
-    - master
+    - merge_requests
 
 python37:
   stage: test
@@ -49,9 +49,9 @@ python36:
     - python -V
     - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
     - pip install tox
-    - tox -e py36 -- twccli/tests/test_cos.py::TestCosLifecyc::test_create_bucket
+    - tox -e py36
   only:
-    - merge_requests
+    - master
 
 sonarqube-reports:
     <<: *sonarqube_temp
