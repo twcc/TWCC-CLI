@@ -49,7 +49,7 @@ python36:
     - python -V
     - echo $_TWCC_API_KEY_, $_TWCC_PROJECT_CODE_, $_TWCC_CLI_GA_
     - pip install tox
-    - tox -e py36
+    - tox -e py36 -- twccli/tests/test_cos.py::TestCosLifecyc::test_create_bucket
   only:
     - merge_requests
 
