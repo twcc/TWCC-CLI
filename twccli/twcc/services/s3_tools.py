@@ -40,7 +40,7 @@ class S3():
                                      aws_access_key_id=self.access_key,
                                      aws_secret_access_key=self.secret_key,
                                      endpoint_url='https://' + self.endpoint_url,
-                                     verify=False)
+                                     verify=True)
 
     def list_bucket(self, show_versioning=False):
         """ Listing all the bucket for S3 directory
