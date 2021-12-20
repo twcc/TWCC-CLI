@@ -433,11 +433,11 @@ def vnet(env, name, getway, cidr, is_table, wait):
     net = Networks()
     # TODO varify getway and cidr @Leo
     import re
-    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$', getway):
+    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" getway):
         raise ValueError("Getway format error")
     if not '/' in cidr:
         raise ValueError("CIDR format error")
-    if not re.findall('^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$', cidr.split('/')[0]):
+    if not re.findall(r"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" cidr.split('/')[0]):
         raise ValueError("CIDR format error")
     ans = net.create(name, getway, cidr)
     if wait:
@@ -505,7 +505,7 @@ def vds(name, disk_type, disk_size, is_table):
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.option('-byjson', '--byjson', 'json_file', default="", show_default=False, type=str,
-              help="Create load balance by json file.")  
+              help="Create load balance by json file.")
 @click.command(help="Create your Load Balancer.")
 def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports, vlb_desc, members, is_table, wait, template, json_file, eip):
     """Command line for create load balancer
@@ -526,7 +526,7 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
     :type wait: bool
 
     """
-    
+
     eip_id = Fixedip().get_id_by_ip(eip)
     if not isNone(eip) and eip_id is None:
         raise ValueError("EIP not avalible")
@@ -552,7 +552,7 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
                     "name": "TestListener (required)",
                     "pool_name": "TestPool (required)",
                     "protocol": "TCP, HTTP, HTTPS, or TERMINATED_HTTPS (required)",
-                    "protocol_port": "from 0 to 65535 (required)",                    
+                    "protocol_port": "from 0 to 65535 (required)",
                     }
                 ]
             }
@@ -562,7 +562,7 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
         click.echo("Create template vlb json file successfully.")
     else:
         json_data = check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file)
-        
+
         net = Networks()
         nets = net.list()
         net_name2id = {}
@@ -580,7 +580,7 @@ def vlb(vlb_id, vlb_name, vnet_name, lb_methods, listener_types, listener_ports,
             pools.append({'method': lb_method, 'protocol': listener_types_mapping[listener_type],
                         'name': "pool-{}".format(listener_index)})
             listener_index += 1
-        
+
         create_load_balance(
             vlb_name, pools, net_name2id[vnet_name], listeners, vlb_desc, is_table, wait, json_data = json_data, eip_id = eip_id)
 
@@ -631,7 +631,7 @@ def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, in
     :param name: Enter name for your resources.
     :type name: string
     """
-    
+
     if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
         import subprocess, os
         command = 'openssl pkcs12 -export -nodes -out server.p12 -inkey {} -in {} -certfile {} -passout pass: ; openssl base64 -in server.p12 -out server.txt'.format(inkey, sercer_certfile, intermediate_CA)
@@ -648,9 +648,9 @@ def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, in
         table_layout("IPs", ans, cols, isPrint=True)
     else:
         jpp(ans)
-    
 
-    
+
+
 
 # end object ===============================================================
 
