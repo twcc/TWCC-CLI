@@ -21,7 +21,7 @@ python39:
     - echo $TWCC_CICD_STAGE
     - pip install tox
     - export TWCC_SHOW_DEPRECATED=False
-    - tox -e py39
+    - tox -e py36
   only:
     - merge_requests
 
