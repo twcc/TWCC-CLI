@@ -127,7 +127,7 @@ class TestCosLifecyc:
 
     # HERE is the test
 
-    def ____test_create_bucket(self):
+    def test_create_bucket(self):
         """
         this test need to be rewrited
         """
