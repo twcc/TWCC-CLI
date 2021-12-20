@@ -42,7 +42,7 @@ class TestCosLifecyc:
         cmd_list = "ls cos -json"
         print(cmd_list)
         self.list_out = self.__run(cmd_list.split(" "))
-        print(slef.list_out)
+        print(self.list_out)
         out = json.loads(self.list_out)
 
         flag = True
