@@ -24,9 +24,6 @@ class TestCosLifecyc:
     def __run(self, cmd_list):
         print(cmd_list)
         result = self.runner.invoke(cli, cmd_list)
-        print("!!!!")
-        print(result)
-        print("!!!!")
         print(result.output)
         #assert result.exit_code == 0
         return result.output
