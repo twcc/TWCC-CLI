@@ -42,6 +42,7 @@ class TestCosLifecyc:
         cmd_list = "ls cos -json"
         print(cmd_list)
         self.list_out = self.__run(cmd_list.split(" "))
+        print(self.list_out)
         out = json.loads(self.list_out)
 
         flag = True
@@ -127,7 +128,7 @@ class TestCosLifecyc:
 
     # HERE is the test
 
-    def ____test_create_bucket(self):
+    def test_create_bucket(self):
         """
         this test need to be rewrited
         """
