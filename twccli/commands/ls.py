@@ -7,8 +7,8 @@ import sys
 import datetime
 import jmespath
 from twccli.twcc.session import Session2
-from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, timezone2local
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip
+from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, protection_desc
+from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
 from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
 from twccli.twcc import GupSiteBlockSet
@@ -58,7 +58,6 @@ def handle_exception(cmd, info_name, exc):
 
 
 def refactor_ip_detail(ans, vnet_id2name):
-    net = Networks()
     for each_ans in ans:
         occupied_resource_type = jmespath.search(
             'occupied_resource.type', each_ans)
@@ -69,21 +68,17 @@ def refactor_ip_detail(ans, vnet_id2name):
         else:
             each_ans['occupied_resource_type_id'] = occupied_resource_type + \
                 ':'+occupied_resource_type_id
-        vnet_name = ''
-        if not each_ans['private_net'] in vnet_id2name:
-            vnet_name = net.queryById(each_ans['private_net'])['name']
-            vnet_id2name[each_ans['private_net']] = vnet_name
-        else:
-            vnet_name = vnet_id2name[each_ans['private_net']]
-        each_ans['vnet'] = vnet_name
+        user = jmespath.search(
+            'user.display_name', each_ans)
+        each_ans['user'] = user
 
 
-def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
-    fxip = Fixedip()
+def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
+    eip = Fixedip()
     ans = []
     vnet_id2name = {}
     cols = ['id', 'address',  'create_time', 'status',
-            'type', 'occupied_resource_type_id', 'vnet']
+            'type', 'occupied_resource_type_id', 'user']
     if not column == '':
         cols = column.split(',')
         cols.append('id')
@@ -91,13 +86,39 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table):
         cols = list(set(cols))
     if len(site_ids_or_names) > 0:
         for ip_id in site_ids_or_names:
-            ans.append(fxip.list(ip_id=ip_id))
+            ans.append(eip.list(ip_id=ip_id))
     else:
-        ans = fxip.list(filter=filter_type)
+        ans = eip.list(filter=filter_type, isAll=is_all)
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
             table_layout("IP Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         isWrap=False)
+        else:
+            jpp(ans)
+
+
+def list_ssls(site_ids_or_names, column, is_table):
+    ssl = Secrets()
+    ans = []
+
+    cols = ['id', 'name',  'create_time', 'status', ]
+    if not column == '':
+        cols = column.split(',')
+        cols.append('id')
+        cols.append('name')
+        cols = list(set(cols))
+    if len(site_ids_or_names) > 0:
+        for ssl_id in site_ids_or_names:
+            ans.append(ssl.list(ssl_id=ssl_id))
+    else:
+        ans = ssl.list()
+    if len(ans) > 0:
+        if is_table:
+            table_layout("SSL Results",
                          ans,
                          cols,
                          isPrint=True,
@@ -173,7 +194,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'detail' in the_vol:
                 is_table = False
                 continue
-            if len(the_vol['name']) > 15:
+            if len(the_vol['name']) > 15 and is_table:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
@@ -184,7 +205,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'detail' in the_vol:
                 is_table = False
                 continue
-            if len(the_vol['name']) > 15:
+            if len(the_vol['name']) > 15 and is_table:
                 the_vol['name'] = '-'.join(the_vol['name'].split('-')
                                            [:2])+'...'
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
@@ -354,8 +375,16 @@ def list_all_img(solution_name, is_table=True):
     else:
         jpp(output)
 
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
 
-def list_cntr(site_ids_or_names, is_table, isAll):
+def get_img_from_json(json_str):
+    ans_image = jmespath.search('Pod[0].container[0].image', json_str)
+    return ans_image.split('/')[-1] if not ans_image == None and '/' in ans_image else ""
+
+
+def list_ccs(site_ids_or_names, is_table, is_all=False):
     """List container by site ids in table/json format or list all containers
 
     :param site_ids_or_names: list of site id
@@ -368,8 +397,9 @@ def list_cntr(site_ids_or_names, is_table, isAll):
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
+
     if len(site_ids_or_names) == 0:
-        my_GpuSite = a.list(isAll=isAll)
+        my_GpuSite = a.list(is_all=is_all)
     else:
         col_name = ['id', 'name', 'create_time', 'status', 'flavor', 'image']
         my_GpuSite = []
@@ -377,30 +407,30 @@ def list_cntr(site_ids_or_names, is_table, isAll):
             # site_id = int(ele)
             ans = a.queryById(ele)
             ans_info = a.getDetail(ele)
-            ans_flavor = jmespath.search('Pod[0].flavor', ans_info)
-            if not ans_flavor == None:
-                ans['flavor'] = ans_flavor
-            ans_image = jmespath.search('Pod[0].container[0].image', ans_info)
-            if not ans_image == None and '/' in ans_image:
-                ans['image'] = ans_image.split('/')[-1]
+
+            ans['flavor'] = get_flv_from_json(ans_info)
+            ans['image'] = get_img_from_json(ans_info)
+
             my_GpuSite.append(ans)
+
     my_GpuSite = [i for i in my_GpuSite if 'id' in i]
     if len(my_GpuSite) > 0:
-        if isAll:
-            col_name.append('user')
+        if is_all:
+            for idx in range(len(my_GpuSite)):
+                my_GpuSite[idx]['owner'] = my_GpuSite[idx]['user']['username']
+                my_GpuSite[idx]['Protected'] = protection_desc(my_GpuSite[idx])
+                
+            col_name.append('owner')
+            col_name.append('Protected')
 
         if is_table:
             table_layout('GpuSite',
                          my_GpuSite,
                          caption_row=col_name,
-                         isPrint=True)
+                         isPrint=True, captionInOrder=True)
         else:
             jpp(my_GpuSite)
-    else:
-        if is_table:
-            table_layout('GpuSite', [], caption_row=col_name, isPrint=True)
-        else:
-            jpp([])
+
 
 
 def list_buckets(is_table, versioning):
@@ -489,13 +519,12 @@ def list_secg(ids_or_names, is_table=True):
 
     if len(ids_or_names) == 1:
         secg_list = getSecGroupList(ids_or_names[0])
-        secg_id = secg_list['id']
         secg_detail = secg_list['security_group_rules']
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
                          secg_detail,
                          caption_row=[
-                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction'],
+                             'id', 'port_range_min', 'port_range_max', 'remote_ip_prefix', 'direction', 'protocol'],
                          isPrint=True, captionInOrder=True)
         else:
             jpp(secg_detail)
@@ -735,7 +764,6 @@ def cos(env, name, okey, is_public, is_table, versioning, ids_or_names):
                    is_public=is_public, is_table=is_table)
 
 
-# end object ==================================================
 @click.command(
     help="'List' the details of your CCS (Container Computer Service) containers.")
 @click.option('-p',
@@ -851,7 +879,7 @@ def ccs(env, res_property, name, product_type, site_ids_or_names, is_table, is_a
                            (hostname, ssh_port, access_token))
 
         else:
-            list_cntr(site_ids_or_names, is_table, is_all)
+            list_ccs(site_ids_or_names, is_table, is_all)
 
 
 @click.command(help='List your keypairs in VCS.')
@@ -989,28 +1017,28 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     list_load_balances(ids_or_names, column, is_all, is_table)
 
 
-@click.option('-id', '--fxip-id', 'ip_id', type=int,
-              help="Index of the volume.")
+@click.option('-id', '--eip-id', 'ip_id', type=int,
+              help="Index of the eip.")
 @click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
-# @click.option('-all',
-#               '--show-all',
-#               'is_all',
-#               is_flag=True,
-#               type=bool,
-#               help="List all the load balancers.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the load balancers.")
 @click.option('-col',
               '--column',
               'column',
               default='',
-              help='User define table column. ex: twccli ls vlb -col pools[0].members')
+              help='User define table column. ex: twccli ls eip -col type')
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ips.")
 @click.pass_context
-def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
-    """Command line for list vds
+def eip(ctx, ip_id, filter_type, ids_or_names, column, is_table, is_all):
+    """Command line for list eip
 
     :param ip_id: Enter id for your fixed ips.
     :type ip_id: string
@@ -1019,8 +1047,33 @@ def fxip(ctx, ip_id, filter_type, ids_or_names, column, is_table):
 
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
-    list_fixed_ips(ids_or_names, column, filter_type, is_table)
+    list_fixed_ips(ids_or_names, column, filter_type, is_table, is_all)
 
+
+@click.option('-id', '--ssl-id', 'ssl_id', type=int,
+              help="Index of the ssl.")
+@click.option('-col',
+              '--column',
+              'column',
+              default='',
+              help='User define table column. ex: twccli ls ssl -col desc')
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your ssls.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, column, is_table):
+    """Command line for create SSL
+
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    list_ssls(ids_or_names, column, is_table)
+
+
+# end object ==================================================
 
 cli.add_command(vcs)
 cli.add_command(cos)
@@ -1029,7 +1082,8 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
+cli.add_command(ssl)
 
 
 def main():

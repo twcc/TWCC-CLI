@@ -40,7 +40,7 @@ class S3():
                                      aws_access_key_id=self.access_key,
                                      aws_secret_access_key=self.secret_key,
                                      endpoint_url='https://' + self.endpoint_url,
-                                     verify=False)
+                                     verify=True)
 
     def list_bucket(self, show_versioning=False):
         """ Listing all the bucket for S3 directory
@@ -59,7 +59,7 @@ class S3():
                         to_zone).strftime("%m/%d/%Y %H:%M:%S")
                 else:
                     ele[y] = x[y]
-                    
+
                 if show_versioning:
                     if u'Name' in ele:
                         ans = self.get_versioning(ele[u'Name'])
@@ -67,7 +67,7 @@ class S3():
                             ele[u'Versioning'] = ans[u'Status']
                         else:
                             ele[u'Versioning'] = "Suspended"
-                    
+
             res.append(ele)
         return res
 
@@ -158,7 +158,7 @@ class S3():
         tmp = []
         to_zone = tz.tzlocal()
         for res in res_list:
-            
+
             if not 'Contents' in res:
                 continue
             else:

@@ -3,6 +3,7 @@
 .vscode/*
 .ipynb_checkpoints/
 .pyc
+*__pycache__*
 .swp
 *.egg-info*
 *venv*
