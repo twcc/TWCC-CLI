@@ -206,8 +206,8 @@ class GpuSite(GpuService):
             raise ValueError(
                 "Solution name:'{0}' is not available.".format(sol_name))
 
-    def list(self, isAll=False):
-        if isAll:
+    def list(self, is_all=False):
+        if is_all:
             self.ext_get = {'project': self._project_id,
                             "all_users": 1}
         elif not self.url_dic == None and self.url_dic['container'] == "":
@@ -437,14 +437,21 @@ class VcsSite(CpuService):
                      {"image-type": u"centos", "image": [
                          u'CentOS 7.9', 'CentOS 8.2'
                      ]}
-                     ]
-        res = []
+                     ]        
+        vcs = VcsSite()
+        exists_sol = vcs.getSolList(mtype='dict', reverse=True)
         if isNone(sol_name) or len(sol_name) == 0:
-            return avbl_imgs
+            data = []
+            for solname, solid in exists_sol.items():
+                data.append({"image-type": solname, "image":[x.split(")")[1] for x in vcs._do_list_solution(solid)['image']]})
+            return data
         else:
             for x in avbl_imgs:
                 if x['image-type'] == sol_name[0]:
                     return x
+        
+        extra_prop = vcs._do_list_solution(exists_sol[sol_name[0].lower()])
+        return {"image-type": sol_name[0], "image":[x.split(")")[1] for x in extra_prop['image']]}
 
     @staticmethod
     def extend_vcs_flavor(name2id, flv_in_sol):
@@ -466,7 +473,6 @@ class VcsSite(CpuService):
     def getExtraProp(self, sol_id):
 
         extra_prop = self._do_list_solution(sol_id)
-
         # processing flavors
 
         extra_flv = set(extra_prop['flavor']
@@ -558,8 +564,9 @@ class VcsServerNet(CpuService):
         self._func_ = "servers"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def associateIP(self, site_id):
-        self.action(site_id, is_bind=True)
+    def associateIP(self, site_id, eip_id = None):
+        self.action(site_id, is_bind=True, eip_id = eip_id)
+        
 
     def deAssociateIP(self, site_id):
         self.action(site_id, is_bind=False)
@@ -570,13 +577,15 @@ class VcsServerNet(CpuService):
         self.data_dic = {"action": "reboot"}
         self._do_api()
 
-    def action(self, site_id, is_bind=True):
+    def action(self, site_id, is_bind=True, eip_id = None):
         server_id = getServerId(site_id)
         self.http_verb = 'put'
         self.url_dic = {self._func_: server_id, 'action': ""}
         self.data_dic = {
             "action": "associateIP" if is_bind else "disassociateIP"
         }
+        if not isNone(eip_id):
+            self.data_dic.update({'ip':int(eip_id)})
         self._do_api()
 
 
@@ -683,9 +692,9 @@ class Fixedip(CpuService):
         self._func_ = "ips"
         self._csite_ = Session2._getClusterName("VCS")
 
-    def create(self, private_net_id, desc=None):
+    def create(self, desc=None):
         self.http_verb = 'post'
-        self.data_dic = {'private_net': private_net_id, 'desc': desc}
+        self.data_dic = {'project': self._project_id, 'desc': desc}
         return self._do_api()
 
     def list(self, ip_id=None, filter=None, isAll=False):
@@ -695,7 +704,10 @@ class Fixedip(CpuService):
                 self.ext_get.update({'type': filter.upper()})
             all_fixedips = self._do_api()
             my_username = Session2().twcc_username
-            return [x for x in all_fixedips if x["user"]['username'] == my_username]
+            if isAll:
+                return all_fixedips
+            else:
+                return [x for x in all_fixedips if x["user"]['username'] == my_username]
 
         else:
             self.http_verb = 'get'
@@ -714,23 +726,78 @@ class Fixedip(CpuService):
         self.url_dic = {"ips": ip_id}
         return self._do_api()
 
-
+    def get_id_by_ip(self, eip):
+        self.ext_get = {'project': self._project_id}
+        self.ext_get.update({'type': 'STATIC'})
+        all_fixedips = self._do_api()
+        for ips in all_fixedips:
+            if ips['address'] == eip and ips['status'] == 'AVAILABLE':
+                return ips['id']
+        return None
 class LoadBalancers(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)
         self._func_ = "loadbalancers"
         self._csite_ = Session2._getClusterName("VCS")
-
-    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc):
+        self.ch_vlb_temp_json = {
+            "pools": [
+                {
+                "name": "TestPool (required)",
+                "protocol": "TCP, HTTP, or HTTPS (required)",
+                "members": [
+                    {
+                    "ip": "string",
+                    "port": 0,
+                    "weight": 0
+                    }
+                ],
+                "method": "ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP (required)",
+                "delay": "5 (optional)",
+                "max_retries": "from 1 to 10 (optional)",
+                "timeout": "5 (optional)",
+                "monitor_type": "HTTP, HTTPS, PING, or TCP (optional)",
+                "expected_codes": "200, 200,202 or 200-204 (optional)",
+                "http_method": "CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, or TRACE (optional)",
+                "url_path": "/ (optional)"
+                }
+            ],
+            "listeners": [
+                {
+                "name": "TestListener (required)",
+                "pool_name": "TestPool (required)",
+                "protocol": "TCP, HTTP, HTTPS, or TERMINATED_HTTPS (required)",
+                "protocol_port": "from 0 to 65535 (required)",
+                "default_tls_container_ref": "The ID of a secret required by the listener if the listener uses TERMINATED_HTTPS protocol (optional)",
+                "sni_container_refs": [
+                    "A list of ID of secrets required by the listener if the listener uses TERMINATED_HTTPS protocol (optional)"
+                ]
+                }
+            ]
+        }
+    def create(self, vlb_name, pools, vnet_id, listeners, vlb_desc, json_data = None, eip_id = None):
         self.http_verb = 'post'
         self.data_dic = {'name': vlb_name, 'private_net': vnet_id,
                          'pools': pools, 'listeners': listeners, 'desc': vlb_desc}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
+        if not isNone(json_data):
+            self.data_dic = json_data
         return self._do_api()
 
-    def update(self, vlb_id, listeners, pools):
+    def update(self, vlb_id, listeners, pools, eip_id = None):
         self.http_verb = 'patch'
         self.url_dic = {"loadbalancers": vlb_id}
+        for pool in pools:
+            for col in ['expected_codes', 'http_method', 'url_path']:
+                if isNone(pool[col]):
+                    del pool[col]
+        for listener in listeners:
+            for col in ['default_tls_container_ref', 'sni_container_refs']:
+                if isNone(listener[col]) or listener[col] == []:
+                    del listener[col]
         self.data_dic = {'pools': pools, 'listeners': listeners}
+        if not isNone(eip_id):
+            self.data_dic.update({'ip': eip_id})
         return self._do_api()
 
     def isStable(self, site_id):
@@ -760,7 +827,43 @@ class LoadBalancers(CpuService):
         self.url_dic = {"loadbalancers": vlb_id}
         return self._do_api()
 
+class Secrets(CpuService):
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "secrets"
+        self._csite_ = Session2._getClusterName("VCS")
 
+    def create(self, name, desc="", payload="", expire_time = ""):
+        self.http_verb = 'post'
+        self.data_dic = {'project': self._project_id, "name": name,
+                         "desc": desc, "payload": payload}
+        if not isNone(expire_time):
+            self.data_dic.update({'expire_time':expire_time})
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"secrets": sys_vol_id}
+        return self._do_api()
+    
+    def list(self, ssl_id=None, isall=False):
+        if isNone(ssl_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isall:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                my_username = Session2().twcc_username
+                return [x for x in all_volumes if x["user"]['username'] == my_username]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"secrets": ssl_id}
+            return self._do_api()
 class Volumes(CpuService):
     def __init__(self, debug=False):
         CpuService.__init__(self)

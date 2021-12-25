@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from twccli.commands.mk import fxip
+from twccli.commands.mk import eip
 import click
 import re
 import sys
@@ -8,7 +8,7 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isF
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.services.compute import Fixedip, GpuSite, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
+from twccli.twcc.services.compute import Fixedip, GpuSite, Secrets, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.services.generic import GenericService
 from twccli.twcc.services.network import Networks
@@ -175,14 +175,33 @@ def del_ip(ids_or_names, isForce=False):
     :param force: Force to delete any resources at your own cost.
     :type force: bool
     """
-    fxip = Fixedip()
+    eip = Fixedip()
     for ip_id in ids_or_names:
-        ans = fxip.list(ip_id)
+        ans = eip.list(ip_id)
         txt = "You about to delete ip \n- id: {}\n- created by: {}\n- created time: {}".format(
             ip_id, ans['user']['display_name'], ans['create_time'])
         if getConfirm("IP", ip_id, isForce, txt):
-            fxip.deleteById(ip_id)
+            eip.deleteById(ip_id)
             print("Successfully remove {}".format(ip_id))
+        else:
+            print("No delete operations.")
+
+def del_ssl(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    ssl = Secrets()
+    for ssl_id in ids_or_names:
+        ans = ssl.list(ssl_id)
+        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ssl_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("SSL", ssl_id, isforce, txt):
+            ssl.deleteById(ssl_id)
+            print("Successfully remove {}".format(ssl_id))
         else:
             print("No delete operations.")
 
@@ -445,14 +464,31 @@ def vlb(ctx, vlb_id, ids_or_names, force):
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="Delete your IPs.")
 @click.pass_context
-def fxip(ctx, ip_id, ids_or_names, force):
-    """Command line for delete fxip
+def eip(ctx, ip_id, ids_or_names, force):
+    """Command line for delete eip
 
-    :param ip_id: Enter id for your fxip.
+    :param ip_id: Enter id for your eip.
     :type ip_id: string
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
     del_ip(ids_or_names, force)
+
+@click.option('-id', '--ssl-id', 'ssl_id',
+              help="Index of the ssls.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your SSLs.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, force):
+    """Command line for delete eip
+
+    :param ip_id: Enter id for your eip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    del_ssl(ids_or_names, force)
 
 
 cli.add_command(vcs)
@@ -462,7 +498,8 @@ cli.add_command(key)
 cli.add_command(vds)
 cli.add_command(vnet)
 cli.add_command(vlb)
-cli.add_command(fxip)
+cli.add_command(eip)
+cli.add_command(ssl)
 
 
 def main():
