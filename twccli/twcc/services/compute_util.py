@@ -187,7 +187,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     # x-extra-property-system-volume-type
     sys_vol = sys_vol.lower()
     if not sys_vol in extra_props['x-extra-property-system-volume-type'].keys():
-        raise ValueError("System Vlume Type: {} is not validated. Avbl: {}".format(sys_vol,
+        raise ValueError("System Volume Type: {} is not validated. Avbl: {}".format(sys_vol,
                                                                                    ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
     required['x-extra-property-system-volume-type'] = extra_props['x-extra-property-system-volume-type'][sys_vol]
 
@@ -198,7 +198,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     if data_vol_size > 0:
         required['x-extra-property-volume-size'] = str(data_vol_size)
         if not data_vol in extra_props['x-extra-property-volume-type']:
-            raise ValueError("Data Vlume Type: {} is not validated. Avbl: {}".format(data_vol,
+            raise ValueError("Data Volume Type: {} is not validated. Avbl: {}".format(data_vol,
                                                                                      ", ".join(extra_props['x-extra-property-volume-type'])))
         required['x-extra-property-volume-type'] = data_vol
 
@@ -480,7 +480,7 @@ def doSiteStable(site_id, site_type='cntr'):
     elif site_type == 'vlb':
         b = LoadBalancers()
     else:
-        raise ValueError("Error")
+        raise ValueError(f"This site_type:{site_type} has no site stable function")
 
     wait_ready = False
     while not wait_ready:
