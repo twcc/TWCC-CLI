@@ -377,9 +377,6 @@ def vcs_status_mapping(ans):
 
 def action_by_status(status, ans, site_id, srvid, vcs):
     if status == 'stop':
-        # Free public IP
-        if not isNone(srvid) and re.findall('[0-9.]+', ans['public_ip']):
-            VcsServerNet().deAssociateIP(site_id)
         vcs.stop(site_id)
     elif status == 'ready':
         vcs.start(site_id)
