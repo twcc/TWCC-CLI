@@ -345,7 +345,7 @@ def display_changed_sites(ans, ids_or_names, site, cols, is_print, is_table, tit
             return ans
         if is_table:
             cols.append('Protected')
-            cols.remove('termination_protection')
+            # cols.remove('termination_protection')
             table_layout(titles[0] if not len(ids_or_names) == 1 else ": {}".format(titles[1],
                                                                                     site_id), ans, cols, isPrint=True, captionInOrder=True)
         else:
