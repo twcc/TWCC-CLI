@@ -890,7 +890,7 @@ class Volumes(CpuService):
         elif vol_status == "extend":
             self.data_dic = {"status": vol_status, "server": 0, "size": size}
         else:
-            raise ValueError("please provide -sts")
+            raise ValueError("please provide -sts for VDS update")
         return self._do_api()
 
     def list(self, sys_vol_id=None, isAll=False):
