@@ -379,6 +379,16 @@ class VcsSite(CpuService):
 
         return self._do_api()
 
+    def list_itype(self, isAll=False):
+        self._csite_ = Session2._getClusterName("goc")
+        print(self._csite_)
+        self._func_ = "solutions"
+        self.ext_get = {"category": "os", 'project': self._project_id,}
+        result = self._do_api()
+        self._func_ = "sites"
+        self._csite_ = Session2._getClusterName("VCS")
+        return result
+
     def stop(self, site_id):
         self.data_dic = {"status": "shelve"}
         self.url_dic = {'sites': site_id, 'action': ""}
@@ -399,10 +409,19 @@ class VcsSite(CpuService):
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
-        sol_list = [(60, "ubuntu"),
-                    (177, "centos"),
-                    (322, "winserver"),
-                    (319, "win10"), ]
+        a = solutions()
+        solutions_list = a.list_vcs()
+        if solutions_list == {}:
+            raise ValueError('no solutions in this project')
+        
+        else:
+            sol_list = []
+            [sol_list.append((solution['id'],solution['name'])) for solution in solutions_list if solution['is_public'] == True ]
+        
+        # sol_list = [(60, "ubuntu"),
+        #             (177, "centos"),
+        #             (322, "winserver"),
+        #             (319, "win10"), ]
         if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
             with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
