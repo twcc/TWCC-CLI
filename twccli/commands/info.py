@@ -118,7 +118,7 @@ def quota(ctx, is_all, is_table):
         proj_name = projq_vcs['project']['name']
 
         vcs_list = {"CPU":"cpu", "GPU":"gpu",
-                    "Floating IP":"floatingip",
+                    "Floating IP":"floating_ip",
                     "Memory": "memory"}
         quota = {}
         for ele in vcs_list.items():
