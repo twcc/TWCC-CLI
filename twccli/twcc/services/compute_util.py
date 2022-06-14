@@ -7,7 +7,6 @@ from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc
-from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.services.solutions import solutions
 
 
@@ -29,13 +28,13 @@ def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
         ext_txt)
     # if py3
-    if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-        return yes_no_dialog(title=str_title, text=str_text)
-
     import click
-    click.echo(click.style(str_title, bg='blue',
+    if sys.version_info[0] >= 3:
+        click.echo(click.style(str_title, bg='blue',
                            fg='white', blink=True, bold=True))
-    return click.confirm(str_text, default=True)
+        return click.confirm( text=str_text) #title=str_title,
+
+    
 
 
 def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
