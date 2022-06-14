@@ -128,7 +128,7 @@ def run_module():
                 if module.params['state'] == getAnsibleState(x['status']):
                     result['changed'] = False
                 else:
-                    del_vcs([str(x['id'])], isForce=True)
+                    del_vcs([str(x['id'])], is_force=True)
                     result['changed'] = True
                 processed_vcs.append(str(x['id']))
 
