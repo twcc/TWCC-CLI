@@ -1,7 +1,6 @@
 from __future__ import print_function
 import click
 import time
-from prompt_toolkit.shortcuts import get_input
 from twccli.twcc.services.compute import sites
 from twccli.twcc.session import session_start
 from twccli.twcc.services.projects import projects
@@ -214,10 +213,10 @@ def create_commit():
             col_name = ['id', 'name', 'create_time', 'status']
             table_layout('sites', my_sites, caption_row=col_name)
 
-    site_id = get_input(
+    site_id = click.prompt(
         u'Please Input the site ID which you would like to commit: ')
-    tag = get_input(u'Please Input the image tag  ')
-    image = get_input(u'Please Input the image name: ')
+    tag = click.prompt(u'Please Input the image tag  ')
+    image = click.prompt(u'Please Input the image name: ')
     c = image_commit()
     print(c.createCommit(site_id, tag, image))
 
