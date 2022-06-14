@@ -19,6 +19,14 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.23.2 Release Note
+
+![img](https://media.giphy.com/media/EpB8oRhHSQcnu/giphy.gif)
+
+**Bug Fix**
+- Remove old package
+- Fix bug in ansible scripts
+
 ### v0.5.23 Release Note
 
 ![img](https://media.giphy.com/media/VKwspRV2pafJu/giphy.gif)
