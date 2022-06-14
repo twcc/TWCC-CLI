@@ -1,6 +1,6 @@
 __TWCC_CLI_MAJOR__ = "0"
 __TWCC_CLI_MINOR__ = "5"
-__TWCC_CLI_BATCH__ = "23.1"
+__TWCC_CLI_BATCH__ = "23.2"
 __version__ = "{}.{}.{}".format(__TWCC_CLI_MAJOR__, __TWCC_CLI_MINOR__, __TWCC_CLI_BATCH__)
 
 
