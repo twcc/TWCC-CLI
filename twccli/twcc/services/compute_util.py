@@ -7,7 +7,6 @@ from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc
-from prompt_toolkit.shortcuts import yes_no_dialog
 from twccli.twcc.services.solutions import solutions
 
 
@@ -29,13 +28,13 @@ def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     str_text = u"NOTICE: This action will not be reversible! \nAre you sure?\n{}".format(
         ext_txt)
     # if py3
-    if sys.version_info[0] >= 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-        return yes_no_dialog(title=str_title, text=str_text)
-
     import click
-    click.echo(click.style(str_title, bg='blue',
+    if sys.version_info[0] >= 3:
+        click.echo(click.style(str_title, bg='blue',
                            fg='white', blink=True, bold=True))
-    return click.confirm(str_text, default=True)
+        return click.confirm( text=str_text) #title=str_title,
+
+
 
 
 def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
@@ -208,7 +207,7 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
     json_template = vlb.ch_vlb_temp_json
     exist_vlb_json = vlb.list(vlb_id)
-    
+
     json_template["pools"] = exist_vlb_json["pools"]
     json_template["listeners"] = exist_vlb_json["listeners"]
     pool_id2name = {}
@@ -219,8 +218,8 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
         pool['delay'] = pool['monitor']['delay']
         pool['max_retries'] = pool['monitor']['max_retries']
         pool['timeout'] = pool['monitor']['timeout']
-        pool['monitor_type'] = pool['monitor']['monitor_type']   
-        pool['expected_codes'] = pool['monitor']['expected_codes'] 
+        pool['monitor_type'] = pool['monitor']['monitor_type']
+        pool['expected_codes'] = pool['monitor']['expected_codes']
         pool['http_method'] = pool['monitor']['http_method']
         pool['url_path'] = pool['monitor']['url_path']
         del pool["monitor"]
@@ -233,7 +232,7 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
         for ip_port in members.split(','):
             json_template["pools"][0]["members"].append({"ip": ip_port.split(':')[0], "port": ip_port.split(':')[1]})
     return json_template
-    
+
 def change_loadbalancer(vlb_id, eip_id, json_data, members, wait, is_table):
     # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
 
@@ -241,7 +240,7 @@ def change_loadbalancer(vlb_id, eip_id, json_data, members, wait, is_table):
     if isNone(json_data):
         json_data = get_ch_json_by_vlbid(vlb_id, members = members)
     ans = vlb.update(vlb_id, json_data['listeners'], json_data['pools'],eip_id = eip_id)
-    
+
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
