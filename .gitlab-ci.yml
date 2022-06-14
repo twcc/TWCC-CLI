@@ -112,7 +112,7 @@ manual deploy to GITHUB:
   script:
     - git remote add github https://$GITHUB_USRERNAME:$GITHUB_APIKEY@github.com/twcc/TWCC-CLI
     - git fetch github
-    - git merge -s ours github/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - git merge -s ours github/master --no-commit --no-ff --allow-unrelated-histories
     - export TWCC_CLI_VER="`python ./twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
     - git commit . -m "-- Release $TWCC_CLI_VER --"
