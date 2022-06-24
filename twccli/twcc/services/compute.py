@@ -398,17 +398,18 @@ class VcsSite(CpuService):
         return self._do_api()
 
     @staticmethod
-    def getSolList(mtype='list', name_only=False, reverse=False):
+    def getSolList(mtype='list', name_only=False, reverse=False, backdoor=True):
         sol_list = [(60, "ubuntu"),
                     (177, "centos"),
                     (322, "winserver"),
                     (319, "win10"), ]
-        if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
-            with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
-                config = yaml.load(f, Loader=yaml.FullLoader)
-            if not isNone(config):
-                if 'extra_sol' in config and not isNone(config['extra_sol']):
-                    sol_list.extend(config['extra_sol'])
+        if backdoor:
+            if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
+                with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
+                    config = yaml.load(f, Loader=yaml.FullLoader)
+                if not isNone(config):
+                    if 'extra_sol' in config and not isNone(config['extra_sol']):
+                        sol_list.extend(config['extra_sol'])
 
         if reverse:
             sol_list = [(y, x) for (x, y) in sol_list]
@@ -440,7 +441,8 @@ class VcsSite(CpuService):
                      ]}
                      ]        
         vcs = VcsSite()
-        exists_sol = vcs.getSolList(mtype='dict', reverse=True)
+        exists_sol = vcs.getSolList(mtype='dict', reverse=True, backdoor=False)
+        print(exists_sol)
         if isNone(sol_name) or len(sol_name) == 0:
             data = []
             for solname, solid in exists_sol.items():
