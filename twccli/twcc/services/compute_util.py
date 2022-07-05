@@ -490,6 +490,19 @@ def doSiteStable(site_id, site_type='cntr'):
 
 
 def format_ccs_env_dict(env_dict):
+    
+    # new api spec will be change on 07/08
+    import datetime
+    from datetime import datetime
+
+    release_date_str = "07/08/22"
+    release_date = datetime.strptime(release_date_str, "%m/%d/%y")
+    today_date = datetime.now()
+    if today_date < release_date:
+        if not isNone(env_dict) and len(env_dict) > 0:
+            return json.dumps([env_dict])
+    # will remove in next version
+    
     if not isNone(env_dict) and len(env_dict) > 0:
         return json.dumps(env_dict)
     else:
@@ -565,3 +578,7 @@ def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, cmd, env_dict, is_apik
                 "Can't find id, please check error message : {}".format(res['detail']))
     else:
         return res
+
+
+if __name__ == "__main__":
+    print(format_ccs_env_dict({"AAA":"BBB"}))
