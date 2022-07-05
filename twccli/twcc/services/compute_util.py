@@ -491,7 +491,7 @@ def doSiteStable(site_id, site_type='cntr'):
 
 def format_ccs_env_dict(env_dict):
     if not isNone(env_dict) and len(env_dict) > 0:
-        return json.dumps([env_dict])
+        return json.dumps(env_dict)
     else:
         return ""
 
