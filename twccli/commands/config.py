@@ -14,7 +14,6 @@ lang_encoding = """
 export PYTHONIOENCODING=UTF-8
 """
 
-
 @click.command(help='Get exsisting information.')
 # @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
@@ -41,10 +40,8 @@ def whoami(ctx):
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey',
               help="TWCC API Key for CLI.")
-@click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
-              help="Set bashrc parameters.")
 @pass_environment
-def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
+def init(env, apikey, proj_code, user_agent, ga_flag, ac_flag):
     """Constructor method
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
@@ -57,9 +54,8 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
     :type rc_setting: bool
     """
     bashrc_file = os.environ["HOME"]+"/.bashrc"
-    is_bashrc_exists = True if exists(bashrc_file) else False
-    if ac_flag == False:
-        is_bashrc_exists = False
+    is_bashrc_exists = True if exists(bashrc_file) or ac_flag == False else False
+        
     if not Session2._isValidSession():
 
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
@@ -102,15 +98,11 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
 
-            if rc:
-                click.echo("Add language setting to `.bashrc`.")
-
-                if is_bashrc_exists:
-                    open(bashrc_file, 'a').write(lang_encoding)
-            else:
-                click.echo(
-                    "Please add encoding setting to your environment: \n {}".format(lang_encoding))
+            click.echo(
+                "Please add encoding setting to your environment: \n {}".format(lang_encoding))
+                
             if is_bashrc_exists:
+                open(bashrc_file, 'a').write(lang_encoding)
                 open(bashrc_file, 'a').write(". {}/twccli/twccli-complete.sh".format(
                     [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
         else:
