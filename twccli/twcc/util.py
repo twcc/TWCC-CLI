@@ -11,6 +11,7 @@ import datetime
 import unicodedata
 import requests as rq
 from twccli.twccli import pass_environment
+
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
@@ -29,13 +30,18 @@ def pp(**kwargs):
 
 def jpp(inobj):
     import json
-    print(json.dumps(inobj, ensure_ascii=False,
-                     sort_keys=True, indent=4, separators=(',', ': ')))
+    print(
+        json.dumps(inobj,
+                   ensure_ascii=False,
+                   sort_keys=True,
+                   indent=4,
+                   separators=(',', ': ')))
 
 
 @pass_environment
 def isDebug(env):
-    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" or env.verbose else False
+    return True if os.environ.get(
+        "TWCC_CLI_STAGE") == "dev" or env.verbose else False
 
 
 def strShorten(mstr, max_len=6):
@@ -68,7 +74,14 @@ def resource_id_validater(mid):
     return mid.isdigit()
 
 
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False, captionInOrder=False):
+def table_layout(title,
+                 json_obj,
+                 caption_row=[],
+                 debug=False,
+                 isWrap=True,
+                 max_len=10,
+                 isPrint=False,
+                 captionInOrder=False):
     from terminaltables import AsciiTable
     from colorclass import Color
     from termcolor import cprint
@@ -131,15 +144,16 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
                     out_buf = ele[idz]
                     try:
                         out_buf = json.loads(out_buf)
-                        out_buf = json.dumps(
-                            out_buf, indent=2, separators=(',', ': '))
+                        out_buf = json.dumps(out_buf,
+                                             indent=2,
+                                             separators=(',', ': '))
                     except:
                         pass
-                    tmp += ptn.format(idy+1, out_buf)
+                    tmp += ptn.format(idy + 1, out_buf)
                 table.table_data[idy][idx] = tmp
             elif type(ele) == type({}):  # for dictionary
-                tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x])
-                                        for x in ele.keys()])
+                tmp = "%s" % "\n".join(
+                    ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
                 table.table_data[idy][idx] = tmp
             elif type(ele) == type(""):  # for string
                 if isWrap:
@@ -148,8 +162,9 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
                     table.table_data[idy][idx] = ele
 
     if debug:
-        cprint("- %.3f seconds" %
-               (time.time() - start_time), 'red', attrs=['bold'])
+        cprint("- %.3f seconds" % (time.time() - start_time),
+               'red',
+               attrs=['bold'])
 
     if isPrint:
         print(table.table)
@@ -167,18 +182,26 @@ def send_ga(event_name, cid, params):
     host = 'https://www.google-analytics.com'
     uri = '/mp/collect?measurement_id={}&api_secret={}'.format(
         measurement_id, api_secret)
-    payload = {"client_id": cid, "non_personalized_ads": "false",
-               "events": [{"name": event_name[:39], "params":params}]}
+    payload = {
+        "client_id": cid,
+        "non_personalized_ads": "false",
+        "events": [{
+            "name": event_name[:39],
+            "params": params
+        }]
+    }
     headers = {'content-type': 'application/json'}
 
     if isDebug():
         from ..twccli import logger
-        logger_info = {'payload': payload,
-                       'headers': headers,
-                       'endpoint': host+uri}
+        logger_info = {
+            'payload': payload,
+            'headers': headers,
+            'endpoint': host + uri
+        }
         logger.info(logger_info)
 
-    res = rq.post(host+uri, data=json.dumps(payload), headers=headers)
+    res = rq.post(host + uri, data=json.dumps(payload), headers=headers)
 
 
 def dic_seperator(d):
@@ -203,12 +226,13 @@ def dic_seperator(d):
 
 def timezone2local(time_str):
     if '.' in time_str:
-        time_str = time_str[:-8]+'Z'
+        time_str = time_str[:-8] + 'Z'
     if 'T' in time_str and 'Z' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
     elif 'T' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
-    return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
+    return pytz.utc.localize(ans, is_dst=None).astimezone(
+        pytz.timezone('Asia/Taipei'))
 
 
 def create_table_list(obj, tt):
@@ -225,7 +249,8 @@ def create_table_list(obj, tt):
             if na in ["created_at", "expired_time"]:
                 ti = time.localtime(int(str(obj[i][na])[:11]))
                 tf.append("{}/{}/{}\n{}:{}:{}".format(ti.tm_year, ti.tm_mon,
-                                                      ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec))
+                                                      ti.tm_mday, ti.tm_hour,
+                                                      ti.tm_min, ti.tm_sec))
             else:
                 tf.append(obj[i][na])
         temp_list.append(tf)
@@ -251,10 +276,10 @@ class SpinCursor(threading.Thread):
         self.string = ''
         # Speed is given as number of spins a second
         # Use it to calculate spin wait time
-        self.waittime = 1.0/float(speed*4)
+        self.waittime = 1.0 / float(speed * 4)
         if os.name == 'posix':
-            self.spinchars = (unicodedata.lookup(
-                'FIGURE DASH'), u'\\ ', u'| ', u'/ ')
+            self.spinchars = (unicodedata.lookup('FIGURE DASH'), u'\\ ', u'| ',
+                              u'/ ')
         else:
             # The unicode dash character does not show
             # up properly in Windows console.
@@ -272,12 +297,13 @@ class SpinCursor(threading.Thread):
 
     def run(self):
 
-        while (not self.flag) and ((self.count < self.min) or (self.count < self.max)):
+        while (not self.flag) and ((self.count < self.min) or
+                                   (self.count < self.max)):
             self.spin()
             self.count += 1
 
         # Clean up display...
-        self.out.write(" "*(len(self.string) + 1))
+        self.out.write(" " * (len(self.string) + 1))
 
     def stop(self):
         self.flag = True
@@ -285,7 +311,7 @@ class SpinCursor(threading.Thread):
 
 def mk_names(name, ids_or_names):
     if not isNone(name):
-        ids_or_names += (name,)
+        ids_or_names += (name, )
     return tuple(set(ids_or_names))
 
 
@@ -299,9 +325,12 @@ def sizeof_fmt(num, suffix='B'):
 
 def validate(apikey):
     try:
-        return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
+        return re.match(
+            '^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$',
+            apikey)
     except:
         return False
+
 
 def name_validator(name):
     """
@@ -335,13 +364,12 @@ def window_password_validater(password):
             click.echo("For Windows numeric latter is needed, [0-9].")
             result = False
         if result and not re.search("[@$!%*?&]", password):
-            click.echo(
-                "For Windows special character is needed, [@$!%*?&].")
+            click.echo("For Windows special character is needed, [@$!%*?&].")
             result = False
         return result
     else:
-        click.echo(
-            "Your password is too long or too short, length: %s" % (len(password)))
+        click.echo("Your password is too long or too short, length: %s" %
+                   (len(password)))
         return False
 
 
@@ -351,16 +379,30 @@ def get_environment_params(param_key, def_val):
     return def_val
 
 
-def twcc_error_echo(msg): 
+def twcc_error_echo(msg):
     """twcc standard error echo
 
     Args:
         msg (string): error message
-    """    
+    """
     import click
 
     click.echo(click.style('[TWCC-CLI] Error-', fg='bright_red'), nl=False)
     click.echo(msg)
 
+
 def protection_desc(x):
     return "    Y" if x['termination_protection'] else " "
+
+
+def _debug(mesg, is_pause=True):
+    click.echo(click.style("\t[DEBUG]: %s" % (mesg), bg='red', fg='white'))
+
+    if is_pause:
+        click.pause()
+
+
+def get_flavor_string(gpu, cpu, mem):
+    if gpu > 0:
+        return "{} GPU, {} vCores, {:d} Gib Memory".format(gpu, cpu, int(mem / 1024))
+    return "{} vCores, {:d} Gib Memory".format(cpu, int(mem / 1024))
