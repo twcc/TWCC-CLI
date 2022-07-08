@@ -99,6 +99,7 @@ def _table_layout_set_default_caption(json_obj, caption_row, keep_order=False):
 
     return caption_row
 
+
 def _table_layout_data_cell_format(cell_ele, is_warp=True):
     ele = cell_ele
     if type(ele) == type([]) and len(ele) > 0:  # for list
@@ -108,18 +109,21 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
             out_buf = ele[idz]
             try:
                 out_buf = json.loads(out_buf)
-                out_buf = json.dumps(out_buf,
-                                        indent=2,
-                                        separators=(',', ': '))
+                out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
             except:
                 pass
         return tmp
     elif type(ele) == type({}):  # for dictionary
-        tmp = "%s" % "\n".join(
-            ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
+        tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x]) for x in ele.keys()])
         return tmp
     elif type(ele) == type(""):  # for string
         return '\n'.join(wrap(ele, 20)) if is_warp else ele
+
+
+def _table_layout_colorful_val(val):
+    val = '' if val == None else val
+    return Color("{autored}%s{/autored}" %
+                 val) if ("%s" % val).lower() == "error" else val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -133,8 +137,8 @@ def _table_layout_arrange_table_info(json_obj, caption_row):
                 val = jmespath.search(cap, ele)
             except jmespath.exceptions.ParseError:
                 val = ele[cap] if cap in ele else ''
-            val = '' if val == None else val
-            row_data.append(Color("{autored}%s{/autored}" % val) if ("%s"%val).lower() == "error" else val)
+
+            row_data.append(_table_layout_colorful_val(val))
         table_info.append(row_data)
     return table_info
 
@@ -142,8 +146,10 @@ def _table_layout_arrange_table_info(json_obj, caption_row):
 def _table_layout_data_cell_layout(list_of_list, is_warp=True):
     for idy in range(len(list_of_list)):
         for idx in range(len(list_of_list[idy])):
-            list_of_list[idy][idx] = _table_layout_data_cell_format(list_of_list[idy][idx], is_warp)
+            list_of_list[idy][idx] = _table_layout_data_cell_format(
+                list_of_list[idy][idx], is_warp)
     return list_of_list
+
 
 def table_layout(title,
                  json_obj,
@@ -154,13 +160,17 @@ def table_layout(title,
                  isPrint=False,
                  captionInOrder=False):
     json_obj = [json_obj] if type(json_obj) == type({}) else json_obj
-    caption_row = _table_layout_set_default_caption(json_obj, caption_row, keep_order=captionInOrder)
+    caption_row = _table_layout_set_default_caption(json_obj,
+                                                    caption_row,
+                                                    keep_order=captionInOrder)
 
     start_time = time.time()
 
-    table = AsciiTable(_table_layout_arrange_table_info(json_obj, caption_row), title=" {} ".format(title))
+    table = AsciiTable(_table_layout_arrange_table_info(json_obj, caption_row),
+                       title=" {} ".format(title))
 
-    table.table_data = _table_layout_data_cell_layout(table.table_data, is_warp=is_warp)
+    table.table_data = _table_layout_data_cell_layout(table.table_data,
+                                                      is_warp=is_warp)
 
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time),
@@ -405,5 +415,6 @@ def _debug(mesg, is_pause=True):
 
 def get_flavor_string(gpu, cpu, mem):
     if gpu > 0:
-        return "{} GPU, {} vCores, {:d} Gib Memory".format(gpu, cpu, int(mem / 1024))
+        return "{} GPU, {} vCores, {:d} Gib Memory".format(
+            gpu, cpu, int(mem / 1024))
     return "{} vCores, {:d} Gib Memory".format(cpu, int(mem / 1024))
