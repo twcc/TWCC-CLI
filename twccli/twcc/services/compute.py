@@ -145,30 +145,7 @@ class GpuSite(GpuService):
     # @todo, this is duplicated with L419
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         pass
-        # wanted_ans = {
 
-        # }
-        # isrv = iservice()
-
-        # def filter_flavor_id(x):
-        #     try:
-        #         other_content_json = json.loads(x['other_content'])
-        #     except ValueError as e:
-        #         return False
-        #     if "flavor_id" in other_content_json:
-        #         return True
-        #     else:
-        #         return False
-
-        # def get_flavor_id(x): return int(
-        #     json.loads(x['other_content'])['flavor_id'])
-
-        # fid_desc = dict([(get_flavor_id(x), x)
-        #                  for x in isrv.getProducts() if filter_flavor_id(x)])
-        # if name_or_id == "flavor_id":
-        #     return fid_desc
-        # else:
-        #     return dict([(fid_desc[x]['desc'], fid_desc[x])for x in fid_desc])
 
     @staticmethod
     def getGpuListOnline():
@@ -178,26 +155,7 @@ class GpuSite(GpuService):
             '1': '1 GPU + 04 cores + 090GB memory',
             '1': '1 GPU + 04 cores + 090GB memory',
         }
-        # gpu = GpuSite()
-        # flvs = gpu.getFlavors()
-        # print(flvs)
-        # name2id = {}
-        # for each_flv in flvs.values():
-        #     # if each_flv['name'] in avb_flv:
-        #     name2id[each_flv['name']] = each_flv['id']
-        # solid2iservice_product = gpu.getIsrvFlavors()
 
-        # desc2id = {}
-        # for gsol_id, each_prod in solid2iservice_product.items():
-        #     if gsol_id in name2id.values():
-        #         desc2id[each_prod['desc']] = gsol_id
-        # gpu_tag2spec = []
-        # inv_name2id = {v: k for k, v in name2id.items()}
-        # for desc, sol_id in desc2id.items():
-
-        #     gpu_tag2spec.append(
-        #         (re.findall('(c.+super)', desc)[0], inv_name2id[sol_id]))
-        # gpu_tag2spec = dict(gpu_tag2spec)
         return gpu_tag2spec
 
     def getAvblFlv(self, sol_id):
@@ -441,30 +399,8 @@ class VcsSite(CpuService):
 
     @staticmethod
     def getSolList(mtype='list', name_only=False, reverse=False):
-<<<<<<< HEAD
-        a = solutions()
-        solutions_list = a.list_vcs()
-        if solutions_list == {}:
-            raise ValueError('no solutions in this project')
-        
-        else:
-            sol_list = []
-            [sol_list.append((solution['id'],solution['name'])) for solution in solutions_list if solution['is_public'] == True ]
-        
-        # sol_list = [(60, "ubuntu"),
-        #             (177, "centos"),
-        #             (322, "winserver"),
-        #             (319, "win10"), ]
-        if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
-            with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
-                config = yaml.load(f, Loader=yaml.FullLoader)
-            if not isNone(config):
-                if 'extra_sol' in config and not isNone(config['extra_sol']):
-                    sol_list.extend(config['extra_sol'])
-=======
         """ This function is out of date!
         """
->>>>>>> 06ea55274e97a4ccf75101dd9c86dd9583268b5a
 
         return None
 
@@ -489,7 +425,6 @@ class VcsSite(CpuService):
     def extend_vcs_flavor(name2id, flv_in_sol):
         # before production names sync w/ BMS, we need to make sure all portions types are
         # available for users.
-
         alternative_names = {
             'v.super':
             ['v.super', '02_vCPU_016GB_MEM_100GB_HDD', '02vCPU_016GB_MEM_LIC'],

@@ -7,7 +7,6 @@ from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc, _debug
-from prompt_toolkit.shortcuts import yes_no_dialog
 
 
 def getConfirm(res_name, entity_name, is_force, ext_txt=""):
