@@ -98,30 +98,32 @@ def _table_layout_set_default_caption(json_obj, caption_row, heading_cap, keep_o
 
     return caption_row
 
+def _table_layout_data_cell_format(cell_ele, is_warp=True):
+    ele = cell_ele
+    if type(ele) == type([]) and len(ele) > 0:  # for list
+        tmp = ""
+        ptn = "[{0:02d}] {1}\n" if len(ele) > 9 else "[{0:01d}] {1}\n"
+        for idz in range(len(ele)):
+            out_buf = ele[idz]
+            try:
+                out_buf = json.loads(out_buf)
+                out_buf = json.dumps(out_buf,
+                                        indent=2,
+                                        separators=(',', ': '))
+            except:
+                pass
+        return tmp
+    elif type(ele) == type({}):  # for dictionary
+        tmp = "%s" % "\n".join(
+            ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
+        return tmp
+    elif type(ele) == type(""):  # for string
+        return '\n'.join(wrap(ele, 20)) if is_warp else ele
+
 def _table_layout_data_cell_layout(list_of_list, is_warp=True):
     for idy in range(len(list_of_list)):
         for idx in range(len(list_of_list[idy])):
-            ele = list_of_list[idy][idx]
-            if type(ele) == type([]) and len(ele) > 0:  # for list
-                tmp = ""
-                ptn = "[{0:02d}] {1}\n" if len(ele) > 9 else "[{0:01d}] {1}\n"
-                for idz in range(len(ele)):
-                    out_buf = ele[idz]
-                    try:
-                        out_buf = json.loads(out_buf)
-                        out_buf = json.dumps(out_buf,
-                                             indent=2,
-                                             separators=(',', ': '))
-                    except:
-                        pass
-                    tmp += ptn.format(idy + 1, out_buf)
-                list_of_list[idy][idx] = tmp
-            elif type(ele) == type({}):  # for dictionary
-                tmp = "%s" % "\n".join(
-                    ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
-                list_of_list[idy][idx] = tmp
-            elif type(ele) == type(""):  # for string
-                list_of_list[idy][idx] = '\n'.join(wrap(ele, 20)) if is_warp else ele
+            list_of_list[idy][idx] = _table_layout_data_cell_format(list_of_list[idy][idx], is_warp)
     return list_of_list
 
 def table_layout(title,
@@ -150,7 +152,7 @@ def table_layout(title,
             except jmespath.exceptions.ParseError:
                 val = ele[cap] if cap in ele else ''
             val = '' if val == None else val
-            row_data.append(Color("{autored}%s{/autored}" % val) if val.lower() == "error" else val)
+            row_data.append(Color("{autored}%s{/autored}" % val) if ("%s"%val).lower() == "error" else val)
         table_info.append(row_data)
     table = AsciiTable(table_info, title=" {} ".format(title))
 
