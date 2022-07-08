@@ -122,11 +122,9 @@ avalible_funcs:
         - 'patch'
     -
       name: "solutions"
-      url_type: "/api/v2/{FUNCTION}/"
+      url_type: "/api/v3/{FUNCTION}/"
       http_verb:
         - 'get'
-        - 'post'
-        - 'delete'
     -
       name: "networks"
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
@@ -139,8 +137,6 @@ avalible_funcs:
       url_type: "/api/v2/{PLATFORM}/{FUNCTION}/"
       http_verb:
         - 'get'
-        - 'post'
-        - 'delete'
       staus: [ "checked 2018-11-05, by Aug"
              , ]
     -

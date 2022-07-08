@@ -4,11 +4,10 @@ import time
 import json
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc
+from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc, _debug
 from prompt_toolkit.shortcuts import yes_no_dialog
-from twccli.twcc.services.solutions import solutions
 
 
 
@@ -123,7 +122,9 @@ def create_vcs(name, sol=None, img_name=None, network=None,
                data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None):
 
     vcs = VcsSite()
-    exists_sol = vcs.getSolList(mtype='dict', reverse=True)
+    vcs_sol = VcsSolutions()
+    exists_sol = dict([ (k.lower(), v) for (k, v) in vcs_sol.list(return_in_dic=True).items()])
+
 
     if isNone(sol):
         raise ValueError("Please provide solution name. ie:{}".format(
@@ -495,7 +496,6 @@ def format_ccs_env_dict(env_dict):
 
 
 def get_ccs_sol_id(sol_name):
-    a = solutions()
     sol_name = sol_name.lower()
     cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
                   if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower() == sol_name])
