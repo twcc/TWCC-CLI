@@ -131,10 +131,7 @@ def table_layout(title,
                     val = ''
             if val == None:
                 val = ''
-            if val == 'Error' or val == "ERROR":
-                row_data.append(Color("{autored}%s{/autored}" % val))
-            else:
-                row_data.append(val)
+            row_data.append(Color("{autored}%s{/autored}" % val) if val.lower() == "error" else val)
         table_info.append(row_data)
     table = AsciiTable(table_info, title=" {} ".format(title))
 
@@ -143,9 +140,7 @@ def table_layout(title,
             ele = table.table_data[idy][idx]
             if type(ele) == type([]) and len(ele) > 0:  # for list
                 tmp = ""
-                ptn = "[{0:01d}] {1}\n"
-                if len(ele) > 9:
-                    ptn = "[{0:02d}] {1}\n"
+                ptn = "[{0:02d}] {1}\n" if len(ele) > 9 else "[{0:01d}] {1}\n"
                 for idz in range(len(ele)):
                     out_buf = ele[idz]
                     try:
@@ -162,10 +157,7 @@ def table_layout(title,
                     ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
                 table.table_data[idy][idx] = tmp
             elif type(ele) == type(""):  # for string
-                if isWrap:
-                    table.table_data[idy][idx] = '\n'.join(wrap(ele, 20))
-                else:
-                    table.table_data[idy][idx] = ele
+                table.table_data[idy][idx] = '\n'.join(wrap(ele, 20)) if isWrap else ele
 
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time),

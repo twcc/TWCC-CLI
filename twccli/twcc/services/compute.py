@@ -436,28 +436,6 @@ class VcsSite(CpuService):
 
         return None
 
-        # sol_list = [(60, "ubuntu"),
-        #             (177, "centos"),
-        #             (322, "winserver"),
-        #             (319, "win10"), ]
-        # if os.path.exists('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))):
-        #     with open('{}/backdoor.ini'.format(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'r') as f:
-        #         config = yaml.load(f, Loader=yaml.FullLoader)
-        #     if not isNone(config):
-        #         if 'extra_sol' in config and not isNone(config['extra_sol']):
-        #             sol_list.extend(config['extra_sol'])
-
-        # if reverse:
-        #     sol_list = [(y, x) for (x, y) in sol_list]
-
-        # if name_only and mtype == 'list':
-        #     sol_list = [y for (x, y) in sol_list]
-
-        # if mtype == 'list':
-        #     return sol_list
-        # elif mtype == 'dict' and not name_only:
-        #     return dict(sol_list)
-
     def _do_list_solution(self, sol_id):
         self.proj = projects()
         self.proj._csite_ = self._csite_
