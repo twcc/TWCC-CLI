@@ -11,6 +11,10 @@ import datetime
 import unicodedata
 import requests as rq
 from twccli.twccli import pass_environment
+from terminaltables import AsciiTable
+from colorclass import Color
+from termcolor import cprint
+from textwrap import wrap
 
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
@@ -102,13 +106,6 @@ def table_layout(title,
                  max_len=10,
                  isPrint=False,
                  captionInOrder=False):
-    from terminaltables import AsciiTable
-    from colorclass import Color
-    from termcolor import cprint
-    from textwrap import wrap
-    import time
-    import json
-
     json_obj = [json_obj] if type(json_obj) == type({}) else json_obj
     heading_cap = set(['id', 'name'])
 
@@ -125,12 +122,8 @@ def table_layout(title,
             try:
                 val = jmespath.search(cap, ele)
             except jmespath.exceptions.ParseError:
-                if cap in ele:
-                    val = ele[cap]
-                else:
-                    val = ''
-            if val == None:
-                val = ''
+                val = ele[cap] if cap in ele else ''
+            val = '' if val == None else val
             row_data.append(Color("{autored}%s{/autored}" % val) if val.lower() == "error" else val)
         table_info.append(row_data)
     table = AsciiTable(table_info, title=" {} ".format(title))
