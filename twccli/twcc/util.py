@@ -123,13 +123,12 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 def _table_layout_colorful_val(val):
     val = '' if val == None else val
     return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else val
+                 val) if ("%s" % val).lower() == "error" else "%s"%val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
     table_info = []
-    table_info.append(
-        [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
+    table_info.append([x for x in caption_row])
     for ele in json_obj:
         row_data = []
         for cap in caption_row:

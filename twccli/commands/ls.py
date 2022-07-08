@@ -96,7 +96,7 @@ def list_fixed_ips(site_ids_or_names, column, filter_type, is_table, is_all):
     refactor_ip_detail(ans, vnet_id2name)
     if len(ans) > 0:
         if is_table:
-            table_layout("IP Results", ans, cols, isPrint=True, isWrap=False)
+            table_layout("IP Results", ans, cols, isPrint=True, is_warp=False)
         else:
             jpp(ans)
 
@@ -123,7 +123,7 @@ def list_ssls(site_ids_or_names, column, is_table):
         ans = ssl.list()
     if len(ans) > 0:
         if is_table:
-            table_layout("SSL Results", ans, cols, isPrint=True, isWrap=False)
+            table_layout("SSL Results", ans, cols, isPrint=True, is_warp=False)
         else:
             jpp(ans)
 
@@ -192,7 +192,7 @@ def list_load_balances(site_ids_or_names, column, is_all, is_table):
                          ans,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(ans)
 
@@ -229,7 +229,7 @@ def list_volume(site_ids_or_names, is_all, is_table):
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
         if is_table:
-            table_layout("VDS Result", ans, cols, isPrint=True, isWrap=False)
+            table_layout("VDS Result", ans, cols, isPrint=True, is_warp=False)
         else:
             jpp(ans)
 
@@ -268,7 +268,7 @@ def list_snapshot(site_ids_or_names, is_all, is_table, desc):
                          ans,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(ans)
 
@@ -289,7 +289,7 @@ def list_gpu_flavor(is_table=True):
         table_layout("Existing `-gpu` flavor",
                      formated_ans,
                      isPrint=True,
-                     isWrap=False)
+                     is_warp=False)
     else:
         jpp(ans)
 
@@ -304,7 +304,7 @@ def list_gpu_flavor_online(solution_name, is_table=True):
         table_layout("Existing `-gpu` flavor",
                      formated_ans,
                      isPrint=True,
-                     isWrap=False)
+                     is_warp=False)
     else:
         jpp(gpu_tag2spec)
 
@@ -316,13 +316,13 @@ def list_vcs_flavor(solution_name=None, is_table=True):
     if len(solution_name) == 0:
         raise ValueError("Need to provide `twccli ls vcs -itype` value.")
 
-    wanted_ans = sol.get_flavor_by_sol_name(solution_name[0])
+    wanted_ans = sol.get_flavors_by_sol_name(solution_name[0])
 
     if is_table:
         table_layout("VCS Product Types for {}".format(solution_name),
                      wanted_ans, ['flavor name', 'spec'],
                      isPrint=True,
-                     isWrap=False)
+                     is_warp=False)
     else:
         jpp(wanted_ans)
 
@@ -463,7 +463,7 @@ def list_buckets(is_table, versioning):
     s3 = S3()
     buckets = s3.list_bucket(show_versioning=versioning)
     if is_table:
-        table_layout("COS buckets {}", buckets, isWrap=False, isPrint=True)
+        table_layout("COS buckets {}", buckets, is_warp=False, isPrint=True)
     else:
         jpp(buckets)
 
@@ -518,7 +518,7 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
                 bucket_name) if is_versioning else bucket_name
             table_layout("COS objects {}".format(bkt_state),
                          files,
-                         isWrap=False,
+                         is_warp=False,
                          max_len=30,
                          isPrint=True,
                          captionInOrder=True,
@@ -958,7 +958,7 @@ def key(env, name, is_table, ids_or_names):
                      ans,
                      cols,
                      isPrint=True,
-                     isWrap=False)
+                     is_warp=False)
     else:
         jpp(ans)
 

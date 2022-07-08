@@ -447,41 +447,11 @@ class VcsSite(CpuService):
         flv = Flavors(self._csite_)
         return dict([(str(x['id']), x) for x in flv.list()])
 
-    @staticmethod
-    def getAvblImg(sol_name=None):
-        avbl_imgs = [{
-            "image-type":
-            u"ubuntu",
-            "image": [u'Ubuntu 16.04', u'Ubuntu 18.04', u'Ubuntu 20.04']
-        }, {
-            "image-type": u"centos",
-            "image": [u'CentOS 7.9', 'CentOS 8.2']
-        }]
-        vcs = VcsSite()
-        exists_sol = vcs.getSolList(mtype='dict', reverse=True, backdoor=False)
-        print(exists_sol)
-        if isNone(sol_name) or len(sol_name) == 0:
-            data = []
-            for solname, solid in exists_sol.items():
-                data.append({
-                    "image-type":
-                    solname,
-                    "image": [
-                        x.split(")")[1]
-                        for x in vcs._do_list_solution(solid)['image']
-                    ]
-                })
-            return data
-        else:
-            for x in avbl_imgs:
-                if x['image-type'] == sol_name[0]:
-                    return x
+    def getAvblImg(self, sol_name):
+        sols = VcsSolutions()
+        return sols.get_images_by_sol_name(sol_name)
 
-        extra_prop = vcs._do_list_solution(exists_sol[sol_name[0].lower()])
-        return {
-            "image-type": sol_name[0],
-            "image": [x.split(")")[1] for x in extra_prop['image']]
-        }
+        
 
     @staticmethod
     def extend_vcs_flavor(name2id, flv_in_sol):
@@ -677,12 +647,14 @@ class VcsSecurityGroup(CpuService):
         self.url_dic = {self._func_: rule_id}
         return self._do_api()
 
+
 class VcsFalvor(CpuService):
 
     def __init__(self):
         CpuService.__init__(self)
         self._func_ = "flavors"
         self._csite_ = Session2._getClusterName("VCS")
+
 
 class VcsSolutions(CpuService):
 
@@ -700,10 +672,40 @@ class VcsSolutions(CpuService):
         }
         ans = self._do_api()
         if return_in_dic:
-            return dict([ (x['name'], x['id']) for x in ans])
+            return dict([(x['name'], x['id']) for x in ans])
         return ans
 
-    def get_flavor_by_sol_name(self, sol_name):
+    def get_images_by_sol_name(self, sol_name):
+        all_imgs = self.get_info_by_sol_name(sol_name, field_name='image')
+        return_ans = []
+        for img in all_imgs:
+            return_ans.append({ 
+                "Provider": img.split(")")[0].replace("(", ""),
+                "VCSi Name": img.split(")")[1], 
+            })
+        return sorted(sorted(return_ans, key=lambda d: d['Provider'], reverse=True), key=lambda d: d['VCSi Name'])
+
+    def get_flavors_by_sol_name(self, sol_name):
+        flv_in_sol = self.get_info_by_sol_name(sol_name, field_name='flavor')
+        flvObj = VcsFalvor()
+        all_flvs = flvObj.list()
+
+        return_ans = []
+
+        for x in flv_in_sol:
+            for y in all_flvs:
+                if x == y['name']:
+                    res_obj = y['resource']
+                    return_ans.append({
+                        "flavor name":
+                        x,
+                        "spec":
+                        get_flavor_string(res_obj['gpu'], res_obj['cpu'],
+                                            res_obj['memory'])
+                    })
+        return sorted(return_ans, key=lambda d: int(d['spec'][:2]))
+
+    def get_info_by_sol_name(self, sol_name, field_name='flavor'):
         sols = self.list()
         found_sol_id = [
             x for x in sols if str(x['name']).lower() == sol_name.lower()
@@ -718,26 +720,10 @@ class VcsSolutions(CpuService):
                 "solutions": found_sol_id,
             }
             ans = self._do_api()
-            flv_in_sol = ans['site_extra_prop']['flavor']
-
-            flvObj = VcsFalvor()
-            all_flvs = flvObj.list()
-
-            return_ans = []
-
-            for x in flv_in_sol:
-                for y in all_flvs:
-                    if x == y['name']:
-                        res_obj = y['resource']
-                        return_ans.append({
-                            "flavor name":x,
-                            "spec": get_flavor_string(res_obj['gpu'], res_obj['cpu'], res_obj['memory'])
-                        })
-
             # reset
             self._func_ = "solutions"
             self._csite_ = 'goc'
-            return sorted(return_ans, key=lambda d: int(d['spec'][:2]))
+            return ans['site_extra_prop'][field_name]
 
 
 class VcsImage(CpuService):

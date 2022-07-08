@@ -36,7 +36,7 @@ class Users(GenericService):
                              total_gpfs,
                              cols,
                              isPrint=True,
-                             isWrap=False)
+                             is_warp=False)
             else:
                 jpp(total_gpfs)
         else:
@@ -77,7 +77,7 @@ class image_commit(GenericService):
         self._csite_ = "goc"
 
     def getCommitList(self):
-        return table_layout("commited images", self._do_api(), isPrint=False, isWrap=False)
+        return table_layout("commited images", self._do_api(), isPrint=False, is_warp=False)
 
     def createCommit(self, siteid, tag, image):
         self.http_verb = "post"
@@ -225,7 +225,7 @@ class projects(GenericService):
                          my_prj,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(res)
 

@@ -109,10 +109,13 @@ def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
 
 
 def list_vcs_img(sol_name, is_table):
-    ans = VcsSite.getAvblImg(sol_name)
+    if len(sol_name) == 0:
+        raise ValueError("Need value from `twccli ls vcs -itype`.")
+
+    cpu_site = VcsSite()
+    ans = cpu_site.getAvblImg(sol_name[0])
     if is_table:
-        table_layout("Abvl. VCS images", ans, [
-                     "image-type", "image"], isPrint=True, isWrap=False)
+        table_layout("Abvl. VCS images", ans, ['Provider', 'VCSi Name'], isPrint=True, is_warp=False)
     else:
         jpp(ans)
 
@@ -266,7 +269,7 @@ def change_loadbalancer(vlb_id, eip_id, json_data, members, wait, is_table):
             table_layout("Load Balancers Info.:", ans,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(ans)
 
@@ -314,7 +317,7 @@ def ch_ip_desc(ids_or_names, desc, is_table):
                          ans,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(ans)
 
