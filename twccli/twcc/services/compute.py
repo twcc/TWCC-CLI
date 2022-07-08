@@ -676,8 +676,6 @@ class VcsSecurityGroup(CpuService):
         self.url_dic = {self._func_: rule_id}
         return self._do_api()
 
-from cachetools import cached, LRUCache, TTLCache
-@cached(cache=LRUCache(maxsize=32))
 class VcsFalvor(CpuService):
 
     def __init__(self):
