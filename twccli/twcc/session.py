@@ -367,7 +367,7 @@ class Session2(object):
             {"key": "twcc_file_resources", "value": self.twcc_file_resources},
         ]
         # return ""
-        return table_layout("parameters", key_values, ['key', 'value'], isPrint=False, isWrap=False)
+        return table_layout("parameters", key_values, ['key', 'value'], isPrint=False, is_warp=False)
 
 
 # if __name__ == '__main__':
