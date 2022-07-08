@@ -78,7 +78,8 @@ def resource_id_validater(mid):
     return mid.isdigit()
 
 
-def _table_layout_set_default_caption(json_obj, caption_row, heading_cap, keep_order=False):
+def _table_layout_set_default_caption(json_obj, caption_row, keep_order=False):
+    heading_cap = set(['id', 'name'])
     if not len(caption_row) > 0 and type(json_obj) == type([]):
         if len(json_obj) > 0:
             row = json_obj[0]
@@ -120,6 +121,24 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
     elif type(ele) == type(""):  # for string
         return '\n'.join(wrap(ele, 20)) if is_warp else ele
 
+
+def _table_layout_arrange_table_info(json_obj, caption_row):
+    table_info = []
+    table_info.append(
+        [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
+    for ele in json_obj:
+        row_data = []
+        for cap in caption_row:
+            try:
+                val = jmespath.search(cap, ele)
+            except jmespath.exceptions.ParseError:
+                val = ele[cap] if cap in ele else ''
+            val = '' if val == None else val
+            row_data.append(Color("{autored}%s{/autored}" % val) if ("%s"%val).lower() == "error" else val)
+        table_info.append(row_data)
+    return table_info
+
+
 def _table_layout_data_cell_layout(list_of_list, is_warp=True):
     for idy in range(len(list_of_list)):
         for idx in range(len(list_of_list[idy])):
@@ -135,52 +154,13 @@ def table_layout(title,
                  isPrint=False,
                  captionInOrder=False):
     json_obj = [json_obj] if type(json_obj) == type({}) else json_obj
-    heading_cap = set(['id', 'name'])
-
-    caption_row = _table_layout_set_default_caption(json_obj, caption_row, heading_cap, keep_order=captionInOrder)
+    caption_row = _table_layout_set_default_caption(json_obj, caption_row, keep_order=captionInOrder)
 
     start_time = time.time()
 
-    table_info = []
-    table_info.append(
-        [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
-    for ele in json_obj:
-        row_data = []
-        for cap in caption_row:
-            try:
-                val = jmespath.search(cap, ele)
-            except jmespath.exceptions.ParseError:
-                val = ele[cap] if cap in ele else ''
-            val = '' if val == None else val
-            row_data.append(Color("{autored}%s{/autored}" % val) if ("%s"%val).lower() == "error" else val)
-        table_info.append(row_data)
-    table = AsciiTable(table_info, title=" {} ".format(title))
+    table = AsciiTable(_table_layout_arrange_table_info(json_obj, caption_row), title=" {} ".format(title))
 
     table.table_data = _table_layout_data_cell_layout(table.table_data, is_warp=is_warp)
-
-    # for idy in range(len(table.table_data)):
-    #     for idx in range(len(table.table_data[idy])):
-    #         ele = table.table_data[idy][idx]
-    #         if type(ele) == type([]) and len(ele) > 0:  # for list
-    #             tmp = ""
-    #             ptn = "[{0:02d}] {1}\n" if len(ele) > 9 else "[{0:01d}] {1}\n"
-    #             for idz in range(len(ele)):
-    #                 out_buf = ele[idz]
-    #                 try:
-    #                     out_buf = json.loads(out_buf)
-    #                     out_buf = json.dumps(out_buf,
-    #                                          indent=2,
-    #                                          separators=(',', ': '))
-    #                 except:
-    #                     pass
-    #                 tmp += ptn.format(idy + 1, out_buf)
-    #             table.table_data[idy][idx] = tmp
-    #         elif type(ele) == type({}):  # for dictionary
-    #             tmp = "%s" % "\n".join(
-    #                 ["[%s] %s" % (x, ele[x]) for x in ele.keys()])
-    #             table.table_data[idy][idx] = tmp
-    #         elif type(ele) == type(""):  # for string
-    #             table.table_data[idy][idx] = '\n'.join(wrap(ele, 20)) if isWrap else ele
 
     if debug:
         cprint("- %.3f seconds" % (time.time() - start_time),
