@@ -74,6 +74,26 @@ def resource_id_validater(mid):
     return mid.isdigit()
 
 
+def _table_layout_set_default_caption(json_obj, caption_row, heading_cap, keep_order=False):
+    if not len(caption_row) > 0 and type(json_obj) == type([]):
+        if len(json_obj) > 0:
+            row = json_obj[0]
+            caption_row = list(row.keys())
+
+    if keep_order == True:
+        pass
+    else:
+        intersect = set(caption_row).intersection(heading_cap)
+        if len(intersect) > 0:
+            new_caption = []
+            for ele in sorted(intersect):
+                new_caption.append(ele)
+                caption_row.remove(ele)
+            new_caption.extend(sorted(caption_row))
+            caption_row = new_caption
+
+    return caption_row
+
 def table_layout(title,
                  json_obj,
                  caption_row=[],
@@ -89,25 +109,11 @@ def table_layout(title,
     import time
     import json
 
-    if type(json_obj) == type({}):
-        json_obj = [json_obj]
-    if not len(caption_row) > 0 and type(json_obj) == type([]):
-        if len(json_obj) > 0:
-            row = json_obj[0]
-            caption_row = list(row.keys())
+    json_obj = [json_obj] if type(json_obj) == type({}) else json_obj
     heading_cap = set(['id', 'name'])
 
-    if captionInOrder == True:
-        pass
-    else:
-        intersect = set(caption_row).intersection(heading_cap)
-        if len(intersect) > 0:
-            new_caption = []
-            for ele in sorted(intersect):
-                new_caption.append(ele)
-                caption_row.remove(ele)
-            new_caption.extend(sorted(caption_row))
-            caption_row = new_caption
+    caption_row = _table_layout_set_default_caption(json_obj, caption_row, heading_cap, keep_order=captionInOrder)
+
     start_time = time.time()
 
     table_info = []
