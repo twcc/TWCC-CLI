@@ -507,20 +507,20 @@ def me(ctx, is_dry, is_force):
     if isNone(_site_id_):
         click.echo(click.style(
             '[TWCC-CLI] Error! No `$_TWCC_SITE_ID_` found in environment variables.', bg='red', fg='white'))
-    else:
-        in_cnv = 'vcs' if is_vcs_env() else 'ccs'
+        return True
+    in_cnv = 'vcs' if is_vcs_env() else 'ccs'
 
-        if is_dry:
-            click.echo(click.style(
-                "[TWCC-CLI] Dry run: `twccli rm {} -s {}{}`.".format(in_cnv, _site_id_, " -f" if is_force else ""), fg='bright_magenta'))
-            click.echo(click.style(
-                ">>> use `--no-dry-run` flag for actully executing command.", fg='bright_magenta'))
-        else:
-            if getConfirm(in_cnv.upper(), _site_id_, is_force):
-                if is_vcs_env():
-                    ctx.invoke(vcs, force=True, site_id=_site_id_)
-                else:
-                    ctx.invoke(ccs, force=True, site_id=_site_id_)
+    if is_dry:
+        click.echo(click.style(
+            "[TWCC-CLI] Dry run: `twccli rm {} -s {}{}`.".format(in_cnv, _site_id_, " -f" if is_force else ""), fg='bright_magenta'))
+        click.echo(click.style(
+            ">>> use `--no-dry-run` flag for actully executing command.", fg='bright_magenta'))
+    else:
+        if getConfirm(in_cnv.upper(), _site_id_, is_force):
+            if is_vcs_env():
+                ctx.invoke(vcs, force=True, site_id=_site_id_)
+            else:
+                ctx.invoke(ccs, force=True, site_id=_site_id_)
 
 
 cli.add_command(vcs)
