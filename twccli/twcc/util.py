@@ -9,6 +9,7 @@ import pytz
 import jmespath
 import datetime
 import unicodedata
+import uuid
 import requests as rq
 from twccli.twccli import pass_environment
 from terminaltables import AsciiTable
@@ -441,3 +442,12 @@ def set_rc_config(rc):
             "Please add encoding setting to your environment: \n {}".format(lang_encoding))
     open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
         [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
+
+
+def set_cid_flag(ga_flag=True):
+        if not ga_flag == None:
+            return str(uuid.uuid1()) if ga_flag else None
+        else:
+            ga_agree_flag = click.confirm(
+                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+            return str(uuid.uuid1()) if ga_agree_flag else None

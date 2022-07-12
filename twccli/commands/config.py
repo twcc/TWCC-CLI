@@ -3,7 +3,6 @@ from __future__ import print_function
 import click
 import os
 import sys
-import uuid
 from os.path import exists
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment, logger
@@ -53,7 +52,6 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
     :type rc_setting: bool
     """
     bashrc_file = os.environ["HOME"]+"/.bashrc"
-    is_bashrc_exists = True if exists(bashrc_file) or ac_flag == False else False
         
     if not Session2._isValidSession():
 
@@ -66,16 +64,9 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
 
         get_environment_params('_TWCC_CLI_GA_', ga_flag)
 
-        if not isNone(user_agent):
-            os.environ['User_Agent'] = user_agent
-
-        if not ga_flag == None:
-            cid = str(uuid.uuid1()) if ga_flag else None
-        else:
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            cid = str(uuid.uuid1()) if ga_agree_flag else None
-
+        os.environ['User_Agent'] = user_agent
+        cid = set_cid_flag(ga_flag)
+        
         if isNone(proj_code) or len(proj_code) == 0:
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
