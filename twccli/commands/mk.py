@@ -9,7 +9,6 @@ from datetime import datetime
 from collections import defaultdict
 from twccli.twcc.services.compute import GpuSite as Sites
 from twccli.twcc.services.compute import VcsSite, VcsSecurityGroup, VcsImage, Volumes, LoadBalancers, getServerId, Fixedip, Secrets
-from twccli.twcc.services.solutions import solutions
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.util import pp, table_layout, isNone, jpp, mk_names, isFile, name_validator, window_password_validater

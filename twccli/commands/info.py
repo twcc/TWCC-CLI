@@ -126,7 +126,7 @@ def quota(ctx, is_all, is_table):
                                       set_unlimited(projq_vcs[ele[1]][u'quota']) )
 
         if is_table:
-            table_layout("[VCS QuotaPlan] for %s"%(proj_name), quota, isPrint=True)#, caption_row=col_cap, captionInOrder=True)
+            table_layout("[VCS QuotaPlan] for %s"%(proj_name), quota, isPrint=True)
 
 
         ccs_list = {"CPU":"cpu", "GPU":"gpu",
@@ -138,7 +138,7 @@ def quota(ctx, is_all, is_table):
 
 
         if is_table:
-            table_layout("[CCS QuotaPlan] for %s"%(proj_name), quota, isPrint=True)#, caption_row=col_cap, captionInOrder=True)
+            table_layout("[CCS QuotaPlan] for %s"%(proj_name), quota, isPrint=True)
 
 
         if not is_table:

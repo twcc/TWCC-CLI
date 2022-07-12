@@ -14,6 +14,13 @@ lang_encoding = """
 export PYTHONIOENCODING=UTF-8
 """
 
+lang_encoding_centos79 = """
+export LANG=zh_TW.utf-8
+export LC_ALL=zh_TW.utf-8
+export PYTHONIOENCODING=UTF-8
+"""
+
+
 @click.command(help='Get exsisting information.')
 # @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
 @pass_environment
@@ -97,14 +104,16 @@ def init(env, apikey, proj_code, user_agent, ga_flag, ac_flag):
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
-
-            click.echo(
-                "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-                
-            if is_bashrc_exists:
-                open(bashrc_file, 'a').write(lang_encoding)
-                open(bashrc_file, 'a').write(". {}/twccli/twccli-complete.sh".format(
-                    [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
+            import platform
+            if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
+                lang_encoding = lang_encoding_centos79
+            if rc:
+                click.echo("Add language setting to `.bashrc`.")
+                open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
+            else:
+                click.echo(
+                    "Please add encoding setting to your environment: \n {}".format(lang_encoding))
+            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format([cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
         else:
             raise ValueError("API Key is not validated.")
     else:

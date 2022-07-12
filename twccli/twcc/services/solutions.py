@@ -22,3 +22,9 @@ class solutions(GenericService):
     def list(self):
         self.ext_get = {'project': self._project_id}
         return super(solutions, self).list()
+
+    def list_vcs(self):
+        GenericService.__init__(self, cluster_tag="VCS")
+        self._csite_ = "goc"
+        self.ext_get = {'project': self._project_id, 'category':'os'}
+        return super(solutions, self).list()
