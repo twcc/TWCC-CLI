@@ -56,9 +56,19 @@ def strShorten(mstr, max_len=6):
         return mstr
 
 
-def isNone(x):
+def isNone(x) -> bool:
     return True if type(x) == type(None) else False
 
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """    
+    return True if isNone(x) or len(x) == 0 else False
 
 def mkdir_p(path):
     import errno
@@ -445,9 +455,9 @@ def set_rc_config(rc):
 
 
 def set_cid_flag(ga_flag=True):
-        if not ga_flag == None:
-            return str(uuid.uuid1()) if ga_flag else None
-        else:
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            return str(uuid.uuid1()) if ga_agree_flag else None
+    if not ga_flag == None:
+        return str(uuid.uuid1()) if ga_flag else None
+    else:
+        ga_agree_flag = click.confirm(
+            'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+        return str(uuid.uuid1()) if ga_agree_flag else None
