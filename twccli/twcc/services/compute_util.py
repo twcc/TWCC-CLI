@@ -501,11 +501,12 @@ def format_ccs_env_dict(env_dict):
 
 
 def get_ccs_sol_id(sol_name):
-    sol_name = sol_name.lower()
-    cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
-                  if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower() == sol_name])
+    avbl_sols = Sites(debug=False).getSolList(reverse=True)
+    
+    cntrs = dict([(cntr.lower(), avbl_sols[cntr]) for cntr in avbl_sols
+                  if not avbl_sols[cntr] in GupSiteBlockSet and cntr.lower() == sol_name.lower()])
     if len(cntrs) > 0:
-        return cntrs[sol_name]
+        return cntrs[sol_name.lower()]
     else:
         raise ValueError(
             "Solution name '{0}' is not valid.".format(sol_name))
