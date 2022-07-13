@@ -5,7 +5,7 @@ import json
 import os
 import yaml
 from twccli.twcc.session import Session2
-from twccli.twcc.services.generic import GpuService, CpuService
+from twccli.twcc.services.generic import GpuService, CpuService, GenericService
 from twccli.twcc.services.base import projects, Flavors, iservice
 from twccli.twcc.util import pp, isNone, table_layout, isDebug, strShorten, _debug, get_flavor_string
 
@@ -13,6 +13,26 @@ from twccli.twcc.util import pp, isNone, table_layout, isDebug, strShorten, _deb
 def chkPortPair(x):
     return True if type(x) == type({}) and len(
         set(['exposed', 'inner']).intersection(set(x.keys()))) == 2 else False
+
+
+class GpuSolutions(GenericService):
+    """ This Class is for solutions api call
+    """
+
+    def __init__(self):
+        """ constractor for this solutions class
+
+        Args:
+            api_key_tag (str): see YAML for detail
+        """
+        GenericService.__init__(self)
+        # current working information
+        self._func_ = "solutions"
+        self._csite_ = "goc"
+
+    def list(self):
+        self.ext_get = {'project': self._project_id, 'category': 'container'}
+        return super(GpuSolutions, self).list()
 
 
 class GpuSite(GpuService):
@@ -68,7 +88,8 @@ class GpuSite(GpuService):
         ext_cntr_sol = set([
             'Preemptive GPU', 'Custom Image', u'Preemptive GPU(Custom Image)'
         ])
-        sols = solutions().list()
+        sols = GpuSolutions().list()
+        
         for ele in sols:
             if ele['name'] in ext_cntr_sol:
                 sol_list.append((ele['id'], ele['name']))
@@ -145,7 +166,6 @@ class GpuSite(GpuService):
     # @todo, this is duplicated with L419
     def getIsrvFlavors(self, name_or_id="flavor_id"):
         pass
-
 
     @staticmethod
     def getGpuListOnline():
@@ -373,7 +393,7 @@ class VcsSite(CpuService):
         self._csite_ = Session2._getClusterName("goc")
         print(self._csite_)
         self._func_ = "solutions"
-        self.ext_get = {"category": "os", 'project': self._project_id,}
+        self.ext_get = {"category": "os", 'project': self._project_id, }
         result = self._do_api()
         self._func_ = "sites"
         self._csite_ = Session2._getClusterName("VCS")
@@ -418,8 +438,6 @@ class VcsSite(CpuService):
     def getAvblImg(self, sol_name):
         sols = VcsSolutions()
         return sols.get_images_by_sol_name(sol_name)
-
-        
 
     @staticmethod
     def extend_vcs_flavor(name2id, flv_in_sol):
@@ -646,9 +664,9 @@ class VcsSolutions(CpuService):
         all_imgs = self.get_info_by_sol_name(sol_name, field_name='image')
         return_ans = []
         for img in all_imgs:
-            return_ans.append({ 
+            return_ans.append({
                 "Provider": img.split(")")[0].replace("(", ""),
-                "VCSi Name": img.split(")")[1], 
+                "VCSi Name": img.split(")")[1],
             })
         return sorted(sorted(return_ans, key=lambda d: d['Provider'], reverse=True), key=lambda d: d['VCSi Name'])
 
@@ -668,7 +686,7 @@ class VcsSolutions(CpuService):
                         x,
                         "spec":
                         get_flavor_string(res_obj['gpu'], res_obj['cpu'],
-                                            res_obj['memory'])
+                                          res_obj['memory'])
                     })
         return sorted(return_ans, key=lambda d: int(d['spec'][:2]))
 
