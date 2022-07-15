@@ -9,7 +9,7 @@ import pytz
 import jmespath
 import datetime
 import unicodedata
-import uuid
+import socket
 import requests as rq
 from twccli.twccli import pass_environment
 from terminaltables import AsciiTable
@@ -56,7 +56,7 @@ def strShorten(mstr, max_len=6):
         return mstr
 
 
-def isNone(x) -> bool:
+def isNone(x):
     return True if type(x) == type(None) else False
 
 def check_empty_value(x) -> bool:
@@ -134,7 +134,7 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 def _table_layout_colorful_val(val):
     val = '' if val == None else val
     return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else "%s" % val
+                 val) if ("%s" % val).lower() == "error" else "%s"%val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
