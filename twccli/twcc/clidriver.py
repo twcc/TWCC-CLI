@@ -9,7 +9,7 @@ import logging
 from twccli.twccli import pass_environment, logger
 import os
 from .session import Session2
-from .util import parsePtn, isNone, isDebug, pp, twcc_error_echo
+from .util import parsePtn, isNone, isDebug, pp, twcc_error_echo, _debug, jpp
 import urllib3
 urllib3.disable_warnings()
 
@@ -108,6 +108,7 @@ class ServiceOperation:
     def _api_act(self,
                  t_api,
                  t_headers,
+                 t_params,
                  t_data=None,
                  mtype="get",
                  show_curl=False):
@@ -119,7 +120,7 @@ class ServiceOperation:
         ssl_verify_mode = True
 
         if mtype == 'get':
-            r = requests.get(t_api, headers=t_headers, verify=ssl_verify_mode)
+            r = requests.get(t_api, params=t_params, headers=t_headers, verify=ssl_verify_mode)
 
         elif mtype == 'post':
             r = requests.post(t_api,
@@ -127,7 +128,7 @@ class ServiceOperation:
                               data=json.dumps(t_data),
                               verify=ssl_verify_mode)
         elif mtype == "delete":
-            r = requests.delete(t_api, headers=t_headers,
+            r = requests.delete(t_api, headers=t_headers, params=t_params, 
                                 verify=ssl_verify_mode)
         elif mtype == "patch":
             r = requests.patch(t_api,
@@ -143,8 +144,11 @@ class ServiceOperation:
             raise ValueError("http verb:'{0}' is not valid".format(mtype))
 
         if self._debug:
-            logger.info(t_api)
-            logger.info(t_headers)
+            logger.info("[t_api]: %s"%t_api)
+            logger.info("[t_headers]: %s"%t_headers)
+            logger.info("[t_params]: %s"%json.dumps(t_params))
+            logger.info("[t_data]: %s"%json.dumps(t_data))
+            logger.info("[r.url]: %s"%r.url)
             logger.info("--- URL: %s, Status: %s, (%.3f sec) ---" %
                         (t_api, r.status_code, time.time() - start_time))
         return (r, (time.time() - start_time))
@@ -180,14 +184,15 @@ class ServiceOperation:
                                  api_key=api_key,
                                  user_agent=user_agent,
                                  ctype=ctype)
-        if not isNone(url_ext_get):
-            t_url += "?"
-            t_url_tmp = []
-            for param_key in url_ext_get.keys():
-                t_url_tmp.append("{0}={1}".format(param_key,
-                                                  url_ext_get[param_key]))
-            t_url += "&".join(t_url_tmp)
-        res = self._api_act(t_url, t_header, t_data=data_dict, mtype=http)
+        # if not isNone(url_ext_get):
+        #     t_url += "?"
+        #     t_url_tmp = []
+        #     for param_key in url_ext_get.keys():
+        #         t_url_tmp.append("{0}={1}".format(param_key,
+        #                                           url_ext_get[param_key]))
+        #     t_url += "&".join(t_url_tmp)
+
+        res = self._api_act(t_url, t_header, t_params=url_ext_get, t_data=data_dict, mtype=http)
 
         import sys
         if 'click' in sys.modules.keys() and res[0].status_code >= 400:
@@ -235,7 +240,7 @@ class ServiceOperation:
         return_header = {
             'User-Agent': this_user_agent,
             'X-API-HOST': site_sn,
-            'x-api-key': api_key,
+            'x-API-KEY': api_key,
             'Content-Type': self.ctype
         }
 
