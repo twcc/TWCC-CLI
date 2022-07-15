@@ -70,17 +70,10 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
         get_environment_params('_TWCC_CLI_GA_', ga_flag)
 
-        if not isNone(user_agent):
-            os.environ['User_Agent'] = user_agent
-            
-        if not ga_flag == None:
-                cid = str(uuid.uuid1()) if ga_flag else None
-        else:
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            cid = str(uuid.uuid1()) if ga_agree_flag else None
+        os.environ['User_Agent'] = user_agent
+        cid = set_cid_flag(ga_flag)
 
-        if isNone(proj_code) or len(proj_code) == 0:
+        if check_empty_value(proj_code):
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
                 
