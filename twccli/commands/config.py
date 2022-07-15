@@ -3,23 +3,11 @@ from __future__ import print_function
 import click
 import os
 import sys
-import uuid
+from os.path import exists
 from twccli.twcc.session import Session2
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.util import *
 from twccli.twcc.services.generic import GenericService
-
-lang_encoding = """
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
-export PYTHONIOENCODING=UTF-8
-"""
-
-lang_encoding_centos79 = """
-export LANG=zh_TW.utf-8
-export LC_ALL=zh_TW.utf-8
-export PYTHONIOENCODING=UTF-8
-"""
 
 
 @click.command(help='Get exsisting information.')
@@ -40,8 +28,10 @@ def whoami(ctx):
 @click.command(help='Configure the TWCC CLI.')
 @click.option('-ua', '--user-agent', 'user_agent',
               help="Meta data to define cli doing for")
-@click.option('-ga / -noga', '--agree-ga / --not-agree-ga', 'ga_flag',
-              help="Agree using ga analytics", is_flag=True, default=None)
+@click.option('-ga/-noga', '--agree-ga/--no-agree-ga', 'ga_flag',
+              help="Agree using ga analytics", is_flag=True, default=True)
+@click.option('-ac/-noac', '--auto-compelete/--no-auto-compelete', 'ac_flag',
+              help="Apply auto-compelete scripts.", default=False)
 @click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey',
@@ -49,7 +39,7 @@ def whoami(ctx):
 @click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
               help="Set bashrc parameters.")
 @pass_environment
-def init(env, apikey, proj_code, rc, user_agent, ga_flag):
+def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
     """Constructor method
 
     :param apikey: TWCC API Key for CLI. It also can read $TWCC_API_KEY.
@@ -61,55 +51,43 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     :param rc_setting: Set bashrc parameters.
     :type rc_setting: bool
     """
-    if not Session2._isValidSession():
+    bashrc_file = os.environ["HOME"]+"/.bashrc"
         
+    if not Session2._isValidSession():
+
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
         get_environment_params('TWCC_API_KEY', apikey)
         get_environment_params('_TWCC_API_KEY_', apikey)
         get_environment_params('TWCC_PROJ_CODE', proj_code)
         get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
+
         get_environment_params('_TWCC_CLI_GA_', ga_flag)
 
-        if not isNone(user_agent):
-            os.environ['User_Agent'] = user_agent
-            
-        if not ga_flag == None:
-                cid = str(uuid.uuid1()) if ga_flag else None
-        else:
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            cid = str(uuid.uuid1()) if ga_agree_flag else None
-
-        if isNone(proj_code) or len(proj_code) == 0:
+        os.environ['User_Agent'] = user_agent
+        cid = set_cid_flag(ga_flag)
+        
+        if check_empty_value(proj_code):
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
-                
-        if isNone(apikey) or len(apikey) == 0:
+
+        if check_empty_value(apikey):
             apikey = click.prompt('Please enter TWCC APIKEY', type=str)
 
         if validate(apikey):
             proj_code = proj_code.upper()
             if env.verbose:
-                logger.info("Receiving TWCC Project Code: {}".format(proj_code))
+                logger.info(
+                    "Receiving TWCC Project Code: {}".format(proj_code))
                 logger.info("Receiving TWCC API Key: {}".format(apikey))
                 logger.info("Receiving TWCC CLI GA: {}".format(ga_flag))
 
-            
             Session2(twcc_api_key=apikey, twcc_project_code=proj_code,
                      user_agent=user_agent, twcc_cid=cid)
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
-            import platform
-            if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
-                lang_encoding = lang_encoding_centos79
-            if rc:
-                click.echo("Add language setting to `.bashrc`.")
-                open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
-            else:
-                click.echo(
-                    "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-            open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format([cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
+
+            set_rc_config(rc)
         else:
             raise ValueError("API Key is not validated.")
     else:

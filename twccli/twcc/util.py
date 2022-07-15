@@ -56,9 +56,19 @@ def strShorten(mstr, max_len=6):
         return mstr
 
 
-def isNone(x):
+def isNone(x) -> bool:
     return True if type(x) == type(None) else False
 
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """    
+    return True if isNone(x) or len(x) == 0 else False
 
 def mkdir_p(path):
     import errno
@@ -124,7 +134,7 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 def _table_layout_colorful_val(val):
     val = '' if val == None else val
     return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else "%s"%val
+                 val) if ("%s" % val).lower() == "error" else "%s" % val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -419,6 +429,38 @@ def get_flavor_string(gpu, cpu, mem):
             gpu, cpu, int(mem / 1024))
     return "{} vCores, {:d} Gib Memory".format(cpu, int(mem / 1024))
 
+
+def set_rc_config(rc):
+    lang_encoding = """
+    export PYTHONIOENCODING=UTF-8
+    """
+
+    lang_encoding_centos79 = """
+    export LANG=zh_TW.utf-8
+    export LC_ALL=zh_TW.utf-8
+    export PYTHONIOENCODING=UTF-8
+    """
+
+    import platform
+    if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
+        lang_encoding = lang_encoding_centos79
+    if rc:
+        click.echo("Add language setting to `.bashrc`.")
+        open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
+    else:
+        click.echo(
+            "Please add encoding setting to your environment: \n {}".format(lang_encoding))
+    open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
+        [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
+
+
+def set_cid_flag(ga_flag=True):
+    if not ga_flag == None:
+        return str(uuid.uuid1()) if ga_flag else None
+    else:
+        ga_agree_flag = click.confirm(
+            'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+        return str(uuid.uuid1()) if ga_agree_flag else None
 
 def is_vcs_env():
     import socket
