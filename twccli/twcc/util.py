@@ -9,6 +9,7 @@ import pytz
 import jmespath
 import datetime
 import unicodedata
+import socket
 import requests as rq
 from twccli.twccli import pass_environment
 from terminaltables import AsciiTable
@@ -383,7 +384,7 @@ def window_password_validater(password):
         return False
 
 
-def get_environment_params(param_key, def_val):
+def get_environment_params(param_key, def_val=None):
     if param_key in os.environ and len(os.environ[param_key]) > 0:
         def_val = os.environ[param_key]
     return def_val
@@ -417,3 +418,11 @@ def get_flavor_string(gpu, cpu, mem):
         return "{} GPU, {} vCores, {:d} Gib Memory".format(
             gpu, cpu, int(mem / 1024))
     return "{} vCores, {:d} Gib Memory".format(cpu, int(mem / 1024))
+
+
+def is_vcs_env():
+    import socket
+    host_name = socket.gethostname()
+    if re.search('-iaas$', host_name):
+        return True
+    return False

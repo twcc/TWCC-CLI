@@ -4,7 +4,7 @@ from twccli.commands.mk import eip
 import click
 import re
 import sys
-from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isFile
+from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isFile, is_vcs_env
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
@@ -12,7 +12,7 @@ from twccli.twcc.services.compute import Fixedip, GpuSite, Secrets, VcsSite, Vcs
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.services.generic import GenericService
 from twccli.twcc.services.network import Networks
-from twccli.twcc.util import isNone, timezone2local, resource_id_validater
+from twccli.twcc.util import isNone, resource_id_validater, _debug, get_environment_params
 from twccli.twccli import pass_environment, logger
 from botocore.exceptions import ClientError
 
@@ -185,6 +185,7 @@ def del_ip(ids_or_names, isForce=False):
             print("Successfully remove {}".format(ip_id))
         else:
             print("No delete operations.")
+
 
 def del_ssl(ids_or_names, isforce=False):
     """Delete ssl by ip id
@@ -473,6 +474,7 @@ def eip(ctx, ip_id, ids_or_names, force):
     ids_or_names = mk_names(ip_id, ids_or_names)
     del_ip(ids_or_names, force)
 
+
 @click.option('-id', '--ssl-id', 'ssl_id',
               help="Index of the ssls.")
 @click.option('-f', '--force', 'force',
@@ -491,6 +493,36 @@ def ssl(ctx, ssl_id, ids_or_names, force):
     del_ssl(ids_or_names, force)
 
 
+@click.option('-f', '--force', 'is_force',
+              is_flag=True, show_default=True, default=False,
+              help='Forcely delete the resource.')
+@click.option('-dry/-no-dry', '--dry-run/--no-dry-run', 'is_dry',
+              is_flag=True, show_default=True, default=True,
+              help='Check out command.')
+@click.command(help="Delete ME now! Equals to `rm [ccs|vcs] -s $_TWCC_SITE_ID_`")
+@click.pass_context
+def me(ctx, is_dry, is_force):
+    _site_id_ = get_environment_params("_TWCC_SITE_ID_")
+
+    if isNone(_site_id_):
+        click.echo(click.style(
+            '[TWCC-CLI] Error! No `$_TWCC_SITE_ID_` found in environment variables.', bg='red', fg='white'))
+        return True
+    in_cnv = 'vcs' if is_vcs_env() else 'ccs'
+
+    if is_dry:
+        click.echo(click.style(
+            "[TWCC-CLI] Dry run: `twccli rm {} -s {}{}`.".format(in_cnv, _site_id_, " -f" if is_force else ""), fg='bright_magenta'))
+        click.echo(click.style(
+            ">>> use `--no-dry-run` flag for actully executing command.", fg='bright_magenta'))
+    else:
+        if getConfirm(in_cnv.upper(), _site_id_, is_force):
+            if is_vcs_env():
+                ctx.invoke(vcs, force=True, site_id=_site_id_)
+            else:
+                ctx.invoke(ccs, force=True, site_id=_site_id_)
+
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -500,6 +532,7 @@ cli.add_command(vnet)
 cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
+cli.add_command(me)
 
 
 def main():

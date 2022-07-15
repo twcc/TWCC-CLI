@@ -29,10 +29,8 @@ def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     import click
     if sys.version_info[0] >= 3:
         click.echo(click.style(str_title, bg='blue',
-                           fg='white', blink=True, bold=True))
-        return click.confirm( text=str_text) #title=str_title,
-
-    
+                               fg='white', blink=True, bold=True))
+        return click.confirm(text=str_text)  # title=str_title,
 
 
 def list_vcs(ids_or_names, is_table, column='', is_all=False, is_print=True):
@@ -113,7 +111,8 @@ def list_vcs_img(sol_name, is_table):
     cpu_site = VcsSite()
     ans = cpu_site.getAvblImg(sol_name[0])
     if is_table:
-        table_layout("Abvl. VCS images", ans, ['Provider', 'VCSi Name'], isPrint=True, is_warp=False)
+        table_layout("Abvl. VCS images", ans, [
+                     'Provider', 'VCSi Name'], isPrint=True, is_warp=False)
     else:
         jpp(ans)
 
@@ -124,8 +123,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
 
     vcs = VcsSite()
     vcs_sol = VcsSolutions()
-    exists_sol = dict([ (k.lower(), v) for (k, v) in vcs_sol.list(return_in_dic=True).items()])
-
+    exists_sol = dict([(k.lower(), v)
+                      for (k, v) in vcs_sol.list(return_in_dic=True).items()])
 
     if isNone(sol):
         raise ValueError("Please provide solution name. ie:{}".format(
@@ -190,7 +189,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     sys_vol = sys_vol.lower()
     if not sys_vol in extra_props['x-extra-property-system-volume-type'].keys():
         raise ValueError("System Volume Type: {} is not validated. Avbl: {}".format(sys_vol,
-                                                                                   ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
+                                                                                    ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
     required['x-extra-property-system-volume-type'] = extra_props['x-extra-property-system-volume-type'][sys_vol]
 
     # x-extra-property-availability-zone
@@ -201,16 +200,17 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         required['x-extra-property-volume-size'] = str(data_vol_size)
         if not data_vol in extra_props['x-extra-property-volume-type']:
             raise ValueError("Data Volume Type: {} is not validated. Avbl: {}".format(data_vol,
-                                                                                     ", ".join(extra_props['x-extra-property-volume-type'])))
+                                                                                      ", ".join(extra_props['x-extra-property-volume-type'])))
         required['x-extra-property-volume-type'] = data_vol
 
     return vcs.create(name, exists_sol[sol], required)
+
 
 def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
     json_template = vlb.ch_vlb_temp_json
     exist_vlb_json = vlb.list(vlb_id)
-    
+
     json_template["pools"] = exist_vlb_json["pools"]
     json_template["listeners"] = exist_vlb_json["listeners"]
     pool_id2name = {}
@@ -221,8 +221,8 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
         pool['delay'] = pool['monitor']['delay']
         pool['max_retries'] = pool['monitor']['max_retries']
         pool['timeout'] = pool['monitor']['timeout']
-        pool['monitor_type'] = pool['monitor']['monitor_type']   
-        pool['expected_codes'] = pool['monitor']['expected_codes'] 
+        pool['monitor_type'] = pool['monitor']['monitor_type']
+        pool['expected_codes'] = pool['monitor']['expected_codes']
         pool['http_method'] = pool['monitor']['http_method']
         pool['url_path'] = pool['monitor']['url_path']
         del pool["monitor"]
@@ -233,17 +233,20 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
         del ln["pool"]
     if not members == None:
         for ip_port in members.split(','):
-            json_template["pools"][0]["members"].append({"ip": ip_port.split(':')[0], "port": ip_port.split(':')[1]})
+            json_template["pools"][0]["members"].append(
+                {"ip": ip_port.split(':')[0], "port": ip_port.split(':')[1]})
     return json_template
-    
+
+
 def change_loadbalancer(vlb_id, eip_id, json_data, members, wait, is_table):
     # {"pools":[{"name":"pool-0","method":"ROUND_ROBIN","protocol":"HTTP","members":[{"ip":"192.168.1.1","port":80,"weight":1},{"ip":"192.168.1.2","port":90,"weight":1}]}],"listeners":[{"name":"listener-0","pool":6885,"protocol":"HTTP","protocol_port":80,"status":"ACTIVE","pool_name":"pool-0"},{"name":"listener-1","pool":6885,"protocol":"TCP","protocol_port":90,"status":"ACTIVE","pool_name":"pool-0"}]}
 
     vlb = LoadBalancers()
     if isNone(json_data):
-        json_data = get_ch_json_by_vlbid(vlb_id, members = members)
-    ans = vlb.update(vlb_id, json_data['listeners'], json_data['pools'],eip_id = eip_id)
-    
+        json_data = get_ch_json_by_vlbid(vlb_id, members=members)
+    ans = vlb.update(
+        vlb_id, json_data['listeners'], json_data['pools'], eip_id=eip_id)
+
     if wait:
         doSiteStable(ans['id'], site_type='vlb')
         ans = vlb.list(ans['id'])
@@ -479,7 +482,8 @@ def doSiteStable(site_id, site_type='cntr'):
     elif site_type == 'vlb':
         b = LoadBalancers()
     else:
-        raise ValueError(f"This site_type:{site_type} has no site stable function")
+        raise ValueError(
+            "This site_type:{} has no site stable function.".format(site_type))
 
     wait_ready = False
     while not wait_ready:
@@ -497,11 +501,12 @@ def format_ccs_env_dict(env_dict):
 
 
 def get_ccs_sol_id(sol_name):
-    sol_name = sol_name.lower()
-    cntrs = dict([(cntr['name'].lower(), cntr['id']) for cntr in a.list()
-                  if not cntr['id'] in GupSiteBlockSet and cntr['name'].lower() == sol_name])
+    avbl_sols = Sites(debug=False).getSolList(reverse=True)
+    
+    cntrs = dict([(cntr.lower(), avbl_sols[cntr]) for cntr in avbl_sols
+                  if not avbl_sols[cntr] in GupSiteBlockSet and cntr.lower() == sol_name.lower()])
     if len(cntrs) > 0:
-        return cntrs[sol_name]
+        return cntrs[sol_name.lower()]
     else:
         raise ValueError(
             "Solution name '{0}' is not valid.".format(sol_name))
