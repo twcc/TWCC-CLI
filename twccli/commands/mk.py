@@ -237,10 +237,6 @@ default_vcs_name = 'twcc-vcs_'
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
         sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
         if len(name) == 1 and name[0] == default_vcs_name:
