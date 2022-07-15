@@ -179,10 +179,11 @@ def cli():
         logger.warning(e)
     pass
 
+default_vcs_name = 'twcc-vcs_'
 
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
-@click.option('-n', '--name', 'name', default=["twccli"], type=str, multiple=True,
+@click.option('-n', '--name', 'name', default=[default_vcs_name], type=str, multiple=True,
               help="Name of the instance.")
 @click.option('-s', '--site-id', 'site_id', type=str,
               help="ID of the instance.")
@@ -236,10 +237,9 @@ def cli():
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
         data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
         sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):
-
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
-        if len(name) == 1 and name[0] == 'twccli':
+        if len(name) == 1 and name[0] == default_vcs_name:
             pass
         else:
             if not len(name) == len(sids):
@@ -251,7 +251,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 img = VcsImage()
                 desc_str = "twccli created at {}".format(
                     datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                if len(name) == 1 and name[0] == 'twccli':
+                if len(name) == 1 and name[0] == default_vcs_name:
                     img_name = 'twccli'+datetime.now().strftime("%d%m%H%M")+str(index)
                 else:
                     img_name = name[index]
@@ -272,9 +272,8 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
     else:
         if len(name) >= 1:
             name = name[0]
-        if name == 'twccli':
-            name = "{}{}".format(name, flavor.replace(
-                ".", '').replace("super", ''))
+        if name == default_vcs_name:
+            name = "{}{}".format(name, flavor.replace(".", ''))[:15]
             if not isNone(password):
                 if window_password_validater(password):
                     name = name+'win'

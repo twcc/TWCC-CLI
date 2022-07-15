@@ -9,7 +9,7 @@ import pytz
 import jmespath
 import datetime
 import unicodedata
-import uuid
+import socket
 import requests as rq
 from twccli.twccli import pass_environment
 from terminaltables import AsciiTable
@@ -394,7 +394,7 @@ def window_password_validater(password):
         return False
 
 
-def get_environment_params(param_key, def_val):
+def get_environment_params(param_key, def_val=None):
     if param_key in os.environ and len(os.environ[param_key]) > 0:
         def_val = os.environ[param_key]
     return def_val
@@ -461,3 +461,10 @@ def set_cid_flag(ga_flag=True):
         ga_agree_flag = click.confirm(
             'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
         return str(uuid.uuid1()) if ga_agree_flag else None
+
+def is_vcs_env():
+    import socket
+    host_name = socket.gethostname()
+    if re.search('-iaas$', host_name):
+        return True
+    return False

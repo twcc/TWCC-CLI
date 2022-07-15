@@ -58,7 +58,6 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag, ac_flag):
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
         get_environment_params('TWCC_API_KEY', apikey)
         get_environment_params('_TWCC_API_KEY_', apikey)
-
         get_environment_params('TWCC_PROJ_CODE', proj_code)
         get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
 
