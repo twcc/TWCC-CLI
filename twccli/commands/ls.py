@@ -445,7 +445,7 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
             col_name.append('Protected')
 
         if is_table:
-            table_layout('GpuSite',
+            table_layout('CCS Info.',
                          my_GpuSite,
                          caption_row=col_name,
                          isPrint=True,
