@@ -149,7 +149,7 @@ def list_ssls(site_ids_or_names, column, is_table):
                          ans,
                          cols,
                          isPrint=True,
-                         isWrap=False)
+                         is_warp=False)
         else:
             jpp(ans)
 

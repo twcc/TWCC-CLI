@@ -941,12 +941,6 @@ class LoadBalancers(CpuService):
         return self._do_api()
 
 class Secrets(CpuService):
-    def __init__(self, debug=False):
-        CpuService.__init__(self)
-        self._func_ = "secrets"
-        self._csite_ = Session2._getClusterName("VCS")
-
-class Secrets(CpuService):
 
     def __init__(self, debug=False):
         CpuService.__init__(self)
