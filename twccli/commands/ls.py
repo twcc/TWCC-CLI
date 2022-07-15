@@ -1103,11 +1103,6 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
     list_load_balances(ids_or_names, column, is_all, is_table)
 
 
-<<<<<<< HEAD
-@click.option('-id', '--eip-id', 'ip_id', type=int,
-              help="Index of the eip.")
-@click.option('-fil', '--filter-type', type=click.Choice(['STATIC', 'DYNAMIC', 'ALL'], case_sensitive=False), default='STATIC', help="Filter the type.")
-=======
 @click.option('-id', '--eip-id', 'ip_id', type=int, help="Index of the eip.")
 @click.option('-fil',
               '--filter-type',
@@ -1115,7 +1110,6 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
                                 case_sensitive=False),
               default='STATIC',
               help="Filter the type.")
->>>>>>> upstream/master
 @click.option('-all',
               '--show-all',
               'is_all',
@@ -1127,17 +1121,12 @@ def vlb(ctx, vlb_id, ids_or_names, column, is_all, is_table):
               'column',
               default='',
               help='User define table column. ex: twccli ls eip -col type')
-<<<<<<< HEAD
-@click.option('-table / -json', '--table-view / --json-view', 'is_table',
-              is_flag=True, default=True, show_default=True,
-=======
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
               is_flag=True,
               default=True,
               show_default=True,
->>>>>>> upstream/master
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ips.")
@@ -1155,28 +1144,18 @@ def eip(ctx, ip_id, filter_type, ids_or_names, column, is_table, is_all):
     list_fixed_ips(ids_or_names, column, filter_type, is_table, is_all)
 
 
-<<<<<<< HEAD
-@click.option('-id', '--ssl-id', 'ssl_id', type=int,
-              help="Index of the ssl.")
-=======
 @click.option('-id', '--ssl-id', 'ssl_id', type=int, help="Index of the ssl.")
->>>>>>> upstream/master
 @click.option('-col',
               '--column',
               'column',
               default='',
               help='User define table column. ex: twccli ls ssl -col desc')
-<<<<<<< HEAD
-@click.option('-table / -json', '--table-view / --json-view', 'is_table',
-              is_flag=True, default=True, show_default=True,
-=======
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
               is_flag=True,
               default=True,
               show_default=True,
->>>>>>> upstream/master
               help="Show information in Table view or JSON view.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your ssls.")
