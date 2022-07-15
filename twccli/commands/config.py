@@ -15,6 +15,12 @@ export LC_ALL=C.UTF-8
 export PYTHONIOENCODING=UTF-8
 """
 
+lang_encoding_centos79 = """
+export LANG=zh_TW.utf-8
+export LC_ALL=zh_TW.utf-8
+export PYTHONIOENCODING=UTF-8
+"""
+
 
 @click.command(help='Get exsisting information.')
 # @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode.")
@@ -60,23 +66,14 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
         get_environment_params('TWCC_API_KEY', apikey)
         get_environment_params('_TWCC_API_KEY_', apikey)
-
         get_environment_params('TWCC_PROJ_CODE', proj_code)
         get_environment_params('_TWCC_PROJECT_CODE_', proj_code)
-        
         get_environment_params('_TWCC_CLI_GA_', ga_flag)
 
-        if not isNone(user_agent):
-            os.environ['User_Agent'] = user_agent
-            
-        if not ga_flag == None:
-                cid = str(uuid.uuid1()) if ga_flag else None
-        else:
-            ga_agree_flag = click.confirm(
-                'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
-            cid = str(uuid.uuid1()) if ga_agree_flag else None
+        os.environ['User_Agent'] = user_agent
+        cid = set_cid_flag(ga_flag)
 
-        if isNone(proj_code) or len(proj_code) == 0:
+        if check_empty_value(proj_code):
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
                 
@@ -96,10 +93,11 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
-
+            import platform
+            if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
+                lang_encoding = lang_encoding_centos79
             if rc:
                 click.echo("Add language setting to `.bashrc`.")
-
                 open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
             else:
                 click.echo(

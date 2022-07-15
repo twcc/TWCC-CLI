@@ -19,6 +19,19 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.24 Release Note
+
+![img](https://media.giphy.com/media/8ki6aWRvqs7fy/giphy.gif)
+
+**Feature**
+- Remove VCS/CCS you are connecting to by `twccli rm me --no-dry-run`.
+- TWCC-CLI supports more vcs spec feature, according to users' project. Check with `twccli ls vcs -itype ubuntu -ptype`. 
+
+**Bug Fix**
+- fix #42
+- fix some bugs
+- fix some error message discriptio
+
 ### v0.5.23.2 Release Note
 
 ![img](https://media.giphy.com/media/EpB8oRhHSQcnu/giphy.gif)
