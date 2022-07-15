@@ -9,8 +9,14 @@ import pytz
 import jmespath
 import datetime
 import unicodedata
+import socket
 import requests as rq
 from twccli.twccli import pass_environment
+from terminaltables import AsciiTable
+from colorclass import Color
+from termcolor import cprint
+from textwrap import wrap
+
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
 
@@ -29,13 +35,18 @@ def pp(**kwargs):
 
 def jpp(inobj):
     import json
-    print(json.dumps(inobj, ensure_ascii=False,
-                     sort_keys=True, indent=4, separators=(',', ': ')))
+    print(
+        json.dumps(inobj,
+                   ensure_ascii=False,
+                   sort_keys=True,
+                   indent=4,
+                   separators=(',', ': ')))
 
 
 @pass_environment
 def isDebug(env):
-    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" or env.verbose else False
+    return True if os.environ.get(
+        "TWCC_CLI_STAGE") == "dev" or env.verbose else False
 
 
 def strShorten(mstr, max_len=6):
@@ -48,6 +59,16 @@ def strShorten(mstr, max_len=6):
 def isNone(x):
     return True if type(x) == type(None) else False
 
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """
+    return True if isNone(x) or len(x) == 0 else False
 
 def mkdir_p(path):
     import errno
@@ -68,23 +89,14 @@ def resource_id_validater(mid):
     return mid.isdigit()
 
 
-def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_len=10, isPrint=False, captionInOrder=False):
-    from terminaltables import AsciiTable
-    from colorclass import Color
-    from termcolor import cprint
-    from textwrap import wrap
-    import time
-    import json
-
-    if type(json_obj) == type({}):
-        json_obj = [json_obj]
+def _table_layout_set_default_caption(json_obj, caption_row, keep_order=False):
+    heading_cap = set(['id', 'name'])
     if not len(caption_row) > 0 and type(json_obj) == type([]):
         if len(json_obj) > 0:
             row = json_obj[0]
             caption_row = list(row.keys())
-    heading_cap = set(['id', 'name'])
 
-    if captionInOrder == True:
+    if keep_order == True:
         pass
     else:
         intersect = set(caption_row).intersection(heading_cap)
@@ -95,61 +107,85 @@ def table_layout(title, json_obj, caption_row=[], debug=False, isWrap=True, max_
                 caption_row.remove(ele)
             new_caption.extend(sorted(caption_row))
             caption_row = new_caption
-    start_time = time.time()
 
+    return caption_row
+
+
+def _table_layout_data_cell_format(cell_ele, is_warp=True):
+    ele = cell_ele
+    if type(ele) == type([]) and len(ele) > 0:  # for list
+        tmp = ""
+        ptn = "[{0:02d}] {1}\n" if len(ele) > 9 else "[{0:01d}] {1}\n"
+        for idz in range(len(ele)):
+            out_buf = ele[idz]
+            try:
+                out_buf = json.loads(out_buf)
+                out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
+            except:
+                pass
+        return tmp
+    elif type(ele) == type({}):  # for dictionary
+        tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x]) for x in ele.keys()])
+        return tmp
+    elif type(ele) == type(""):  # for string
+        return '\n'.join(wrap(ele, 20)) if is_warp else ele
+
+
+def _table_layout_colorful_val(val):
+    val = '' if val == None else val
+    return Color("{autored}%s{/autored}" %
+                 val) if ("%s" % val).lower() == "error" else "%s"%val
+
+
+def _table_layout_arrange_table_info(json_obj, caption_row):
     table_info = []
-    table_info.append(
-        [Color("{autoyellow}%s{/autoyellow}" % x) for x in caption_row])
+    table_info.append([x for x in caption_row])
     for ele in json_obj:
         row_data = []
         for cap in caption_row:
             try:
                 val = jmespath.search(cap, ele)
             except jmespath.exceptions.ParseError:
-                if cap in ele:
-                    val = ele[cap]
-                else:
-                    val = ''
-            if val == None:
-                val = ''
-            if val == 'Error' or val == "ERROR":
-                row_data.append(Color("{autored}%s{/autored}" % val))
-            else:
-                row_data.append(val)
-        table_info.append(row_data)
-    table = AsciiTable(table_info, title=" {} ".format(title))
+                val = ele[cap] if cap in ele else ''
 
-    for idy in range(len(table.table_data)):
-        for idx in range(len(table.table_data[idy])):
-            ele = table.table_data[idy][idx]
-            if type(ele) == type([]) and len(ele) > 0:  # for list
-                tmp = ""
-                ptn = "[{0:01d}] {1}\n"
-                if len(ele) > 9:
-                    ptn = "[{0:02d}] {1}\n"
-                for idz in range(len(ele)):
-                    out_buf = ele[idz]
-                    try:
-                        out_buf = json.loads(out_buf)
-                        out_buf = json.dumps(
-                            out_buf, indent=2, separators=(',', ': '))
-                    except:
-                        pass
-                    tmp += ptn.format(idy+1, out_buf)
-                table.table_data[idy][idx] = tmp
-            elif type(ele) == type({}):  # for dictionary
-                tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x])
-                                        for x in ele.keys()])
-                table.table_data[idy][idx] = tmp
-            elif type(ele) == type(""):  # for string
-                if isWrap:
-                    table.table_data[idy][idx] = '\n'.join(wrap(ele, 20))
-                else:
-                    table.table_data[idy][idx] = ele
+            row_data.append(_table_layout_colorful_val(val))
+        table_info.append(row_data)
+    return table_info
+
+
+def _table_layout_data_cell_layout(list_of_list, is_warp=True):
+    for idy in range(len(list_of_list)):
+        for idx in range(len(list_of_list[idy])):
+            list_of_list[idy][idx] = _table_layout_data_cell_format(
+                list_of_list[idy][idx], is_warp)
+    return list_of_list
+
+
+def table_layout(title,
+                 json_obj,
+                 caption_row=[],
+                 debug=False,
+                 is_warp=True,
+                 max_len=10,
+                 isPrint=False,
+                 captionInOrder=False):
+    json_obj = [json_obj] if type(json_obj) == type({}) else json_obj
+    caption_row = _table_layout_set_default_caption(json_obj,
+                                                    caption_row,
+                                                    keep_order=captionInOrder)
+
+    start_time = time.time()
+
+    table = AsciiTable(_table_layout_arrange_table_info(json_obj, caption_row),
+                       title=" {} ".format(title))
+
+    table.table_data = _table_layout_data_cell_layout(table.table_data,
+                                                      is_warp=is_warp)
 
     if debug:
-        cprint("- %.3f seconds" %
-               (time.time() - start_time), 'red', attrs=['bold'])
+        cprint("- %.3f seconds" % (time.time() - start_time),
+               'red',
+               attrs=['bold'])
 
     if isPrint:
         print(table.table)
@@ -167,18 +203,26 @@ def send_ga(event_name, cid, params):
     host = 'https://www.google-analytics.com'
     uri = '/mp/collect?measurement_id={}&api_secret={}'.format(
         measurement_id, api_secret)
-    payload = {"client_id": cid, "non_personalized_ads": "false",
-               "events": [{"name": event_name[:39], "params":params}]}
+    payload = {
+        "client_id": cid,
+        "non_personalized_ads": "false",
+        "events": [{
+            "name": event_name[:39],
+            "params": params
+        }]
+    }
     headers = {'content-type': 'application/json'}
 
     if isDebug():
         from ..twccli import logger
-        logger_info = {'payload': payload,
-                       'headers': headers,
-                       'endpoint': host+uri}
+        logger_info = {
+            'payload': payload,
+            'headers': headers,
+            'endpoint': host + uri
+        }
         logger.info(logger_info)
 
-    res = rq.post(host+uri, data=json.dumps(payload), headers=headers)
+    res = rq.post(host + uri, data=json.dumps(payload), headers=headers)
 
 
 def dic_seperator(d):
@@ -203,12 +247,13 @@ def dic_seperator(d):
 
 def timezone2local(time_str):
     if '.' in time_str:
-        time_str = time_str[:-8]+'Z'
+        time_str = time_str[:-8] + 'Z'
     if 'T' in time_str and 'Z' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
     elif 'T' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
-    return pytz.utc.localize(ans, is_dst=None).astimezone(pytz.timezone('Asia/Taipei'))
+    return pytz.utc.localize(ans, is_dst=None).astimezone(
+        pytz.timezone('Asia/Taipei'))
 
 
 def create_table_list(obj, tt):
@@ -225,7 +270,8 @@ def create_table_list(obj, tt):
             if na in ["created_at", "expired_time"]:
                 ti = time.localtime(int(str(obj[i][na])[:11]))
                 tf.append("{}/{}/{}\n{}:{}:{}".format(ti.tm_year, ti.tm_mon,
-                                                      ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec))
+                                                      ti.tm_mday, ti.tm_hour,
+                                                      ti.tm_min, ti.tm_sec))
             else:
                 tf.append(obj[i][na])
         temp_list.append(tf)
@@ -251,10 +297,10 @@ class SpinCursor(threading.Thread):
         self.string = ''
         # Speed is given as number of spins a second
         # Use it to calculate spin wait time
-        self.waittime = 1.0/float(speed*4)
+        self.waittime = 1.0 / float(speed * 4)
         if os.name == 'posix':
-            self.spinchars = (unicodedata.lookup(
-                'FIGURE DASH'), u'\\ ', u'| ', u'/ ')
+            self.spinchars = (unicodedata.lookup('FIGURE DASH'), u'\\ ', u'| ',
+                              u'/ ')
         else:
             # The unicode dash character does not show
             # up properly in Windows console.
@@ -272,12 +318,13 @@ class SpinCursor(threading.Thread):
 
     def run(self):
 
-        while (not self.flag) and ((self.count < self.min) or (self.count < self.max)):
+        while (not self.flag) and ((self.count < self.min) or
+                                   (self.count < self.max)):
             self.spin()
             self.count += 1
 
         # Clean up display...
-        self.out.write(" "*(len(self.string) + 1))
+        self.out.write(" " * (len(self.string) + 1))
 
     def stop(self):
         self.flag = True
@@ -285,7 +332,7 @@ class SpinCursor(threading.Thread):
 
 def mk_names(name, ids_or_names):
     if not isNone(name):
-        ids_or_names += (name,)
+        ids_or_names += (name, )
     return tuple(set(ids_or_names))
 
 
@@ -299,9 +346,12 @@ def sizeof_fmt(num, suffix='B'):
 
 def validate(apikey):
     try:
-        return re.match('^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$', apikey)
+        return re.match(
+            '^([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})$',
+            apikey)
     except:
         return False
+
 
 def name_validator(name):
     """
@@ -335,17 +385,16 @@ def window_password_validater(password):
             click.echo("For Windows numeric latter is needed, [0-9].")
             result = False
         if result and not re.search("[@$!%*?&]", password):
-            click.echo(
-                "For Windows special character is needed, [@$!%*?&].")
+            click.echo("For Windows special character is needed, [@$!%*?&].")
             result = False
         return result
     else:
-        click.echo(
-            "Your password is too long or too short, length: %s" % (len(password)))
+        click.echo("Your password is too long or too short, length: %s" %
+                   (len(password)))
         return False
 
 
-def get_environment_params(param_key, def_val):
+def get_environment_params(param_key, def_val=None):
     if param_key in os.environ and len(os.environ[param_key]) > 0:
         def_val = os.environ[param_key]
     return def_val
@@ -362,5 +411,60 @@ def twcc_error_echo(msg):
     click.echo(click.style('[TWCC-CLI] Error-', fg='bright_red'), nl=False)
     click.echo(msg)
 
+
 def protection_desc(x):
     return "    Y" if x['termination_protection'] else " "
+
+
+def _debug(mesg, is_pause=True):
+    click.echo(click.style("\t[DEBUG]: %s" % (mesg), bg='red', fg='white'))
+
+    if is_pause:
+        click.pause()
+
+
+def get_flavor_string(gpu, cpu, mem):
+    if gpu > 0:
+        return "{} GPU, {} vCores, {:d} Gib Memory".format(
+            gpu, cpu, int(mem / 1024))
+    return "{} vCores, {:d} Gib Memory".format(cpu, int(mem / 1024))
+
+
+def is_vcs_env():
+    import socket
+    host_name = socket.gethostname()
+    if re.search('-iaas$', host_name):
+        return True
+    return False
+
+def set_rc_config(rc):
+    lang_encoding = """
+    export PYTHONIOENCODING=UTF-8
+    """
+
+    lang_encoding_centos79 = """
+    export LANG=zh_TW.utf-8
+    export LC_ALL=zh_TW.utf-8
+    export PYTHONIOENCODING=UTF-8
+    """
+
+    import platform
+    if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
+        lang_encoding = lang_encoding_centos79
+    if rc:
+        click.echo("Add language setting to `.bashrc`.")
+        open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
+    else:
+        click.echo(
+            "Please add encoding setting to your environment: \n {}".format(lang_encoding))
+    open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
+        [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
+
+
+def set_cid_flag(ga_flag=True):
+    if not ga_flag == None:
+        return str(uuid.uuid1()) if ga_flag else None
+    else:
+        ga_agree_flag = click.confirm(
+            'Do you agree we use the collection of the information by GA to improve user experience? ', default=True)
+        return str(uuid.uuid1()) if ga_agree_flag else None
