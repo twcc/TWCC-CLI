@@ -214,7 +214,7 @@ class ServiceOperation:
                     return res[0].content, t_url
             elif res_type == 'txt':
                 return res[0].content, t_url
-        else: 
+        else:
             raise ValueError(
                 "Response type Error:'{0}' is not valid, available options: {1}"
                 .format(res_type, ", ".join(self.res_type_valid)))
