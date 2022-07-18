@@ -128,6 +128,32 @@ def list_ssls(site_ids_or_names, column, is_table):
             jpp(ans)
 
 
+def list_ssls(site_ids_or_names, column, is_table):
+    ssl = Secrets()
+    ans = []
+
+    cols = ['id', 'name',  'create_time', 'status', ]
+    if not column == '':
+        cols = column.split(',')
+        cols.append('id')
+        cols.append('name')
+        cols = list(set(cols))
+    if len(site_ids_or_names) > 0:
+        for ssl_id in site_ids_or_names:
+            ans.append(ssl.list(ssl_id=ssl_id))
+    else:
+        ans = ssl.list()
+    if len(ans) > 0:
+        if is_table:
+            table_layout("SSL Results",
+                         ans,
+                         cols,
+                         isPrint=True,
+                         is_warp=False)
+        else:
+            jpp(ans)
+
+
 def list_load_balances(site_ids_or_names, column, is_all, is_table):
     vlb = LoadBalancers()
     ans = []
@@ -394,6 +420,9 @@ def list_all_img(solution_name, is_table=True):
     else:
         jpp(output)
 
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
 
 def get_flv_from_json(json_str):
     ans_flavor = jmespath.search('Pod[0].flavor', json_str)
@@ -419,6 +448,7 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
     col_name = ['id', 'name', 'create_time', 'status']
     a = GpuSite()
 
+
     if len(site_ids_or_names) == 0:
         my_GpuSite = a.list(is_all=is_all)
     else:
@@ -440,7 +470,6 @@ def list_ccs(site_ids_or_names, is_table, is_all=False):
             for idx in range(len(my_GpuSite)):
                 my_GpuSite[idx]['owner'] = my_GpuSite[idx]['user']['username']
                 my_GpuSite[idx]['Protected'] = protection_desc(my_GpuSite[idx])
-
             col_name.append('owner')
             col_name.append('Protected')
 

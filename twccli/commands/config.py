@@ -62,7 +62,6 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     :type rc_setting: bool
     """
     if not Session2._isValidSession():
-        
         # _TWCC_API_KEY_ priority higher then TWCC_API_KEY
         get_environment_params('TWCC_API_KEY', apikey)
         get_environment_params('_TWCC_API_KEY_', apikey)
@@ -76,7 +75,7 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         if check_empty_value(proj_code):
             proj_code = click.prompt(
                 'Please enter TWCC Project Code', type=str)
-                
+
         if isNone(apikey) or len(apikey) == 0:
             apikey = click.prompt('Please enter TWCC APIKEY', type=str)
 
@@ -87,7 +86,6 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
                 logger.info("Receiving TWCC API Key: {}".format(apikey))
                 logger.info("Receiving TWCC CLI GA: {}".format(ga_flag))
 
-            
             Session2(twcc_api_key=apikey, twcc_project_code=proj_code,
                      user_agent=user_agent, twcc_cid=cid)
 
