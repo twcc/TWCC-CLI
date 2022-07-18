@@ -186,25 +186,6 @@ def del_ip(ids_or_names, isForce=False):
         else:
             print("No delete operations.")
 
-def del_ssl(ids_or_names, isforce=False):
-    """Delete ssl by ip id
-
-    :param ids_or_names: name for deleting object.
-    :type ids_or_names: string
-    :param force: Force to delete any resources at your own cost.
-    :type force: bool
-    """
-    ssl = Secrets()
-    for ssl_id in ids_or_names:
-        ans = ssl.list(ssl_id)
-        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
-            ssl_id, ans['user']['display_name'], ans['create_time'])
-        if getConfirm("SSL", ssl_id, isforce, txt):
-            ssl.deleteById(ssl_id)
-            print("Successfully remove {}".format(ssl_id))
-        else:
-            print("No delete operations.")
-
 
 def del_ssl(ids_or_names, isforce=False):
     """Delete ssl by ip id
@@ -492,23 +473,6 @@ def eip(ctx, ip_id, ids_or_names, force):
     """
     ids_or_names = mk_names(ip_id, ids_or_names)
     del_ip(ids_or_names, force)
-
-@click.option('-id', '--ssl-id', 'ssl_id',
-              help="Index of the ssls.")
-@click.option('-f', '--force', 'force',
-              is_flag=True, show_default=True, default=False,
-              help='Force delete the container.')
-@click.argument('ids_or_names', nargs=-1)
-@click.command(help="Delete your SSLs.")
-@click.pass_context
-def ssl(ctx, ssl_id, ids_or_names, force):
-    """Command line for delete eip
-
-    :param ip_id: Enter id for your eip.
-    :type ip_id: string
-    """
-    ids_or_names = mk_names(ssl_id, ids_or_names)
-    del_ssl(ids_or_names, force)
 
 
 @click.option('-id', '--ssl-id', 'ssl_id',

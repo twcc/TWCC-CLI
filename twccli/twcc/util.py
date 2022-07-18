@@ -1,22 +1,21 @@
-import datetime
-import json
+import threading
+import sys
 import os
 import re
-import socket
-import sys
-import threading
-import time
-import unicodedata
-import uuid
-from textwrap import wrap
 import click
-import jmespath
+import json
+import time
 import pytz
+import jmespath
+import datetime
+import unicodedata
+import socket
 import requests as rq
+from twccli.twccli import pass_environment
+from terminaltables import AsciiTable
 from colorclass import Color
 from termcolor import cprint
-from terminaltables import AsciiTable
-from twccli.twccli import pass_environment
+from textwrap import wrap
 
 os.environ['LANG'] = 'C.UTF-8'
 os.environ['LC_ALL'] = 'C.UTF-8'
@@ -258,9 +257,9 @@ def timezone2local(time_str):
 
 
 def create_table_list(obj, tt):
-    import time
-
     from terminaltables import AsciiTable as AC
+
+    import time
     temp_list = []
 
     temp_list.append([cap for cap in tt])
@@ -449,29 +448,17 @@ def set_rc_config(rc):
     export PYTHONIOENCODING=UTF-8
     """
 
-
-    try:
-        import platform
-        core_version = platform.linux_distribution()
-    except:
-        import distro
-        core_version = distro.linux_distribution()
-        
-    if core_version[0] == 'CentOS Linux' and core_version[1][:3] == '7.9':
+    import platform
+    if platform.linux_distribution()[0] == 'CentOS Linux' and platform.linux_distribution()[1][:3] == '7.9':
         lang_encoding = lang_encoding_centos79
-
     if rc:
         click.echo("Add language setting to `.bashrc`.")
         open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
     else:
         click.echo(
             "Please add encoding setting to your environment: \n {}".format(lang_encoding))
-    try:
-        open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
-            [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
-    except Exception:
-        pass
-
+    open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
+        [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
 
 
 def set_cid_flag(ga_flag=True):

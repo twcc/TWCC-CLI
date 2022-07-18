@@ -9,7 +9,6 @@ from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc, _debug
 
 
-
 def getConfirm(res_name, entity_name, is_force, ext_txt=""):
     """Popup confirm dialog for double confirming to make sure if user really want to delete or not
 
@@ -206,10 +205,6 @@ def create_vcs(name, sol=None, img_name=None, network=None,
 
     return vcs.create(name, exists_sol[sol], required)
 
-def get_ch_json_by_vlbid(vlb_id, members=None):
-    vlb = LoadBalancers()
-    json_template = vlb.ch_vlb_temp_json
-    exist_vlb_json = vlb.list(vlb_id)
 
 def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
@@ -327,6 +322,7 @@ def ch_ip_desc(ids_or_names, desc, is_table):
         else:
             jpp(ans)
 
+
 def patch_ccs(ccs, ids_or_names, desc, keep):
     ans = []
     show_col = []
@@ -339,6 +335,7 @@ def patch_ccs(ccs, ids_or_names, desc, keep):
             ccs.patch_keep(site_id, keep)
             show_col.append('termination_protection')
     return ans, show_col
+
 
 def display_changed_sites(ans, ids_or_names, site, cols, is_print, is_table, titles):
     if len(ans) > 0:
@@ -372,6 +369,7 @@ def change_ccs(ids_or_names, is_table, desc, keep, is_print=True):
     display_changed_sites(ans, ids_or_names, ccs, cols,
                           is_print, is_table, ["GpuSites", "GpuSite Info."])
 
+
 def vcs_status_mapping(ans):
     for each_vcs in ans:
         if each_vcs['status'] == "NotReady":
@@ -380,6 +378,7 @@ def vcs_status_mapping(ans):
             each_vcs['status'] = "Stopping"
         if each_vcs['status'] == "Unshelving":
             each_vcs['status'] = "Starting"
+
 
 def action_by_status(status, ans, site_id, srvid, vcs):
     if status == 'stop':
@@ -390,6 +389,7 @@ def action_by_status(status, ans, site_id, srvid, vcs):
         VcsServerNet().reboot(srvid)
     else:
         pass
+
 
 def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
     ans = []
@@ -408,6 +408,7 @@ def do_ch_vcs(ids_or_names, vcs, status, desc, keep):
     else:
         raise ValueError
     return ans, show_col
+
 
 def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     vcs = VcsSite()
@@ -433,12 +434,6 @@ def check_proteced(site_info, vsite, ele):
         vsite.delete(ele)
         print("VCS resources {} deleted.".format(ele))
 
-def check_proteced(site_info,vsite,ele):
-    if site_info['termination_protection']:
-        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(ele), bg='red', fg='white', blink=True, bold=True))
-    else:
-        vsite.delete(ele)
-        print("VCS resources {} deleted.".format(ele))
 
 def del_vcs(ids_or_names, is_force=False):
     """delete a vcs
@@ -507,7 +502,7 @@ def format_ccs_env_dict(env_dict):
 
 def get_ccs_sol_id(sol_name):
     avbl_sols = Sites(debug=False).getSolList(reverse=True)
-
+    
     cntrs = dict([(cntr.lower(), avbl_sols[cntr]) for cntr in avbl_sols
                   if not avbl_sols[cntr] in GupSiteBlockSet and cntr.lower() == sol_name.lower()])
     if len(cntrs) > 0:
@@ -541,6 +536,7 @@ def get_pass_api_key_params(is_apikey, env_dict):
         env_dict['_TWCC_CLI_GA_'] = "1"
         env_dict['_TWCC_PROJECT_CODE_'] = sess.twcc_proj_code
         env_dict['_TWCC_CREDENTIAL_TRANSER_FROM_SITE_'] = socket.gethostname()
+
 
 def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, cmd, env_dict, is_apikey):
     """Create container
