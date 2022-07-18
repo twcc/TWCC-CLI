@@ -89,7 +89,7 @@ class GpuSite(GpuService):
             'Preemptive GPU', 'Custom Image', u'Preemptive GPU(Custom Image)'
         ])
         sols = GpuSolutions().list()
-        
+
         for ele in sols:
             if ele['name'] in ext_cntr_sol:
                 sol_list.append((ele['id'], ele['name']))
@@ -116,7 +116,6 @@ class GpuSite(GpuService):
 
         if not gpus in gpu_list.keys():
             raise ValueError("GPU number '{0}' is not valid.".format(gpus))
-
         gpu_default = {
             'command': "whoami; sleep 600;",
             'flavor': gpu_list[gpus],
@@ -832,7 +831,6 @@ class Fixedip(CpuService):
                 return ips['id']
         return None
 
-
 class LoadBalancers(CpuService):
 
     def __init__(self, debug=False):
@@ -941,7 +939,6 @@ class LoadBalancers(CpuService):
         self.http_verb = 'delete'
         self.url_dic = {"loadbalancers": vlb_id}
         return self._do_api()
-
 
 class Secrets(CpuService):
 
