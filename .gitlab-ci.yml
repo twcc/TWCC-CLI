@@ -116,7 +116,8 @@ manual deploy to GITHUB:
     - git fetch upstream
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-    - git merge -X upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+      #- git merge -X upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - git merge -X theirs upstream/master
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
     - git commit . -m "-- Release $TWCC_CLI_VER --"
@@ -128,7 +129,8 @@ manual deploy to GITHUB:
     - bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
     - export GITHUB_TOKEN=$GITHUB_APIKEY
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
-    - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
+    - /usr/bin/gh release create "v$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
+    - git push --set-upstream upstream $TWCC_CLI_VER
   only:
     - master
   when: manual
