@@ -453,10 +453,10 @@ def set_rc_config(rc):
     try:
         import platform
         core_version = platform.linux_distribution()
-    except:
+    except e:
         import distro
         core_version = distro.linux_distribution()
-        
+
     if core_version[0] == 'CentOS Linux' and core_version[1][:3] == '7.9':
         lang_encoding = lang_encoding_centos79
 
