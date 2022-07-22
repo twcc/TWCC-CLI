@@ -60,6 +60,7 @@ def strShorten(mstr, max_len=6):
 def isNone(x):
     return True if type(x) == type(None) else False
 
+
 def check_empty_value(x) -> bool:
     """make sure input value is empty
 
@@ -70,6 +71,7 @@ def check_empty_value(x) -> bool:
         True: if input parameter is empty or None, else is False
     """
     return True if isNone(x) or len(x) == 0 else False
+
 
 def mkdir_p(path):
     import errno
@@ -124,6 +126,7 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
                 out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
             except:
                 pass
+            tmp += ptn.format(idz+1, out_buf)
         return tmp
     elif type(ele) == type({}):  # for dictionary
         tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x]) for x in ele.keys()])
@@ -133,9 +136,12 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 
 
 def _table_layout_colorful_val(val):
+    if type(val)==type([]):
+        return val
+
     val = '' if val == None else val
     return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else "%s"%val
+                 val) if ("%s" % val).lower() == "error" else "%s" % val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -438,6 +444,7 @@ def is_vcs_env():
         return True
     return False
 
+
 def set_rc_config(rc):
     lang_encoding = """
     export PYTHONIOENCODING=UTF-8
@@ -448,7 +455,8 @@ def set_rc_config(rc):
     export LC_ALL=zh_TW.utf-8
     export PYTHONIOENCODING=UTF-8
     """
-
+    if not rc:
+        return False
 
     try:
         import platform
@@ -456,7 +464,7 @@ def set_rc_config(rc):
     except:
         import distro
         core_version = distro.linux_distribution()
-        
+
     if core_version[0] == 'CentOS Linux' and core_version[1][:3] == '7.9':
         lang_encoding = lang_encoding_centos79
 
@@ -472,7 +480,7 @@ def set_rc_config(rc):
     except Exception:
         pass
 
-
+    return True
 
 def set_cid_flag(ga_flag=True):
     if not ga_flag == None:

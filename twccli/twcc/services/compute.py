@@ -202,8 +202,9 @@ class GpuSite(GpuService):
         elif not self.url_dic == None and self.url_dic['container'] == "":
             pass
         else:
-            self.ext_get = {'project': self._project_id}
-        return self._do_api()
+            self.ext_get = {'project': self._project_id, "category": "container"}
+        ans = self._do_api()
+        return ans
 
     def create(self, name, sol_id, extra_prop):
 
@@ -715,7 +716,7 @@ class VcsImage(CpuService):
     def __init__(self):
         CpuService.__init__(self)
         self._func_ = "images"
-        self._csite_ = 'goc'
+        self._csite_ = Session2._getClusterName("VCS")
 
     def deleteById(self, sys_vol_id):
         self.http_verb = 'delete'
@@ -725,7 +726,7 @@ class VcsImage(CpuService):
 
     def list(self, srv_id=None, isAll=False):
         if not isNone(srv_id):
-            images = []
+            images = []  
             self.ext_get = {'project': self._project_id}
             all_images = self._do_api()
             for one_image in all_images:
