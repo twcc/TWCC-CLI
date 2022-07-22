@@ -471,7 +471,7 @@ def set_rc_config(rc):
     try:
         import platform
         core_version = platform.linux_distribution()
-    except:
+    except Exception:
         import distro
         core_version = distro.linux_distribution()
 
