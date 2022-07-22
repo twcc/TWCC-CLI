@@ -1,5 +1,6 @@
 sphinx_click
 myst-parser
+docutils==0.18
 loguru
 jmespath
 netaddr
@@ -25,3 +26,5 @@ tqdm
 urllib3
 wcwidth
 loguru
+distro
+feedparser

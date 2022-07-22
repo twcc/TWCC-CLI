@@ -114,13 +114,11 @@ manual deploy to GITHUB:
     - cd TWCC-CLI/
     - git remote add upstream $CI_REPOSITORY_URL
     - git fetch upstream
+    - export TWCC_CLI_VER="`python ./twccli/version.py`"
+    - git checkout -b $TWCC_CLI_VER
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-      #- git merge -X upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
-    - git merge -X theirs upstream/master
-    - export TWCC_CLI_VER="`python ../twccli/version.py`"
-    - git checkout -b $TWCC_CLI_VER
-    - git commit . -m "-- Release $TWCC_CLI_VER --"
+    - git merge -X theirs upstream/master -m "-- Release $TWCC_CLI_VER --" --no-ff --allow-unrelated-histories
     - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common

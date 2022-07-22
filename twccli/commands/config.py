@@ -26,16 +26,17 @@ def whoami(ctx):
 
 
 @click.command(help='Configure the TWCC CLI.')
+
+@click.option('-pcode', '--project-code', 'proj_code', required=True,
+              help=" TWCC project code (e.g., GOV108009)")
+@click.option('--apikey', 'apikey', required=True,
+              help="TWCC API Key for CLI.")
 @click.option('-ua', '--user-agent', 'user_agent', default='TWCC-CLI',
               help="Meta data to define cli doing for")
+@click.option('-rc / -norc', '--set-bashrc / --not-set-bashrc', 'rc', is_flag=True,  default=True,
+              help="Set bashrc parameters.")
 @click.option('-ga / -noga', '--agree-ga / --not-agree-ga', 'ga_flag',
               help="Agree using ga analytics", is_flag=True, default=None)
-@click.option('-pcode', '--project-code', 'proj_code',
-              help=" TWCC project code (e.g., GOV108009)")
-@click.option('--apikey', 'apikey',
-              help="TWCC API Key for CLI.")
-@click.option('-rc', '--set-bashrc', 'rc', is_flag=True,
-              help="Set bashrc parameters.")
 @pass_environment
 def init(env, apikey, proj_code, rc, user_agent, ga_flag):
     """Constructor method
@@ -80,7 +81,7 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
 
             click.echo(click.style("Hi! {}, welcome to TWCC!".format(
                 Session2._whoami()['display_name']), fg='yellow'))
-            
+
             set_rc_config(rc)
         else:
             raise ValueError("API Key is not validated.")
@@ -88,7 +89,7 @@ def init(env, apikey, proj_code, rc, user_agent, ga_flag):
         if env.verbose:
             logger.info("load credential from {}".format(
                 Session2()._getSessionFile()))
-        click.echo(Session2())
+    click.echo(Session2())
 
 
 @click.command(help='Show this version.')

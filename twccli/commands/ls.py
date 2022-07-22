@@ -8,9 +8,9 @@ import datetime
 import jmespath
 from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, protection_desc
-from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, VcsSolutions, Volumes, LoadBalancers, Fixedip, Secrets
+from twccli.twcc.services.compute import GpuSite, GpuSolutions, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, VcsSolutions, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
-from twccli.twcc.services.compute_util import list_vcs, list_vcs_img
+from twccli.twcc.services.compute_util import list_vcs, list_vcs_img, list_vcsi_img
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
@@ -393,7 +393,9 @@ def list_all_img(solution_name, is_table=True):
     :type solution_name: string
     """
     print("Note : this operation take 1-2 mins")
+    a = GpuSolutions()
     if isNone(solution_name) or len(solution_name) == 0:
+        
         cntrs = [(cntr['name'], cntr['id']) for cntr in a.list()
                  if not cntr['id'] in GupSiteBlockSet]
     else:
@@ -405,17 +407,18 @@ def list_all_img(solution_name, is_table=True):
 
     sol_list = GpuSite.getSolList(name_only=True)
     base_site = GpuSite(debug=False)
+
+    
     output = []
     for (sol_name, sol_id) in cntrs:
         output.append({
             "sol_name": sol_name,
-            "sol_id": sol_id,
             "images": base_site.getAvblImg(sol_id, sol_name)
         })
 
     if is_table:
         table_layout("img",
-                     output, ['sol_name', 'sol_id', 'images'],
+                     output, ['sol_name', 'images'],
                      isPrint=True)
     else:
         jpp(output)
@@ -1169,6 +1172,21 @@ def ssl(ctx, ssl_id, ids_or_names, column, is_table):
     ids_or_names = mk_names(ssl_id, ids_or_names)
     list_ssls(ids_or_names, column, is_table)
 
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="List your system (bootable) images.")
+@click.pass_context
+def vcsi(ctx, is_table):
+    """Command line for checking bootable images
+
+    """
+    list_vcsi_img(is_table)
+
 
 # end object ==================================================
 
@@ -1181,7 +1199,7 @@ cli.add_command(vnet)
 cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
-
+cli.add_command(vcsi)
 
 def main():
     cli()

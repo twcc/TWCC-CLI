@@ -71,6 +71,18 @@ def check_empty_value(x) -> bool:
     """
     return True if isNone(x) or len(x) == 0 else False
 
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """
+    return True if isNone(x) or len(x) == 0 else False
+
+
 def mkdir_p(path):
     import errno
     try:
@@ -124,6 +136,7 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
                 out_buf = json.dumps(out_buf, indent=2, separators=(',', ': '))
             except:
                 pass
+            tmp += ptn.format(idz+1, out_buf)
         return tmp
     elif type(ele) == type({}):  # for dictionary
         tmp = "%s" % "\n".join(["[%s] %s" % (x, ele[x]) for x in ele.keys()])
@@ -133,9 +146,12 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 
 
 def _table_layout_colorful_val(val):
+    if type(val)==type([]):
+        return val
+
     val = '' if val == None else val
     return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else "%s"%val
+                 val) if ("%s" % val).lower() == "error" else "%s" % val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -438,6 +454,7 @@ def is_vcs_env():
         return True
     return False
 
+
 def set_rc_config(rc):
     lang_encoding = """
     export PYTHONIOENCODING=UTF-8
@@ -448,12 +465,13 @@ def set_rc_config(rc):
     export LC_ALL=zh_TW.utf-8
     export PYTHONIOENCODING=UTF-8
     """
-
+    if not rc:
+        return False
 
     try:
         import platform
         core_version = platform.linux_distribution()
-    except e:
+    except Exception:
         import distro
         core_version = distro.linux_distribution()
 
@@ -472,7 +490,7 @@ def set_rc_config(rc):
     except Exception:
         pass
 
-
+    return True
 
 def set_cid_flag(ga_flag=True):
     if not ga_flag == None:
