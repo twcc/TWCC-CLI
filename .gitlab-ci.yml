@@ -114,12 +114,11 @@ manual deploy to GITHUB:
     - cd TWCC-CLI/
     - git remote add upstream $CI_REPOSITORY_URL
     - git fetch upstream
+    - export TWCC_CLI_VER="`python ./twccli/version.py`"
+    - git checkout -b $TWCC_CLI_VER
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-    - git merge -X theirs upstream/master --no-commit --no-ff --allow-unrelated-histories
-    - export TWCC_CLI_VER="`python ../twccli/version.py`"
-    - git checkout -b $TWCC_CLI_VER
-    - git commit . -m "-- Release $TWCC_CLI_VER --"
+    - git merge -X theirs upstream/master -m "-- Release $TWCC_CLI_VER --" --no-ff --allow-unrelated-histories
     - git push --set-upstream origin $TWCC_CLI_VER
     - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
     - apt update && apt install -y software-properties-common
@@ -128,7 +127,7 @@ manual deploy to GITHUB:
     - bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
     - export GITHUB_TOKEN=$GITHUB_APIKEY
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp
-    - /usr/bin/gh release create "$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
+    - /usr/bin/gh release create "v$TWCC_CLI_VER" --title "v$TWCC_CLI_VER" --notes-file /tmp/release_note_tmp
     - git push --set-upstream upstream $TWCC_CLI_VER
   only:
     - master
