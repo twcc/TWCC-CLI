@@ -61,25 +61,6 @@ def mk_temp_by_vlb_id(json_template, vlb_id):
             json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]], "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
     return json_template
 
-def mk_temp_by_vlb_id(json_template, vlb_id):
-    if not isNone(vlb_id):
-        vlb = LoadBalancers()
-        exist_vlb_json = vlb.list(vlb_id)
-        json_template["name"] = exist_vlb_json["name"]
-        json_template["private_net"] = exist_vlb_json["private_net"]["id"]
-        json_template["pools"] = []
-        pool_id2name = {}
-        for pool in exist_vlb_json["pools"]:
-            json_template["pools"].append(
-                {"name": pool["name"], "protocol": pool["protocol"], "members": pool["members"], "method": pool["method"]})
-            pool_id2name[pool["id"]] = pool["name"]
-        json_template["listeners"] = []
-        for listener in exist_vlb_json["listeners"]:
-            json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]],
-                                              "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
-    return json_template
-
-
 def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
     json_data = None
     if json_file:
@@ -109,8 +90,7 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
-    ans = vlb.create(vlb_name, pools, vnet_id, listeners,
-                     vlb_desc, json_data=json_data, eip_id=eip_id)
+    ans = vlb.create(vlb_name, pools, vnet_id, listeners, vlb_desc, json_data=json_data, eip_id=eip_id)
     if 'detail' in ans:
         is_table = False
     else:
@@ -205,9 +185,6 @@ def cli():
 
 default_vcs_name = 'twcc-vcs_'
 
-default_vcs_name = 'twcc-vcs_'
-
-
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default=[default_vcs_name], type=str, multiple=True,
@@ -280,7 +257,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 vm_name = [x for x in vms if int(x['id']) == int(sids[0])][0]['name']
 
                 img = VcsImage()
-                # time just ignore
+
                 desc_str = "twccli created from {}({})".format(vm_name, sids[0])
                 if len(name) == 1 and name[0] == default_vcs_name:
                     img_name = "VCSi-" + vm_name[:8]
