@@ -3,24 +3,32 @@ import click
 import os
 import sys
 import yaml
+import requests
+import feedparser
 from os import path
+from urllib.parse import urlparse
 
-plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
-os.environ['LANG'] = 'C.UTF-8'
-os.environ['LC_ALL'] = 'C.UTF-8'
 
 if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
     _TWCC_DATA_DIR_ = os.environ['TWCC_DATA_PATH']
 else:
     _TWCC_DATA_DIR_ = os.path.join(os.environ['HOME'], '.twcc_data')
+    
+def create_log_dir():
+    log_dir = os.path.join(_TWCC_DATA_DIR_, "log")
 
-log_dir = os.path.join(_TWCC_DATA_DIR_, "log")
-
-try:
     if not os.path.isdir(log_dir):
+        os.mkdir(_TWCC_DATA_DIR_)
         os.mkdir(log_dir)
-except:
-    log_dir = os.environ['HOME']
+        
+    return log_dir
+
+plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
+os.environ['LANG'] = 'C.UTF-8'
+os.environ['LC_ALL'] = 'C.UTF-8'
+
+log_dir = create_log_dir()
+
 
 if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
     from loguru import logger
@@ -184,6 +192,8 @@ class bcolors:
 
 
 def check_if_py2():
+    """ obsolete function
+    """
     if sys.version_info[0] < 3:
         from os import environ
         __show_deprecated__ = False
@@ -210,12 +220,18 @@ class CredentialHandler():
     def __init__(self):
         self.old_credential = path.join(_TWCC_DATA_DIR_, "credential")
 
+        self._current_version = self.get_current_version()
+        create_log_dir()
         from datetime import datetime
         self.backup_credential = path.join(
             _TWCC_DATA_DIR_, "credential.bakup_"+datetime.now().strftime("%m%d%H%M"))
 
         from .version import __version__
         self.cli_version = __version__
+
+    def get_current_version(self):
+        rss_file = "https://pypi.org/rss/project/twcc-cli/releases.xml"
+        return feedparser.parse(fetch_and_cache(rss_file))['entries'][0]['title']
 
     def isOldCredential(self):
         if path.exists(self.old_credential):
@@ -224,23 +240,47 @@ class CredentialHandler():
                     yaml_cnt = stream.read()
                     if len(yaml_cnt) == 0:
                         return False
-                        
+
                     cnf = yaml.safe_load(yaml_cnt)
-                    
+
                     self.old_api = cnf['_default']['twcc_api_key']
                     self.prj_code = cnf['_default']['twcc_proj_code']
                     self.old_version = cnf['_meta']['cli_version']
 
                     _env_ver_ = self.old_version.split('.')
                     _cli_ver_ = self.cli_version.split('.')
+                    _online_ver_ = self._current_version.split('.')
+                    
+                    env_ver_count = int(_env_ver_[0])*10000 + int(_env_ver_[1])*100 + int(_env_ver_[2])*1 
+                    cli_ver_count = int(_cli_ver_[0])*10000 + int(_cli_ver_[1])*100 + int(_cli_ver_[2])*1
+                    online_ver_count = int(_online_ver_[0])*10000 + int(_online_ver_[1])*100 + int(_online_ver_[2])*1
 
-                    if _env_ver_[0] == _cli_ver_[0] and _env_ver_[1] == _cli_ver_[1]:
-                        if int(_env_ver_[2]) < int(_cli_ver_[2]):
-                            return True
-                        else:
-                            return False
-                    else:
-                        raise ValueError("Major/Minor version mismatch!")
+                    if online_ver_count > env_ver_count:
+                        mystr = """
+ ___________________
+ | _______________ |
+ | |XXXXXXXXXXXXX| |
+ | |XXXXXXXXXXXXX| |
+ | |XXXXXXXXXXXXX| |
+ |_________________|
+ ___[___________]___
+|         [_____] []|  \__  
+L___________________J     \ \___\/   
+
+New TWCC-CLI version: {} found in https://pypi.org/project/TWCC-CLI/
+Please use `pip3 install -U TWCC-CLI` to upgrade your toolkit.
+
+ _______      _____    ___       
+|_   _\ \    / / __|  / __|___   
+  | |  \ \/\/ /\__ \ | (__/ _ \_ 
+  |_|   \_/\_/ |___/  \___\___(_)
+   We build and operate TWCC.ai
+                        """
+                        click.echo_via_pager(mystr.format(self._current_version))
+                        return False # if True, will make user renew credentials (no good)
+                    if cli_ver_count > env_ver_count:
+                        return True
+                    return False
                 except yaml.YAMLError as exc:
                     print(exc)
 
@@ -268,6 +308,24 @@ class CredentialHandler():
         import os
         os.remove(self.old_credential)
 
+def _fetch_file(url, save_to):
+    open(save_to, 'wb').write(requests.get(
+        url, allow_redirects=True).content)
+
+def fetch_and_cache(url) -> str:
+    filename = urlparse(url).path.split('/')[-1]
+    full_path = _TWCC_DATA_DIR_ + path.sep + filename
+
+    if not path.exists(full_path):
+        _fetch_file(url, full_path)
+    mtime = path.getmtime(full_path)
+        
+    from datetime import timedelta, datetime
+    ts = datetime.fromtimestamp(mtime)
+    ts_max = ts + timedelta(days=1)
+    if ts > ts_max:
+        _fetch_file(url, full_path)
+    return open(full_path, 'rb').read()
 
 if __name__ == '__main__':
     cli()

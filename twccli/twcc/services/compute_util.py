@@ -4,7 +4,7 @@ import time
 import json
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions, VcsImage
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc, _debug
 
@@ -117,6 +117,15 @@ def list_vcs_img(sol_name, is_table):
     else:
         jpp(ans)
 
+def list_vcsi_img(is_table):
+    """list user built bootable images
+    """
+    ans = VcsImage().list()
+    if is_table:
+        table_layout("Abvl. VCS images", ans, [
+                     'id', 'name', 'create_time', 'status'], isPrint=True, is_warp=False)
+    else:
+        jpp(ans)
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,

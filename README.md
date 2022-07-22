@@ -19,6 +19,16 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.5.24.2 Release Note
+
+![img](https://media.giphy.com/media/O7BtZQ0ceoVz4pDdC7/giphy.gif)
+
+**Feature**
+- CLI will remind users while config init when a new version is released.
+
+**Bug Fix**
+- fix bug
+
 ### v0.5.24.1 Release Note
 
 ![img](https://media.giphy.com/media/fs3BdcvtegqOB6WjGR/giphy.gif)
