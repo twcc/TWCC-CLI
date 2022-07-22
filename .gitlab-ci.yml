@@ -116,8 +116,7 @@ manual deploy to GITHUB:
     - git fetch upstream
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-      #- git merge -X upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
-    - git merge -X theirs upstream/master
+    - git merge -X theirs upstream/master --no-commit --no-ff --allow-unrelated-histories
     - export TWCC_CLI_VER="`python ../twccli/version.py`"
     - git checkout -b $TWCC_CLI_VER
     - git commit . -m "-- Release $TWCC_CLI_VER --"
