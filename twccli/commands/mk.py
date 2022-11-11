@@ -4,6 +4,7 @@ import re
 import sys
 import json
 import time
+from unicodedata import name
 import click
 from datetime import datetime
 from collections import defaultdict
@@ -77,6 +78,41 @@ def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, jso
     return json_data
 
 
+def mk_temp_by_vlb_id(json_template, vlb_id):
+    if not isNone(vlb_id):
+        vlb = LoadBalancers()
+        exist_vlb_json = vlb.list(vlb_id)
+        json_template["name"] = exist_vlb_json["name"]
+        json_template["private_net"] = exist_vlb_json["private_net"]["id"]
+        json_template["pools"] = []
+        pool_id2name = {}
+        for pool in exist_vlb_json["pools"]:
+            json_template["pools"].append(
+                {"name": pool["name"], "protocol": pool["protocol"], "members": pool["members"], "method": pool["method"]})
+            pool_id2name[pool["id"]] = pool["name"]
+        json_template["listeners"] = []
+        for listener in exist_vlb_json["listeners"]:
+            json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]],
+                                              "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
+    return json_template
+
+
+def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
+    json_data = None
+    if json_file:
+        with open(json_file, 'r') as fn:
+            json_data = json.load(fn)
+    elif not members == ():
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods) == len(members)):
+            raise ValueError(
+                'the number of listener_ports, listener_types, lb_methods should be the same')
+    else:
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods)):
+            raise ValueError(
+                'the number of listener_ports, listener_types should be the same')
+    return json_data
+
+
 def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table, wait, json_data=None, eip_id=None):
     """Create load balance by name
 
@@ -90,7 +126,8 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
     if [thisvlb for thisvlb in allvlb if thisvlb['name'] == vlb_name]:
         raise ValueError(
             "Name '{0}' is duplicate.".format(vlb_name))
-    ans = vlb.create(vlb_name, pools, vnet_id, listeners, vlb_desc, json_data=json_data, eip_id=eip_id)
+    ans = vlb.create(vlb_name, pools, vnet_id, listeners,
+                     vlb_desc, json_data=json_data, eip_id=eip_id)
     if 'detail' in ans:
         is_table = False
     else:
@@ -104,21 +141,40 @@ def create_load_balance(vlb_name, pools, vnet_id, listeners, vlb_desc, is_table,
         jpp(ans)
 
 
-def create_volume(vol_name, size, dtype, is_table):
-    """Create volume by name
+def create_volume(name, size, dtype, is_table, snapshot=None, vds_id=None, desc=None):
+    """_summary_
 
-    :param vol_name: Enter volume name
-    :type vol_name: string
+    Args:
+        name (str): _description_
+        size (int): _description_
+        dtype (str): _description_
+        is_table (bool): _description_
+        snapshot (bool, optional): _description_. Defaults to None.
+        vds_id (int, optional): _description_. Defaults to None.
+        desc (str, optional): _description_. Defaults to None.
+
+    Raises:
+        ValueError: _description_
+        ValueError: _description_
     """
-    if not name_validator(vol_name):
+    if not name_validator(name):
         raise ValueError(
-            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(vol_name))
+            "Name '{0}' is not valid. '^[a-z][a-z-_0-9]{{5,15}}$' only.".format(name))
     vol = Volumes()
-    ans = vol.create(vol_name, size, desc="CLI create Disk",
-                     volume_type=dtype.lower())
-    if is_table:
+    if snapshot:
+        if vds_id == None:
+            raise ValueError(
+                "Snapshot VDS Need Volume ID")
+        ans = vol.snapshot(name, vds_id, desc)
+        cols = ["id", "name", "desc", "status"]
+        title = "Volume Snapshot"
+    else:
+        ans = vol.create(name, size, desc="CLI create Disk",
+                         volume_type=dtype.lower())
         cols = ["id", "name", "size", "volume_type"]
-        table_layout("Volumes", ans, cols, isPrint=True)
+        title = "Volumes"
+    if is_table:
+        table_layout(title, ans, cols, isPrint=True)
     else:
         jpp(ans)
 
@@ -185,6 +241,9 @@ def cli():
 
 default_vcs_name = 'twcc-vcs_'
 
+default_vcs_name = 'twcc-vcs_'
+
+
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default=[default_vcs_name], type=str, multiple=True,
@@ -223,6 +282,9 @@ default_vcs_name = 'twcc-vcs_'
 @click.option('-sys-vol', '--system-volume-type', 'sys_vol', default="HDD", type=str,
               show_default=True,
               help="Disk type of the BOOTABLE disk.")
+@click.option('-sys-size', '--system-disk-size', 'sys_vol_size', type=int,
+              default=100, show_default=True,
+              help="Size of the system disk in (GB).")
 @click.option('-dd-type', '--data-disk-type', 'data_vol', default="HDD", type=str,
               show_default=True,
               help="Disk type of the DATA disk.")
@@ -238,9 +300,9 @@ default_vcs_name = 'twcc-vcs_'
 @click.argument('ids_or_names', nargs=-1)
 @pass_environment
 @click.pass_context
-def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
-        data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,
-        sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):
+def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, sys_vol_size,  # NOSONAR
+        data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,  # NOSONAR
+        sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):  # NOSONAR
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
         if len(name) == 1 and name[0] == default_vcs_name:
@@ -254,17 +316,22 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
                 img_name = ''
 
                 vms = list_vcs(sids, is_print=False, is_table=False)
-                vm_name = [x for x in vms if int(x['id']) == int(sids[0])][0]['name']
+                vm_name = [x for x in vms if int(
+                    x['id']) == int(sids[0])][0]['name']
 
                 img = VcsImage()
-
-                desc_str = "twccli created from {}({})".format(vm_name, sids[0])
+                # time just ignore
+                desc_str = "twccli created from {}({})".format(
+                    vm_name, sids[0])
                 if len(name) == 1 and name[0] == default_vcs_name:
                     img_name = "VCSi-" + vm_name[:8]
                 else:
                     img_name = name[index]
 
                 ans = img.createSnapshot(sid, img_name, desc_str)
+                if wait:
+                    doSiteStable(sid, site_type='vcs-img')
+                table_layout_title = "VCS Site"
                 if "detail" in ans:
                     is_table = False
                 else:
@@ -289,7 +356,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol,
 
         ans = create_vcs(name, sol=sol.lower(), img_name=img_name,
                          network=network, keypair=keypair,
-                         flavor=flavor, sys_vol=sys_vol,
+                         flavor=flavor, sys_vol=sys_vol, sys_vol_size=sys_vol_size,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
                          fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey, eip=eip,)
         ans["solution"] = sol
@@ -463,13 +530,20 @@ def vnet(env, name, getway, cidr, is_table, wait):
               help="Name of the disk.")
 @click.option('-t', '--disk-type', default="HDD", type=str, show_default=True,
               help="Disk type: SSD or HDD")
+@click.option('-d', '--vds-description', 'desc', type=str, default='generated by cli',
+              help="Description of the Volume snapshot.")
+@click.option('-id', '--vds-id', 'vds_id', type=int,  default=None,
+              help="Index of the volume.")
 @click.option('-sz', '--disk-size', default=100, type=int, show_default=True,
               help="Size of the disk.")
+@click.option('-sn', '--snapshot', 'snapshot', is_flag=True,
+              default=False,
+              help="Create a snapshot for olume. `-id` is required!")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.command(help="Create your VDS (Virtual Disk Service).")
-def vds(name, disk_type, disk_size, is_table):
+def vds(vds_id, desc, name, disk_type, disk_size, snapshot, is_table):
     """Command line for create vds
 
     :param name: Enter name for your resources.
@@ -481,7 +555,10 @@ def vds(name, disk_type, disk_size, is_table):
     """
     if name == "twccli":
         name = "twccli%s%s" % (disk_size, disk_type.lower())
-    create_volume(name, disk_size, disk_type, is_table)
+        if snapshot:
+            name = 'sn' + name
+    create_volume(name, disk_size, disk_type, is_table,
+                  snapshot=snapshot, vds_id=vds_id, desc=desc)
 
 
 @click.option('-d', '--load_balance_description', 'vlb_desc', default="", show_default=True, type=str,
@@ -636,32 +713,6 @@ def eip(desc, is_table):
 def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, inkey, intermediate_ca, is_table):
     """Command line for create SSL
 
-    :param name: Enter name for your resources.
-    :type name: string
-    """
-
-    if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
-        import subprocess, os
-        command = 'openssl pkcs12 -export -nodes -out server.p12 -inkey {} -in {} -certfile {} -passout pass: ; openssl base64 -in server.p12 -out server.txt'.format(inkey, sercer_certfile, intermediate_CA)
-        subprocess.check_output(command, shell=True,stderr=subprocess.STDOUT).decode('utf8').strip()
-        payload_file = os.path.join(os.getcwd(),'server.txt')
-    ssl = Secrets()
-    if not isNone(payload_file):
-        with open(payload_file,'r') as f:
-            payload = f.read()
-    ans = ssl.create(name, desc, payload, expire_time)
-    ans = ssl.list(ans['id'])
-    if is_table:
-        cols = ["id", "name", "status", "create_time"]
-        table_layout("IPs", ans, cols, isPrint=True)
-    else:
-        jpp(ans)
-
-
-
-
-# end object ===============================================================
-
 @click.command(help="Create your SSL certificates.")
 @click.option('-d', '--SSL-description', 'desc', type=str, default='generated by cli',
               help="Description of the SSL certificate.")
@@ -690,7 +741,7 @@ def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, in
     :type name: string
     """
 
-    if not(isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
+    if not (isNone(inkey) or isNone(sercer_certfile) or isNone(intermediate_ca)):
         import subprocess
         import os
         command = 'openssl pkcs12 -export -nodes -out server.p12 -inkey {} -in {} -certfile {} -passout pass: ; openssl base64 -in server.p12 -out server.txt'.format(
