@@ -6,7 +6,7 @@ import click
 import json
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_ccs, change_volume, change_loadbalancer, ch_ip_desc, get_ch_json_by_vlbid
+from twccli.twcc.services.compute_util import change_vcs, change_vcsi, change_ccs, change_volume, change_loadbalancer, ch_ip_desc, get_ch_json_by_vlbid
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 
@@ -102,6 +102,25 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, keep, is_table, wai
     site_ids_or_names = mk_names(name, site_ids_or_names)
     change_vcs(site_ids_or_names, str(
         vcs_status).lower(), is_table, desc, keep, wait)
+
+@click.command(
+    help="'Change' details of your system (bootable) images.")
+@click.option('-d', '--vcsi-desc', 'desc', type=str, default=None, help="Description of the instance.")
+@click.option('-id', '--vcsi-id', 'vcsi_id', type=int, help="ID of the instance.")
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
+@click.pass_context
+def vcsi(ctx, env, desc, site_ids_or_names, vcsi_id, is_table):
+    
+    site_ids_or_names = mk_names(vcsi_id, site_ids_or_names)
+    change_vcsi(site_ids_or_names, is_table, desc)
 
 @click.command(
     help="'Change' details of your CCS (Container Computer Service) containers.")
@@ -288,6 +307,7 @@ cli.add_command(vds)
 cli.add_command(vlb)
 cli.add_command(cos)
 cli.add_command(eip)
+cli.add_command(vcsi)
 
 def main():
     cli()

@@ -118,12 +118,17 @@ manual deploy to GITHUB:
     - git checkout -b $TWCC_CLI_VER
     - git config --global user.email "August.Chao@twsc.io"
     - git config --global user.name $GITHUB_USRERNAME
-    - git merge -X theirs upstream/master -m "-- Release $TWCC_CLI_VER --" --no-ff --allow-unrelated-histories
+    - git merge -X theirs upstream/$CI_COMMIT_REF_NAME --no-commit --no-ff --allow-unrelated-histories
+    - export TWCC_CLI_VER="`python ./twccli/version.py`"
+    - git checkout -b $TWCC_CLI_VER
+    - git commit . -m "-- Release $TWCC_CLI_VER --"
     - git push --set-upstream origin $TWCC_CLI_VER
-    - apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-    - apt update && apt install -y software-properties-common
-    - apt-add-repository https://cli.github.com/packages
-    - apt update && apt install -y gh
+    - type -p curl >/dev/null || sudo apt install curl -y
+    - curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /tmp/githubcli-archive-keyring.gpg
+    - chmod go+r /tmp/githubcli-archive-keyring.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/tmp/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
+    - apt update
+    - apt install software-properties-common gh -y
     - bash scripts/get_latest_release_note.sh > /tmp/release_note_tmp
     - export GITHUB_TOKEN=$GITHUB_APIKEY
     - /usr/bin/gh pr create --title "v$TWCC_CLI_VER" --body-file /tmp/release_note_tmp

@@ -193,7 +193,6 @@ class ServiceOperation:
         #     t_url += "&".join(t_url_tmp)
 
         res = self._api_act(t_url, t_header, t_params=url_ext_get, t_data=data_dict, mtype=http)
-
         import sys
         if 'click' in sys.modules.keys() and res[0].status_code >= 400:
             if 'detail' in res[0].json():
@@ -329,7 +328,7 @@ class ServiceOperation:
 
         # need to migrate /v3/
         if 'PLATFORM' in url_parts and url_parts[
-                'PLATFORM'] in ["openstack-taichung-default-2", "k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
+                'PLATFORM'] in ["openstack-taichung-default-2","openstack-taichung-default", "k8s-D-twcc", "k8s-taichung-default"] and 'sites' in url_parts['FUNCTION']:
             if is_v3:
                 t_url = t_url.replace("/v2/", "/v3/")
         return self.host_url + t_url

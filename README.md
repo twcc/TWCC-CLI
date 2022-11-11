@@ -4,9 +4,7 @@
 
 The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=twcc_TWCC-CLI)
-
-[![CircleCI](https://circleci.com/gh/twcc/TWCC-CLI.svg?style=shield)](https://circleci.com/gh/twcc/TWCC-CLI) [![Join the chat at https://gitter.im/TWCC-CLI/community](https://badges.gitter.im/TWCC-CLI/community.svg)](https://gitter.im/TWCC-CLI/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Documentation Status](https://readthedocs.org/projects/twcc-cli/badge/?version=latest)](https://twcc-cli.readthedocs.io/en/latest/?badge=latest) [User Manual](https://man.twcc.ai/@twccdocs/twcc-cli-v05)
+[![Documentation Status](https://readthedocs.org/projects/twcc-cli/badge/?version=latest)](https://twcc-cli.readthedocs.io/en/latest/?badge=latest)
 
 The TWCC Command Line Interface (CLI) is an environment to create and manage your TWCC resources. 
 
@@ -18,6 +16,19 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 
 ## :point_down: Release Notes :point_down:
+
+### v0.6.0 Release Note
+
+![img](https://media.giphy.com/media/E0oh8fTKeT0T6/giphy.gif)
+
+
+**Feature**
+- New CCS features for you!
+- We sync VCS and CCS solutions and images with User Portal.
+- VDS now can snapshot.
+
+**Bug Fix**
+- fix bug
 
 ### v0.5.24.2 Release Note
 
