@@ -27,7 +27,7 @@ def whoami(ctx):
 
 @click.command(help='Configure the TWCC CLI.')
 
-@click.option('-pcode', '--project-code', 'proj_code', required=True,
+@click.option('-pcode', '--project-code', 'proj_code',
               help=" TWCC project code (e.g., GOV108009)")
 @click.option('--apikey', 'apikey', required=True,
               help="TWCC API Key for CLI.")

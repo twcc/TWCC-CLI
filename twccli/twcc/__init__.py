@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 from twccli.twcc.util import isNone
 from twccli.twcc.session import Session2
 from requests.packages import urllib3
@@ -16,8 +17,8 @@ if sys.version_info[0] == 2:
 if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
     pass
 else:
-    os.environ['TWCC_DATA_PATH'] = os.path.join(os.environ['HOME'], '.twcc_data')
-
+    homepath = os.environ['HOME'] if 'HOME' in os.environ else os.environ['HOMEPATH']
+    os.environ['TWCC_DATA_PATH'] = os.path.join(homepath, '.twcc_data')
 
 GupSiteBlockSet = set([182, 29, 35, 120])
 

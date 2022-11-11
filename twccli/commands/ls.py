@@ -223,27 +223,26 @@ def list_load_balances(site_ids_or_names, column, is_all, is_table):
             jpp(ans)
 
 
-def list_volume(site_ids_or_names, is_all, is_table):
+def list_volume(site_ids_or_names, snapshot, is_all, is_table):  # NOSONAR
     vol = Volumes()
     ans = []
-    cols = [
-        'id', 'name', 'size', 'create_time', 'volume_type', 'status',
-        'mountpoint'
-    ]
     if len(site_ids_or_names) > 0:
         for vol_id in site_ids_or_names:
-            ans.append(vol.list(vol_id))
-        for the_vol in ans:
-            if 'detail' in the_vol:
-                is_table = False
-                continue
-            if len(the_vol['name']) > 15 and is_table:
-                the_vol['name'] = '-'.join(
-                    the_vol['name'].split('-')[:2]) + '...'
-            if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
-                the_vol['mountpoint'] = the_vol['mountpoint'][0]
+            ans.append(vol.list(vol_id, snapshot=snapshot))
+        if snapshot:
+            pass
+        else:
+            for the_vol in ans:
+                if 'detail' in the_vol:
+                    is_table = False
+                    continue
+                if len(the_vol['name']) > 15 and is_table:
+                    the_vol['name'] = '-'.join(
+                        the_vol['name'].split('-')[:2]) + '...'
+                if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
+                    the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
-        ans = vol.list(isAll=is_all)
+        ans = vol.list(isAll=is_all, snapshot=snapshot)
         for the_vol in ans:
             if 'detail' in the_vol:
                 is_table = False
@@ -254,8 +253,18 @@ def list_volume(site_ids_or_names, is_all, is_table):
             if 'mountpoint' in the_vol and len(the_vol['mountpoint']) == 1:
                 the_vol['mountpoint'] = the_vol['mountpoint'][0]
     if len(ans) > 0:
+        if snapshot:
+            title = "VDS Snapshot Result"
+            cols = [
+                'id', 'name', 'desc', 'create_time', 'status']
+        else:
+            title = "VDS Result"
+            cols = [
+                'id', 'name', 'size', 'create_time', 'volume_type', 'status',
+                'mountpoint'
+            ]
         if is_table:
-            table_layout("VDS Result", ans, cols, isPrint=True, is_warp=False)
+            table_layout(title, ans, cols, isPrint=True, is_warp=False)
         else:
             jpp(ans)
 
@@ -395,7 +404,7 @@ def list_all_img(solution_name, is_table=True):
     print("Note : this operation take 1-2 mins")
     a = GpuSolutions()
     if isNone(solution_name) or len(solution_name) == 0:
-        
+
         cntrs = [(cntr['name'], cntr['id']) for cntr in a.list()
                  if not cntr['id'] in GupSiteBlockSet]
     else:
@@ -408,7 +417,6 @@ def list_all_img(solution_name, is_table=True):
     sol_list = GpuSite.getSolList(name_only=True)
     base_site = GpuSite(debug=False)
 
-    
     output = []
     for (sol_name, sol_id) in cntrs:
         output.append({
@@ -426,6 +434,16 @@ def list_all_img(solution_name, is_table=True):
 def get_flv_from_json(json_str):
     ans_flavor = jmespath.search('Pod[0].flavor', json_str)
     return "" if ans_flavor == None else ans_flavor
+
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
+
+
+def get_flv_from_json(json_str):
+    ans_flavor = jmespath.search('Pod[0].flavor', json_str)
+    return "" if ans_flavor == None else ans_flavor
+
 
 def get_flv_from_json(json_str):
     ans_flavor = jmespath.search('Pod[0].flavor', json_str)
@@ -581,9 +599,9 @@ def list_secg(ids_or_names, is_table=True):
                          caption_row=[
                              'id', 'port_range_min', 'port_range_max',
                              'remote_ip_prefix', 'direction', 'protocol'
-                         ],
-                         isPrint=True,
-                         captionInOrder=True)
+            ],
+                isPrint=True,
+                captionInOrder=True)
         else:
             jpp(secg_detail)
         return True
@@ -658,8 +676,7 @@ def cli():
     '--column',
     'column',
     default='',
-    help=
-    'User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name'
+    help='User define table column. ex: twccli ls vcs -col desc / twccli ls vcs -col user.display_name'
 )
 @click.option('-img',
               '--image',
@@ -1009,17 +1026,20 @@ def key(env, name, is_table, ids_or_names):
               default=True,
               show_default=True,
               help="Show information in Table view or JSON view.")
+@click.option('-sn', '--snapshot', 'snapshot', is_flag=True,
+              default=False,
+              help="List volume snapshots.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="List your VDS (Virtual Disk Service).")
 @click.pass_context
-def vds(ctx, name, ids_or_names, is_all, is_table):
+def vds(ctx, name, ids_or_names, snapshot, is_all, is_table):
     """Command line for list vds
 
     :param name: Enter name for your resources.
     :type name: string
     """
     ids_or_names = mk_names(name, ids_or_names)
-    list_volume(ids_or_names, is_all, is_table)
+    list_volume(ids_or_names, snapshot, is_all, is_table)
 
 
 @click.option('-id',
@@ -1172,6 +1192,12 @@ def ssl(ctx, ssl_id, ids_or_names, column, is_table):
     ids_or_names = mk_names(ssl_id, ids_or_names)
     list_ssls(ids_or_names, column, is_table)
 
+    :param name: Enter name for your resources.
+    :type name: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    list_ssls(ids_or_names, column, is_table)
+
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -1190,6 +1216,33 @@ def vcsi(ctx, is_table):
 
 # end object ==================================================
 
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.option('-id', '--vcsi-id', 'vcsi_id', type=int, help="Index of the vcsi.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the images in the project.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your system (bootable) images.")
+@click.pass_context
+def vcsi(ctx, vcsi_id, ids_or_names, is_table, is_all):
+    """Command line for checking bootable images
+
+    """
+    ids_or_names = mk_names(vcsi_id, ids_or_names)
+    list_vcsi_img(ids_or_names, is_table, is_all)
+
+
+# end object ==================================================
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -1200,6 +1253,7 @@ cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
 cli.add_command(vcsi)
+
 
 def main():
     cli()

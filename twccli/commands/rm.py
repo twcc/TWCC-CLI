@@ -122,7 +122,7 @@ def del_snap(ids_or_names, isForce=False, isAll=False):
             return None
         for snap_id in ids_or_names:
             the_snap = [x for x in all_snaps if x['id'] ==
-                        int(snap_id) and x['status'] == 'ACTIVE']
+                        int(snap_id)]
             if len(the_snap) > 0:
                 the_snap = the_snap[0]
                 txt = "You about to delete snapshot \n- id: {}\n- created by: {}\n- created time: {}".format(
@@ -226,6 +226,46 @@ def del_ssl(ids_or_names, isforce=False):
             print("No delete operations.")
 
 
+def del_ssl(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    ssl = Secrets()
+    for ssl_id in ids_or_names:
+        ans = ssl.list(ssl_id)
+        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ssl_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("SSL", ssl_id, isforce, txt):
+            ssl.deleteById(ssl_id)
+            print("Successfully remove {}".format(ssl_id))
+        else:
+            print("No delete operations.")
+
+
+def del_ssl(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    ssl = Secrets()
+    for ssl_id in ids_or_names:
+        ans = ssl.list(ssl_id)
+        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ssl_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("SSL", ssl_id, isforce, txt):
+            ssl.deleteById(ssl_id)
+            print("Successfully remove {}".format(ssl_id))
+        else:
+            print("No delete operations.")
+
+
 def del_load_balancer(ids_or_names, isForce=False):
     """Delete vlb by vlb id
 
@@ -247,7 +287,7 @@ def del_load_balancer(ids_or_names, isForce=False):
             print("No delete operations.")
 
 
-def del_volume(ids_or_names, isForce=False):
+def del_volume(ids_or_names, isForce=False, snapshot=None):
     """Delete volume by volume id
 
     :param ids_or_names: name for deleting object.
@@ -259,10 +299,14 @@ def del_volume(ids_or_names, isForce=False):
     :param isAll: Operates as tenant admin
     :type isAll: bool
     """
-    if getConfirm(u"Delete Volumes", ", ".join(ids_or_names), isForce):
+    if snapshot:
+        title = "Delete Volume Snapshot"
+    else:
+        title = "Delete Volumes"
+    if getConfirm(title, ", ".join(ids_or_names), isForce):
         vol = Volumes()
         for vol_id in ids_or_names:
-            ans = vol.deleteById(vol_id)
+            ans = vol.deleteById(vol_id, snapshot)
             print("Successfully remove {}".format(vol_id))
     else:
         print("No delete operations.")
@@ -365,6 +409,30 @@ def vcs(env, res_property, name, force, is_all, site_id, ids_or_names):
             print("resource id is required.")
 
 
+@click.command(help="Remove your system (bootable) image(s)")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force to delete the objects.')
+@click.option('-id', '--vcsi-id', 'vcsi_id',
+              help='ID of the IMAGE.')
+@click.option('-all', '--show-all', 'is_all', is_flag=True, type=bool,
+              help="Operates as tenant admin.")
+@click.argument('ids_or_names', nargs=-1)
+@pass_environment
+@click.pass_context
+def vcsi(ctx, env, vcsi_id,  ids_or_names, is_all, force):
+    """Removing key operation
+
+    :param name: Enter name for your resource name
+    :type name: string
+    :param ids_or_names: Enter ids or names
+    :type ids_or_names: string
+    :param force: Force to delete any resource at your own cost.
+    :type force: bool
+    """
+    del_snap(mk_names(vcsi_id, ids_or_names), force, is_all)
+
+
 @click.command(help="'Delete' Operations for COS (Cloud Object Storage) resources.")
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default=False,
@@ -445,17 +513,20 @@ def vnet(env, ids_or_names, vnetid, force):
 @click.option('-f', '--force', 'force',
               is_flag=True, show_default=True, default=False,
               help='Force delete the container.')
+@click.option('-sn', '--snapshot', 'snapshot', is_flag=True,
+              default=False,
+              help="Delete volume snapshots.")
 @click.argument('ids_or_names', nargs=-1)
 @click.command(help="Delete your VDS (Virtual Disk Service).")
 @click.pass_context
-def vds(ctx, name, ids_or_names, force):
+def vds(ctx, name, ids_or_names, snapshot, force):
     """Command line for delete vds
 
     :param name: Enter name for your resources.
     :type name: string
     """
     ids_or_names = mk_names(name, ids_or_names)
-    del_volume(ids_or_names, force)
+    del_volume(ids_or_names, force , snapshot = snapshot)
 
 
 @click.option('-id', '--vlb-id', 'vlb_id',
@@ -559,6 +630,72 @@ def me(ctx, is_dry, is_force):
                 ctx.invoke(ccs, force=True, site_id=_site_id_)
 
 
+@click.option('-id', '--ssl-id', 'ssl_id',
+              help="Index of the ssls.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your SSLs.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, force):
+    """Command line for delete eip
+
+    :param ip_id: Enter id for your eip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    del_ssl(ids_or_names, force)
+
+
+@click.option('-id', '--ssl-id', 'ssl_id',
+              help="Index of the ssls.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your SSLs.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, force):
+    """Command line for delete eip
+
+    :param ip_id: Enter id for your eip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    del_ssl(ids_or_names, force)
+
+
+@click.option('-f', '--force', 'is_force',
+              is_flag=True, show_default=True, default=False,
+              help='Forcely delete the resource.')
+@click.option('-dry/-no-dry', '--dry-run/--no-dry-run', 'is_dry',
+              is_flag=True, show_default=True, default=True,
+              help='Check out command.')
+@click.command(help="Delete ME now! Equals to `rm [ccs|vcs] -s $_TWCC_SITE_ID_`")
+@click.pass_context
+def me(ctx, is_dry, is_force):
+    _site_id_ = get_environment_params("_TWCC_SITE_ID_")
+
+    if isNone(_site_id_):
+        click.echo(click.style(
+            '[TWCC-CLI] Error! No `$_TWCC_SITE_ID_` found in environment variables.', bg='red', fg='white'))
+        return True
+    in_cnv = 'vcs' if is_vcs_env() else 'ccs'
+
+    if is_dry:
+        click.echo(click.style(
+            "[TWCC-CLI] Dry run: `twccli rm {} -s {}{}`.".format(in_cnv, _site_id_, " -f" if is_force else ""), fg='bright_magenta'))
+        click.echo(click.style(
+            ">>> use `--no-dry-run` flag for actully executing command.", fg='bright_magenta'))
+    else:
+        if getConfirm(in_cnv.upper(), _site_id_, is_force):
+            if is_vcs_env():
+                ctx.invoke(vcs, force=True, site_id=_site_id_)
+            else:
+                ctx.invoke(ccs, force=True, site_id=_site_id_)
+
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -569,6 +706,7 @@ cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
 cli.add_command(me)
+cli.add_command(vcsi)
 
 
 def main():

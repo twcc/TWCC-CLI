@@ -20,8 +20,7 @@ def get_private_ip_with_port():
 class TestVcsLifecyc:
     def _loadParams(self):
         self.key_name = "twccli_{}".format(str(uuid.uuid1()).split("-")[0])
-        (self.flv, self.sol, self.img, self.sys_vol) = (
-            "v.super", "centos", "CentOS 7.9", "HDD")  # self.sol=ubuntu
+        (self.flv, self.sol, self.sys_vol, self.network) = ("v.super", "centos", "HDD", 'woodpecker_net')  # self.sol=ubuntu
         self.ext_port = "81"
         self.ext_port_range = "3000-3010"
         self.apikey = os.environ['_TWCC_API_KEY_']
@@ -48,6 +47,13 @@ class TestVcsLifecyc:
         cmd_list = "mk key --name {}".format(self.key_name)
         print(cmd_list)
         self.create_out = self.__run(cmd_list.split(u" "))
+
+    def _get_latest_vcsi(self):
+        cmd_list = "ls vcs -itype centos -img -json"
+        print(cmd_list)
+        output = self.__run(cmd_list.split(u" "))
+        self.img = json.loads(output)[0]['VCSi Name']
+
 
     def _list_key(self):
         cmd_list = "ls key -n {} -json".format(self.key_name)
@@ -91,9 +97,10 @@ class TestVcsLifecyc:
     def _create_vcs(self):
         paras = ["mk", "vcs",
                  "--name",           self.key_name,
-                 "--image-type-name", self.sol,
+                 "--image-type-name",self.sol,
                  "--product-type",   self.flv,
                  "-img",             self.img,
+                 "-net",             self.network,
                  "--keypair",        self.key_name,
                  "--system-volume-type", self.sys_vol,
                  "-wait", "-json"
@@ -137,7 +144,7 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg_range_and_port(self):
-        cmd_list = "net vcs -prange {} -p {} -s {}".format(self.ext_port_range,
+        cmd_list = "net vcs -cidr 192.168.0.0/24 -prange {} -p {} -s {}".format(self.ext_port_range,
                                                            self.ext_port, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
@@ -191,6 +198,7 @@ class TestVcsLifecyc:
     def test_lifecycle(self):
         self._loadParams()
         self._loadSession()
+        self._get_latest_vcsi()
         self._create_key()
         self._list_key()
         self._create_vcs()
