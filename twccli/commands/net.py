@@ -49,6 +49,52 @@ def ccs(env, site_id, port, isAttach):
     else:
         b.unbindPort(site_id, port)
 
+
+def net_vcs_protocol_check(protocol):
+    avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp',
+                  'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
+    if not protocol in avbl_proto:
+        pronum = re.findall(
+            '^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$', protocol)
+        if pronum:
+            protocol = str(int(pronum[0]))
+        else:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
+
+
+def public_ip_assignee(site_info, fip, eip):
+    errorFlg = True
+    if len(site_info['public_ip']) > 0 and fip == False:
+        VcsServerNet().deAssociateIP(site_info['id'])
+        errorFlg = False
+
+    if len(site_info['public_ip']) == 0:
+        if not isNone(eip):
+            VcsServerNet().associateIP(site_info['id'], eip_id=eip)
+            errorFlg = False
+        elif fip == True:
+            VcsServerNet().associateIP(site_info['id'])
+            errorFlg = False
+    return errorFlg
+
+
+def max_min_port_check(portrange):
+    if re.findall('[^0-9-]', portrange):
+        raise ValueError('port range should be digital-digital')
+
+    port_list = portrange.split('-')
+    if len(port_list) == 2:
+        port_min, port_max = [int(mport) for mport in port_list]
+        if port_min < 0 or port_max < 0:
+            raise ValueError('port range must bigger than 0')
+        elif port_min > port_max:
+            raise ValueError(
+                'port_range_min must be <= port_range_max')
+    else:
+        raise ValueError('port range set error')
+    return port_min, port_max
+
 def net_vcs_protocol_check(protocol):
     avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp', 'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
     if not protocol in avbl_proto:
@@ -103,7 +149,7 @@ def max_min_port_check(portrange):
               'cidr',
               type=str,
               help='Network range for security group.',
-              default='192.168.0.1/24',
+              default=None,
               show_default=True)
 @click.option('-fip / -nofip',
               '--floating-ip / --no-floating-ip',
@@ -142,7 +188,7 @@ def max_min_port_check(portrange):
               show_default=True)
 @click.argument('site_ids', nargs=-1)
 @pass_environment
-def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange, eip):
+def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange, eip):  # NOSONAR
     """Command line for network function of vcs
     :param portrange: Port range number for your VCS environment
     :type portrange: string
@@ -164,13 +210,19 @@ def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange
     site_ids = mk_names(site_id, site_ids)
     if len(site_ids) == 0:
         raise ValueError("Error: VCS id: {} is not found.".format(site_id))
-        
+
     site_infos = list_vcs(site_ids, False, is_print=False)
 
     for site_info in site_infos:
-        errorFlg = public_ip_assignee(site_info, fip, eip)
+        if not isNone(fip) or not isNone(eip):
+            # case 1: change fip eip
+            errorFlg = public_ip_assignee(site_info, fip, eip)
+
 
         # case 2: port setting
+        if (not isNone(portrange) or not isNone(port)) and isNone(cidr):
+            raise ValueError("Error: -cidr is required for port configuration.".format(site_id))
+
         from netaddr import IPNetwork
         IPNetwork(cidr)
 
@@ -191,6 +243,12 @@ def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange
                                   "ingress" if is_ingress else "egress")
             errorFlg = False
 
+        if not isNone(cidr):
+            secg = VcsSecurityGroup()
+            secg.addSecurityGroup(secg_id, '', '', cidr, protocol,
+                                  "ingress" if is_ingress else "egress")
+            errorFlg = False
+
         if errorFlg:
             raise ValueError(
                 "Error! Nothing to do! Check `--help` for detail.")
@@ -204,7 +262,8 @@ def cli():
     try:
         import sys
         ga = GenericService()
-        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(r'\d',i) == [] and not i == '-sv']).replace('-','')
+        func_call = '_'.join([i for i in sys.argv[1:] if re.findall(
+            r'\d', i) == [] and not i == '-sv']).replace('-', '')
         ga._send_ga(func_call)
     except Exception as e:
         logger.warning(e)

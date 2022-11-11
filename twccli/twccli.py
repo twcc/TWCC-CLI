@@ -12,16 +12,19 @@ from urllib.parse import urlparse
 if "TWCC_DATA_PATH" in os.environ and os.path.isdir(os.environ['TWCC_DATA_PATH']):
     _TWCC_DATA_DIR_ = os.environ['TWCC_DATA_PATH']
 else:
-    _TWCC_DATA_DIR_ = os.path.join(os.environ['HOME'], '.twcc_data')
-    
+    homepath = os.environ['HOME'] if 'HOME' in os.environ else os.environ['HOMEPATH']
+    _TWCC_DATA_DIR_ = os.path.join(homepath, '.twcc_data')
+
+
 def create_log_dir():
     log_dir = os.path.join(_TWCC_DATA_DIR_, "log")
 
     if not os.path.isdir(log_dir):
         os.mkdir(_TWCC_DATA_DIR_)
         os.mkdir(log_dir)
-        
+
     return log_dir
+
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 os.environ['LANG'] = 'C.UTF-8'
@@ -247,13 +250,16 @@ class CredentialHandler():
                     self.prj_code = cnf['_default']['twcc_proj_code']
                     self.old_version = cnf['_meta']['cli_version']
 
-                    _env_ver_ = self.old_version.split('.')
-                    _cli_ver_ = self.cli_version.split('.')
+                    _env_ver_ = self.old_version.replace("RC", "").split('.')
+                    _cli_ver_ = self.cli_version.replace("RC", "").split('.')
                     _online_ver_ = self._current_version.split('.')
-                    
-                    env_ver_count = int(_env_ver_[0])*10000 + int(_env_ver_[1])*100 + int(_env_ver_[2])*1 
-                    cli_ver_count = int(_cli_ver_[0])*10000 + int(_cli_ver_[1])*100 + int(_cli_ver_[2])*1
-                    online_ver_count = int(_online_ver_[0])*10000 + int(_online_ver_[1])*100 + int(_online_ver_[2])*1
+
+                    env_ver_count = int(
+                        _env_ver_[0])*10000 + int(_env_ver_[1])*100 + int(_env_ver_[2])*1
+                    cli_ver_count = int(
+                        _cli_ver_[0])*10000 + int(_cli_ver_[1])*100 + int(_cli_ver_[2])*1
+                    online_ver_count = int(
+                        _online_ver_[0])*10000 + int(_online_ver_[1])*100 + int(_online_ver_[2])*1
 
                     if online_ver_count > env_ver_count:
                         mystr = """
@@ -264,20 +270,22 @@ class CredentialHandler():
  | |XXXXXXXXXXXXX| |
  |_________________|
  ___[___________]___
-|         [_____] []|  \__  
-L___________________J     \ \___\/   
+|         [_____] []|  \__
+L___________________J     \ \___\/
 
 New TWCC-CLI version: {} found in https://pypi.org/project/TWCC-CLI/
 Please use `pip3 install -U TWCC-CLI` to upgrade your toolkit.
 
- _______      _____    ___       
-|_   _\ \    / / __|  / __|___   
-  | |  \ \/\/ /\__ \ | (__/ _ \_ 
+ _______      _____    ___
+|_   _\ \    / / __|  / __|___
+  | |  \ \/\/ /\__ \ | (__/ _ \_
   |_|   \_/\_/ |___/  \___\___(_)
    We build and operate TWCC.ai
                         """
-                        click.echo_via_pager(mystr.format(self._current_version))
-                        return False # if True, will make user renew credentials (no good)
+                        click.echo_via_pager(
+                            mystr.format(self._current_version))
+                        # if True, will make user renew credentials (no good)
+                        return False
                     if cli_ver_count > env_ver_count:
                         return True
                     return False
@@ -326,6 +334,27 @@ def fetch_and_cache(url) -> str:
     if ts > ts_max:
         _fetch_file(url, full_path)
     return open(full_path, 'rb').read()
+
+def _fetch_file(url, save_to):
+    open(save_to, 'wb').write(requests.get(
+        url, allow_redirects=True).content)
+
+
+def fetch_and_cache(url) -> str:
+    filename = urlparse(url).path.split('/')[-1]
+    full_path = _TWCC_DATA_DIR_ + path.sep + filename
+
+    if not path.exists(full_path):
+        _fetch_file(url, full_path)
+    mtime = path.getmtime(full_path)
+
+    from datetime import timedelta, datetime
+    ts = datetime.fromtimestamp(mtime)
+    ts_max = ts + timedelta(days=1)
+    if ts > ts_max:
+        _fetch_file(url, full_path)
+    return open(full_path, 'rb').read()
+
 
 if __name__ == '__main__':
     cli()

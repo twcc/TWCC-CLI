@@ -70,18 +70,18 @@ class GpuSite(GpuService):
     @staticmethod
     def getSolList(mtype='dict', name_only=False, reverse=False):
         sol_list = [
-            (4, "TensorFlow"),
-            (9, "PyTorch"),
-            (10, "Caffe"),
-            (13, "CNTK"),
-            (16, "CUDA"),
-            (19, "MXNet"),
-            (24, "Caffe2"),
-            # (29, "TensorRT"), # not avalible for now
-            # (35, "TensorRT_Server"), # not avalible for now
-            (42, "Theano"),
-            (49, "Torch"),
-            (52, "DIGITS"),
+            # (4, "TensorFlow"),
+            # (9, "PyTorch"),
+            # (10, "Caffe"),
+            # (13, "CNTK"),
+            # (16, "CUDA"),
+            # (19, "MXNet"),
+            # (24, "Caffe2"),
+            # # (29, "TensorRT"), # not avalible for now
+            # # (35, "TensorRT_Server"), # not avalible for now
+            # (42, "Theano"),
+            # (49, "Torch"),
+            # (52, "DIGITS"),
         ]
         # (339, "AIFS"),]
 
@@ -89,7 +89,8 @@ class GpuSite(GpuService):
             'Preemptive GPU', 'Custom Image', u'Preemptive GPU(Custom Image)'
         ])
         sols = GpuSolutions().list()
-
+        for sol in sols:
+            sol_list.append((sol['id'], sol['name']))
         for ele in sols:
             if ele['name'] in ext_cntr_sol:
                 sol_list.append((ele['id'], ele['name']))
@@ -202,7 +203,8 @@ class GpuSite(GpuService):
         elif not self.url_dic == None and self.url_dic['container'] == "":
             pass
         else:
-            self.ext_get = {'project': self._project_id, "category": "container"}
+            self.ext_get = {'project': self._project_id,
+                            "category": "container"}
         ans = self._do_api()
         return ans
 
@@ -623,6 +625,9 @@ class VcsSecurityGroup(CpuService):
             "port_range_max": port_max,
             "port_range_min": port_min
         }
+        if port_min == '' and port_max == '':
+            del self.data_dic['port_range_max']
+            del self.data_dic['port_range_min']
         self._do_api()
 
     def deleteRule(self, rule_id):
@@ -718,13 +723,13 @@ class VcsImage(CpuService):
         self._func_ = "images"
         self._csite_ = 'goc'
 
-    def deleteById(self, sys_vol_id):
+    def deleteById(self, image_id):
         self.http_verb = 'delete'
         self.res_type = 'txt'
-        self.url_dic = {"images": sys_vol_id}
+        self.url_dic = {"images": image_id}
         return self._do_api()
 
-    def list(self, srv_id=None, isAll=False):
+    def list(self, srv_id=None, isAll=False, image_id=None):
         if not isNone(srv_id):
             images = []  
             self.ext_get = {'project': self._project_id}
@@ -734,6 +739,9 @@ class VcsImage(CpuService):
                     if one_image['server']['id'] == srv_id:
                         images.append(one_image)
             return images
+        elif not isNone(image_id):
+            self.url_dic = {"images": image_id}
+            return self._do_api()
         else:
             self.ext_get = {'project': self._project_id, 'sol_categ': 'os'}
             ans = self._do_api()
@@ -764,6 +772,28 @@ class VcsImage(CpuService):
                 "os": tsrv['os'],
                 "os_version": tsrv['os_version']
             }
+        return self._do_api()
+
+    def isStable(self, site_id):
+        srv_id = getServerId(site_id)
+        vcsimg_infos = self.list(srv_id)
+        for vcsimg_info in vcsimg_infos:
+            if vcsimg_info['status'] == "QUEUED":  # or vcsimg_info['status'] == "Error"
+                return False
+        return True
+
+    def patch(self, image_id, desc=None):
+        self.http_verb = 'patch'
+        self.url_dic = {"images": image_id}
+        self.data_dic = {}
+        if not isNone(desc):
+            self.data_dic.update({"desc": desc})
+        # if not isNone(is_public):
+        #     self.data_dic.update({"is_public": is_public})
+        # if not isNone(license_type):
+        #     self.data_dic.update({"license_type": license_type})
+        if self.data_dic == {}:
+            raise ValueError
         return self._do_api()
 
 
@@ -831,6 +861,7 @@ class Fixedip(CpuService):
             if ips['address'] == eip and ips['status'] == 'AVAILABLE':
                 return ips['id']
         return None
+
 
 class LoadBalancers(CpuService):
 
@@ -988,6 +1019,53 @@ class Secrets(CpuService):
             return self._do_api()
 
 
+class Secrets(CpuService):
+
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "secrets"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, name, desc="", payload="", expire_time=""):
+        self.http_verb = 'post'
+        self.data_dic = {
+            'project': self._project_id,
+            "name": name,
+            "desc": desc,
+            "payload": payload
+        }
+        if not isNone(expire_time):
+            self.data_dic.update({'expire_time': expire_time})
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"secrets": sys_vol_id}
+        return self._do_api()
+
+    def list(self, ssl_id=None, isall=False):
+        if isNone(ssl_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isall:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                my_username = Session2().twcc_username
+                return [
+                    x for x in all_volumes
+                    if x["user"]['username'] == my_username
+                ]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"secrets": ssl_id}
+            return self._do_api()
+
+
 class Volumes(CpuService):
 
     def __init__(self, debug=False):
@@ -1006,9 +1084,32 @@ class Volumes(CpuService):
         }
         return self._do_api()
 
-    def deleteById(self, sys_vol_id):
+    def snapshot(self, name, volume, desc=""):
+        """_summary_
+
+        Args:
+            name (_type_): volume snapshot name
+            volume (_type_):volume id
+            desc (str, optional): volume snapshot desc . Defaults to "".
+
+        Returns:
+            _type_: _description_
+        """
+        self.http_verb = 'post'
+        self._func_ = "snapshots"
+        self.data_dic = {
+            'desc': desc,
+            "name": name,
+            "volume": volume
+        }
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id, snapshot):
         self.http_verb = 'delete'
         self.url_dic = {"volumes": sys_vol_id}
+        if snapshot:
+            self._func_ = "snapshots"
+            self.url_dic = {"snapshots": sys_vol_id}
         return self._do_api()
 
     def update(self, sys_vol_id, vol_status, srvid, size, wait):
@@ -1022,8 +1123,10 @@ class Volumes(CpuService):
             raise ValueError("please provide -sts")
         return self._do_api()
 
-    def list(self, sys_vol_id=None, isAll=False):
-        if isNone(sys_vol_id):
+    def list(self, vol_id=None, isAll=False, snapshot=None):
+        if snapshot:
+            self._func_ = "snapshots"
+        if isNone(vol_id):
             self.http_verb = 'get'
             self.res_type = 'json'
             if isAll:
@@ -1039,9 +1142,12 @@ class Volumes(CpuService):
                     if x["user"]['username'] == my_username
                 ]
         else:
+            print(self._func_)
             self.http_verb = 'get'
             self.res_type = 'json'
-            self.url_dic = {"volumes": sys_vol_id}
+            self.url_dic = {"volumes": vol_id}
+            if snapshot:
+                self.url_dic = {"snapshots": vol_id}
             return self._do_api()
 
 

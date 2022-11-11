@@ -8,7 +8,7 @@ pytz
 boto3
 botocore
 certifi
-chardet
+chardet<5.0.0
 Click==7.0
 colorclass
 idna
