@@ -117,19 +117,27 @@ def list_vcs_img(sol_name, is_table):
     else:
         jpp(ans)
 
-def list_vcsi_img(is_table):
+def list_vcsi_img(ids_or_names, is_table, is_all):
     """list user built bootable images
     """
-    ans = VcsImage().list()
+    table_col = ['id', 'name', 'desc', 'create_time', 'status', 'base_image' ,'server.hostname']
+    if len(ids_or_names) > 0:
+        image_details = []
+        for image_id in ids_or_names:
+            image_details.append(VcsImage().list(image_id = image_id))
+        ans = image_details
+        
+    else:
+        ans = VcsImage().list(isAll=is_all)
+        
     if is_table:
-        table_layout("Abvl. VCS images", ans, [
-                     'id', 'name', 'create_time', 'status'], isPrint=True, is_warp=False)
+        table_layout("Abvl. VCS images", ans, table_col, isPrint=True, is_warp=False)
     else:
         jpp(ans)
 
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None):
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None, sys_vol_size=None):
 
     vcs = VcsSite()
     vcs_sol = VcsSolutions()
@@ -153,7 +161,6 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(name))
 
     extra_props = vcs.getExtraProp(exists_sol[sol.lower()])
-
     # x-extra-property-image
     if isNone(img_name):
         # img_name = "Ubuntu 20.04"
@@ -201,7 +208,8 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         raise ValueError("System Volume Type: {} is not validated. Avbl: {}".format(sys_vol,
                                                                                     ", ".join(extra_props['x-extra-property-system-volume-type'].keys())))
     required['x-extra-property-system-volume-type'] = extra_props['x-extra-property-system-volume-type'][sys_vol]
-
+    if sys_vol_size > 0:
+        required['x-extra-property-system-volume-size'] = str(sys_vol_size)
     # x-extra-property-availability-zone
     required['x-extra-property-availability-zone'] = "nova"
 
@@ -212,7 +220,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
             raise ValueError("Data Volume Type: {} is not validated. Avbl: {}".format(data_vol,
                                                                                       ", ".join(extra_props['x-extra-property-volume-type'])))
         required['x-extra-property-volume-type'] = data_vol
-
+    
     return vcs.create(name, exists_sol[sol], required)
 
 def get_ch_json_by_vlbid(vlb_id, members=None):
@@ -433,6 +441,27 @@ def change_vcs(ids_or_names, status, is_table, desc, keep, wait, is_print=True):
     display_changed_sites(ans, ids_or_names, vcs, cols,
                           is_print, is_table, ["VCS VMs", "VCS Info."])
 
+def do_ch_vcsi(ids_or_names, vcsi, desc):
+    ans = []
+    if len(ids_or_names) > 0:
+        show_col = []
+        for i, vcsi_id in enumerate(ids_or_names):
+            ans.append(vcsi.patch(vcsi_id, desc = desc)) #, license_type = license_type, is_public = is_public))
+    else:
+        raise ValueError
+    return ans
+
+def change_vcsi(ids_or_names, is_table, desc):
+    vcsi = VcsImage()
+    ans = do_ch_vcsi(ids_or_names, vcsi, desc)
+    cols = ['id', 'name', 'create_time', 'status']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Abvl. VCS images", ans, ['id', 'name', 'desc', 'create_time', 'status', 'base_image' ,'server.hostname'] , isPrint=True, is_warp=False)
+        else:
+            jpp(ans)
+    
+
 
 def check_proteced(site_info, vsite, ele):
     if site_info['termination_protection']:
@@ -491,6 +520,8 @@ def doSiteStable(site_id, site_type='cntr'):
         b = Sites()
     elif site_type == 'vcs':
         b = VcsSite()
+    elif site_type == 'vcs-img':
+        b = VcsImage()
     elif site_type == 'vnet':
         b = Networks()
     elif site_type == 'vlb':

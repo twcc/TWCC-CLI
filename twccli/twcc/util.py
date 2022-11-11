@@ -83,6 +83,18 @@ def check_empty_value(x) -> bool:
     return True if isNone(x) or len(x) == 0 else False
 
 
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """
+    return True if isNone(x) or len(x) == 0 else False
+
+
 def mkdir_p(path):
     import errno
     try:
@@ -146,12 +158,11 @@ def _table_layout_data_cell_format(cell_ele, is_warp=True):
 
 
 def _table_layout_colorful_val(val):
-    if type(val)==type([]):
+    if type(val) == type([]):
         return val
 
     val = '' if val == None else val
-    return Color("{autored}%s{/autored}" %
-                 val) if ("%s" % val).lower() == "error" else "%s" % val
+    return click.style(f'{val}', fg='bright_red') if ("%s" % val).lower() == "error" else "%s" % val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -471,26 +482,27 @@ def set_rc_config(rc):
     try:
         import platform
         core_version = platform.linux_distribution()
-    except Exception:
+    except:
         import distro
         core_version = distro.linux_distribution()
 
     if core_version[0] == 'CentOS Linux' and core_version[1][:3] == '7.9':
         lang_encoding = lang_encoding_centos79
-
+    homepath = os.environ['HOME'] if 'HOME' in os.environ else os.environ['HOMEPATH']
     if rc:
         click.echo("Add language setting to `.bashrc`.")
-        open(os.environ["HOME"]+"/.bashrc", 'a').write(lang_encoding)
+        open(homepath+"/.bashrc", 'a').write(lang_encoding)
     else:
         click.echo(
             "Please add encoding setting to your environment: \n {}".format(lang_encoding))
     try:
-        open(os.environ["HOME"]+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
+        open(homepath+"/.bashrc", 'a').write(". {}/twccli/twccli-complete.sh".format(
             [cli_path for cli_path in sys.path if '.local/lib' in cli_path][0]))
     except Exception:
         pass
 
     return True
+
 
 def set_cid_flag(ga_flag=True):
     if not ga_flag == None:
