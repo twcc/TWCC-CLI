@@ -17,6 +17,18 @@ If you have any questions, please email us at: iservice@twcc.ai for account supp
 
 ## :point_down: Release Notes :point_down:
 
+### v0.6.1 Release Note
+
+The "We miss you, Viga!" version
+
+![img](https://media.giphy.com/media/EPd4fYR4CU8OVivBiP/giphy.gif)
+
+**Feature**
+- Compatible for Security Group operations.
+
+**Bug Fix**
+- various bugs fixed
+
 ### v0.6.0 Release Note
 
 ![img](https://media.giphy.com/media/E0oh8fTKeT0T6/giphy.gif)

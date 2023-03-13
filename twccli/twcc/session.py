@@ -332,7 +332,6 @@ class Session2(object):
         user_agent = Session2._getUserAgent()
         if not isNone(user_agent):
             sessionData["_meta"]['user_agent'] = user_agent
-        
         s3keys = Session2._getTwccS3Keys(
             Session2._getDefaultProject(proj_code), Session2._getApiKey(twcc_api_key))
         sessionData["_default"]['twcc_s3_access_key'] = s3keys['public']['access_key']

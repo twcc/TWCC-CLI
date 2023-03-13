@@ -4,9 +4,10 @@ import sys
 import re
 import click
 import json
+from pkg_resources import require
 from twccli.twcc.util import mk_names, isNone
 from twccli.twccli import pass_environment, logger
-from twccli.twcc.services.compute_util import change_vcs, change_vcsi, change_ccs, change_volume, change_loadbalancer, ch_ip_desc, get_ch_json_by_vlbid
+from twccli.twcc.services.compute_util import change_vcs, change_vcsi, change_ccs, change_volume, change_loadbalancer, ch_ip_desc, get_ch_json_by_vlbid, ch_secg
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.services.s3_tools import S3
 
@@ -48,6 +49,12 @@ def create_ch_template_vlb(vlb_id):
         ch_json = get_ch_json_by_vlbid(vlb_id)
     return ch_json
 
+def create_ch_template_vlb(vlb_id):
+    if not isNone(vlb_id):
+        ch_json = get_ch_json_by_vlbid(vlb_id)
+    return ch_json
+
+
 # Create groups for command
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -71,7 +78,6 @@ def cli():
 @click.option('-s', '--site-id', 'name', type=int, help="ID of the instance.")
 @click.option('-keep/-nokeep', '--keep/--nokeep', 'keep', is_flag=True, default=None, help="Termination protection of the instance.")
 @click.option('-sts', '--vcs-status', type=click.Choice(['Ready', 'Stop', 'Reboot'], case_sensitive=False), help="Status of the instance.")
-
 @click.option('-table / -json',
               '--table-view / --json-view',
               'is_table',
@@ -102,6 +108,27 @@ def vcs(ctx, env, desc, site_ids_or_names, name, vcs_status, keep, is_table, wai
     site_ids_or_names = mk_names(name, site_ids_or_names)
     change_vcs(site_ids_or_names, str(
         vcs_status).lower(), is_table, desc, keep, wait)
+
+
+@click.command(
+    help="'Change' details of your system (bootable) images.")
+@click.option('-d', '--vcsi-desc', 'desc', type=str, default=None, help="Description of the instance.")
+@click.option('-id', '--vcsi-id', 'vcsi_id', type=int, help="ID of the instance.")
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('site_ids_or_names', nargs=-1)
+@pass_environment
+@click.pass_context
+def vcsi(ctx, env, desc, site_ids_or_names, vcsi_id, is_table):
+
+    site_ids_or_names = mk_names(vcsi_id, site_ids_or_names)
+    change_vcsi(site_ids_or_names, is_table, desc)
+
 
 @click.command(
     help="'Change' details of your system (bootable) images.")
@@ -190,7 +217,6 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
                       site_id, is_table, vol_size, wait)
 
 
-
 @click.option('-id', '--vlb-id', 'vlb_id', type=str,
               help="Index of the load balancer.")
 @click.option('-ip', '--eip-id', 'eip_id', type=str, default=None,
@@ -207,10 +233,10 @@ def vds(ctx, env, name, ids_or_names, vol_status, vol_size, site_id, wait, is_ta
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
 @click.option('-byjson', '--byjson', 'json_file', default="", show_default=False, type=str,
-              help="Change load balancer by json file.")  
+              help="Change load balancer by json file.")
 @click.command(help="Update status of your vlb by listener.")
 @pass_environment
-def vlb(env, vlb_id,  members, eip_id, template, json_file, wait, is_table): 
+def vlb(env, vlb_id,  members, eip_id, template, json_file, wait, is_table):
     """Command line for list vlb
 
     :param vlb_id: Enter id for your load balancer.
@@ -238,7 +264,8 @@ def vlb(env, vlb_id,  members, eip_id, template, json_file, wait, is_table):
         if json_file:
             with open(json_file, 'r') as fn:
                 json_data = json.load(fn)
-        change_loadbalancer(vlb_id, eip_id, json_data ,members, wait, is_table,)
+        change_loadbalancer(vlb_id, eip_id, json_data,
+                            members, wait, is_table,)
 
 
 @click.option('-bkt',
@@ -301,6 +328,30 @@ def eip(ctx, ip_id, desc, ids_or_names, is_table):
     ch_ip_desc(ids_or_names, desc, is_table)
 
 
+@click.option('-d', '--secg-description', 'desc', type=str, default=None,
+              help="Description of the security group.")
+@click.option('-id', '--security-group-id', 'secg_id', required=True, type=str, help="Index of the security group.")
+@click.option('-iid', '--instance-id', 'iid', type=int, help="ID(s) of the instance.")
+@click.option('-act', '--action', type=click.Choice(['desc', 'add', 'remove'], case_sensitive=False), default=None, help="The change action.")
+@click.option('-type', '--instance-type', 'type', type=click.Choice(['vcs'], case_sensitive=False), default='vcs', help="Tyep of your instance.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Update desc of your security group or security group to your instance.")
+@click.pass_context
+def secg(ctx, secg_id, iid, desc, action, type, ids_or_names, is_table):
+    action_dict = {'add': 'addSecurityGroup',
+                   'remove': 'removeSecurityGroup', 'desc': 'desc'}
+    if action == 'desc':
+        ids_or_names = mk_names(secg_id, ids_or_names)
+    else:
+        ids_or_names = mk_names(iid, ids_or_names)
+
+    ch_secg(ids_or_names, desc=desc, is_table=is_table,
+            secg_id=secg_id, action=action_dict[action])
+
+
 cli.add_command(vcs)
 cli.add_command(ccs)
 cli.add_command(vds)
@@ -308,6 +359,8 @@ cli.add_command(vlb)
 cli.add_command(cos)
 cli.add_command(eip)
 cli.add_command(vcsi)
+cli.add_command(secg)
+
 
 def main():
     cli()

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from email.policy import default
 import re
 import sys
 import json
@@ -16,9 +17,10 @@ from twccli.twcc.util import pp, table_layout, isNone, jpp, mk_names, isFile, na
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc import Session2
 from twccli.twcc.services.network import Networks
-from twccli.twcc.services.compute_util import doSiteStable, create_vcs, create_ccs, list_vcs
+from twccli.twcc.services.compute_util import doSiteStable, create_vcs, create_ccs, list_vcs, create_secg, create_secg_rule
 from twccli.twcc.services.generic import GenericService
 from twccli.twccli import pass_environment, logger
+from click.testing import CliRunner
 
 
 def create_commit(site_id, tag, isAll=False):
@@ -61,6 +63,41 @@ def mk_temp_by_vlb_id(json_template, vlb_id):
         for listener in exist_vlb_json["listeners"]:
             json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]], "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
     return json_template
+
+def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
+    json_data = None
+    if json_file:
+        with open(json_file, 'r') as fn:
+            json_data = json.load(fn)
+    elif not members == ():
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods) == len(members)):
+            raise ValueError(
+                'the number of listener_ports, listener_types, lb_methods should be the same')
+    else:
+        if not (len(listener_ports) == len(listener_types) == len(lb_methods)):
+            raise ValueError(
+                'the number of listener_ports, listener_types should be the same')
+    return json_data
+
+
+def mk_temp_by_vlb_id(json_template, vlb_id):
+    if not isNone(vlb_id):
+        vlb = LoadBalancers()
+        exist_vlb_json = vlb.list(vlb_id)
+        json_template["name"] = exist_vlb_json["name"]
+        json_template["private_net"] = exist_vlb_json["private_net"]["id"]
+        json_template["pools"] = []
+        pool_id2name = {}
+        for pool in exist_vlb_json["pools"]:
+            json_template["pools"].append(
+                {"name": pool["name"], "protocol": pool["protocol"], "members": pool["members"], "method": pool["method"]})
+            pool_id2name[pool["id"]] = pool["name"]
+        json_template["listeners"] = []
+        for listener in exist_vlb_json["listeners"]:
+            json_template["listeners"].append({"name": listener["name"], "pool_name": pool_id2name[listener["pool"]],
+                                              "protocol": listener["protocol"], "protocol_port": listener["protocol_port"]})
+    return json_template
+
 
 def check_vlb_parameter(listener_ports, listener_types, lb_methods, members, json_file):
     json_data = None
@@ -244,6 +281,9 @@ default_vcs_name = 'twcc-vcs_'
 default_vcs_name = 'twcc-vcs_'
 
 
+default_vcs_name = 'twcc-vcs_'
+
+
 @click.command(context_settings=dict(max_content_width=500),
                help="Create your VCS (Virtual Compute Service) instances.")
 @click.option('-n', '--name', 'name', default=[default_vcs_name], type=str, multiple=True,
@@ -268,6 +308,8 @@ default_vcs_name = 'twcc-vcs_'
               help="The keys of the environment parameters of instances.")
 @click.option('-envv', '--environment-values', 'env_values',  show_default=False, multiple=True,
               help="The values of the environment parameters of instances.")
+@click.option('-secg', '--security-group-names', 'secg', default=None, type=str,
+              help="Names of the security group. ex: clisg or clisg,sg1")
 @click.option('-itype', '--image-type-name', 'sol', default="Ubuntu", type=str,
               help="Name of the image type.")
 @click.option('-ptype', '--product-type', 'flavor', default="v.super", type=str,
@@ -302,7 +344,7 @@ default_vcs_name = 'twcc-vcs_'
 @click.pass_context
 def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, sys_vol_size,  # NOSONAR
         data_vol, data_vol_size, flavor, img_name, wait, network, snapshot,  # NOSONAR
-        sol, fip, password, env_keys, env_values, eip,  is_apikey, is_table):  # NOSONAR
+        sol, fip, password, env_keys, env_values, eip, secg, is_apikey, is_table):  # NOSONAR
     if snapshot:
         sids = mk_names(site_id, ids_or_names)
         if len(name) == 1 and name[0] == default_vcs_name:
@@ -358,7 +400,7 @@ def vcs(ctx, env, keypair, name, ids_or_names, site_id, sys_vol, sys_vol_size,  
                          network=network, keypair=keypair,
                          flavor=flavor, sys_vol=sys_vol, sys_vol_size=sys_vol_size,
                          data_vol=data_vol.lower(), data_vol_size=data_vol_size,
-                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey, eip=eip,)
+                         fip=fip, password=password, env=mk_env_dict(), pass_api=is_apikey, eip=eip, secg=secg,)
         ans["solution"] = sol
         ans["flavor"] = flavor
 
@@ -538,7 +580,7 @@ def vnet(env, name, getway, cidr, is_table, wait):
               help="Size of the disk.")
 @click.option('-sn', '--snapshot', 'snapshot', is_flag=True,
               default=False,
-              help="Create a snapshot for olume. `-id` is required!")
+              help="Create a snapshot for Volume. `-id` is required!")
 @click.option('-table / -json', '--table-view / --json-view', 'is_table',
               is_flag=True, default=True, show_default=True,
               help="Show information in Table view or JSON view.")
@@ -689,29 +731,6 @@ def eip(desc, is_table):
     """
     create_fixedip(desc, is_table)
 
-@click.command(help="Create your SSL certificates.")
-@click.option('-d', '--SSL-description', 'desc', type=str, default='generated by cli',
-              help="Description of the SSL certificate.")
-@click.option('-n', '--name', 'name', default="twccli", type=str,
-              help="Name of your SSL.")
-@click.option('-p', '--payload', 'payload', default=None, type=str,
-              help="Base64 encoding of your SSL.")
-@click.option('-sca', '--sercer-certfile', 'sercer_certfile', default=None, type=str,
-              help="Server certfile for your openssl.")
-@click.option('-inkey', '--inkey', 'inkey', default=None, type=str,
-              help="Server key for your openssl.")
-@click.option('-ica', '--intermediate-CA', 'intermediate_ca', default=None, type=str,
-              help="Intermediate CA for your openssl.")
-@click.option('-pf', '--payload-file', 'payload_file', default=None, type=str,
-              help="Base64 file path of your SSL.")
-@click.option('-et', '--expire-time', 'expire_time', default=None, type=str,
-              help="Expire-time of your SSL.")
-@click.option('-table / -json', '--table-view / --json-view', 'is_table',
-              is_flag=True, default=True, show_default=True,
-              help="Show information in Table view or JSON view.")
-@pass_environment
-def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, inkey, intermediate_ca, is_table):
-    """Command line for create SSL
 
 @click.command(help="Create your SSL certificates.")
 @click.option('-d', '--SSL-description', 'desc', type=str, default='generated by cli',
@@ -757,9 +776,68 @@ def ssl(env, name, desc, payload, payload_file, expire_time, sercer_certfile, in
     ans = ssl.list(ans['id'])
     if is_table:
         cols = ["id", "name", "status", "create_time"]
-        table_layout("IPs", ans, cols, isPrint=True)
+        table_layout("SSLs", ans, cols, isPrint=True)
     else:
         jpp(ans)
+
+
+@click.option('-d', '--secg-description', 'desc', type=str, default='generated by cli',
+              help="Description of the security group.")
+@click.option('-n', '--name', 'name', type=str, default='sg_cli',
+              help="Description of the security group.")
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="Create your security group.")
+def secg(desc, is_table, name):
+    create_secg(name, desc,  is_table=is_table)
+
+
+@click.command(help='Create security group rules into security group.')
+@click.option('-p', '--port', 'port', type=int, help='Port number.')
+@click.option('-id',
+              '--secg-id',
+              'secg_id',
+              type=str,
+              required=True,
+              help='ID of the container.')
+@click.option('-cidr',
+              '--cidr-network',
+              'cidr',
+              type=str,
+              help='Network range for security group.',
+              default=None,
+              show_default=True)
+@click.option('-in/-out',
+              '--ingress/--egress',
+              'is_ingress',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help='Applying security group directions.')
+@click.option(
+    '-prange',
+    '--port-range',
+    'portrange',
+    type=str,
+    help='Port number from min-port to max-port, use "-" as delimiter, ie: 3000-3010. Only supported for TCP, UDP, UDPLITE, SCTP and DCCP'
+)
+@click.option('-proto',
+              '--protocol',
+              'protocol',
+              type=str,
+              help='Manage VCS security groups protocol.',
+              default='tcp',
+              show_default=True)
+@click.option('-table / -json', '--table-view / --json-view', 'is_table',
+              is_flag=True, default=True, show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.argument('secg_ids', nargs=-1)
+@pass_environment
+def secg_rule(env, secg_ids, secg_id, port, cidr, protocol, is_ingress,  portrange, is_table):
+    secg_ids = mk_names(secg_id, secg_ids)
+    create_secg_rule(secg_ids, port, cidr, protocol,
+                     is_ingress,  portrange, is_table)
 
 
 # end object ===============================================================
@@ -772,6 +850,8 @@ cli.add_command(vnet)
 cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
+cli.add_command(secg)
+cli.add_command(secg_rule)
 
 
 def main():

@@ -1,7 +1,7 @@
 from twccli.twcc.services.compute import GpuSite, VcsSite, VcsSecurityGroup, VcsServerNet
 from twccli.twcc.util import isNone, mk_names
 from twccli.twcc.services.compute import getServerId, getSecGroupList
-from twccli.twcc.services.compute_util import list_vcs
+from twccli.twcc.services.compute_util import list_vcs, net_vcs_protocol_check, public_ip_assignee, max_min_port_check
 from twccli.twccli import pass_environment, logger
 from twccli.twcc.services.base import Keypairs
 from twccli.twcc.services.generic import GenericService
@@ -164,7 +164,7 @@ def max_min_port_check(portrange):
               type=str,
               default=None,
               show_default=False,
-              help='Configure your instance with a EIP.')
+              help='Configure your instance with a EIP, using eip_id here.')
 @click.option('-in/-out',
               '--ingress/--egress',
               'is_ingress',
@@ -206,25 +206,23 @@ def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange
     :type is_ingress: bool
     """
     net_vcs_protocol_check(protocol)
-    # case 1: floating ip operations
     site_ids = mk_names(site_id, site_ids)
     if len(site_ids) == 0:
         raise ValueError("Error: VCS id: {} is not found.".format(site_id))
 
     site_infos = list_vcs(site_ids, False, is_print=False)
-
     for site_info in site_infos:
         if not isNone(fip) or not isNone(eip):
             # case 1: change fip eip
             errorFlg = public_ip_assignee(site_info, fip, eip)
 
-
         # case 2: port setting
         if (not isNone(portrange) or not isNone(port)) and isNone(cidr):
-            raise ValueError("Error: -cidr is required for port configuration.".format(site_id))
+            raise ValueError(
+                "Error: -cidr is required for port configuration.".format(site_id))
 
-        from netaddr import IPNetwork
-        IPNetwork(cidr)
+            from netaddr import IPNetwork
+            IPNetwork(cidr)
 
         secg_list = getSecGroupList(site_info['id'])
         secg_id = secg_list['id']
@@ -243,9 +241,9 @@ def vcs(env, site_ids, site_id, port, cidr, protocol, is_ingress, fip, portrange
                                   "ingress" if is_ingress else "egress")
             errorFlg = False
 
-        if not isNone(cidr):
+        if not isNone(cidr) and isNone(portrange) and isNone(port):
             secg = VcsSecurityGroup()
-            secg.addSecurityGroup(secg_id, '', '', cidr, protocol,
+            secg.addSecurityGroup(secg_id, None, None, cidr, protocol,
                                   "ingress" if is_ingress else "egress")
             errorFlg = False
 
