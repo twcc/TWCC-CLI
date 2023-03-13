@@ -4,10 +4,9 @@ import time
 import json
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.compute import GpuSite as Sites
-from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions, VcsImage
+from twccli.twcc.services.compute import VcsSite, getServerId, VcsServer, VcsServerNet, Volumes, LoadBalancers, Fixedip, VcsSolutions, VcsImage, SecurityGroups
 from twccli.twcc.services.network import Networks
 from twccli.twcc.util import jpp, table_layout, isNone, name_validator, protection_desc, _debug
-
 
 
 def getConfirm(res_name, entity_name, is_force, ext_txt=""):
@@ -117,6 +116,27 @@ def list_vcs_img(sol_name, is_table):
     else:
         jpp(ans)
 
+
+def list_vcsi_img(ids_or_names, is_table, is_all):
+    """list user built bootable images
+    """
+    table_col = ['id', 'name', 'desc', 'create_time',
+                 'status', 'base_image', 'server.hostname']
+    if len(ids_or_names) > 0:
+        image_details = []
+        for image_id in ids_or_names:
+            image_details.append(VcsImage().list(image_id=image_id))
+        ans = image_details
+
+    else:
+        ans = VcsImage().list(isAll=is_all)
+
+    if is_table:
+        table_layout("Abvl. VCS images", ans, table_col,
+                     isPrint=True, is_warp=False)
+    else:
+        jpp(ans)
+
 def list_vcsi_img(ids_or_names, is_table, is_all):
     """list user built bootable images
     """
@@ -135,15 +155,128 @@ def list_vcsi_img(ids_or_names, is_table, is_all):
     else:
         jpp(ans)
 
+def list_secg(ids_or_names, secg_type, is_table, is_all):
+    secg_type_dict = {'proj': 'project', 'vlb': 'loadbalancer',
+                      'vcs': 'server', 'ccs': 'site', 'detail': 'detail', None: None}  # 'Server': 'server',
+    ans = SecurityGroups().list(
+        ids=ids_or_names, secg_type=secg_type_dict[secg_type], isall=is_all)
+    col = ['id', 'name', 'create_time', 'type']
+
+    if is_table:
+        if not ids_or_names == ():
+            col.append('security group_rules')
+        table_layout("Abvl. SecurityGroups", ans,
+                     col, isPrint=True, is_warp=False)
+    else:
+        if not ids_or_names == ():
+            col.append('security_group_rules')
+        jpp(ans)
+
+
+def create_secg(name, desc=None, is_table=None):
+    secg = SecurityGroups()
+    ans = secg.create(name, desc=desc)
+    if is_table:
+        cols = ["id", "name", "desc", "create_time", "type"]
+        table_layout("Security Group(s)", ans, cols, isPrint=True)
+    else:
+        jpp(ans)
+
+
+def addRule(secg_id, portrange, cidr, protocol, is_ingress, port):
+    secg = SecurityGroups()
+    if not isNone(portrange):
+        port_min, port_max = max_min_port_check(portrange)
+        secg.addRule(secg_id, port_min, port_max, cidr, protocol,
+                        "ingress" if is_ingress else "egress")
+
+    if not isNone(port):
+        secg.addRule(secg_id, port, port, cidr, protocol,
+                        "ingress" if is_ingress else "egress")
+
+    if not isNone(cidr) and isNone(portrange) and isNone(port):
+        secg.addRule(secg_id, None, None, cidr, protocol,
+                        "ingress" if is_ingress else "egress")
+
+
+def create_secg_rule(secg_ids, port, cidr, protocol, is_ingress,  portrange, is_table):
+    net_vcs_protocol_check(protocol)
+    # case 1: floating ip operations
+
+    if secg_ids == ():
+        raise ValueError("Need secg id for mk rules！")
+
+    if (not isNone(portrange) or not isNone(port)) and isNone(cidr):
+        raise ValueError(
+            "Error: -cidr is required for port configuration.".format(secg_id))
+
+    from netaddr import IPNetwork
+    IPNetwork(cidr)
+    for secg_id in secg_ids:
+        
+        addRule(secg_id, portrange, cidr, protocol, is_ingress, port)
+
+    secg = SecurityGroups()
+    ans = secg.list(ids=secg_ids)
+
+    if 'detail' in ans:
+        is_table = False
+    col = ['id', 'name', 'create_time', 'type']
+
+
+    if is_table:
+        col.append('security group_rules')
+        table_layout("Abvl. SecurityGroups", ans,
+                     col, isPrint=True, is_warp=False)
+    else:
+        col.append('security_group_rules')
+        jpp(ans)
+
+
+def ch_secg_add_remove(ids_or_names, action, secg_id, is_table, cols):
+    for iid in ids_or_names:
+        server_id = getServerId(iid)
+        server = VcsServer()
+        server.putSecg(action, secg_id, server_id)
+    secg = SecurityGroups()
+    ans = secg.list(ids=ids_or_names, secg_type='server')
+    if is_table:
+        cols.append('security group_rules')
+    else:
+        cols.append('security_group_rules')
+
+
+def ch_secg(ids_or_names, desc=None, is_table=None, secg_id=None, action=None):
+    ans = []
+    secg = SecurityGroups()
+    cols = ['id', 'name', 'desc', 'create_time', 'type']
+    title = "SecurityGroups Results"
+    if len(ids_or_names) > 0:
+        if action == 'desc':
+            for secg_id in ids_or_names:
+                if not isNone(desc):
+                    ans.append(secg.patch_desc(secg_id, desc))
+        else:
+            ch_secg_add_remove(ids_or_names, action, secg_id, is_table, cols)
+    if len(ans) > 0:
+        if is_table:
+            table_layout(title,
+                         ans,
+                         cols,
+                         isPrint=True,
+                         is_warp=False)
+        else:
+            jpp(ans)
+
+
 def create_vcs(name, sol=None, img_name=None, network=None,
                keypair="", flavor=None, sys_vol=None,
-               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None, sys_vol_size=None):
+               data_vol=None, data_vol_size=0, fip=None, password=None, env=None, pass_api=None, eip=None, sys_vol_size=None, secg=None):
 
     vcs = VcsSite()
     vcs_sol = VcsSolutions()
     exists_sol = dict([(k.lower(), v)
                       for (k, v) in vcs_sol.list(return_in_dic=True).items()])
-
     if isNone(sol):
         raise ValueError("Please provide solution name. ie:{}".format(
             ", ".join(exists_sol.keys())))
@@ -160,7 +293,7 @@ def create_vcs(name, sol=None, img_name=None, network=None,
         raise ValueError(
             "Name '{0}' is not valid. ^[a-z][a-z-_0-9]{{5,15}}$ only.".format(name))
 
-    extra_props = vcs.getExtraProp(exists_sol[sol.lower()])
+    extra_props, candidate_secg = vcs.getExtraProp(exists_sol[sol.lower()])
     # x-extra-property-image
     if isNone(img_name):
         # img_name = "Ubuntu 20.04"
@@ -172,7 +305,19 @@ def create_vcs(name, sol=None, img_name=None, network=None,
     if isNone(network):
         network = 'default_network'
     required['x-extra-property-private-network'] = network
-
+    default_sg_name = 'clisg_'+vcs._api_key_[:8]
+    # check secg default exist or not
+    if not default_sg_name in candidate_secg:
+        secgObj = SecurityGroups()
+        ans = secgObj.create(default_sg_name, desc='cli_created_sg')
+        secgObj.addRule(ans['id'], 22, 22, '0.0.0.0/0', 'tcp', 'ingress')
+        secgObj.addRule(ans['id'], 443, 443, '0.0.0.0/0', 'tcp', 'ingress')
+        secgObj.addRule(ans['id'], None, None, '0.0.0.0/0', 'icmp', 'ingress')
+    if isNone(secg):
+        required['x-extra-property-sg'] = default_sg_name
+    else:
+        required['x-extra-property-sg'] = ','.join(
+            [i for i in secg.split(',') if len(i) > 0])
     if isNone(password):
         # x-extra-property-keypair
         if isNone(keypair):
@@ -227,6 +372,12 @@ def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
     json_template = vlb.ch_vlb_temp_json
     exist_vlb_json = vlb.list(vlb_id)
+
+def get_ch_json_by_vlbid(vlb_id, members=None):
+    vlb = LoadBalancers()
+    json_template = vlb.ch_vlb_temp_json
+    exist_vlb_json = vlb.list(vlb_id)
+
 
 def get_ch_json_by_vlbid(vlb_id, members=None):
     vlb = LoadBalancers()
@@ -463,6 +614,40 @@ def change_vcsi(ids_or_names, is_table, desc):
     
 
 
+def do_ch_vcsi(ids_or_names, vcsi, desc):
+    ans = []
+    if len(ids_or_names) > 0:
+        show_col = []
+        for i, vcsi_id in enumerate(ids_or_names):
+            # , license_type = license_type, is_public = is_public))
+            ans.append(vcsi.patch(vcsi_id, desc=desc))
+    else:
+        raise ValueError
+    return ans
+
+
+def change_vcsi(ids_or_names, is_table, desc):
+    vcsi = VcsImage()
+    ans = do_ch_vcsi(ids_or_names, vcsi, desc)
+    cols = ['id', 'name', 'create_time', 'status']
+    if len(ans) > 0:
+        if is_table:
+            table_layout("Abvl. VCS images", ans, [
+                         'id', 'name', 'desc', 'create_time', 'status', 'base_image', 'server.hostname'], isPrint=True, is_warp=False)
+        else:
+            jpp(ans)
+
+
+
+def check_proteced(site_info, vsite, ele):
+    if site_info['termination_protection']:
+        click.echo(click.style("Delete fail! VCS resources {} is protected.".format(
+            ele), bg='red', fg='white', blink=True, bold=True))
+    else:
+        vsite.delete(ele)
+        print("VCS resources {} deleted.".format(ele))
+
+
 def check_proteced(site_info, vsite, ele):
     if site_info['termination_protection']:
         click.echo(click.style("Delete fail! VCS resources {} is protected.".format(
@@ -613,3 +798,49 @@ def create_ccs(cntr_name, gpu, flavor, sol_name, sol_img, cmd, env_dict, is_apik
                 "Can't find id, please check error message : {}".format(res['detail']))
     else:
         return res
+
+
+def net_vcs_protocol_check(protocol):
+    avbl_proto = ['ah', 'pgm', 'tcp', 'ipv6-encap', 'dccp', 'igmp', 'icmp', 'esp', 'vrrp', 'ipv6-icmp', 'gre', 'sctp',
+                  'rsvp', 'ipv6-route', 'udp', 'ipv6-opts', 'ipv6-nonxt', 'udplite', 'egp', 'ipip', 'icmpv6', 'ipv6-frag', 'ospf']
+    if not protocol in avbl_proto:
+        pronum = re.findall(
+            '^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$', protocol)
+        if pronum:
+            protocol = str(int(pronum[0]))
+        else:
+            raise ValueError(
+                "Protocol is not valid. available: {}.".format(avbl_proto))
+
+
+def public_ip_assignee(site_info, fip, eip):
+    errorFlg = True
+    if len(site_info['public_ip']) > 0 and fip == False:
+        VcsServerNet().deAssociateIP(site_info['id'])
+        errorFlg = False
+
+    if len(site_info['public_ip']) == 0:
+        if not isNone(eip):
+            VcsServerNet().associateIP(site_info['id'], eip_id=eip)
+            errorFlg = False
+        elif fip == True:
+            VcsServerNet().associateIP(site_info['id'])
+            errorFlg = False
+    return errorFlg
+
+
+def max_min_port_check(portrange):
+    if re.findall('[^0-9-]', portrange):
+        raise ValueError('port range should be digital-digital')
+
+    port_list = portrange.split('-')
+    if len(port_list) == 2:
+        port_min, port_max = [int(mport) for mport in port_list]
+        if port_min < 0 or port_max < 0:
+            raise ValueError('port range must bigger than 0')
+        elif port_min > port_max:
+            raise ValueError(
+                'port_range_min must be <= port_range_max')
+    else:
+        raise ValueError('port range set error')
+    return port_min, port_max

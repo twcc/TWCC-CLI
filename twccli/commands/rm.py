@@ -8,7 +8,7 @@ from twccli.twcc.util import pp, table_layout, SpinCursor, isNone, mk_names, isF
 from twccli.twcc.services.base import acls, users, image_commit, Keypairs
 from twccli.twcc.session import Session2
 from twccli.twcc.services.s3_tools import S3
-from twccli.twcc.services.compute import Fixedip, GpuSite, Secrets, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers
+from twccli.twcc.services.compute import Fixedip, GpuSite, Secrets, VcsSite, VcsSecurityGroup, getSecGroupList, VcsImage, Volumes, LoadBalancers, SecurityGroups
 from twccli.twcc.services.compute_util import del_vcs, getConfirm
 from twccli.twcc.services.generic import GenericService
 from twccli.twcc.services.network import Networks
@@ -131,7 +131,7 @@ def del_snap(ids_or_names, isForce=False, isAll=False):
                     snap.deleteById(snap_id)
 
 
-def del_secg(ids_or_names, site_id=None, isForce=False, isAll=False):
+def del_secg_from_vcs(ids_or_names, site_id=None, isForce=False, isAll=False):
     """Delete security group by site id
 
     :param ids_or_names: name for deleting object.
@@ -262,6 +262,86 @@ def del_ssl(ids_or_names, isforce=False):
         if getConfirm("SSL", ssl_id, isforce, txt):
             ssl.deleteById(ssl_id)
             print("Successfully remove {}".format(ssl_id))
+        else:
+            print("No delete operations.")
+
+
+def del_ssl(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    ssl = Secrets()
+    for ssl_id in ids_or_names:
+        ans = ssl.list(ssl_id)
+        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ssl_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("SSL", ssl_id, isforce, txt):
+            ssl.deleteById(ssl_id)
+            print("Successfully remove {}".format(ssl_id))
+        else:
+            print("No delete operations.")
+
+
+def del_ssl(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    ssl = Secrets()
+    for ssl_id in ids_or_names:
+        ans = ssl.list(ssl_id)
+        txt = "You about to delete SSL \n- id: {}\n- created by: {}\n- created time: {}".format(
+            ssl_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("SSL", ssl_id, isforce, txt):
+            ssl.deleteById(ssl_id)
+            print("Successfully remove {}".format(ssl_id))
+        else:
+            print("No delete operations.")
+
+
+def del_secg(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+
+    for secg_id in ids_or_names:
+        secg = SecurityGroups()  # need in the for loop！
+        ans = secg.list(ids=[secg_id], secg_type='detail')[0]
+        txt = "You about to delete security group \n- id: {}\n- created by: {}\n- created time: {}".format(
+            secg_id, ans['user']['display_name'], ans['create_time'])
+        if getConfirm("Security Group", secg_id, isforce, txt):
+            secg.deleteById(secg_id)
+            print("Successfully remove {}".format(secg_id))
+        else:
+            print("No delete operations.")
+
+
+def del_secg_rule(ids_or_names, isforce=False):
+    """Delete ssl by ip id
+
+    :param ids_or_names: name for deleting object.
+    :type ids_or_names: string
+    :param force: Force to delete any resources at your own cost.
+    :type force: bool
+    """
+    for rule_id in ids_or_names:
+        secg = SecurityGroups()
+        txt = "You about to delete security group rule \n- id: {}\n".format(
+            rule_id)
+        if getConfirm("Security Group rule", rule_id, isforce, txt):
+            secg.deleteRule(rule_id)
+            print("Successfully remove {}".format(rule_id))
         else:
             print("No delete operations.")
 
@@ -398,7 +478,7 @@ def vcs(env, res_property, name, force, is_all, site_id, ids_or_names):
         :type is_all: bool
     """
     if res_property == "SecurityGroup":
-        del_secg(mk_names(name, ids_or_names), site_id, force, is_all)
+        del_secg_from_vcs(mk_names(name, ids_or_names), site_id, force, is_all)
     if res_property == "Snapshot":
         del_snap(mk_names(name, ids_or_names), force, is_all)
     if isNone(res_property):
@@ -526,7 +606,7 @@ def vds(ctx, name, ids_or_names, snapshot, force):
     :type name: string
     """
     ids_or_names = mk_names(name, ids_or_names)
-    del_volume(ids_or_names, force , snapshot = snapshot)
+    del_volume(ids_or_names, force, snapshot=snapshot)
 
 
 @click.option('-id', '--vlb-id', 'vlb_id',
@@ -696,6 +776,100 @@ def me(ctx, is_dry, is_force):
                 ctx.invoke(ccs, force=True, site_id=_site_id_)
 
 
+@click.option('-id', '--ssl-id', 'ssl_id',
+              help="Index of the ssls.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your SSLs.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, force):
+    """Command line for delete eip
+
+    :param ip_id: Enter id for your eip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    del_ssl(ids_or_names, force)
+
+
+@click.option('-id', '--ssl-id', 'ssl_id',
+              help="Index of the ssls.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your SSLs.")
+@click.pass_context
+def ssl(ctx, ssl_id, ids_or_names, force):
+    """Command line for delete eip
+
+    :param ip_id: Enter id for your eip.
+    :type ip_id: string
+    """
+    ids_or_names = mk_names(ssl_id, ids_or_names)
+    del_ssl(ids_or_names, force)
+
+
+@click.option('-f', '--force', 'is_force',
+              is_flag=True, show_default=True, default=False,
+              help='Forcely delete the resource.')
+@click.option('-dry/-no-dry', '--dry-run/--no-dry-run', 'is_dry',
+              is_flag=True, show_default=True, default=True,
+              help='Check out command.')
+@click.command(help="Delete ME now! Equals to `rm [ccs|vcs] -s $_TWCC_SITE_ID_`")
+@click.pass_context
+def me(ctx, is_dry, is_force):
+    _site_id_ = get_environment_params("_TWCC_SITE_ID_")
+
+    if isNone(_site_id_):
+        click.echo(click.style(
+            '[TWCC-CLI] Error! No `$_TWCC_SITE_ID_` found in environment variables.', bg='red', fg='white'))
+        return True
+    in_cnv = 'vcs' if is_vcs_env() else 'ccs'
+
+    if is_dry:
+        click.echo(click.style(
+            "[TWCC-CLI] Dry run: `twccli rm {} -s {}{}`.".format(in_cnv, _site_id_, " -f" if is_force else ""), fg='bright_magenta'))
+        click.echo(click.style(
+            ">>> use `--no-dry-run` flag for actully executing command.", fg='bright_magenta'))
+    else:
+        if getConfirm(in_cnv.upper(), _site_id_, is_force):
+            if is_vcs_env():
+                ctx.invoke(vcs, force=True, site_id=_site_id_)
+            else:
+                ctx.invoke(ccs, force=True, site_id=_site_id_)
+
+
+@click.option('-id', '--secg-id', 'secg_id',
+              help="Index of the security group.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your security groups.")
+@click.pass_context
+def secg(ctx, secg_id, ids_or_names, force):
+
+    ids_or_names = mk_names(secg_id, ids_or_names)
+    del_secg(ids_or_names, force)
+
+
+@click.option('-id', '--rule-id', 'rule_id',
+              help="Index of the security group rule.")
+@click.option('-f', '--force', 'force',
+              is_flag=True, show_default=True, default=False,
+              help='Force delete the container.')
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="Delete your security group rule(s).")
+@click.pass_context
+def secg_rule(ctx, rule_id, ids_or_names, force):
+
+    ids_or_names = mk_names(rule_id, ids_or_names)
+    del_secg_rule(ids_or_names, force)
+
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -707,6 +881,8 @@ cli.add_command(eip)
 cli.add_command(ssl)
 cli.add_command(me)
 cli.add_command(vcsi)
+cli.add_command(secg)
+cli.add_command(secg_rule)
 
 
 def main():

@@ -3,15 +3,15 @@ info:
   ctime: "2018-10-12 09:21:00"
   auth: "August Chao <1803001@narlabs.org.tw>"
 production:
-    host:   "https://apigateway.twcc.ai"
-    keys:
-    resources:
-        HPCJ: 'slurm-taichung-default'
-        COS: 'ceph-taichung-default'
-        CNTR: 'k8s-D-twcc'
-        VCS: 'openstack-taichung-default-2'
-    management:
-        - 'goc'
+  host: "https://apigateway.twcc.ai"
+  keys:
+  resources:
+    HPCJ: "slurm-taichung-default"
+    COS: "ceph-taichung-default"
+    CNTR: "k8s-D-twcc"
+    VCS: "openstack-taichung-default-2"
+  management:
+    - "goc"
 avalible_funcs:
   - name: "servers"
     url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
@@ -22,11 +22,23 @@ avalible_funcs:
     url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
     http_verb:
       - "delete"
+  - name: "security-group-rules"
+    url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+    http_verb:
+      - "post"
+      - "delete"
   - name: "security_groups"
     url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
     http_verb:
       - "get"
       - "patch"
+  - name: "security-groups"
+    url_type: "/api/v3/{PLATFORM}/{FUNCTION}/"
+    http_verb:
+      - "get"
+      - "post"
+      - "patch"
+      - "delete"
   - name: "iservice"
     url_type: "/{FUNCTION}/"
     http_verb:

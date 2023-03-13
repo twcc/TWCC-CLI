@@ -15,6 +15,32 @@ def chkPortPair(x):
         set(['exposed', 'inner']).intersection(set(x.keys()))) == 2 else False
 
 
+def getServerId(site_id):
+    vcs = VcsSite()
+    sites = vcs.queryById(site_id)
+    if not 'id' in sites:
+        raise ValueError("Site ID: {} is not found.".format(site_id))
+    if len(sites['servers']) >= 1:
+        server_info = sites['servers'][0]
+        server_id = server_info['id']
+        return server_id
+    else:
+        return None
+        # raise ValueError("Site ID: {} , servers not found.".format(site_id))
+
+
+def getSecGroupList(site_id):
+    server_id = getServerId(site_id)
+
+    t_server = VcsServer()
+    srv_info = t_server.getInfoByServerId(server_id)
+
+    if len(srv_info['security_groups']) == 0:
+        return []
+    else:
+        return srv_info['security_groups']
+
+
 class GpuSolutions(GenericService):
     """ This Class is for solutions api call
     """
@@ -259,7 +285,7 @@ class GpuSite(GpuService):
             ans = self._cache_sol_[sol_id]
 
         if isShow:
-            #table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
+            # table_layout(" site_extra_prop for %s "%sol_id, [ans], list(ans.keys()))
             print(ans)
         elif not isShow:
             return ans
@@ -287,25 +313,28 @@ class GpuSite(GpuService):
         info_pod_port2name = {}
         for each_pod_port in info_pod_port:
             info_pod_port2name[each_pod_port['port']] = each_pod_port['name']
-        info_service = [x for x in info_detail['Service'][0]['ports']]
-        if not ssh_info:
-            # don't show node port
-            ans = [
-                dict([(y, x[y]) for y in x if not y == 'node_port'])
-                for x in info_service
-            ]
-            for eachans in ans:
-                if eachans['target_port'] in info_pod_port2name:
-                    eachans['name'] = info_pod_port2name[
-                        eachans['target_port']]
-            return ans
+        if 'Service' in info_detail:
+            info_service = [x for x in info_detail['Service'][0]['ports']]
+            if not ssh_info:
+                # don't show node port
+                ans = [
+                    dict([(y, x[y]) for y in x if not y == 'node_port'])
+                    for x in info_service
+                ]
+                for eachans in ans:
+                    if eachans['target_port'] in info_pod_port2name:
+                        eachans['name'] = info_pod_port2name[
+                            eachans['target_port']]
+                return ans
+            else:
+                info_service = [
+                    x['port'] for x in info_detail['Service'][0]['ports']
+                    if x['target_port'] == 22
+                ][0]
+                info_pub_ip = info_detail['Service'][0]['public_ip'][0]
+                return "{}@{} -p {}".format(usr_name, info_pub_ip, info_service)
         else:
-            info_service = [
-                x['port'] for x in info_detail['Service'][0]['ports']
-                if x['target_port'] == 22
-            ][0]
-            info_pub_ip = info_detail['Service'][0]['public_ip'][0]
-            return "{}@{} -p {}".format(usr_name, info_pub_ip, info_service)
+            return []
 
     def isStable(self, site_id):
         site_info = self.queryById(site_id)
@@ -393,7 +422,6 @@ class VcsSite(CpuService):
 
     def list_itype(self, isAll=False):
         self._csite_ = Session2._getClusterName("goc")
-        print(self._csite_)
         self._func_ = "solutions"
         self.ext_get = {"category": "os", 'project': self._project_id, }
         result = self._do_api()
@@ -476,7 +504,7 @@ class VcsSite(CpuService):
 
         extra_prop = self._do_list_solution(sol_id)
         # processing flavors
-
+        secg = extra_prop['sg']
         extra_flv = set(
             extra_prop['flavor']) if 'flavor' in extra_prop else set([])
 
@@ -508,7 +536,7 @@ class VcsSite(CpuService):
             else:
                 res["x-extra-property-{}".format(ele)] = extra_prop[ele]
 
-        return res
+        return res, secg
 
     def getIsrvFlavors(self, value_type="list_vcs_ptype"):
 
@@ -638,6 +666,136 @@ class VcsSecurityGroup(CpuService):
         return self._do_api()
 
 
+class SecurityGroups(CpuService):
+
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "security-groups"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, name, desc=""):
+        self.http_verb = 'post'
+        self.data_dic = {
+            'project': self._project_id,
+            "name": name,
+            "desc": desc,
+        }
+        return self._do_api()
+
+    def _ls_diff_type(self, secg_type, ids, isall, my_username):
+        all_secgs = []
+        if ids == ():
+            return self.get_all_secg('project', secg_type,  isall, my_username)
+        for id in ids:
+            if secg_type == 'server':
+                id = getServerId(id)
+            if secg_type == 'site':
+                GpuService.__init__(self)
+                self._func_ = "security_groups"
+                self._csite_ = Session2._getClusterName("CNTR")
+            self.ext_get = {secg_type: id, 'project': self._project_id}
+            all_secgs_one_id = self._do_api()
+            if secg_type == 'site':
+                all_secgs_one_id[0]['type'] = 'CCS'
+                all_secgs.extend(all_secgs_one_id)
+            else:
+                if isall:
+                    all_secgs.extend(all_secgs_one_id)
+                else:
+                    all_secgs.extend([
+                        x for x in all_secgs_one_id
+                        if x["user"]['username'] == my_username
+                    ])
+        return all_secgs
+
+    def _short_detail_rules_process(self, target_dict):
+        short_detail_rules = []
+        for rules in target_dict['security_group_rules']:
+            short_detail_rules.append(
+                f"{rules['id']},{rules['direction']:>7},{rules['ethertype']},{str(rules['port_range_min']):>5}-{str(rules['port_range_max']):<5},{rules['protocol']:<5},{rules['remote_ip_prefix']}")
+        return short_detail_rules
+
+    def list(self, ids=None, secg_type=None, isall=False):
+        all_secgs = []
+        my_username = Session2().twcc_username
+        if secg_type == 'detail' or (secg_type == None and not ids == ()):
+            for id in ids:
+                self.res_type = 'json'
+                self.url_dic = {"security-groups": id}
+                res = self._do_api()
+                short_detail_rules = self._short_detail_rules_process(res)
+                res['security group_rules'] = short_detail_rules
+                all_secgs.append(res)
+            return all_secgs
+        elif secg_type == 'project' or secg_type == None:
+            filter_type = ''
+            return self.get_all_secg('project', filter_type,
+                                     isall, my_username)
+        else:
+            self.http_verb = 'get'
+            all_secgs = self._ls_diff_type(secg_type, ids, isall, my_username)
+            for secg in all_secgs:
+                short_detail_rules = self._short_detail_rules_process(secg)
+                secg['security group_rules'] = short_detail_rules
+            return all_secgs
+
+    def deleteById(self, secg_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"security-groups": secg_id}
+        return self._do_api()
+
+    def patch_desc(self, secg_id, desc):
+        self.http_verb = 'patch'
+        self.url_dic = {'security-groups': secg_id}
+        self.data_dic = {"desc": desc}
+        return self._do_api()
+
+    def addRule(self, secg_id, port_min, port_max, cidr, protocol,
+                direction):
+
+        self.http_verb = "post"
+        self._func_ = "security-group-rules"
+        self.data_dic = {
+            "sg": secg_id,
+            "direction": direction,
+            "protocol": protocol,
+            "remote_ip_prefix": cidr,
+            "port_range_max": port_max,
+            "port_range_min": port_min
+        }
+        self._do_api()
+
+    def deleteRule(self, rule_id):
+        self.http_verb = "delete"
+        self._func_ = "security-group-rules"
+        self.ext_get = {'project': self._project_id}
+        self.url_dic = {self._func_: rule_id}
+        return self._do_api()
+
+    def get_all_secg(self, secg_type, filter_type,  isall, my_username):
+        if filter_type == 'site':
+            GpuService.__init__(self)
+            self._func_ = "security_groups"
+            self._csite_ = Session2._getClusterName("CNTR")
+            self.ext_get = {secg_type: id, 'project': self._project_id}
+        else:
+            self.res_type = 'json'
+            self.ext_get = {secg_type: self._project_id}
+        all_secgs = self._do_api()
+        filter_type_dict = {'loadbalancer': 'LB',
+                            'server': 'VM', 'site': 'CCS'}
+        if not filter_type == '':
+            all_secgs = [
+                secg for secg in all_secgs if secg['type'] == filter_type_dict[filter_type]]
+        if isall:
+            return all_secgs
+        else:
+            return [
+                x for x in all_secgs
+                if x["user"]['username'] == my_username
+            ]
+
+
 class VcsFalvor(CpuService):
 
     def __init__(self):
@@ -693,7 +851,7 @@ class VcsSolutions(CpuService):
                         get_flavor_string(res_obj['gpu'], res_obj['cpu'],
                                           res_obj['memory'])
                     })
-        return sorted(return_ans, key=lambda d: int(d['spec'][:2]))
+        return sorted(return_ans, key=lambda d: float(d['spec'][:2]))
 
     def get_info_by_sol_name(self, sol_name, field_name='flavor'):
         sols = self.list()
@@ -806,6 +964,18 @@ class VcsServer(CpuService):
 
     def getServerDetail(self, site_id):
         self.ext_get = {'project': self._project_id, 'site': site_id}
+        return self._do_api()
+
+    def getInfoByServerId(self, server_id):
+        self.url_dic = {'servers': server_id}
+        self.ext_get = {'project': self._project_id, 'server': server_id}
+        return self._do_api()
+
+
+    def putSecg(self, action, sg, iid):
+        self.http_verb = 'put'
+        self.url_dic = {'servers': iid, "action": ""}
+        self.data_dic = {"action": action, "sg": sg}
         return self._do_api()
 
 
@@ -1066,6 +1236,53 @@ class Secrets(CpuService):
             return self._do_api()
 
 
+class Secrets(CpuService):
+
+    def __init__(self, debug=False):
+        CpuService.__init__(self)
+        self._func_ = "secrets"
+        self._csite_ = Session2._getClusterName("VCS")
+
+    def create(self, name, desc="", payload="", expire_time=""):
+        self.http_verb = 'post'
+        self.data_dic = {
+            'project': self._project_id,
+            "name": name,
+            "desc": desc,
+            "payload": payload
+        }
+        if not isNone(expire_time):
+            self.data_dic.update({'expire_time': expire_time})
+        return self._do_api()
+
+    def deleteById(self, sys_vol_id):
+        self.http_verb = 'delete'
+        self.url_dic = {"secrets": sys_vol_id}
+        return self._do_api()
+
+    def list(self, ssl_id=None, isall=False):
+        if isNone(ssl_id):
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            if isall:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                return all_volumes
+            else:
+                self.ext_get = {'project': self._project_id}
+                all_volumes = self._do_api()
+                my_username = Session2().twcc_username
+                return [
+                    x for x in all_volumes
+                    if x["user"]['username'] == my_username
+                ]
+        else:
+            self.http_verb = 'get'
+            self.res_type = 'json'
+            self.url_dic = {"secrets": ssl_id}
+            return self._do_api()
+
+
 class Volumes(CpuService):
 
     def __init__(self, debug=False):
@@ -1151,27 +1368,3 @@ class Volumes(CpuService):
             return self._do_api()
 
 
-def getServerId(site_id):
-    vcs = VcsSite()
-    sites = vcs.queryById(site_id)
-    if not 'id' in sites:
-        raise ValueError("Site ID: {} is not found.".format(site_id))
-    if len(sites['servers']) >= 1:
-        server_info = sites['servers'][0]
-        server_id = server_info['id']
-        return server_id
-    else:
-        return None
-        #raise ValueError("Site ID: {} , servers not found.".format(site_id))
-
-
-def getSecGroupList(site_id):
-    server_id = getServerId(site_id)
-    if server_id == None:
-        return []
-    secg = VcsSecurityGroup()
-    secg_list = secg.list(server_id=server_id)
-    if len(secg_list) > 0:
-        return secg_list[0]
-    else:
-        return []

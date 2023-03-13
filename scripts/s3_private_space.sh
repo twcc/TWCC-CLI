@@ -1,12 +1,12 @@
 API_KEY=
 PROJ_ID=
 API_HST=ceph-taichung-default
-API_URL="https://apigateway.twcc.ai/api/v3/$API_HST/projects/$PROJ_ID/key/"
+API_URL="https://apigateway.twcc.tw/api/v3/$API_HST/projects/$PROJ_ID/key/"
 
 
 get_project_code()
 {
-    API_PRJ="https://apigateway.twcc.ai/api/v2/$API_HST/projects/"
+    API_PRJ="https://apigateway.twcc.tw/api/v2/$API_HST/projects/"
 
     curl -s -X GET \
       -H "x-api-key: $API_KEY" \
@@ -60,7 +60,7 @@ delete_s3()
 
 info_s3()
 {
-    BKT_URL="https://apigateway.twcc.ai/api/v3/$API_HST/projects/$PROJ_ID/buckets/?s3_name=$1&all=false"
+    BKT_URL="https://apigateway.twcc.tw/api/v3/$API_HST/projects/$PROJ_ID/buckets/?s3_name=$1&all=false"
 
     echo "5. Bucket Information for s3_name= $1"
     curl -s -X GET \
@@ -73,7 +73,7 @@ info_s3()
 
 info_util_s3()
 {
-    BKT_URL="https://apigateway.twcc.ai/api/v3/$API_HST/projects/$PROJ_ID/buckets_util/?s3_name=$1&all=false"
+    BKT_URL="https://apigateway.twcc.tw/api/v3/$API_HST/projects/$PROJ_ID/buckets_util/?s3_name=$1&all=false"
 
     echo "6. Usage for s3_name= $1"
     curl -s -X GET \

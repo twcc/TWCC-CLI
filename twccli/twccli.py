@@ -158,14 +158,20 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option("-sv", "--show_and_verbose", is_flag=True, help="Enables verbose mode and show in console.")
 @pass_environment
 def cli(env, verbose, show_and_verbose):
-    """
-        Welcome to TWCC, TaiWan Computing Cloud.
+    """\b
+         _______      _____    ___\b
+        |_   _\ \    / / __|  / __|___\b
+          | |  \ \/\/ /\__ \ | (__/ _ \_\b
+          |_|   \_/\_/ |___/  \___\___(_)\b
+            We build and operate TWCC.ai\b
+
+            Thanks for using TWCC-CLI
 
         https://github.com/twcc/TWCC-CLI
 
-        -- You Succeed, We Succeed!! --
+          -- You Succeed, We Succeed! --
 
-                Powered by TWS
+          Powered by https://TWS.twcc.ai
     """
     env.verbose = verbose
     check_if_py2()
@@ -249,7 +255,17 @@ class CredentialHandler():
                     self.old_api = cnf['_default']['twcc_api_key']
                     self.prj_code = cnf['_default']['twcc_proj_code']
                     self.old_version = cnf['_meta']['cli_version']
+                    from twccli.version import __version__
+                    if not self.old_version == __version__:
+                        self._backup()
+                        self._removeOld()
 
+                        from click.testing import CliRunner
+                        runner = CliRunner()
+                        cmd_list = "config init --apikey %s -pcode %s -ga" % (
+                            self.old_api, self.prj_code)
+                        runner.invoke(cli, cmd_list.split(" "))
+                        self.old_version = __version__
                     _env_ver_ = self.old_version.replace("RC", "").split('.')
                     _cli_ver_ = self.cli_version.replace("RC", "").split('.')
                     _online_ver_ = self._current_version.split('.')
@@ -281,6 +297,7 @@ Please use `pip3 install -U TWCC-CLI` to upgrade your toolkit.
   | |  \ \/\/ /\__ \ | (__/ _ \_
   |_|   \_/\_/ |___/  \___\___(_)
    We build and operate TWCC.ai
+   Press q to exit.
                         """
                         click.echo_via_pager(
                             mystr.format(self._current_version))
@@ -334,6 +351,48 @@ def fetch_and_cache(url) -> str:
     if ts > ts_max:
         _fetch_file(url, full_path)
     return open(full_path, 'rb').read()
+
+def _fetch_file(url, save_to):
+    open(save_to, 'wb').write(requests.get(
+        url, allow_redirects=True).content)
+
+
+def fetch_and_cache(url) -> str:
+    filename = urlparse(url).path.split('/')[-1]
+    full_path = _TWCC_DATA_DIR_ + path.sep + filename
+
+    if not path.exists(full_path):
+        _fetch_file(url, full_path)
+    mtime = path.getmtime(full_path)
+
+    from datetime import timedelta, datetime
+    ts = datetime.fromtimestamp(mtime)
+    ts_max = ts + timedelta(days=1)
+    if ts > ts_max:
+        _fetch_file(url, full_path)
+    return open(full_path, 'rb').read()
+
+
+def _fetch_file(url, save_to):
+    open(save_to, 'wb').write(requests.get(
+        url, allow_redirects=True).content)
+
+
+def fetch_and_cache(url) -> str:
+    filename = urlparse(url).path.split('/')[-1]
+    full_path = _TWCC_DATA_DIR_ + path.sep + filename
+
+    if not path.exists(full_path):
+        _fetch_file(url, full_path)
+    mtime = path.getmtime(full_path)
+
+    from datetime import timedelta, datetime
+    ts = datetime.fromtimestamp(mtime)
+    ts_max = ts + timedelta(days=1)
+    if ts > ts_max:
+        _fetch_file(url, full_path)
+    return open(full_path, 'rb').read()
+
 
 def _fetch_file(url, save_to):
     open(save_to, 'wb').write(requests.get(

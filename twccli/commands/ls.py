@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from email.policy import default
 import click
 import json
 import re
@@ -10,7 +11,7 @@ from twccli.twcc.session import Session2
 from twccli.twcc.util import pp, jpp, table_layout, SpinCursor, isNone, mk_names, mkCcsHostName, protection_desc
 from twccli.twcc.services.compute import GpuSite, GpuSolutions, VcsSite, VcsSecurityGroup, VcsImage, VcsServer, VcsSolutions, Volumes, LoadBalancers, Fixedip, Secrets
 from twccli.twcc.services.compute import getServerId, getSecGroupList
-from twccli.twcc.services.compute_util import list_vcs, list_vcs_img, list_vcsi_img
+from twccli.twcc.services.compute_util import list_vcs, list_vcs_img, list_vcsi_img, list_secg
 from twccli.twcc import GupSiteBlockSet
 from twccli.twcc.services.s3_tools import S3
 from twccli.twcc.services.network import Networks
@@ -243,6 +244,7 @@ def list_volume(site_ids_or_names, snapshot, is_all, is_table):  # NOSONAR
                     the_vol['mountpoint'] = the_vol['mountpoint'][0]
     else:
         ans = vol.list(isAll=is_all, snapshot=snapshot)
+        ans = [x for x in ans if x['is_bootable'] == False]
         for the_vol in ans:
             if 'detail' in the_vol:
                 is_table = False
@@ -577,7 +579,7 @@ def list_files(ids_or_names, okey_regex=None, is_public=True, is_table=True):
             jpp(files)
 
 
-def list_secg(ids_or_names, is_table=True):
+def list_secg_vcs(ids_or_names, is_table=True):
     """List security group by site ids in table/json format
 
     :param site_ids_or_names: list of site id
@@ -592,18 +594,16 @@ def list_secg(ids_or_names, is_table=True):
 
     if len(ids_or_names) == 1:
         secg_list = getSecGroupList(ids_or_names[0])
-        secg_detail = secg_list['security_group_rules']
         if is_table:
             table_layout("SecurityGroup for {}".format(ids_or_names[0]),
-                         secg_detail,
-                         caption_row=[
-                             'id', 'port_range_min', 'port_range_max',
-                             'remote_ip_prefix', 'direction', 'protocol'
-            ],
+                         secg_list,
+                         caption_row=['id', 'name'],
+                max_len=30,
+                is_warp=False,
                 isPrint=True,
                 captionInOrder=True)
         else:
-            jpp(secg_detail)
+            jpp(secg_list)
         return True
 
 
@@ -619,17 +619,20 @@ def list_ccs_with_properties(res_property,
             list_all_img(site_ids_or_names, is_table)
         else:
             if len(site_ids_or_names) == 1:
-                list_gpu_flavor_online(site_ids_or_names[0])
+                list_gpu_flavor_online(site_ids_or_names[0], is_table)
             else:
-                list_gpu_flavor_online('all')
+                list_gpu_flavor_online('all', is_table)
 
     if res_property == 'commit':
         list_commit()
 
     if res_property == "solution":
         avbl_sols = GpuSite().getSolList(mtype='list', name_only=True)
-        click.echo("Avalible Image types for CCS: {}".format(
-            ", ".join(avbl_sols)))
+        if is_table:
+            click.echo("Avalible Image types for CCS: '{}'".format(
+                "', '".join(avbl_sols)))
+        else:
+            click.echo(json.dumps(avbl_sols))
 
     if res_property == 'log':
         list_gpu_log(site_ids_or_names)
@@ -787,7 +790,7 @@ def vcs(ctx, env, res_property, site_ids_or_names, name, column, is_table,
             jpp(ans)
 
     if res_property == 'SecurityGroup':
-        list_secg(site_ids_or_names, is_table)
+        list_secg_vcs(site_ids_or_names, is_table)
 
     if res_property == 'Keypair':
         ctx.invoke(key,
@@ -1258,6 +1261,81 @@ def vcsi(ctx, is_table):
 
 # end object ==================================================
 
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.command(help="List your system (bootable) images.")
+@click.pass_context
+def vcsi(ctx, is_table):
+    """Command line for checking bootable images
+
+    """
+    list_vcsi_img(is_table)
+
+
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.option('-id', '--vcsi-id', 'vcsi_id', type=int, help="Index of the vcsi.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the images in the project.")
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your system (bootable) images.")
+@click.pass_context
+def vcsi(ctx, vcsi_id, ids_or_names, is_table, is_all):
+    """Command line for checking bootable images
+
+    """
+    ids_or_names = mk_names(vcsi_id, ids_or_names)
+    list_vcsi_img(ids_or_names, is_table, is_all)
+
+
+@click.option('-table / -json',
+              '--table-view / --json-view',
+              'is_table',
+              is_flag=True,
+              default=True,
+              show_default=True,
+              help="Show information in Table view or JSON view.")
+@click.option('-id', '--secg-id', 'secg_id', type=str, help="Index of the security group.")
+@click.option('-all',
+              '--show-all',
+              'is_all',
+              is_flag=True,
+              type=bool,
+              help="List all the images in the project.")
+@click.option('-type', '--secg-type', type=click.Choice(['vcs'], case_sensitive=False), default=None, help="Tyep of the security resource.") # ccs, vlb, detail, proj
+@click.argument('ids_or_names', nargs=-1)
+@click.command(help="List your security groups.")
+@click.pass_context
+def secg(ctx, secg_id, ids_or_names, secg_type, is_table, is_all):
+    """_summary_
+
+    Args:
+        ctx (_type_): _description_
+        secg_id (_type_): _description_
+        ids_or_names (_type_): _description_
+        is_table (bool): _description_
+        is_all (bool): _description_
+    """
+    ids_or_names = mk_names(secg_id, ids_or_names)
+    list_secg(ids_or_names, secg_type, is_table, is_all)
+
+
+# end object ==================================================
+
 cli.add_command(vcs)
 cli.add_command(cos)
 cli.add_command(ccs)
@@ -1268,6 +1346,8 @@ cli.add_command(vlb)
 cli.add_command(eip)
 cli.add_command(ssl)
 cli.add_command(vcsi)
+cli.add_command(secg)
+
 
 def main():
     cli()

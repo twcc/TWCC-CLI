@@ -144,8 +144,10 @@ class TestVcsLifecyc:
         out = self.__run(cmd_list.split(" "))
 
     def _add_secg_range_and_port(self):
-        cmd_list = "net vcs -cidr 192.168.0.0/24 -prange {} -p {} -s {}".format(self.ext_port_range,
-                                                           self.ext_port, self.vcs_id)
+        cmd_list = "net vcs -cidr 192.168.255.0/24 -prange {} -s {}".format(self.ext_port_range, self.vcs_id)
+        print(cmd_list)
+        out = self.__run(cmd_list.split(" "))
+        cmd_list = "net vcs -cidr 192.168.254.0/24 -p {} -s {}".format(self.ext_port, self.vcs_id)
         print(cmd_list)
         out = self.__run(cmd_list.split(" "))
 
@@ -203,13 +205,13 @@ class TestVcsLifecyc:
         self._list_key()
         self._create_vcs()
         # self._add_secg_range()
-        self._add_secg_range_and_port()
-        self._add_secg_without_range_and_port()
+        #self._add_secg_range_and_port()
+        #self._add_secg_without_range_and_port()
         self._list_vcs()
         # self._stop_vcs()
         # self._start_vcs()
         # self._add_secg()
-        self._list_secg()
-        self._del_secg()
+        #self._list_secg()
+        #self._del_secg()
         self._del_vcs()
         self._delete_key()

@@ -44,10 +44,8 @@ def jpp(inobj):
                    separators=(',', ': ')))
 
 
-@pass_environment
-def isDebug(env):
-    return True if os.environ.get(
-        "TWCC_CLI_STAGE") == "dev" or env.verbose else False
+def isDebug():
+    return True if os.environ.get("TWCC_CLI_STAGE") == "dev" or '-sv' in sys.argv else False
 
 
 def strShorten(mstr, max_len=6):
@@ -70,6 +68,18 @@ def check_empty_value(x) -> bool:
         True: if input parameter is empty or None, else is False
     """
     return True if isNone(x) or len(x) == 0 else False
+
+def check_empty_value(x) -> bool:
+    """make sure input value is empty
+
+    Args:
+        x (str): any parameter
+
+    Returns:
+        True: if input parameter is empty or None, else is False
+    """
+    return True if isNone(x) or len(x) == 0 else False
+
 
 def check_empty_value(x) -> bool:
     """make sure input value is empty
@@ -162,7 +172,7 @@ def _table_layout_colorful_val(val):
         return val
 
     val = '' if val == None else val
-    return click.style(f'{val}', fg='bright_red') if ("%s" % val).lower() == "error" else "%s" % val
+    return click.style('{}'.format(val), fg='bright_red') if ("%s" % val).lower() == "error" else "%s" % val
 
 
 def _table_layout_arrange_table_info(json_obj, caption_row):
@@ -278,10 +288,11 @@ def timezone2local(time_str):
         time_str = time_str[:-8] + 'Z'
     if 'T' in time_str and 'Z' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
+        return pytz.utc.localize(ans, is_dst=None).astimezone(
+            pytz.timezone('Asia/Taipei'))
     elif 'T' in time_str:
         ans = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
-    return pytz.utc.localize(ans, is_dst=None).astimezone(
-        pytz.timezone('Asia/Taipei'))
+        return ans
 
 
 def create_table_list(obj, tt):
@@ -502,6 +513,7 @@ def set_rc_config(rc):
         pass
 
     return True
+
 
 def set_cid_flag(ga_flag=True):
     if not ga_flag == None:

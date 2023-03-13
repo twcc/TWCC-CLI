@@ -82,6 +82,7 @@ sonar-preview:
     - git checkout dev
     - git merge $CI_COMMIT_SHA --no-commit --no-ff
     - gitlab-sonar-scanner \
+      -X \
       -Dsonar.analysis.mode=preview \
       -Dsonar.host.url=$SONAR_URL \
       -Dsonar.login=$SONAR_TOKEN \
