@@ -2,6 +2,16 @@
 
 # TWCC-CLI Project
 
+> [!WARNING]
+> ### ⚠️ 【專案已終止維護 / Discontinued】
+> **TWCC 服務已正式下線，本開源專案已停止維護與更新。**  
+> 程式碼內存在已知問題與 Bug，**請勿再安裝或使用本專案**。
+>
+> ---
+> **TWCC service has been officially retired, and this project is no longer maintained.**  
+> The codebase contains known bugs and unsupported features. **Please DO NOT use this project.**
+
+
 The [TWCC, Taiwan Computing Cloud](https://www.twcc.ai) Command Line Interface (CLI) is an environment to create and manage your TWCC services.
 
 [![Documentation Status](https://readthedocs.org/projects/twcc-cli/badge/?version=latest)](https://twcc-cli.readthedocs.io/en/latest/?badge=latest)
